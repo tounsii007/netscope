@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "title": "NetScope — नेटवर्क डायग्नोस्टिक्स और IP इंटेलिजेंस",
+    "description": "पोर्ट चेकर, IP लुकअप, DNS, WHOIS, SSL निरीक्षण और मॉनिटरिंग। ब्राउज़र में पेशेवर नेटवर्क डायग्नोस्टिक्स।"
+  },
+  "nav": {
+    "home": "होम", "api": "API", "pricing": "मूल्य", "docs": "दस्तावेज़", "sign_in": "साइन इन",
+    "lang_en": "English", "lang_de": "Deutsch", "lang_hi": "हिन्दी", "lang_zh": "中文"
+  },
+  "home": {
+    "badge": "सभी सिस्टम चालू हैं",
+    "title_1": "नेटवर्क डायग्नोस्टिक्स,", "title_2": "बिल्कुल सही तरीके से।",
+    "subtitle": "पोर्ट जांच, IP इंटेलिजेंस, DNS, WHOIS, SSL निरीक्षण और अपटाइम मॉनिटरिंग — एक तेज़ प्लेटफ़ॉर्म, मुफ़्त में शुरू करें।",
+    "cta_tools": "टूल्स आज़माएं", "cta_api": "API दस्तावेज़",
+    "tools_heading": "सभी नेटवर्क टूल्स", "tools_count": "{count} टूल्स · निःशुल्क टियर उपलब्ध"
+  },
+  "tools": {
+    "port-checker":    { "title": "पोर्ट चेकर",          "desc": "TCP/UDP पोर्ट जांचें, रेंज स्कैन करें, सेवाएं पहचानें।" },
+    "ip-lookup":       { "title": "IP लुकअप",            "desc": "जियोलोकेशन, ASN, ISP, प्रॉक्सी/VPN/TOR पहचान।" },
+    "dns-lookup":      { "title": "DNS लुकअप",           "desc": "A, AAAA, MX, TXT, CNAME, NS रिकॉर्ड।" },
+    "dns-propagation": { "title": "DNS प्रसार",           "desc": "15 वैश्विक रिज़ॉल्वर समानांतर में क्वेरी करें।" },
+    "http-headers":    { "title": "HTTP सुरक्षा हेडर",   "desc": "सुरक्षा हेडर को A+ से F तक ग्रेड करें।" },
+    "tech-stack":      { "title": "टेक स्टैक",            "desc": "फ्रेमवर्क, CMS, एनालिटिक्स, होस्टिंग पहचानें।" },
+    "redirects":       { "title": "रीडायरेक्ट ट्रेसर",   "desc": "हर हॉप फॉलो करें, लूप और डाउनग्रेड पहचानें।" },
+    "subdomains":      { "title": "सबडोमेन फाइंडर",      "desc": "CT लॉग के माध्यम से निष्क्रिय गणना।" },
+    "cdn-detector":    { "title": "CDN डिटेक्टर",        "desc": "Cloudflare, Fastly, Akamai आदि पहचानें।" },
+    "ssl-check":       { "title": "SSL सर्टिफिकेट",      "desc": "चेन, समाप्ति, सिफर, TLS संस्करण।" },
+    "whois":           { "title": "WHOIS / RDAP",        "desc": "डोमेन स्वामित्व और पंजीकरण डेटा।" },
+    "reachability":    { "title": "पहुंचनीयता",           "desc": "HTTP, TCP, पिंग और वैश्विक स्थिति।" },
+    "email-verify":    { "title": "ईमेल वेरिफायर",       "desc": "MX + डिस्पोजेबल + SMTP जांच।" },
+    "email-auth":      { "title": "SPF / DMARC / DKIM",  "desc": "ईमेल प्रमाणीकरण ग्रेड करें।" },
+    "blacklist":       { "title": "IP ब्लैकलिस्ट",       "desc": "20+ स्पैम DNSBL पर IP जांचें।" },
+    "jwt":             { "title": "JWT डिकोडर",          "desc": "केवल क्लाइंट-साइड JWT क्लेम देखें।" },
+    "password-leak":   { "title": "पासवर्ड लीक जांच",   "desc": "k-अनामिता के साथ HIBP जांच — ब्राउज़र नहीं छोड़ता।" },
+    "dnssec":          { "title": "DNSSEC वैलिडेटर",     "desc": "DS, DNSKEY और हस्ताक्षर जांच।" },
+    "cookies":         { "title": "कुकी / GDPR",          "desc": "कुकी फ्लैग + थर्ड-पार्टी ट्रैकर पहचान।" },
+    "opengraph":       { "title": "OG प्रीव्यू",          "desc": "किसी भी URL के लिए सोशल शेयर प्रीव्यू।" },
+    "robots":          { "title": "Robots & Sitemap",     "desc": "robots.txt पार्स करें और sitemap वैलिडेट करें।" },
+    "ipv6":            { "title": "IPv6 तैयारी",          "desc": "apex/www/NS/MX पर AAAA कवरेज ग्रेड करें।" },
+    "bgp":             { "title": "BGP / ASN",            "desc": "RIPE Stat के माध्यम से रूटिंग इंटेलिजेंस।" },
+    "mixed-content":   { "title": "मिश्रित सामग्री",      "desc": "HTTPS पृष्ठों पर http:// संसाधन खोजें।" },
+    "dashboard":       { "title": "मेरी IP",              "desc": "आपकी IP, स्थान, ISP, ब्राउज़र, OS।" },
+    "monitoring":      { "title": "मॉनिटरिंग",            "desc": "निर्धारित अपटाइम जांच और अलर्ट।" }
+  },
+  "footer": {
+    "tagline": "पेशेवर नेटवर्क डायग्नोस्टिक्स।",
+    "pricing": "मूल्य", "api": "API", "status": "स्थिति",
+    "copyright": "© {year} NetScope।"
+  },
+  "common": {
+    "loading": "लोड हो रहा है…", "error": "कुछ गलत हुआ। कृपया पुनः प्रयास करें।",
+    "lookup": "खोजें", "check": "जांचें", "analyze": "विश्लेषण करें", "detect": "पहचानें",
+    "verify": "सत्यापित करें", "trace": "ट्रेस करें", "scan": "स्कैन करें", "inspect": "निरीक्षण करें",
+    "enumerate": "गणना करें", "preview": "पूर्वावलोकन", "score": "स्कोर करें",
+    "enter_host": "होस्टनेम या IP दर्ज करें", "enter_domain": "डोमेन दर्ज करें",
+    "enter_url": "URL दर्ज करें", "enter_ip": "IPv4 पता दर्ज करें",
+    "enter_email": "ईमेल पता दर्ज करें",
+    "copy": "कॉपी करें", "copied": "कॉपी हो गया!", "filter": "फ़िल्टर…",
+    "no_records": "कोई रिकॉर्ड नहीं", "no_results": "कोई परिणाम नहीं मिला।",
+    "records_count": "{count} रिकॉर्ड", "resolved_in": "{ms}ms में हल हुआ",
+    "yes": "हां", "no": "नहीं"
+  },
+  "bgp": {
+    "title": "BGP / ASN", "subtitle": "RIPE Stat के माध्यम से रूटिंग इंटेलिजेंस।",
+    "tab_ip": "IP", "tab_asn": "ASN",
+    "field_ip": "IP", "field_prefix": "प्रीफिक्स", "field_block": "ब्लॉक",
+    "field_announced": "घोषित", "field_country": "देश", "field_city": "शहर",
+    "field_asn": "ASN", "field_holder": "धारक",
+    "field_announced_prefixes": "घोषित प्रीफिक्स", "field_neighbours": "पड़ोसी",
+    "announcing_asns": "घोषणा करने वाले ASN", "prefix_sample": "प्रीफिक्स नमूना"
+  },
+  "blacklist": {
+    "title": "IP ब्लैकलिस्ट जांच", "subtitle": "20+ प्रमुख DNSBL समानांतर में क्वेरी करें।",
+    "placeholder": "IPv4 पता",
+    "clean": "साफ़", "listed_on": "{total} में से {listed} सूचियों पर सूचीबद्ध",
+    "col_list": "सूची", "col_status": "स्थिति",
+    "status_listed": "सूचीबद्ध", "status_clean": "साफ़"
+  },
+  "cdn": {
+    "title": "CDN डिटेक्टर", "subtitle": "किसी भी होस्ट के सामने CDN या WAF पहचानें।",
+    "powered_by": "द्वारा संचालित", "no_cdn": "हेडर के माध्यम से कोई CDN नहीं मिला।",
+    "server_label": "सर्वर", "detection_signals": "पहचान संकेत"
+  },
+  "cookies": {
+    "title": "कुकी और GDPR विश्लेषक", "subtitle": "कुकी फ्लैग और थर्ड-पार्टी ट्रैकर पहचान।",
+    "gdpr_score": "GDPR जोखिम स्कोर",
+    "summary": "{cookies} कुकी, {trackers} ट्रैकर, {hosts} थर्ड-पार्टी होस्ट",
+    "col_name": "नाम", "col_secure": "सुरक्षित", "col_httponly": "केवल HTTP", "col_samesite": "SameSite",
+    "section_cookies": "कुकीज़", "section_trackers": "थर्ड-पार्टी ट्रैकर"
+  },
+  "dashboard": {
+    "title": "मेरा IP डैशबोर्ड", "subtitle": "आपके कनेक्शन के बारे में सभी जानकारी।",
+    "detecting": "आपका कनेक्शन पहचाना जा रहा है…",
+    "section_connection": "कनेक्शन", "section_location": "स्थान",
+    "section_client": "क्लाइंट", "section_threat": "खतरा / गोपनीयता",
+    "field_ip": "IP", "field_hostname": "होस्टनेम", "field_isp": "ISP", "field_asn": "ASN",
+    "field_country": "देश", "field_region": "क्षेत्र", "field_city": "शहर",
+    "field_tz_ip": "समय क्षेत्र (IP)", "field_tz_browser": "समय क्षेत्र (ब्राउज़र)",
+    "field_browser": "ब्राउज़र", "field_os": "OS", "field_device": "डिवाइस",
+    "field_screen": "स्क्रीन", "field_lang": "स्वीकृत भाषाएं",
+    "threat_tor": "TOR", "threat_hosting": "होस्टिंग", "threat_vpn": "VPN",
+    "threat_proxy": "प्रॉक्सी", "threat_residential": "आवासीय"
+  },
+  "dns": {
+    "title": "DNS लुकअप", "subtitle": "किसी भी डोमेन के DNS रिकॉर्ड क्वेरी करें।",
+    "record_types": "रिकॉर्ड प्रकार", "records_count": "{count} रिकॉर्ड", "no_records": "कोई रिकॉर्ड नहीं"
+  },
+  "propagation": {
+    "title": "DNS प्रसार", "subtitle": "15 वैश्विक रिज़ॉल्वर समानांतर में क्वेरी करें।",
+    "stat_resolvers": "रिज़ॉल्वर", "stat_unique": "अद्वितीय उत्तर",
+    "stat_status": "स्थिति", "propagated": "प्रसारित", "propagating": "प्रसारित हो रहा है",
+    "col_resolver": "रिज़ॉल्वर", "col_region": "क्षेत्र", "col_answer": "उत्तर", "col_ms": "ms"
+  },
+  "dnssec": {
+    "title": "DNSSEC वैलिडेटर", "subtitle": "DS, DNSKEY और हस्ताक्षर जांच।",
+    "active": "DNSSEC सक्रिय", "not_signed": "हस्ताक्षरित नहीं",
+    "stat_ds": "DS रिकॉर्ड", "stat_dnskey": "DNSKEY रिकॉर्ड", "stat_rrsig": "RRSIG उपस्थित",
+    "findings": "निष्कर्ष", "ds_records": "DS रिकॉर्ड"
+  },
+  "email_auth": {
+    "title": "SPF / DKIM / DMARC", "subtitle": "किसी भी डोमेन के लिए ईमेल प्रमाणीकरण विश्लेषण।",
+    "placeholder_domain": "example.com", "placeholder_selector": "DKIM सेलेक्टर (वैकल्पिक)",
+    "score_label": "ईमेल प्रमाणीकरण स्कोर"
+  },
+  "email_verify": {
+    "title": "ईमेल वेरिफायर", "subtitle": "सिंटैक्स + MX + डिस्पोजेबल पहचान + वैकल्पिक SMTP जांच।",
+    "smtp_label": "SMTP RCPT जांच करें (धीमा, स्पैम फ़िल्टर सक्रिय कर सकता है)",
+    "deliverable": "संभवतः डिलीवर करने योग्य", "problematic": "समस्याग्रस्त",
+    "flag_syntax": "वैध सिंटैक्स", "flag_mx": "MX रिकॉर्ड मौजूद",
+    "flag_not_disposable": "डिस्पोजेबल नहीं", "flag_not_role": "रोल अकाउंट नहीं",
+    "mx_records": "MX रिकॉर्ड", "no_mx": "कोई MX रिकॉर्ड नहीं — डोमेन ईमेल प्राप्त नहीं कर सकता।",
+    "smtp_probe": "SMTP जांच", "smtp_mx": "MX", "smtp_code": "कोड"
+  },
+  "headers": {
+    "title": "HTTP सुरक्षा हेडर", "subtitle": "Response हेडर विश्लेषण करें और A+ से F तक ग्रेड करें।",
+    "score": "स्कोर {score}/100", "http_status": "HTTP {status}",
+    "security_checks": "सुरक्षा हेडर जांच", "raw_headers": "कच्चे Response हेडर"
+  },
+  "ip": {
+    "title": "IP लुकअप", "subtitle": "जियोलोकेशन, ASN, ISP और खतरा विश्लेषण।",
+    "placeholder": "IPv4 या IPv6",
+    "field_ip": "IP", "field_hostname": "होस्टनेम", "field_country": "देश",
+    "field_region": "क्षेत्र", "field_city": "शहर", "field_timezone": "समय क्षेत्र",
+    "field_isp": "ISP", "field_asn": "ASN", "field_coords": "निर्देशांक",
+    "threat_title": "खतरा विश्लेषण", "risk_score": "जोखिम स्कोर",
+    "threat_tor": "TOR एग्जिट", "threat_hosting": "होस्टिंग / DC",
+    "threat_vpn": "VPN", "threat_proxy": "प्रॉक्सी", "threat_residential": "आवासीय"
+  },
+  "ipv6": {
+    "title": "IPv6 तैयारी", "subtitle": "apex, www, NS और MX पर AAAA कवरेज।",
+    "grade": "IPv6 ग्रेड", "row_apex_a": "Apex (A)", "row_apex_aaaa": "Apex (AAAA)",
+    "row_www_a": "www (A)", "row_www_aaaa": "www (AAAA)",
+    "row_ns": "IPv6 वाले नेमसर्वर ({with}/{total})", "row_mx": "IPv6 वाले MX ({with}/{total})",
+    "warnings": "चेतावनियां"
+  },
+  "jwt": {
+    "title": "JWT डिकोडर", "subtitle": "JWT पेस्ट करें — पूरी तरह ब्राउज़र में डीकोड। कुछ भी आपका डिवाइस नहीं छोड़ता।",
+    "placeholder": "JWT यहां पेस्ट करें…",
+    "header": "हेडर", "payload": "पेलोड", "signature": "हस्ताक्षर",
+    "claim_issued": "जारी किया", "claim_expires": "समाप्त होता है", "claim_status": "स्थिति",
+    "claim_subject": "विषय",
+    "valid": "वैध", "expired": "समाप्त", "not_yet": "अभी वैध नहीं",
+    "sig_note": "हस्ताक्षर क्लाइंट-साइड पर सत्यापित नहीं किया जा सकता।"
+  },
+  "mixed": {
+    "title": "मिश्रित सामग्री स्कैनर", "subtitle": "HTTPS पृष्ठों पर http:// संसाधन खोजें।",
+    "placeholder": "https://…",
+    "clean": "साफ़", "insecure_count": "{count} असुरक्षित संसाधन"
+  },
+  "opengraph": {
+    "title": "OG प्रीव्यू", "subtitle": "किसी भी URL के लिए सोशल शेयर प्रीव्यू।",
+    "no_title": "(कोई शीर्षक नहीं)", "no_desc": "(कोई विवरण नहीं)",
+    "field_site": "साइट का नाम", "field_type": "प्रकार",
+    "field_twitter": "Twitter कार्ड", "field_favicon": "Favicon",
+    "raw_tags": "कच्चे OG टैग"
+  },
+  "password": {
+    "title": "पासवर्ड लीक जांच", "subtitle": "HIBP k-अनामिता — आपका पासवर्ड कभी ब्राउज़र नहीं छोड़ता।",
+    "placeholder": "कोई भी पासवर्ड दर्ज करें",
+    "safe": "किसी भी ज्ञात उल्लंघन में नहीं मिला",
+    "found": "{count} बार मिला",
+    "safe_note": "यह पासवर्ड हैश HIBP की सूची में नहीं है — लेकिन यह मज़बूती की गारंटी नहीं देता।",
+    "unsafe_note": "इस पासवर्ड को हर जगह बदलें। हमलावरों ने यह सटीक पासवर्ड देखा है।"
+  },
+  "ports": {
+    "title": "पोर्ट चेकर", "subtitle": "TCP पोर्ट जांचें, सामान्य पोर्ट स्कैन करें या रेंज खोजें।",
+    "mode_single": "एकल पोर्ट", "mode_common": "सामान्य पोर्ट", "mode_range": "पोर्ट रेंज",
+    "placeholder_host": "example.com या IP", "placeholder_port": "443",
+    "placeholder_range": "1-1024",
+    "open": "खुला", "closed": "बंद", "filtered": "फ़िल्टर्ड",
+    "open_of": "{open} खुले / {total} जांचे गए", "service": "सेवा"
+  },
+  "reachability": {
+    "title": "पहुंचनीयता", "subtitle": "HTTP, TCP, पिंग और वैश्विक स्थिति जांच।",
+    "reachable": "पहुंच योग्य", "unreachable": "पहुंच योग्य नहीं"
+  },
+  "redirects": {
+    "title": "रीडायरेक्ट ट्रेसर", "subtitle": "हर रीडायरेक्ट हॉप फॉलो करें, लूप और HTTPS डाउनग्रेड पहचानें।",
+    "stat_hops": "हॉप्स", "stat_final_status": "अंतिम स्थिति",
+    "stat_downgrade": "डाउनग्रेड", "stat_result": "परिणाम",
+    "downgrade_yes": "हां", "downgrade_no": "नहीं", "location": "गंतव्य"
+  },
+  "robots": {
+    "title": "Robots & Sitemap", "subtitle": "robots.txt पार्स करें और संदर्भित Sitemap वैलिडेट करें।",
+    "robots_txt": "robots.txt", "sitemaps": "Sitemap", "sitemap_errors": "त्रुटियां"
+  },
+  "ssl": {
+    "title": "SSL सर्टिफिकेट इंस्पेक्टर", "subtitle": "TLS चेन, समाप्ति, सिफर सूट और ग्रेड।",
+    "valid": "वैध", "invalid": "अमान्य / समाप्त",
+    "field_tls": "TLS", "field_cipher": "सिफर",
+    "field_valid_from": "वैध से", "field_valid_to": "वैध तक",
+    "field_issuer": "जारीकर्ता", "field_expiry": "समाप्ति तक दिन",
+    "field_subject_alt": "वैकल्पिक विषय नाम", "grade": "ग्रेड",
+    "chain": "सर्टिफिकेट चेन"
+  },
+  "subdomains": {
+    "title": "सबडोमेन फाइंडर", "subtitle": "CT लॉग के माध्यम से निष्क्रिय गणना।",
+    "filter_placeholder": "फ़िल्टर…", "count": "{count} सबडोमेन मिले"
+  },
+  "tech": {
+    "title": "टेक स्टैक डिटेक्टर", "subtitle": "फ्रेमवर्क, CMS, एनालिटिक्स और होस्टिंग पहचानें।",
+    "detected": "{count} तकनीकें पहचानी गईं"
+  },
+  "whois": {
+    "title": "WHOIS / RDAP", "subtitle": "डोमेन स्वामित्व और पंजीकरण डेटा।",
+    "field_name": "नाम", "field_handle": "हैंडल", "field_registrar": "रजिस्ट्रार",
+    "field_created": "निर्मित", "field_updated": "अपडेट किया गया", "field_expires": "समाप्त होता है",
+    "dates": "दिनांक", "nameservers": "नेमसर्वर", "raw": "कच्चा RDAP"
+  }
+}

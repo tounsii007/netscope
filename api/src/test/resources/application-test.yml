@@ -1,0 +1,21 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+netscope:
+  cors:
+    allowed-origins: "*"
+  rate-limit:
+    anonymous-per-minute: 1000
+    authenticated-per-minute: 10000
+  tor:
+    exit-list-url: http://localhost:0/none
+
+logging:
+  level:
+    org.testcontainers: WARN
+    com.github.dockerjava: WARN
+    org.hibernate: WARN

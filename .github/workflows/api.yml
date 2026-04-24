@@ -1,0 +1,67 @@
+name: API
+
+on:
+  push: { branches: [main], paths: ["api/**", ".github/workflows/api.yml"] }
+  pull_request: { paths: ["api/**"] }
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: api } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21", cache: maven }
+      - name: Unit + integration tests
+        run: mvn -B verify
+      - name: Upload JaCoCo coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: api/target/site/jacoco/jacoco.xml
+          flags: backend
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: JUnit report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: api/target/surefire-reports/TEST-*.xml,api/target/failsafe-reports/TEST-*.xml
+
+  mutation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    defaults: { run: { working-directory: api } }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21", cache: maven }
+      - name: Mutation testing
+        run: mvn -B test org.pitest:pitest-maven:mutationCoverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pitest-report
+          path: api/target/pit-reports/
+
+  docker:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api
+          push: false
+          tags: netscope-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: netscope-api:${{ github.sha }}
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true

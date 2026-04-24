@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html, body { background: #0a0a0a; color: #fafafa; }
+
+@layer utilities {
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .glow { box-shadow: 0 0 40px -10px rgba(249,115,22,0.35); }
+  .card {
+    @apply rounded-xl border border-border bg-bg-card p-5 shadow-lg shadow-black/20;
+  }
+  .input {
+    @apply w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm
+           text-fg placeholder:text-fg-subtle focus:border-brand focus:outline-none
+           focus:ring-2 focus:ring-brand/30 transition;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2
+           text-sm font-medium text-white transition hover:bg-brand-hover
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-border
+           bg-bg-elevated px-4 py-2 text-sm font-medium hover:border-fg-muted transition;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium;
+  }
+  .badge-ok { @apply badge bg-success/15 text-success; }
+  .badge-err { @apply badge bg-danger/15 text-danger; }
+  .badge-warn { @apply badge bg-warn/15 text-warn; }
+}

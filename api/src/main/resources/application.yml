@@ -1,0 +1,141 @@
+server:
+  port: 8080
+  http2:
+    enabled: true
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,text/plain
+    min-response-size: 1024
+  shutdown: graceful
+  tomcat:
+    max-http-form-post-size: 128KB
+    max-swallow-size: 128KB
+    connection-timeout: 8s
+    keep-alive-timeout: 30s
+    threads:
+      max: 400
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+spring:
+  application:
+    name: netscope-api
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    async:
+      request-timeout: 30s
+  servlet:
+    multipart:
+      max-file-size: 256KB
+      max-request-size: 1MB
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/netscope}
+    username: ${DATABASE_USER:netscope}
+    password: ${DATABASE_PASSWORD:netscope_dev}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: 4
+      connection-timeout: 5000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 20000
+      validation-timeout: 2000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL:false}
+      timeout: 3s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+
+netscope:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+  rate-limit:
+    anonymous-per-minute: 30
+    authenticated-per-minute: 600
+  geoip:
+    mmdb-path: ${GEOIP_DB_PATH:}
+    ipinfo-token: ${IPINFO_TOKEN:}
+  tor:
+    exit-list-url: https://check.torproject.org/torbulkexitlist
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-production-must-be-32-characters-minimum}
+    issuer: ${JWT_ISSUER:https://netscope.io}
+    ttl-seconds: ${JWT_TTL:3600}
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    return-url: ${STRIPE_RETURN_URL:http://localhost:3000/settings/billing}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db,redis
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: netscope-api
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ipinfo:
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+      crtsh:
+        slidingWindowSize: 10
+        failureRateThreshold: 60
+        waitDurationInOpenState: 60s
+      rdap:
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+  timelimiter:
+    instances:
+      ipinfo:
+        timeoutDuration: 5s
+      crtsh:
+        timeoutDuration: 15s
+      rdap:
+        timeoutDuration: 8s
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui

@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: netscope-postgres
+    environment:
+      POSTGRES_DB: netscope
+      POSTGRES_USER: netscope
+      POSTGRES_PASSWORD: netscope_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - netscope_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netscope"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: netscope-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - netscope_redis:/data
+
+  adminer:
+    image: adminer:4
+    container_name: netscope-adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  netscope_pg:
+  netscope_redis:

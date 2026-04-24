@@ -1,0 +1,52 @@
+name: NetScope Audit
+description: Run security & reachability checks against your site on every push.
+author: NetScope
+
+branding:
+  icon: activity
+  color: orange
+
+inputs:
+  target:
+    description: Host or URL to audit
+    required: true
+  api-key:
+    description: NetScope API key (NETSCOPE_API_KEY secret)
+    required: false
+  api-url:
+    description: Override API base URL
+    required: false
+    default: https://api.netscope.io
+  fail-below:
+    description: Fail the build if HTTP header grade drops below this (A+, A, B, C, D, F)
+    required: false
+    default: B
+  fail-on-ssl-days:
+    description: Fail if certificate expires within N days
+    required: false
+    default: "14"
+
+outputs:
+  header-grade:
+    description: Letter grade A+..F for HTTP security headers
+    value: ${{ steps.audit.outputs.header-grade }}
+  ssl-grade:
+    description: SSL grade
+    value: ${{ steps.audit.outputs.ssl-grade }}
+  ssl-days-left:
+    description: Days until cert expiry
+    value: ${{ steps.audit.outputs.ssl-days-left }}
+
+runs:
+  using: composite
+  steps:
+    - name: Run NetScope audit
+      id: audit
+      shell: bash
+      env:
+        NETSCOPE_API_KEY: ${{ inputs.api-key }}
+        NETSCOPE_API_URL: ${{ inputs.api-url }}
+        TARGET: ${{ inputs.target }}
+        FAIL_BELOW: ${{ inputs.fail-below }}
+        FAIL_SSL_DAYS: ${{ inputs.fail-on-ssl-days }}
+      run: ${{ github.action_path }}/entrypoint.sh

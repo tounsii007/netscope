@@ -1,0 +1,40 @@
+# Node
+node_modules/
+.next/
+out/
+.env
+.env.local
+.env*.local
+
+# Java / Maven
+api/target/
+*.class
+*.jar
+!maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
+HELP.md
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+.vitest/
+api/target/pit-reports/
+api/target/site/
+
+# Secrets
+*.pem
+*.key
+GeoLite2-*.mmdb

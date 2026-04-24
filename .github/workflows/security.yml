@@ -1,0 +1,43 @@
+name: Security
+
+on:
+  schedule: [{ cron: "0 6 * * 1" }]
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    permissions: { actions: read, contents: read, security-events: write }
+    strategy:
+      matrix:
+        language: [java, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with: { languages: ${{ matrix.language }} }
+      - uses: actions/setup-java@v4
+        if: matrix.language == 'java'
+        with: { distribution: temurin, java-version: "21" }
+      - name: Build Java
+        if: matrix.language == 'java'
+        run: cd api && mvn -B -DskipTests package
+      - uses: github/codeql-action/analyze@v3
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+
+  osv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google/osv-scanner-action/osv-scanner-action@v1
+        with:
+          scan-args: |-
+            --recursive
+            ./

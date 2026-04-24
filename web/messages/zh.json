@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "title": "NetScope — 网络诊断与 IP 情报",
+    "description": "端口检测、IP 查询、DNS、WHOIS、SSL 检测和监控。在浏览器中进行专业级网络诊断。"
+  },
+  "nav": {
+    "home": "首页", "api": "API", "pricing": "价格", "docs": "文档", "sign_in": "登录",
+    "lang_en": "English", "lang_de": "Deutsch", "lang_hi": "हिन्दी", "lang_zh": "中文"
+  },
+  "home": {
+    "badge": "所有系统运行正常",
+    "title_1": "网络诊断，", "title_2": "专业可靠。",
+    "subtitle": "端口检查、IP 情报、DNS、WHOIS、SSL 检测和正常运行时间监控 — 一个快速平台，免费开始使用。",
+    "cta_tools": "试用工具", "cta_api": "API 文档",
+    "tools_heading": "所有网络工具", "tools_count": "{count} 个工具 · 提供免费层"
+  },
+  "tools": {
+    "port-checker":    { "title": "端口检测",            "desc": "检查 TCP/UDP 端口，扫描范围，检测服务。" },
+    "ip-lookup":       { "title": "IP 查询",             "desc": "地理位置、ASN、ISP、代理/VPN/TOR 检测。" },
+    "dns-lookup":      { "title": "DNS 查询",            "desc": "A、AAAA、MX、TXT、CNAME、NS 记录。" },
+    "dns-propagation": { "title": "DNS 传播检测",        "desc": "并行查询 15 个全球解析器。" },
+    "http-headers":    { "title": "HTTP 安全头部",       "desc": "安全头部评级 A+ 至 F。" },
+    "tech-stack":      { "title": "技术栈检测",          "desc": "检测框架、CMS、分析工具、托管服务。" },
+    "redirects":       { "title": "重定向追踪",          "desc": "追踪每一跳，发现循环和降级。" },
+    "subdomains":      { "title": "子域名查找",          "desc": "通过 CT 日志进行被动枚举。" },
+    "cdn-detector":    { "title": "CDN 检测",            "desc": "识别 Cloudflare、Fastly、Akamai 等。" },
+    "ssl-check":       { "title": "SSL 证书",            "desc": "证书链、有效期、加密套件、TLS 版本。" },
+    "whois":           { "title": "WHOIS / RDAP",       "desc": "域名所有权和注册数据。" },
+    "reachability":    { "title": "可达性检测",          "desc": "HTTP、TCP、Ping 和全局状态。" },
+    "email-verify":    { "title": "邮箱验证",            "desc": "MX + 一次性邮箱 + SMTP 探测。" },
+    "email-auth":      { "title": "SPF / DMARC / DKIM", "desc": "评估邮件认证配置。" },
+    "blacklist":       { "title": "IP 黑名单",           "desc": "在 20+ 垃圾邮件 DNSBL 上检查 IP。" },
+    "jwt":             { "title": "JWT 解码器",          "desc": "仅在客户端检查 JWT 声明。" },
+    "password-leak":   { "title": "密码泄露检测",        "desc": "使用 k-匿名性的 HIBP 检查 — 不离开浏览器。" },
+    "dnssec":          { "title": "DNSSEC 验证",         "desc": "DS、DNSKEY 和签名检查。" },
+    "cookies":         { "title": "Cookie / GDPR",      "desc": "Cookie 标志 + 第三方追踪器检测。" },
+    "opengraph":       { "title": "OG 预览",             "desc": "任意 URL 的社交分享预览。" },
+    "robots":          { "title": "Robots 和 Sitemap",  "desc": "解析 robots.txt 并验证 sitemap。" },
+    "ipv6":            { "title": "IPv6 就绪性",         "desc": "评估 apex/www/NS/MX 的 AAAA 覆盖范围。" },
+    "bgp":             { "title": "BGP / ASN",          "desc": "通过 RIPE Stat 获取路由情报。" },
+    "mixed-content":   { "title": "混合内容",            "desc": "查找 HTTPS 页面上的 http:// 资源。" },
+    "dashboard":       { "title": "我的 IP",            "desc": "您的 IP、位置、ISP、浏览器、操作系统。" },
+    "monitoring":      { "title": "监控",               "desc": "计划正常运行时间检查和警报。" }
+  },
+  "footer": {
+    "tagline": "专业网络诊断服务。",
+    "pricing": "价格", "api": "API", "status": "状态",
+    "copyright": "© {year} NetScope。"
+  },
+  "common": {
+    "loading": "加载中…", "error": "出现错误，请重试。",
+    "lookup": "查询", "check": "检查", "analyze": "分析", "detect": "检测",
+    "verify": "验证", "trace": "追踪", "scan": "扫描", "inspect": "检测",
+    "enumerate": "枚举", "preview": "预览", "score": "评分",
+    "enter_host": "输入主机名或 IP", "enter_domain": "输入域名",
+    "enter_url": "输入 URL", "enter_ip": "输入 IPv4 地址",
+    "enter_email": "输入电子邮件地址",
+    "copy": "复制", "copied": "已复制！", "filter": "筛选…",
+    "no_records": "无记录", "no_results": "未找到结果。",
+    "records_count": "{count} 条记录", "resolved_in": "{ms}ms 内解析完成",
+    "yes": "是", "no": "否"
+  },
+  "bgp": {
+    "title": "BGP / ASN", "subtitle": "通过 RIPE Stat 获取路由情报。",
+    "tab_ip": "IP", "tab_asn": "ASN",
+    "field_ip": "IP", "field_prefix": "前缀", "field_block": "地址块",
+    "field_announced": "已通告", "field_country": "国家", "field_city": "城市",
+    "field_asn": "ASN", "field_holder": "持有者",
+    "field_announced_prefixes": "通告前缀数", "field_neighbours": "邻居数",
+    "announcing_asns": "通告 ASN 列表", "prefix_sample": "前缀样本"
+  },
+  "blacklist": {
+    "title": "IP 黑名单检测", "subtitle": "并行查询 20+ 主要 DNSBL。",
+    "placeholder": "IPv4 地址",
+    "clean": "干净", "listed_on": "在 {total} 个列表中的 {listed} 个上被列入",
+    "col_list": "列表", "col_status": "状态",
+    "status_listed": "已列入", "status_clean": "干净"
+  },
+  "cdn": {
+    "title": "CDN 检测", "subtitle": "识别任意主机前端的 CDN 或 WAF。",
+    "powered_by": "由以下提供支持", "no_cdn": "未通过响应头检测到 CDN。",
+    "server_label": "服务器", "detection_signals": "检测信号"
+  },
+  "cookies": {
+    "title": "Cookie 和 GDPR 分析", "subtitle": "Cookie 标志和第三方追踪器检测。",
+    "gdpr_score": "GDPR 风险评分",
+    "summary": "{cookies} 个 Cookie，{trackers} 个追踪器，{hosts} 个第三方主机",
+    "col_name": "名称", "col_secure": "安全", "col_httponly": "仅 HTTP", "col_samesite": "SameSite",
+    "section_cookies": "Cookie 列表", "section_trackers": "第三方追踪器"
+  },
+  "dashboard": {
+    "title": "我的 IP 仪表板", "subtitle": "我们能检测到的关于您连接的所有信息。",
+    "detecting": "正在检测您的连接…",
+    "section_connection": "连接信息", "section_location": "位置",
+    "section_client": "客户端", "section_threat": "威胁 / 隐私",
+    "field_ip": "IP", "field_hostname": "主机名", "field_isp": "ISP", "field_asn": "ASN",
+    "field_country": "国家", "field_region": "地区", "field_city": "城市",
+    "field_tz_ip": "时区 (IP)", "field_tz_browser": "时区 (浏览器)",
+    "field_browser": "浏览器", "field_os": "操作系统", "field_device": "设备",
+    "field_screen": "屏幕", "field_lang": "Accept-Language",
+    "threat_tor": "TOR", "threat_hosting": "托管", "threat_vpn": "VPN",
+    "threat_proxy": "代理", "threat_residential": "住宅 IP"
+  },
+  "dns": {
+    "title": "DNS 查询", "subtitle": "查询任意域名的 DNS 记录。",
+    "record_types": "记录类型", "records_count": "{count} 条记录", "no_records": "无记录"
+  },
+  "propagation": {
+    "title": "DNS 传播检测", "subtitle": "并行查询 15 个全球解析器。",
+    "stat_resolvers": "解析器数", "stat_unique": "唯一答案数",
+    "stat_status": "状态", "propagated": "已传播", "propagating": "传播中",
+    "col_resolver": "解析器", "col_region": "地区", "col_answer": "答案", "col_ms": "ms"
+  },
+  "dnssec": {
+    "title": "DNSSEC 验证", "subtitle": "DS、DNSKEY 和签名检查。",
+    "active": "DNSSEC 已启用", "not_signed": "未签名",
+    "stat_ds": "DS 记录", "stat_dnskey": "DNSKEY 记录", "stat_rrsig": "RRSIG 存在",
+    "findings": "发现", "ds_records": "DS 记录"
+  },
+  "email_auth": {
+    "title": "SPF / DKIM / DMARC", "subtitle": "分析任意域名的邮件认证记录。",
+    "placeholder_domain": "example.com", "placeholder_selector": "DKIM 选择器（可选）",
+    "score_label": "邮件认证评分"
+  },
+  "email_verify": {
+    "title": "邮箱验证", "subtitle": "语法 + MX + 一次性邮箱检测 + 可选 SMTP 探测。",
+    "smtp_label": "执行 SMTP RCPT 探测（较慢，可能触发目标服务器的垃圾邮件过滤器）",
+    "deliverable": "可能可投递", "problematic": "存在问题",
+    "flag_syntax": "语法正确", "flag_mx": "有 MX 记录",
+    "flag_not_disposable": "非一次性邮箱", "flag_not_role": "非角色账户",
+    "mx_records": "MX 记录", "no_mx": "无 MX 记录 — 该域名无法接收邮件。",
+    "smtp_probe": "SMTP 探测", "smtp_mx": "MX", "smtp_code": "状态码"
+  },
+  "headers": {
+    "title": "HTTP 安全头部检测", "subtitle": "分析响应头并评级 A+ 至 F。",
+    "score": "评分 {score}/100", "http_status": "HTTP {status}",
+    "security_checks": "安全头部检查项", "raw_headers": "原始响应头"
+  },
+  "ip": {
+    "title": "IP 查询", "subtitle": "地理位置、ASN、ISP 和威胁情报。",
+    "placeholder": "IPv4 或 IPv6",
+    "field_ip": "IP", "field_hostname": "主机名", "field_country": "国家",
+    "field_region": "地区", "field_city": "城市", "field_timezone": "时区",
+    "field_isp": "ISP", "field_asn": "ASN", "field_coords": "坐标",
+    "threat_title": "威胁情报", "risk_score": "风险评分",
+    "threat_tor": "TOR 出口", "threat_hosting": "托管 / 数据中心",
+    "threat_vpn": "VPN", "threat_proxy": "代理", "threat_residential": "住宅 IP"
+  },
+  "ipv6": {
+    "title": "IPv6 就绪性", "subtitle": "apex、www、NS 和 MX 的 AAAA 覆盖范围。",
+    "grade": "IPv6 评级", "row_apex_a": "根域 (A)", "row_apex_aaaa": "根域 (AAAA)",
+    "row_www_a": "www (A)", "row_www_aaaa": "www (AAAA)",
+    "row_ns": "支持 IPv6 的域名服务器 ({with}/{total})", "row_mx": "支持 IPv6 的 MX ({with}/{total})",
+    "warnings": "警告"
+  },
+  "jwt": {
+    "title": "JWT 解码器", "subtitle": "粘贴任意 JWT — 完全在浏览器中解码，不离开您的设备。",
+    "placeholder": "粘贴 JWT…",
+    "header": "头部", "payload": "载荷", "signature": "签名",
+    "claim_issued": "签发时间", "claim_expires": "过期时间", "claim_status": "状态",
+    "claim_subject": "主题",
+    "valid": "有效", "expired": "已过期", "not_yet": "尚未生效",
+    "sig_note": "签名无法在客户端验证。"
+  },
+  "mixed": {
+    "title": "混合内容扫描器", "subtitle": "查找 HTTPS 页面上的 http:// 资源。",
+    "placeholder": "https://…",
+    "clean": "干净", "insecure_count": "{count} 个不安全资源"
+  },
+  "opengraph": {
+    "title": "OG 预览", "subtitle": "任意 URL 的社交分享预览。",
+    "no_title": "（无标题）", "no_desc": "（无描述）",
+    "field_site": "网站名称", "field_type": "类型",
+    "field_twitter": "Twitter 卡片", "field_favicon": "网站图标",
+    "raw_tags": "原始 OG 标签"
+  },
+  "password": {
+    "title": "密码泄露检测", "subtitle": "HIBP k-匿名性检测 — 您的密码永远不会离开浏览器。",
+    "placeholder": "输入任意密码",
+    "safe": "在任何已知泄露事件中未找到",
+    "found": "被发现 {count} 次",
+    "safe_note": "此密码哈希不在 HIBP 列表中 — 但这不能保证密码强度。",
+    "unsafe_note": "请在您使用此密码的所有地方更改它。攻击者已知晓此密码。"
+  },
+  "ports": {
+    "title": "端口检测", "subtitle": "检查 TCP 端口可达性，扫描常用端口或指定范围。",
+    "mode_single": "单个端口", "mode_common": "常用端口", "mode_range": "端口范围",
+    "placeholder_host": "example.com 或 IP", "placeholder_port": "443",
+    "placeholder_range": "1-1024",
+    "open": "开放", "closed": "关闭", "filtered": "过滤",
+    "open_of": "{open} 开放 / {total} 已扫描", "service": "服务"
+  },
+  "reachability": {
+    "title": "可达性检测", "subtitle": "HTTP、TCP、Ping 和全局状态检测。",
+    "reachable": "可达", "unreachable": "不可达"
+  },
+  "redirects": {
+    "title": "重定向追踪", "subtitle": "追踪每个重定向跳转，检测循环和 HTTPS 降级。",
+    "stat_hops": "跳转次数", "stat_final_status": "最终状态",
+    "stat_downgrade": "降级", "stat_result": "结果",
+    "downgrade_yes": "是", "downgrade_no": "否", "location": "目标地址"
+  },
+  "robots": {
+    "title": "Robots 和 Sitemap", "subtitle": "解析 robots.txt 并验证引用的 sitemap。",
+    "robots_txt": "robots.txt", "sitemaps": "Sitemap 列表", "sitemap_errors": "错误"
+  },
+  "ssl": {
+    "title": "SSL 证书检测", "subtitle": "TLS 链、有效期、加密套件和评级。",
+    "valid": "有效", "invalid": "无效 / 已过期",
+    "field_tls": "TLS", "field_cipher": "加密套件",
+    "field_valid_from": "有效期起", "field_valid_to": "有效期至",
+    "field_issuer": "颁发机构", "field_expiry": "剩余天数",
+    "field_subject_alt": "备用主题名称", "grade": "评级",
+    "chain": "证书链"
+  },
+  "subdomains": {
+    "title": "子域名查找", "subtitle": "通过 CT 日志进行被动枚举。",
+    "filter_placeholder": "筛选…", "count": "找到 {count} 个子域名"
+  },
+  "tech": {
+    "title": "技术栈检测", "subtitle": "检测框架、CMS、分析工具和托管服务提供商。",
+    "detected": "检测到 {count} 种技术"
+  },
+  "whois": {
+    "title": "WHOIS / RDAP", "subtitle": "域名所有权和注册数据。",
+    "field_name": "名称", "field_handle": "标识符", "field_registrar": "注册商",
+    "field_created": "注册时间", "field_updated": "更新时间", "field_expires": "到期时间",
+    "dates": "日期信息", "nameservers": "域名服务器", "raw": "原始 RDAP 数据"
+  }
+}

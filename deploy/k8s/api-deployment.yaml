@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netscope-api
+  namespace: netscope
+  labels: { app: netscope-api }
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels: { app: netscope-api }
+  template:
+    metadata:
+      labels: { app: netscope-api }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      terminationGracePeriodSeconds: 40
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: api
+          image: ghcr.io/netscope/netscope-api:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8080, name: http }]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests: { cpu: "200m", memory: "512Mi" }
+            limits:   { cpu: "1000m", memory: "1Gi" }
+          env:
+            - { name: SPRING_PROFILES_ACTIVE, value: prod }
+            - { name: DATABASE_URL, valueFrom: { secretKeyRef: { name: netscope-db, key: url } } }
+            - { name: DATABASE_USER, valueFrom: { secretKeyRef: { name: netscope-db, key: user } } }
+            - { name: DATABASE_PASSWORD, valueFrom: { secretKeyRef: { name: netscope-db, key: password } } }
+            - { name: REDIS_HOST, valueFrom: { secretKeyRef: { name: netscope-redis, key: host } } }
+            - { name: REDIS_PASSWORD, valueFrom: { secretKeyRef: { name: netscope-redis, key: password } } }
+            - { name: REDIS_SSL, value: "true" }
+            - { name: CORS_ORIGINS, value: "https://netscope.io" }
+            - { name: IPINFO_TOKEN, valueFrom: { secretKeyRef: { name: netscope-secrets, key: ipinfo } } }
+          startupProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 3
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            periodSeconds: 10
+            failureThreshold: 5
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: netscope-api, namespace: netscope }
+spec:
+  selector: { app: netscope-api }
+  ports: [{ port: 80, targetPort: http, name: http }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: netscope-api, namespace: netscope }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: netscope-api }
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource: { name: cpu,    target: { type: Utilization, averageUtilization: 70 } }
+    - type: Resource
+      resource: { name: memory, target: { type: Utilization, averageUtilization: 80 } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: netscope-api, namespace: netscope }
+spec:
+  minAvailable: 2
+  selector: { matchLabels: { app: netscope-api } }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: netscope-api, namespace: netscope }
+spec:
+  podSelector: { matchLabels: { app: netscope-api } }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: { matchLabels: { name: ingress-nginx } }
+      ports: [{ port: 8080 }]
+  egress:
+    - to: [{ namespaceSelector: { matchLabels: { name: kube-system } }}]
+      ports: [{ port: 53, protocol: UDP }, { port: 53, protocol: TCP }]
+    - {} # allow external DNS/HTTPS for scans; restrict further if RFC1918 blocked at firewall
