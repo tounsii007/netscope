@@ -1,3 +1,23 @@
+# ─── Logging ──────────────────────────────────────────────────────────────────
+# Log files land in logs/ relative to the working directory (or override via
+# LOG_PATH env var).  Logback config: src/main/resources/logback-spring.xml
+# File naming: server.2025-01-15.log.gz  |  error.2025-01-15.log.gz  | etc.
+logging:
+  file:
+    path: ${LOG_PATH:logs}
+  level:
+    root: INFO
+    io.netscope: DEBUG
+    # Silence noisy libs
+    org.hibernate.SQL: WARN
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    com.zaxxer.hikari: INFO
+  pattern:
+    # Used as fallback if logback-spring.xml is not found
+    console: "%d{HH:mm:ss.SSS} %-5level %logger{40} - %msg%n"
+
+# ─── Server ───────────────────────────────────────────────────────────────────
 server:
   port: 8080
   http2:

@@ -23,8 +23,14 @@ HELP.md
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs — daily rotating files (never commit log data)
+logs/
 *.log
+*.log.gz
+# Winston audit files (track which log files were created)
+.server-audit.json
+.error-audit.json
+.access-audit.json
 
 # Test artifacts
 coverage/
