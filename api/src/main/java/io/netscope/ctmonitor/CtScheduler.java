@@ -11,30 +11,47 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import org.springframework.data.domain.PageRequest;
+
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 /**
  * Every 10 min, polls crt.sh for each active subscription and records new
  * certificates. On any new observation, publishes a {@code ct.new_cert} event
  * so webhooks and email alerts fire.
+ *
+ * Crash protections:
+ *  - Paginated DB read (100/page) instead of findAll() — prevents OOM on large tables
+ *  - Semaphore(50) caps concurrent crt.sh threads — prevents unbounded thread growth
+ *  - Response body limited to 8 MB — prevents heap exhaustion on large domains
+ *  - RestClient timeout 15 s — prevents indefinite blocking
  */
 @Component
 public class CtScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(CtScheduler.class);
+    /** Max simultaneous crt.sh HTTP calls. Prevents unbounded virtual-thread accumulation. */
+    private static final int MAX_CONCURRENT = 50;
+    /** Hard cap on crt.sh response size (8 MB). Prevents OOM for huge domains. */
+    private static final int MAX_BODY_BYTES = 8 * 1024 * 1024;
+    private static final int PAGE_SIZE = 100;
 
     private final CtSubscriptionRepository subs;
     private final CtObservationRepository obs;
     private final ApplicationEventPublisher events;
     private final RestClient rest = RestClient.builder()
-        .defaultHeader("User-Agent", "NetScope/1.0").build();
+        .defaultHeader("User-Agent", "NetScope/1.0")
+        .requestInterceptor((req, body, execution) -> execution.execute(req, body))
+        .build();
     private final ObjectMapper mapper = new ObjectMapper();
     private final ExecutorService exec = Executors.newThreadPerTaskExecutor(
         Thread.ofVirtual().name("ct-", 0).factory());
+    private final Semaphore concurrencyLimit = new Semaphore(MAX_CONCURRENT);
 
     public CtScheduler(CtSubscriptionRepository s, CtObservationRepository o, ApplicationEventPublisher e) {
         this.subs = s; this.obs = o; this.events = e;
@@ -42,15 +59,39 @@ public class CtScheduler {
 
     @Scheduled(fixedDelay = 600_000, initialDelay = 30_000)
     public void tick() {
-        for (CtSubscription s : subs.findAll()) exec.submit(() -> poll(s));
+        // Paginated: never loads the full table into memory at once
+        int page = 0;
+        List<CtSubscription> batch;
+        do {
+            batch = subs.findAll(PageRequest.of(page++, PAGE_SIZE)).getContent();
+            for (CtSubscription s : batch) {
+                exec.submit(() -> {
+                    try {
+                        concurrencyLimit.acquire();   // blocks if 50 already running
+                        try { poll(s); }
+                        finally { concurrencyLimit.release(); }
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            }
+        } while (batch.size() == PAGE_SIZE);
     }
 
     @CircuitBreaker(name = "crtsh", fallbackMethod = "fallback")
     public void poll(CtSubscription s) {
         try {
-            String body = rest.get()
+            byte[] rawBytes = rest.get()
                 .uri("https://crt.sh/?q=%25.{d}&output=json", s.getDomain())
-                .retrieve().body(String.class);
+                .retrieve().body(byte[].class);
+            if (rawBytes == null) return;
+            // Enforce size cap — prevents OOM on popular domains returning 50+ MB
+            if (rawBytes.length > MAX_BODY_BYTES) {
+                log.warn("CT response too large ({} bytes) for {}, skipping", rawBytes.length, s.getDomain());
+                return;
+            }
+            String body = new String(rawBytes, java.nio.charset.StandardCharsets.UTF_8);
+            JsonNode arr = mapper.readTree(body);
             JsonNode arr = mapper.readTree(body);
             if (!arr.isArray()) return;
 

@@ -4,178 +4,379 @@
     "description": "Port Checker, IP Lookup, DNS, WHOIS, SSL Inspection and Monitoring. Professional-grade network diagnostics in your browser."
   },
   "nav": {
-    "home": "Home", "api": "API", "pricing": "Pricing", "docs": "Docs", "sign_in": "Sign in",
-    "lang_en": "English", "lang_de": "Deutsch", "lang_hi": "हिन्दी", "lang_zh": "中文"
+    "home": "Home",
+    "api": "API",
+    "pricing": "Pricing",
+    "docs": "Docs",
+    "sign_in": "Sign in",
+    "lang_en": "English",
+    "lang_de": "Deutsch",
+    "lang_hi": "हिन्दी",
+    "lang_zh": "中文"
   },
   "home": {
     "badge": "All systems operational",
-    "title_1": "Network diagnostics,", "title_2": "done right.",
+    "title_1": "Network diagnostics,",
+    "title_2": "done right.",
     "subtitle": "Port checks, IP intelligence, DNS, WHOIS, SSL inspection and uptime monitoring — one fast platform, free to start.",
-    "cta_tools": "Try the tools", "cta_api": "API docs",
-    "tools_heading": "All network tools", "tools_count": "{count} tools · free tier available"
+    "cta_tools": "Try the tools",
+    "cta_api": "API docs",
+    "tools_heading": "All network tools",
+    "tools_count": "{count} tools · free tier available"
   },
   "tools": {
-    "port-checker":    { "title": "Port Checker",        "desc": "Check TCP/UDP ports, scan ranges, detect services." },
-    "ip-lookup":       { "title": "IP Lookup",           "desc": "Geolocation, ASN, ISP, proxy/VPN/TOR detection." },
-    "dns-lookup":      { "title": "DNS Lookup",          "desc": "A, AAAA, MX, TXT, CNAME, NS records." },
-    "dns-propagation": { "title": "DNS Propagation",     "desc": "Query 15 global resolvers in parallel." },
-    "http-headers":    { "title": "HTTP Headers",        "desc": "Grade security headers A+ to F." },
-    "tech-stack":      { "title": "Tech Stack",          "desc": "Detect frameworks, CMS, analytics, hosting." },
-    "redirects":       { "title": "Redirect Tracer",     "desc": "Follow every hop, spot loops and downgrades." },
-    "subdomains":      { "title": "Subdomain Finder",    "desc": "Passive enumeration via CT logs." },
-    "cdn-detector":    { "title": "CDN Detector",        "desc": "Identify Cloudflare, Fastly, Akamai and more." },
-    "ssl-check":       { "title": "SSL Certificate",     "desc": "Chain, expiry, cipher, TLS version." },
-    "whois":           { "title": "WHOIS / RDAP",        "desc": "Domain ownership and registration data." },
-    "reachability":    { "title": "Reachability",        "desc": "HTTP, TCP, ping and global status." },
-    "email-verify":    { "title": "Email Verifier",      "desc": "MX + disposable + SMTP probe." },
-    "email-auth":      { "title": "SPF / DMARC / DKIM", "desc": "Grade your email authentication setup." },
-    "blacklist":       { "title": "IP Blacklist",        "desc": "Check an IP on 20+ spam DNSBLs." },
-    "jwt":             { "title": "JWT Decoder",         "desc": "Inspect JWT claims client-side only." },
-    "password-leak":   { "title": "Password Leak",       "desc": "HIBP check with k-anonymity — never leaves browser." },
-    "dnssec":          { "title": "DNSSEC Validator",    "desc": "DS, DNSKEY and signature checks." },
-    "cookies":         { "title": "Cookie / GDPR",       "desc": "Cookie flags + third-party tracker detection." },
-    "opengraph":       { "title": "OG Preview",          "desc": "Social share preview for any URL." },
-    "robots":          { "title": "Robots & Sitemap",    "desc": "Parse robots.txt and validate sitemaps." },
-    "ipv6":            { "title": "IPv6 Readiness",      "desc": "Grade AAAA coverage across apex/www/NS/MX." },
-    "bgp":             { "title": "BGP / ASN",           "desc": "Routing intelligence via RIPE Stat." },
-    "mixed-content":   { "title": "Mixed Content",       "desc": "Find http:// resources on HTTPS pages." },
-    "dashboard":       { "title": "My IP",               "desc": "Your IP, location, ISP, browser, OS." },
-    "monitoring":      { "title": "Monitoring",          "desc": "Scheduled uptime checks and alerts." }
+    "port-checker": {
+      "title": "Port Checker",
+      "desc": "Check TCP/UDP ports, scan ranges, detect services."
+    },
+    "ip-lookup": {
+      "title": "IP Lookup",
+      "desc": "Geolocation, ASN, ISP, proxy/VPN/TOR detection."
+    },
+    "dns-lookup": {
+      "title": "DNS Lookup",
+      "desc": "A, AAAA, MX, TXT, CNAME, NS records."
+    },
+    "dns-propagation": {
+      "title": "DNS Propagation",
+      "desc": "Query 15 global resolvers in parallel."
+    },
+    "http-headers": {
+      "title": "HTTP Headers",
+      "desc": "Grade security headers A+ to F."
+    },
+    "tech-stack": {
+      "title": "Tech Stack",
+      "desc": "Detect frameworks, CMS, analytics, hosting."
+    },
+    "redirects": {
+      "title": "Redirect Tracer",
+      "desc": "Follow every hop, spot loops and downgrades."
+    },
+    "subdomains": {
+      "title": "Subdomain Finder",
+      "desc": "Passive enumeration via CT logs."
+    },
+    "cdn-detector": {
+      "title": "CDN Detector",
+      "desc": "Identify Cloudflare, Fastly, Akamai and more."
+    },
+    "ssl-check": {
+      "title": "SSL Certificate",
+      "desc": "Chain, expiry, cipher, TLS version."
+    },
+    "whois": {
+      "title": "WHOIS / RDAP",
+      "desc": "Domain ownership and registration data."
+    },
+    "reachability": {
+      "title": "Reachability",
+      "desc": "HTTP, TCP, ping and global status."
+    },
+    "email-verify": {
+      "title": "Email Verifier",
+      "desc": "MX + disposable + SMTP probe."
+    },
+    "email-auth": {
+      "title": "SPF / DMARC / DKIM",
+      "desc": "Grade your email authentication setup."
+    },
+    "blacklist": {
+      "title": "IP Blacklist",
+      "desc": "Check an IP on 20+ spam DNSBLs."
+    },
+    "jwt": {
+      "title": "JWT Decoder",
+      "desc": "Inspect JWT claims client-side only."
+    },
+    "password-leak": {
+      "title": "Password Leak",
+      "desc": "HIBP check with k-anonymity — never leaves browser."
+    },
+    "dnssec": {
+      "title": "DNSSEC Validator",
+      "desc": "DS, DNSKEY and signature checks."
+    },
+    "cookies": {
+      "title": "Cookie / GDPR",
+      "desc": "Cookie flags + third-party tracker detection."
+    },
+    "opengraph": {
+      "title": "OG Preview",
+      "desc": "Social share preview for any URL."
+    },
+    "robots": {
+      "title": "Robots & Sitemap",
+      "desc": "Parse robots.txt and validate sitemaps."
+    },
+    "ipv6": {
+      "title": "IPv6 Readiness",
+      "desc": "Grade AAAA coverage across apex/www/NS/MX."
+    },
+    "bgp": {
+      "title": "BGP / ASN",
+      "desc": "Routing intelligence via RIPE Stat."
+    },
+    "mixed-content": {
+      "title": "Mixed Content",
+      "desc": "Find http:// resources on HTTPS pages."
+    },
+    "dashboard": {
+      "title": "My IP",
+      "desc": "Your IP, location, ISP, browser, OS."
+    },
+    "monitoring": {
+      "title": "Monitoring",
+      "desc": "Scheduled uptime checks and alerts."
+    }
   },
   "footer": {
     "tagline": "Professional network diagnostics.",
-    "pricing": "Pricing", "api": "API", "status": "Status",
+    "pricing": "Pricing",
+    "api": "API",
+    "status": "Status",
     "copyright": "© {year} NetScope."
   },
   "common": {
-    "loading": "Loading…", "error": "Something went wrong. Please try again.",
-    "lookup": "Lookup", "check": "Check", "analyze": "Analyze", "detect": "Detect",
-    "verify": "Verify", "trace": "Trace", "scan": "Scan", "inspect": "Inspect",
-    "enumerate": "Enumerate", "preview": "Preview", "score": "Score",
-    "enter_host": "Enter hostname or IP", "enter_domain": "Enter domain",
-    "enter_url": "Enter URL", "enter_ip": "Enter IPv4 address",
+    "loading": "Loading…",
+    "error": "Something went wrong. Please try again.",
+    "lookup": "Lookup",
+    "check": "Check",
+    "analyze": "Analyze",
+    "detect": "Detect",
+    "verify": "Verify",
+    "trace": "Trace",
+    "scan": "Scan",
+    "inspect": "Inspect",
+    "enumerate": "Enumerate",
+    "preview": "Preview",
+    "score": "Score",
+    "enter_host": "Enter hostname or IP",
+    "enter_domain": "Enter domain",
+    "enter_url": "Enter URL",
+    "enter_ip": "Enter IPv4 address",
     "enter_email": "Enter email address",
-    "copy": "Copy", "copied": "Copied!", "filter": "filter…",
-    "no_records": "No records", "no_results": "No results found.",
-    "records_count": "{count} records", "resolved_in": "Resolved in {ms}ms",
-    "yes": "yes", "no": "no"
+    "copy": "Copy",
+    "copied": "Copied!",
+    "filter": "filter…",
+    "no_records": "No records",
+    "no_results": "No results found.",
+    "records_count": "{count} records",
+    "resolved_in": "Resolved in {ms}ms",
+    "yes": "yes",
+    "no": "no",
+    "error_title": "Something went wrong",
+    "retry": "Try again"
   },
   "bgp": {
-    "title": "BGP / ASN", "subtitle": "Routing intelligence via RIPE Stat.",
-    "tab_ip": "IP", "tab_asn": "ASN",
-    "field_ip": "IP", "field_prefix": "Prefix", "field_block": "Block",
-    "field_announced": "Announced", "field_country": "Country", "field_city": "City",
-    "field_asn": "ASN", "field_holder": "Holder",
-    "field_announced_prefixes": "Announced prefixes", "field_neighbours": "Neighbours",
-    "announcing_asns": "Announcing ASNs", "prefix_sample": "Prefix sample"
+    "title": "BGP / ASN",
+    "subtitle": "Routing intelligence via RIPE Stat.",
+    "tab_ip": "IP",
+    "tab_asn": "ASN",
+    "field_ip": "IP",
+    "field_prefix": "Prefix",
+    "field_block": "Block",
+    "field_announced": "Announced",
+    "field_country": "Country",
+    "field_city": "City",
+    "field_asn": "ASN",
+    "field_holder": "Holder",
+    "field_announced_prefixes": "Announced prefixes",
+    "field_neighbours": "Neighbours",
+    "announcing_asns": "Announcing ASNs",
+    "prefix_sample": "Prefix sample"
   },
   "blacklist": {
-    "title": "IP Blacklist Check", "subtitle": "Query 20+ major DNSBLs in parallel.",
+    "title": "IP Blacklist Check",
+    "subtitle": "Query 20+ major DNSBLs in parallel.",
     "placeholder": "IPv4 address",
-    "clean": "Clean", "listed_on": "Listed on {listed} of {total} lists",
-    "col_list": "List", "col_status": "Status",
-    "status_listed": "listed", "status_clean": "clean"
+    "clean": "Clean",
+    "listed_on": "Listed on {listed} of {total} lists",
+    "col_list": "List",
+    "col_status": "Status",
+    "status_listed": "listed",
+    "status_clean": "clean"
   },
   "cdn": {
-    "title": "CDN Detector", "subtitle": "Identify the CDN or WAF in front of any host.",
-    "powered_by": "Powered by", "no_cdn": "No CDN detected via headers.",
-    "server_label": "server", "detection_signals": "Detection signals"
+    "title": "CDN Detector",
+    "subtitle": "Identify the CDN or WAF in front of any host.",
+    "powered_by": "Powered by",
+    "no_cdn": "No CDN detected via headers.",
+    "server_label": "server",
+    "detection_signals": "Detection signals"
   },
   "cookies": {
-    "title": "Cookie & GDPR Analyzer", "subtitle": "Cookie flags + third-party tracker detection.",
+    "title": "Cookie & GDPR Analyzer",
+    "subtitle": "Cookie flags + third-party tracker detection.",
     "gdpr_score": "GDPR risk score",
     "summary": "{cookies} cookies, {trackers} trackers, {hosts} third-party hosts",
-    "col_name": "Name", "col_secure": "Secure", "col_httponly": "HttpOnly", "col_samesite": "SameSite",
-    "section_cookies": "Cookies", "section_trackers": "Third-party trackers"
+    "col_name": "Name",
+    "col_secure": "Secure",
+    "col_httponly": "HttpOnly",
+    "col_samesite": "SameSite",
+    "section_cookies": "Cookies",
+    "section_trackers": "Third-party trackers"
   },
   "dashboard": {
-    "title": "My IP Dashboard", "subtitle": "Everything we can detect about your connection.",
+    "title": "My IP Dashboard",
+    "subtitle": "Everything we can detect about your connection.",
     "detecting": "Detecting your connection…",
-    "section_connection": "Connection", "section_location": "Location",
-    "section_client": "Client", "section_threat": "Threat / Privacy",
-    "field_ip": "IP", "field_hostname": "Hostname", "field_isp": "ISP", "field_asn": "ASN",
-    "field_country": "Country", "field_region": "Region", "field_city": "City",
-    "field_tz_ip": "Timezone (IP)", "field_tz_browser": "Timezone (browser)",
-    "field_browser": "Browser", "field_os": "OS", "field_device": "Device",
-    "field_screen": "Screen", "field_lang": "Accept-Language",
-    "threat_tor": "TOR", "threat_hosting": "Hosting", "threat_vpn": "VPN",
-    "threat_proxy": "Proxy", "threat_residential": "Residential"
+    "section_connection": "Connection",
+    "section_location": "Location",
+    "section_client": "Client",
+    "section_threat": "Threat / Privacy",
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_country": "Country",
+    "field_region": "Region",
+    "field_city": "City",
+    "field_tz_ip": "Timezone (IP)",
+    "field_tz_browser": "Timezone (browser)",
+    "field_browser": "Browser",
+    "field_os": "OS",
+    "field_device": "Device",
+    "field_screen": "Screen",
+    "field_lang": "Accept-Language",
+    "threat_tor": "TOR",
+    "threat_hosting": "Hosting",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Residential"
   },
   "dns": {
-    "title": "DNS Lookup", "subtitle": "Query DNS records for any domain.",
-    "record_types": "Record types", "records_count": "{count} records", "no_records": "No records"
+    "title": "DNS Lookup",
+    "subtitle": "Query DNS records for any domain.",
+    "record_types": "Record types",
+    "records_count": "{count} records",
+    "no_records": "No records"
   },
   "propagation": {
-    "title": "DNS Propagation", "subtitle": "Query 15 global resolvers in parallel.",
-    "stat_resolvers": "Resolvers", "stat_unique": "Unique answers",
-    "stat_status": "Status", "propagated": "Propagated", "propagating": "Propagating",
-    "col_resolver": "Resolver", "col_region": "Region", "col_answer": "Answer", "col_ms": "ms"
+    "title": "DNS Propagation",
+    "subtitle": "Query 15 global resolvers in parallel.",
+    "stat_resolvers": "Resolvers",
+    "stat_unique": "Unique answers",
+    "stat_status": "Status",
+    "propagated": "Propagated",
+    "propagating": "Propagating",
+    "col_resolver": "Resolver",
+    "col_region": "Region",
+    "col_answer": "Answer",
+    "col_ms": "ms"
   },
   "dnssec": {
-    "title": "DNSSEC Validator", "subtitle": "DS, DNSKEY and signature presence checks.",
-    "active": "DNSSEC active", "not_signed": "Not signed",
-    "stat_ds": "DS records", "stat_dnskey": "DNSKEY records", "stat_rrsig": "RRSIG present",
-    "findings": "Findings", "ds_records": "DS records"
+    "title": "DNSSEC Validator",
+    "subtitle": "DS, DNSKEY and signature presence checks.",
+    "active": "DNSSEC active",
+    "not_signed": "Not signed",
+    "stat_ds": "DS records",
+    "stat_dnskey": "DNSKEY records",
+    "stat_rrsig": "RRSIG present",
+    "findings": "Findings",
+    "ds_records": "DS records"
   },
   "email_auth": {
-    "title": "SPF / DKIM / DMARC", "subtitle": "Parse and grade email authentication for any domain.",
-    "placeholder_domain": "example.com", "placeholder_selector": "DKIM selector (optional)",
+    "title": "SPF / DKIM / DMARC",
+    "subtitle": "Parse and grade email authentication for any domain.",
+    "placeholder_domain": "example.com",
+    "placeholder_selector": "DKIM selector (optional)",
     "score_label": "Email authentication score"
   },
   "email_verify": {
-    "title": "Email Verifier", "subtitle": "Syntax + MX + disposable detection + optional SMTP probe.",
+    "title": "Email Verifier",
+    "subtitle": "Syntax + MX + disposable detection + optional SMTP probe.",
     "smtp_label": "Perform SMTP RCPT probe (slower, may trigger spam filters on target server)",
-    "deliverable": "Likely deliverable", "problematic": "Problematic",
-    "flag_syntax": "Valid syntax", "flag_mx": "Has MX records",
-    "flag_not_disposable": "Not disposable", "flag_not_role": "Not a role account",
-    "mx_records": "MX records", "no_mx": "No MX records — domain cannot receive mail.",
-    "smtp_probe": "SMTP probe", "smtp_mx": "MX", "smtp_code": "Code"
+    "deliverable": "Likely deliverable",
+    "problematic": "Problematic",
+    "flag_syntax": "Valid syntax",
+    "flag_mx": "Has MX records",
+    "flag_not_disposable": "Not disposable",
+    "flag_not_role": "Not a role account",
+    "mx_records": "MX records",
+    "no_mx": "No MX records — domain cannot receive mail.",
+    "smtp_probe": "SMTP probe",
+    "smtp_mx": "MX",
+    "smtp_code": "Code"
   },
   "headers": {
-    "title": "HTTP Security Headers", "subtitle": "Analyze response headers and grade security posture from A+ to F.",
-    "score": "Score {score}/100", "http_status": "HTTP {status}",
-    "security_checks": "Security header checks", "raw_headers": "Raw response headers"
+    "title": "HTTP Security Headers",
+    "subtitle": "Analyze response headers and grade security posture from A+ to F.",
+    "score": "Score {score}/100",
+    "http_status": "HTTP {status}",
+    "security_checks": "Security header checks",
+    "raw_headers": "Raw response headers"
   },
   "ip": {
-    "title": "IP Lookup", "subtitle": "Geolocation, ASN, ISP and threat intelligence.",
+    "title": "IP Lookup",
+    "subtitle": "Geolocation, ASN, ISP and threat intelligence.",
     "placeholder": "IPv4 or IPv6",
-    "field_ip": "IP", "field_hostname": "Hostname", "field_country": "Country",
-    "field_region": "Region", "field_city": "City", "field_timezone": "Timezone",
-    "field_isp": "ISP", "field_asn": "ASN", "field_coords": "Coordinates",
-    "threat_title": "Threat intelligence", "risk_score": "risk score",
-    "threat_tor": "TOR exit", "threat_hosting": "Hosting / DC",
-    "threat_vpn": "VPN", "threat_proxy": "Proxy", "threat_residential": "Residential"
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_country": "Country",
+    "field_region": "Region",
+    "field_city": "City",
+    "field_timezone": "Timezone",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_coords": "Coordinates",
+    "threat_title": "Threat intelligence",
+    "risk_score": "risk score",
+    "threat_tor": "TOR exit",
+    "threat_hosting": "Hosting / DC",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Residential"
   },
   "ipv6": {
-    "title": "IPv6 Readiness", "subtitle": "AAAA coverage across apex, www, NS and MX.",
-    "grade": "IPv6 Grade", "row_apex_a": "Apex (A)", "row_apex_aaaa": "Apex (AAAA)",
-    "row_www_a": "www (A)", "row_www_aaaa": "www (AAAA)",
-    "row_ns": "Nameservers with IPv6 ({with}/{total})", "row_mx": "MX with IPv6 ({with}/{total})",
+    "title": "IPv6 Readiness",
+    "subtitle": "AAAA coverage across apex, www, NS and MX.",
+    "grade": "IPv6 Grade",
+    "row_apex_a": "Apex (A)",
+    "row_apex_aaaa": "Apex (AAAA)",
+    "row_www_a": "www (A)",
+    "row_www_aaaa": "www (AAAA)",
+    "row_ns": "Nameservers with IPv6 ({with}/{total})",
+    "row_mx": "MX with IPv6 ({with}/{total})",
     "warnings": "Warnings"
   },
   "jwt": {
-    "title": "JWT Decoder", "subtitle": "Paste any JWT — decoded entirely in your browser. Nothing leaves your device.",
+    "title": "JWT Decoder",
+    "subtitle": "Paste any JWT — decoded entirely in your browser. Nothing leaves your device.",
     "placeholder": "Paste a JWT…",
-    "header": "Header", "payload": "Payload", "signature": "Signature",
-    "claim_issued": "Issued", "claim_expires": "Expires", "claim_status": "Status",
+    "header": "Header",
+    "payload": "Payload",
+    "signature": "Signature",
+    "claim_issued": "Issued",
+    "claim_expires": "Expires",
+    "claim_status": "Status",
     "claim_subject": "Subject",
-    "valid": "Valid", "expired": "Expired", "not_yet": "Not yet valid",
+    "valid": "Valid",
+    "expired": "Expired",
+    "not_yet": "Not yet valid",
     "sig_note": "Signature cannot be verified client-side."
   },
   "mixed": {
-    "title": "Mixed Content Scanner", "subtitle": "Find http:// resources on HTTPS pages.",
+    "title": "Mixed Content Scanner",
+    "subtitle": "Find http:// resources on HTTPS pages.",
     "placeholder": "https://…",
-    "clean": "Clean", "insecure_count": "{count} insecure resources"
+    "clean": "Clean",
+    "insecure_count": "{count} insecure resources"
   },
   "opengraph": {
-    "title": "OG Preview", "subtitle": "Social share preview for any URL.",
-    "no_title": "(no title)", "no_desc": "(no description)",
-    "field_site": "Site name", "field_type": "Type",
-    "field_twitter": "Twitter card", "field_favicon": "Favicon",
+    "title": "OG Preview",
+    "subtitle": "Social share preview for any URL.",
+    "no_title": "(no title)",
+    "no_desc": "(no description)",
+    "field_site": "Site name",
+    "field_type": "Type",
+    "field_twitter": "Twitter card",
+    "field_favicon": "Favicon",
     "raw_tags": "Raw OG tags"
   },
   "password": {
-    "title": "Password Leak Check", "subtitle": "HIBP k-anonymity check — your password never leaves the browser.",
+    "title": "Password Leak Check",
+    "subtitle": "HIBP k-anonymity check — your password never leaves the browser.",
     "placeholder": "Enter any password",
     "safe": "Not found in any known breach",
     "found": "Found {count} times",
@@ -183,48 +384,81 @@
     "unsafe_note": "Change this password everywhere you use it. Attackers have seen this exact password."
   },
   "ports": {
-    "title": "Port Checker", "subtitle": "Check TCP port reachability, scan common ports, or sweep a range.",
-    "mode_single": "Single port", "mode_common": "Common ports", "mode_range": "Port range",
-    "placeholder_host": "example.com or IP", "placeholder_port": "443",
+    "title": "Port Checker",
+    "subtitle": "Check TCP port reachability, scan common ports, or sweep a range.",
+    "mode_single": "Single port",
+    "mode_common": "Common ports",
+    "mode_range": "Port range",
+    "placeholder_host": "example.com or IP",
+    "placeholder_port": "443",
     "placeholder_range": "1-1024",
-    "open": "open", "closed": "closed", "filtered": "filtered",
-    "open_of": "{open} open / {total} scanned", "service": "Service"
+    "open": "open",
+    "closed": "closed",
+    "filtered": "filtered",
+    "open_of": "{open} open / {total} scanned",
+    "service": "Service"
   },
   "reachability": {
-    "title": "Reachability", "subtitle": "HTTP, TCP, ping and global status check.",
-    "reachable": "Reachable", "unreachable": "Unreachable"
+    "title": "Reachability",
+    "subtitle": "HTTP, TCP, ping and global status check.",
+    "reachable": "Reachable",
+    "unreachable": "Unreachable"
   },
   "redirects": {
-    "title": "Redirect Tracer", "subtitle": "Follow every redirect hop, detect loops and HTTPS downgrades.",
-    "stat_hops": "Hops", "stat_final_status": "Final status",
-    "stat_downgrade": "Downgrade", "stat_result": "Result",
-    "downgrade_yes": "YES", "downgrade_no": "no", "location": "Location"
+    "title": "Redirect Tracer",
+    "subtitle": "Follow every redirect hop, detect loops and HTTPS downgrades.",
+    "stat_hops": "Hops",
+    "stat_final_status": "Final status",
+    "stat_downgrade": "Downgrade",
+    "stat_result": "Result",
+    "downgrade_yes": "YES",
+    "downgrade_no": "no",
+    "location": "Location"
   },
   "robots": {
-    "title": "Robots & Sitemap", "subtitle": "Parse robots.txt and validate referenced sitemaps.",
-    "robots_txt": "robots.txt", "sitemaps": "Sitemaps", "sitemap_errors": "Errors"
+    "title": "Robots & Sitemap",
+    "subtitle": "Parse robots.txt and validate referenced sitemaps.",
+    "robots_txt": "robots.txt",
+    "sitemaps": "Sitemaps",
+    "sitemap_errors": "Errors"
   },
   "ssl": {
-    "title": "SSL Certificate Inspector", "subtitle": "TLS chain, expiry, cipher suite and grade.",
-    "valid": "Valid", "invalid": "Invalid / Expired",
-    "field_tls": "TLS", "field_cipher": "Cipher",
-    "field_valid_from": "Valid from", "field_valid_to": "Valid to",
-    "field_issuer": "Issuer", "field_expiry": "Days until expiry",
-    "field_subject_alt": "Subject Alt Names", "grade": "Grade",
+    "title": "SSL Certificate Inspector",
+    "subtitle": "TLS chain, expiry, cipher suite and grade.",
+    "valid": "Valid",
+    "invalid": "Invalid / Expired",
+    "field_tls": "TLS",
+    "field_cipher": "Cipher",
+    "field_valid_from": "Valid from",
+    "field_valid_to": "Valid to",
+    "field_issuer": "Issuer",
+    "field_expiry": "Days until expiry",
+    "field_subject_alt": "Subject Alt Names",
+    "grade": "Grade",
     "chain": "Certificate chain"
   },
   "subdomains": {
-    "title": "Subdomain Finder", "subtitle": "Passive enumeration via CT logs.",
-    "filter_placeholder": "filter…", "count": "{count} subdomains found"
+    "title": "Subdomain Finder",
+    "subtitle": "Passive enumeration via CT logs.",
+    "filter_placeholder": "filter…",
+    "count": "{count} subdomains found"
   },
   "tech": {
-    "title": "Tech Stack Detector", "subtitle": "Detect frameworks, CMS, analytics and hosting provider.",
+    "title": "Tech Stack Detector",
+    "subtitle": "Detect frameworks, CMS, analytics and hosting provider.",
     "detected": "{count} technologies detected"
   },
   "whois": {
-    "title": "WHOIS / RDAP", "subtitle": "Domain ownership and registration data.",
-    "field_name": "Name", "field_handle": "Handle", "field_registrar": "Registrar",
-    "field_created": "Created", "field_updated": "Updated", "field_expires": "Expires",
-    "dates": "Dates", "nameservers": "Nameservers", "raw": "Raw RDAP"
+    "title": "WHOIS / RDAP",
+    "subtitle": "Domain ownership and registration data.",
+    "field_name": "Name",
+    "field_handle": "Handle",
+    "field_registrar": "Registrar",
+    "field_created": "Created",
+    "field_updated": "Updated",
+    "field_expires": "Expires",
+    "dates": "Dates",
+    "nameservers": "Nameservers",
+    "raw": "Raw RDAP"
   }
 }

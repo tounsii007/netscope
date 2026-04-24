@@ -4,178 +4,379 @@
     "description": "Port-Prüfer, IP-Abfrage, DNS, WHOIS, SSL-Inspektion und Monitoring. Professionelle Netzwerkdiagnose direkt im Browser."
   },
   "nav": {
-    "home": "Start", "api": "API", "pricing": "Preise", "docs": "Dokumentation", "sign_in": "Anmelden",
-    "lang_en": "English", "lang_de": "Deutsch", "lang_hi": "हिन्दी", "lang_zh": "中文"
+    "home": "Start",
+    "api": "API",
+    "pricing": "Preise",
+    "docs": "Dokumentation",
+    "sign_in": "Anmelden",
+    "lang_en": "English",
+    "lang_de": "Deutsch",
+    "lang_hi": "हिन्दी",
+    "lang_zh": "中文"
   },
   "home": {
     "badge": "Alle Systeme betriebsbereit",
-    "title_1": "Netzwerkdiagnose,", "title_2": "professionell gemacht.",
+    "title_1": "Netzwerkdiagnose,",
+    "title_2": "professionell gemacht.",
     "subtitle": "Portprüfungen, IP-Analyse, DNS, WHOIS, SSL-Inspektion und Uptime-Monitoring — eine schnelle Plattform, kostenlos starten.",
-    "cta_tools": "Tools ausprobieren", "cta_api": "API-Dokumentation",
-    "tools_heading": "Alle Netzwerk-Tools", "tools_count": "{count} Tools · kostenloses Kontingent verfügbar"
+    "cta_tools": "Tools ausprobieren",
+    "cta_api": "API-Dokumentation",
+    "tools_heading": "Alle Netzwerk-Tools",
+    "tools_count": "{count} Tools · kostenloses Kontingent verfügbar"
   },
   "tools": {
-    "port-checker":    { "title": "Port-Prüfer",            "desc": "TCP/UDP-Ports prüfen, Bereiche scannen, Dienste erkennen." },
-    "ip-lookup":       { "title": "IP-Abfrage",             "desc": "Geolokation, ASN, ISP, Proxy/VPN/TOR-Erkennung." },
-    "dns-lookup":      { "title": "DNS-Abfrage",            "desc": "A, AAAA, MX, TXT, CNAME, NS-Einträge." },
-    "dns-propagation": { "title": "DNS-Ausbreitung",        "desc": "15 globale Resolver parallel abfragen." },
-    "http-headers":    { "title": "HTTP-Sicherheits-Header","desc": "Sicherheits-Header von A+ bis F bewerten." },
-    "tech-stack":      { "title": "Tech-Stack",             "desc": "Frameworks, CMS, Analytics, Hosting erkennen." },
-    "redirects":       { "title": "Weiterleitungs-Tracer",  "desc": "Jeden Hop verfolgen, Schleifen und Downgrades erkennen." },
-    "subdomains":      { "title": "Subdomain-Finder",       "desc": "Passive Enumeration über CT-Logs." },
-    "cdn-detector":    { "title": "CDN-Erkennung",          "desc": "Cloudflare, Fastly, Akamai und mehr identifizieren." },
-    "ssl-check":       { "title": "SSL-Zertifikat",         "desc": "Kette, Ablauf, Verschlüsselung, TLS-Version." },
-    "whois":           { "title": "WHOIS / RDAP",           "desc": "Domain-Eigentümer und Registrierungsdaten." },
-    "reachability":    { "title": "Erreichbarkeit",         "desc": "HTTP, TCP, Ping und globaler Status." },
-    "email-verify":    { "title": "E-Mail-Prüfer",          "desc": "MX + Wegwerf-Adressen + SMTP-Probe." },
-    "email-auth":      { "title": "SPF / DMARC / DKIM",    "desc": "E-Mail-Authentifizierung bewerten." },
-    "blacklist":       { "title": "IP-Blacklist",           "desc": "IP auf 20+ Spam-DNSBLs prüfen." },
-    "jwt":             { "title": "JWT-Decoder",            "desc": "JWT-Ansprüche nur clientseitig einsehen." },
-    "password-leak":   { "title": "Passwort-Leak-Check",   "desc": "HIBP-Prüfung mit k-Anonymität — verlässt nie den Browser." },
-    "dnssec":          { "title": "DNSSEC-Validator",       "desc": "DS, DNSKEY und Signaturprüfungen." },
-    "cookies":         { "title": "Cookie / DSGVO",         "desc": "Cookie-Flags + Drittanbieter-Tracker erkennen." },
-    "opengraph":       { "title": "OG-Vorschau",            "desc": "Social-Share-Vorschau für beliebige URLs." },
-    "robots":          { "title": "Robots & Sitemap",       "desc": "robots.txt parsen und Sitemaps validieren." },
-    "ipv6":            { "title": "IPv6-Bereitschaft",      "desc": "AAAA-Abdeckung über Apex/www/NS/MX bewerten." },
-    "bgp":             { "title": "BGP / ASN",              "desc": "Routing-Intelligenz via RIPE Stat." },
-    "mixed-content":   { "title": "Gemischter Inhalt",      "desc": "http://-Ressourcen auf HTTPS-Seiten finden." },
-    "dashboard":       { "title": "Meine IP",               "desc": "Ihre IP, Standort, ISP, Browser, Betriebssystem." },
-    "monitoring":      { "title": "Monitoring",             "desc": "Geplante Verfügbarkeitsprüfungen und Benachrichtigungen." }
+    "port-checker": {
+      "title": "Port-Prüfer",
+      "desc": "TCP/UDP-Ports prüfen, Bereiche scannen, Dienste erkennen."
+    },
+    "ip-lookup": {
+      "title": "IP-Abfrage",
+      "desc": "Geolokation, ASN, ISP, Proxy/VPN/TOR-Erkennung."
+    },
+    "dns-lookup": {
+      "title": "DNS-Abfrage",
+      "desc": "A, AAAA, MX, TXT, CNAME, NS-Einträge."
+    },
+    "dns-propagation": {
+      "title": "DNS-Ausbreitung",
+      "desc": "15 globale Resolver parallel abfragen."
+    },
+    "http-headers": {
+      "title": "HTTP-Sicherheits-Header",
+      "desc": "Sicherheits-Header von A+ bis F bewerten."
+    },
+    "tech-stack": {
+      "title": "Tech-Stack",
+      "desc": "Frameworks, CMS, Analytics, Hosting erkennen."
+    },
+    "redirects": {
+      "title": "Weiterleitungs-Tracer",
+      "desc": "Jeden Hop verfolgen, Schleifen und Downgrades erkennen."
+    },
+    "subdomains": {
+      "title": "Subdomain-Finder",
+      "desc": "Passive Enumeration über CT-Logs."
+    },
+    "cdn-detector": {
+      "title": "CDN-Erkennung",
+      "desc": "Cloudflare, Fastly, Akamai und mehr identifizieren."
+    },
+    "ssl-check": {
+      "title": "SSL-Zertifikat",
+      "desc": "Kette, Ablauf, Verschlüsselung, TLS-Version."
+    },
+    "whois": {
+      "title": "WHOIS / RDAP",
+      "desc": "Domain-Eigentümer und Registrierungsdaten."
+    },
+    "reachability": {
+      "title": "Erreichbarkeit",
+      "desc": "HTTP, TCP, Ping und globaler Status."
+    },
+    "email-verify": {
+      "title": "E-Mail-Prüfer",
+      "desc": "MX + Wegwerf-Adressen + SMTP-Probe."
+    },
+    "email-auth": {
+      "title": "SPF / DMARC / DKIM",
+      "desc": "E-Mail-Authentifizierung bewerten."
+    },
+    "blacklist": {
+      "title": "IP-Blacklist",
+      "desc": "IP auf 20+ Spam-DNSBLs prüfen."
+    },
+    "jwt": {
+      "title": "JWT-Decoder",
+      "desc": "JWT-Ansprüche nur clientseitig einsehen."
+    },
+    "password-leak": {
+      "title": "Passwort-Leak-Check",
+      "desc": "HIBP-Prüfung mit k-Anonymität — verlässt nie den Browser."
+    },
+    "dnssec": {
+      "title": "DNSSEC-Validator",
+      "desc": "DS, DNSKEY und Signaturprüfungen."
+    },
+    "cookies": {
+      "title": "Cookie / DSGVO",
+      "desc": "Cookie-Flags + Drittanbieter-Tracker erkennen."
+    },
+    "opengraph": {
+      "title": "OG-Vorschau",
+      "desc": "Social-Share-Vorschau für beliebige URLs."
+    },
+    "robots": {
+      "title": "Robots & Sitemap",
+      "desc": "robots.txt parsen und Sitemaps validieren."
+    },
+    "ipv6": {
+      "title": "IPv6-Bereitschaft",
+      "desc": "AAAA-Abdeckung über Apex/www/NS/MX bewerten."
+    },
+    "bgp": {
+      "title": "BGP / ASN",
+      "desc": "Routing-Intelligenz via RIPE Stat."
+    },
+    "mixed-content": {
+      "title": "Gemischter Inhalt",
+      "desc": "http://-Ressourcen auf HTTPS-Seiten finden."
+    },
+    "dashboard": {
+      "title": "Meine IP",
+      "desc": "Ihre IP, Standort, ISP, Browser, Betriebssystem."
+    },
+    "monitoring": {
+      "title": "Monitoring",
+      "desc": "Geplante Verfügbarkeitsprüfungen und Benachrichtigungen."
+    }
   },
   "footer": {
     "tagline": "Professionelle Netzwerkdiagnose.",
-    "pricing": "Preise", "api": "API", "status": "Status",
+    "pricing": "Preise",
+    "api": "API",
+    "status": "Status",
     "copyright": "© {year} NetScope."
   },
   "common": {
-    "loading": "Lädt…", "error": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
-    "lookup": "Abfragen", "check": "Prüfen", "analyze": "Analysieren", "detect": "Erkennen",
-    "verify": "Verifizieren", "trace": "Verfolgen", "scan": "Scannen", "inspect": "Untersuchen",
-    "enumerate": "Aufzählen", "preview": "Vorschau", "score": "Bewerten",
-    "enter_host": "Hostname oder IP eingeben", "enter_domain": "Domain eingeben",
-    "enter_url": "URL eingeben", "enter_ip": "IPv4-Adresse eingeben",
+    "loading": "Lädt…",
+    "error": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
+    "lookup": "Abfragen",
+    "check": "Prüfen",
+    "analyze": "Analysieren",
+    "detect": "Erkennen",
+    "verify": "Verifizieren",
+    "trace": "Verfolgen",
+    "scan": "Scannen",
+    "inspect": "Untersuchen",
+    "enumerate": "Aufzählen",
+    "preview": "Vorschau",
+    "score": "Bewerten",
+    "enter_host": "Hostname oder IP eingeben",
+    "enter_domain": "Domain eingeben",
+    "enter_url": "URL eingeben",
+    "enter_ip": "IPv4-Adresse eingeben",
     "enter_email": "E-Mail-Adresse eingeben",
-    "copy": "Kopieren", "copied": "Kopiert!", "filter": "filtern…",
-    "no_records": "Keine Einträge", "no_results": "Keine Ergebnisse gefunden.",
-    "records_count": "{count} Einträge", "resolved_in": "Aufgelöst in {ms}ms",
-    "yes": "ja", "no": "nein"
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "filter": "filtern…",
+    "no_records": "Keine Einträge",
+    "no_results": "Keine Ergebnisse gefunden.",
+    "records_count": "{count} Einträge",
+    "resolved_in": "Aufgelöst in {ms}ms",
+    "yes": "ja",
+    "no": "nein",
+    "error_title": "Etwas ist schiefgelaufen",
+    "retry": "Erneut versuchen"
   },
   "bgp": {
-    "title": "BGP / ASN", "subtitle": "Routing-Intelligenz via RIPE Stat.",
-    "tab_ip": "IP", "tab_asn": "ASN",
-    "field_ip": "IP", "field_prefix": "Präfix", "field_block": "Block",
-    "field_announced": "Angekündigt", "field_country": "Land", "field_city": "Stadt",
-    "field_asn": "ASN", "field_holder": "Inhaber",
-    "field_announced_prefixes": "Angekündigte Präfixe", "field_neighbours": "Nachbarn",
-    "announcing_asns": "Ankündigende ASNs", "prefix_sample": "Präfix-Auswahl"
+    "title": "BGP / ASN",
+    "subtitle": "Routing-Intelligenz via RIPE Stat.",
+    "tab_ip": "IP",
+    "tab_asn": "ASN",
+    "field_ip": "IP",
+    "field_prefix": "Präfix",
+    "field_block": "Block",
+    "field_announced": "Angekündigt",
+    "field_country": "Land",
+    "field_city": "Stadt",
+    "field_asn": "ASN",
+    "field_holder": "Inhaber",
+    "field_announced_prefixes": "Angekündigte Präfixe",
+    "field_neighbours": "Nachbarn",
+    "announcing_asns": "Ankündigende ASNs",
+    "prefix_sample": "Präfix-Auswahl"
   },
   "blacklist": {
-    "title": "IP-Blacklist-Prüfung", "subtitle": "20+ große DNSBLs parallel abfragen.",
+    "title": "IP-Blacklist-Prüfung",
+    "subtitle": "20+ große DNSBLs parallel abfragen.",
     "placeholder": "IPv4-Adresse",
-    "clean": "Sauber", "listed_on": "Eingetragen auf {listed} von {total} Listen",
-    "col_list": "Liste", "col_status": "Status",
-    "status_listed": "eingetragen", "status_clean": "sauber"
+    "clean": "Sauber",
+    "listed_on": "Eingetragen auf {listed} von {total} Listen",
+    "col_list": "Liste",
+    "col_status": "Status",
+    "status_listed": "eingetragen",
+    "status_clean": "sauber"
   },
   "cdn": {
-    "title": "CDN-Erkennung", "subtitle": "CDN oder WAF vor einem beliebigen Host identifizieren.",
-    "powered_by": "Bereitgestellt von", "no_cdn": "Kein CDN über Header erkannt.",
-    "server_label": "Server", "detection_signals": "Erkennungssignale"
+    "title": "CDN-Erkennung",
+    "subtitle": "CDN oder WAF vor einem beliebigen Host identifizieren.",
+    "powered_by": "Bereitgestellt von",
+    "no_cdn": "Kein CDN über Header erkannt.",
+    "server_label": "Server",
+    "detection_signals": "Erkennungssignale"
   },
   "cookies": {
-    "title": "Cookie- & DSGVO-Analyse", "subtitle": "Cookie-Flags und Drittanbieter-Tracker erkennen.",
+    "title": "Cookie- & DSGVO-Analyse",
+    "subtitle": "Cookie-Flags und Drittanbieter-Tracker erkennen.",
     "gdpr_score": "DSGVO-Risikopunktzahl",
     "summary": "{cookies} Cookies, {trackers} Tracker, {hosts} Drittanbieter-Hosts",
-    "col_name": "Name", "col_secure": "Sicher", "col_httponly": "Nur HTTP", "col_samesite": "SameSite",
-    "section_cookies": "Cookies", "section_trackers": "Drittanbieter-Tracker"
+    "col_name": "Name",
+    "col_secure": "Sicher",
+    "col_httponly": "Nur HTTP",
+    "col_samesite": "SameSite",
+    "section_cookies": "Cookies",
+    "section_trackers": "Drittanbieter-Tracker"
   },
   "dashboard": {
-    "title": "Mein IP-Dashboard", "subtitle": "Alle erkennbaren Informationen über Ihre Verbindung.",
+    "title": "Mein IP-Dashboard",
+    "subtitle": "Alle erkennbaren Informationen über Ihre Verbindung.",
     "detecting": "Verbindung wird erkannt…",
-    "section_connection": "Verbindung", "section_location": "Standort",
-    "section_client": "Client", "section_threat": "Bedrohung / Datenschutz",
-    "field_ip": "IP", "field_hostname": "Hostname", "field_isp": "ISP", "field_asn": "ASN",
-    "field_country": "Land", "field_region": "Region", "field_city": "Stadt",
-    "field_tz_ip": "Zeitzone (IP)", "field_tz_browser": "Zeitzone (Browser)",
-    "field_browser": "Browser", "field_os": "Betriebssystem", "field_device": "Gerät",
-    "field_screen": "Bildschirm", "field_lang": "Akzeptierte Sprachen",
-    "threat_tor": "TOR", "threat_hosting": "Hosting", "threat_vpn": "VPN",
-    "threat_proxy": "Proxy", "threat_residential": "Privat"
+    "section_connection": "Verbindung",
+    "section_location": "Standort",
+    "section_client": "Client",
+    "section_threat": "Bedrohung / Datenschutz",
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_country": "Land",
+    "field_region": "Region",
+    "field_city": "Stadt",
+    "field_tz_ip": "Zeitzone (IP)",
+    "field_tz_browser": "Zeitzone (Browser)",
+    "field_browser": "Browser",
+    "field_os": "Betriebssystem",
+    "field_device": "Gerät",
+    "field_screen": "Bildschirm",
+    "field_lang": "Akzeptierte Sprachen",
+    "threat_tor": "TOR",
+    "threat_hosting": "Hosting",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Privat"
   },
   "dns": {
-    "title": "DNS-Abfrage", "subtitle": "DNS-Einträge für beliebige Domains abfragen.",
-    "record_types": "Eintragstypen", "records_count": "{count} Einträge", "no_records": "Keine Einträge"
+    "title": "DNS-Abfrage",
+    "subtitle": "DNS-Einträge für beliebige Domains abfragen.",
+    "record_types": "Eintragstypen",
+    "records_count": "{count} Einträge",
+    "no_records": "Keine Einträge"
   },
   "propagation": {
-    "title": "DNS-Ausbreitung", "subtitle": "15 globale Resolver parallel abfragen.",
-    "stat_resolvers": "Resolver", "stat_unique": "Eindeutige Antworten",
-    "stat_status": "Status", "propagated": "Verbreitet", "propagating": "Wird verbreitet",
-    "col_resolver": "Resolver", "col_region": "Region", "col_answer": "Antwort", "col_ms": "ms"
+    "title": "DNS-Ausbreitung",
+    "subtitle": "15 globale Resolver parallel abfragen.",
+    "stat_resolvers": "Resolver",
+    "stat_unique": "Eindeutige Antworten",
+    "stat_status": "Status",
+    "propagated": "Verbreitet",
+    "propagating": "Wird verbreitet",
+    "col_resolver": "Resolver",
+    "col_region": "Region",
+    "col_answer": "Antwort",
+    "col_ms": "ms"
   },
   "dnssec": {
-    "title": "DNSSEC-Validator", "subtitle": "DS, DNSKEY und Signaturprüfungen.",
-    "active": "DNSSEC aktiv", "not_signed": "Nicht signiert",
-    "stat_ds": "DS-Einträge", "stat_dnskey": "DNSKEY-Einträge", "stat_rrsig": "RRSIG vorhanden",
-    "findings": "Befunde", "ds_records": "DS-Einträge"
+    "title": "DNSSEC-Validator",
+    "subtitle": "DS, DNSKEY und Signaturprüfungen.",
+    "active": "DNSSEC aktiv",
+    "not_signed": "Nicht signiert",
+    "stat_ds": "DS-Einträge",
+    "stat_dnskey": "DNSKEY-Einträge",
+    "stat_rrsig": "RRSIG vorhanden",
+    "findings": "Befunde",
+    "ds_records": "DS-Einträge"
   },
   "email_auth": {
-    "title": "SPF / DKIM / DMARC", "subtitle": "E-Mail-Authentifizierung für beliebige Domains analysieren.",
-    "placeholder_domain": "beispiel.de", "placeholder_selector": "DKIM-Selektor (optional)",
+    "title": "SPF / DKIM / DMARC",
+    "subtitle": "E-Mail-Authentifizierung für beliebige Domains analysieren.",
+    "placeholder_domain": "beispiel.de",
+    "placeholder_selector": "DKIM-Selektor (optional)",
     "score_label": "E-Mail-Authentifizierungspunktzahl"
   },
   "email_verify": {
-    "title": "E-Mail-Verifizierung", "subtitle": "Syntax + MX + Wegwerf-Erkennung + optionale SMTP-Probe.",
+    "title": "E-Mail-Verifizierung",
+    "subtitle": "Syntax + MX + Wegwerf-Erkennung + optionale SMTP-Probe.",
     "smtp_label": "SMTP-RCPT-Probe durchführen (langsamer, kann Spamfilter auslösen)",
-    "deliverable": "Wahrscheinlich zustellbar", "problematic": "Problematisch",
-    "flag_syntax": "Gültige Syntax", "flag_mx": "MX-Einträge vorhanden",
-    "flag_not_disposable": "Keine Wegwerf-Adresse", "flag_not_role": "Kein Rollen-Konto",
-    "mx_records": "MX-Einträge", "no_mx": "Keine MX-Einträge — Domain kann keine E-Mails empfangen.",
-    "smtp_probe": "SMTP-Probe", "smtp_mx": "MX", "smtp_code": "Code"
+    "deliverable": "Wahrscheinlich zustellbar",
+    "problematic": "Problematisch",
+    "flag_syntax": "Gültige Syntax",
+    "flag_mx": "MX-Einträge vorhanden",
+    "flag_not_disposable": "Keine Wegwerf-Adresse",
+    "flag_not_role": "Kein Rollen-Konto",
+    "mx_records": "MX-Einträge",
+    "no_mx": "Keine MX-Einträge — Domain kann keine E-Mails empfangen.",
+    "smtp_probe": "SMTP-Probe",
+    "smtp_mx": "MX",
+    "smtp_code": "Code"
   },
   "headers": {
-    "title": "HTTP-Sicherheits-Header", "subtitle": "Response-Header analysieren und von A+ bis F bewerten.",
-    "score": "Punktzahl {score}/100", "http_status": "HTTP {status}",
-    "security_checks": "Sicherheits-Header-Prüfungen", "raw_headers": "Rohe Response-Header"
+    "title": "HTTP-Sicherheits-Header",
+    "subtitle": "Response-Header analysieren und von A+ bis F bewerten.",
+    "score": "Punktzahl {score}/100",
+    "http_status": "HTTP {status}",
+    "security_checks": "Sicherheits-Header-Prüfungen",
+    "raw_headers": "Rohe Response-Header"
   },
   "ip": {
-    "title": "IP-Abfrage", "subtitle": "Geolokation, ASN, ISP und Bedrohungsanalyse.",
+    "title": "IP-Abfrage",
+    "subtitle": "Geolokation, ASN, ISP und Bedrohungsanalyse.",
     "placeholder": "IPv4 oder IPv6",
-    "field_ip": "IP", "field_hostname": "Hostname", "field_country": "Land",
-    "field_region": "Region", "field_city": "Stadt", "field_timezone": "Zeitzone",
-    "field_isp": "ISP", "field_asn": "ASN", "field_coords": "Koordinaten",
-    "threat_title": "Bedrohungsanalyse", "risk_score": "Risikopunktzahl",
-    "threat_tor": "TOR-Ausgang", "threat_hosting": "Hosting / RZ",
-    "threat_vpn": "VPN", "threat_proxy": "Proxy", "threat_residential": "Privat"
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_country": "Land",
+    "field_region": "Region",
+    "field_city": "Stadt",
+    "field_timezone": "Zeitzone",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_coords": "Koordinaten",
+    "threat_title": "Bedrohungsanalyse",
+    "risk_score": "Risikopunktzahl",
+    "threat_tor": "TOR-Ausgang",
+    "threat_hosting": "Hosting / RZ",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Privat"
   },
   "ipv6": {
-    "title": "IPv6-Bereitschaft", "subtitle": "AAAA-Abdeckung über Apex, www, NS und MX.",
-    "grade": "IPv6-Note", "row_apex_a": "Apex (A)", "row_apex_aaaa": "Apex (AAAA)",
-    "row_www_a": "www (A)", "row_www_aaaa": "www (AAAA)",
-    "row_ns": "Nameserver mit IPv6 ({with}/{total})", "row_mx": "MX mit IPv6 ({with}/{total})",
+    "title": "IPv6-Bereitschaft",
+    "subtitle": "AAAA-Abdeckung über Apex, www, NS und MX.",
+    "grade": "IPv6-Note",
+    "row_apex_a": "Apex (A)",
+    "row_apex_aaaa": "Apex (AAAA)",
+    "row_www_a": "www (A)",
+    "row_www_aaaa": "www (AAAA)",
+    "row_ns": "Nameserver mit IPv6 ({with}/{total})",
+    "row_mx": "MX mit IPv6 ({with}/{total})",
     "warnings": "Hinweise"
   },
   "jwt": {
-    "title": "JWT-Decoder", "subtitle": "JWT einfügen — vollständig im Browser dekodiert. Nichts verlässt Ihr Gerät.",
+    "title": "JWT-Decoder",
+    "subtitle": "JWT einfügen — vollständig im Browser dekodiert. Nichts verlässt Ihr Gerät.",
     "placeholder": "JWT einfügen…",
-    "header": "Header", "payload": "Nutzlast", "signature": "Signatur",
-    "claim_issued": "Ausgestellt", "claim_expires": "Läuft ab", "claim_status": "Status",
+    "header": "Header",
+    "payload": "Nutzlast",
+    "signature": "Signatur",
+    "claim_issued": "Ausgestellt",
+    "claim_expires": "Läuft ab",
+    "claim_status": "Status",
     "claim_subject": "Betreff",
-    "valid": "Gültig", "expired": "Abgelaufen", "not_yet": "Noch nicht gültig",
+    "valid": "Gültig",
+    "expired": "Abgelaufen",
+    "not_yet": "Noch nicht gültig",
     "sig_note": "Die Signatur kann clientseitig nicht verifiziert werden."
   },
   "mixed": {
-    "title": "Gemischter-Inhalt-Scanner", "subtitle": "http://-Ressourcen auf HTTPS-Seiten finden.",
+    "title": "Gemischter-Inhalt-Scanner",
+    "subtitle": "http://-Ressourcen auf HTTPS-Seiten finden.",
     "placeholder": "https://…",
-    "clean": "Sauber", "insecure_count": "{count} unsichere Ressourcen"
+    "clean": "Sauber",
+    "insecure_count": "{count} unsichere Ressourcen"
   },
   "opengraph": {
-    "title": "OG-Vorschau", "subtitle": "Social-Share-Vorschau für beliebige URLs.",
-    "no_title": "(kein Titel)", "no_desc": "(keine Beschreibung)",
-    "field_site": "Seitenname", "field_type": "Typ",
-    "field_twitter": "Twitter-Karte", "field_favicon": "Favicon",
+    "title": "OG-Vorschau",
+    "subtitle": "Social-Share-Vorschau für beliebige URLs.",
+    "no_title": "(kein Titel)",
+    "no_desc": "(keine Beschreibung)",
+    "field_site": "Seitenname",
+    "field_type": "Typ",
+    "field_twitter": "Twitter-Karte",
+    "field_favicon": "Favicon",
     "raw_tags": "Rohe OG-Tags"
   },
   "password": {
-    "title": "Passwort-Leak-Prüfung", "subtitle": "HIBP k-Anonymität — Ihr Passwort verlässt nie den Browser.",
+    "title": "Passwort-Leak-Prüfung",
+    "subtitle": "HIBP k-Anonymität — Ihr Passwort verlässt nie den Browser.",
     "placeholder": "Beliebiges Passwort eingeben",
     "safe": "In keinem bekannten Datenleck gefunden",
     "found": "{count}-mal gefunden",
@@ -183,48 +384,81 @@
     "unsafe_note": "Ändern Sie dieses Passwort überall. Angreifer kennen dieses genaue Passwort."
   },
   "ports": {
-    "title": "Port-Prüfer", "subtitle": "TCP-Ports prüfen, gängige Ports scannen oder Bereich durchsuchen.",
-    "mode_single": "Einzelner Port", "mode_common": "Gängige Ports", "mode_range": "Port-Bereich",
-    "placeholder_host": "beispiel.de oder IP", "placeholder_port": "443",
+    "title": "Port-Prüfer",
+    "subtitle": "TCP-Ports prüfen, gängige Ports scannen oder Bereich durchsuchen.",
+    "mode_single": "Einzelner Port",
+    "mode_common": "Gängige Ports",
+    "mode_range": "Port-Bereich",
+    "placeholder_host": "beispiel.de oder IP",
+    "placeholder_port": "443",
     "placeholder_range": "1-1024",
-    "open": "offen", "closed": "geschlossen", "filtered": "gefiltert",
-    "open_of": "{open} offen / {total} geprüft", "service": "Dienst"
+    "open": "offen",
+    "closed": "geschlossen",
+    "filtered": "gefiltert",
+    "open_of": "{open} offen / {total} geprüft",
+    "service": "Dienst"
   },
   "reachability": {
-    "title": "Erreichbarkeit", "subtitle": "HTTP, TCP, Ping und globaler Statuscheck.",
-    "reachable": "Erreichbar", "unreachable": "Nicht erreichbar"
+    "title": "Erreichbarkeit",
+    "subtitle": "HTTP, TCP, Ping und globaler Statuscheck.",
+    "reachable": "Erreichbar",
+    "unreachable": "Nicht erreichbar"
   },
   "redirects": {
-    "title": "Weiterleitungs-Tracer", "subtitle": "Jeden Weiterleitungs-Hop verfolgen, Schleifen und HTTPS-Downgrades erkennen.",
-    "stat_hops": "Hops", "stat_final_status": "Endstatus",
-    "stat_downgrade": "Downgrade", "stat_result": "Ergebnis",
-    "downgrade_yes": "JA", "downgrade_no": "nein", "location": "Ziel"
+    "title": "Weiterleitungs-Tracer",
+    "subtitle": "Jeden Weiterleitungs-Hop verfolgen, Schleifen und HTTPS-Downgrades erkennen.",
+    "stat_hops": "Hops",
+    "stat_final_status": "Endstatus",
+    "stat_downgrade": "Downgrade",
+    "stat_result": "Ergebnis",
+    "downgrade_yes": "JA",
+    "downgrade_no": "nein",
+    "location": "Ziel"
   },
   "robots": {
-    "title": "Robots & Sitemap", "subtitle": "robots.txt parsen und referenzierte Sitemaps validieren.",
-    "robots_txt": "robots.txt", "sitemaps": "Sitemaps", "sitemap_errors": "Fehler"
+    "title": "Robots & Sitemap",
+    "subtitle": "robots.txt parsen und referenzierte Sitemaps validieren.",
+    "robots_txt": "robots.txt",
+    "sitemaps": "Sitemaps",
+    "sitemap_errors": "Fehler"
   },
   "ssl": {
-    "title": "SSL-Zertifikat-Inspektion", "subtitle": "TLS-Kette, Ablauf, Cipher-Suite und Bewertung.",
-    "valid": "Gültig", "invalid": "Ungültig / Abgelaufen",
-    "field_tls": "TLS", "field_cipher": "Verschlüsselung",
-    "field_valid_from": "Gültig ab", "field_valid_to": "Gültig bis",
-    "field_issuer": "Aussteller", "field_expiry": "Tage bis Ablauf",
-    "field_subject_alt": "Alternative Namen", "grade": "Note",
+    "title": "SSL-Zertifikat-Inspektion",
+    "subtitle": "TLS-Kette, Ablauf, Cipher-Suite und Bewertung.",
+    "valid": "Gültig",
+    "invalid": "Ungültig / Abgelaufen",
+    "field_tls": "TLS",
+    "field_cipher": "Verschlüsselung",
+    "field_valid_from": "Gültig ab",
+    "field_valid_to": "Gültig bis",
+    "field_issuer": "Aussteller",
+    "field_expiry": "Tage bis Ablauf",
+    "field_subject_alt": "Alternative Namen",
+    "grade": "Note",
     "chain": "Zertifikatskette"
   },
   "subdomains": {
-    "title": "Subdomain-Finder", "subtitle": "Passive Enumeration über CT-Logs.",
-    "filter_placeholder": "filtern…", "count": "{count} Subdomains gefunden"
+    "title": "Subdomain-Finder",
+    "subtitle": "Passive Enumeration über CT-Logs.",
+    "filter_placeholder": "filtern…",
+    "count": "{count} Subdomains gefunden"
   },
   "tech": {
-    "title": "Tech-Stack-Erkennung", "subtitle": "Frameworks, CMS, Analytics und Hosting erkennen.",
+    "title": "Tech-Stack-Erkennung",
+    "subtitle": "Frameworks, CMS, Analytics und Hosting erkennen.",
     "detected": "{count} Technologien erkannt"
   },
   "whois": {
-    "title": "WHOIS / RDAP", "subtitle": "Domain-Eigentümer und Registrierungsdaten.",
-    "field_name": "Name", "field_handle": "Kennung", "field_registrar": "Registrar",
-    "field_created": "Erstellt", "field_updated": "Aktualisiert", "field_expires": "Läuft ab",
-    "dates": "Daten", "nameservers": "Nameserver", "raw": "Rohes RDAP"
+    "title": "WHOIS / RDAP",
+    "subtitle": "Domain-Eigentümer und Registrierungsdaten.",
+    "field_name": "Name",
+    "field_handle": "Kennung",
+    "field_registrar": "Registrar",
+    "field_created": "Erstellt",
+    "field_updated": "Aktualisiert",
+    "field_expires": "Läuft ab",
+    "dates": "Daten",
+    "nameservers": "Nameserver",
+    "raw": "Rohes RDAP"
   }
 }

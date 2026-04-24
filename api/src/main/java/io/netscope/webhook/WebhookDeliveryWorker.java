@@ -21,17 +21,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 /**
  * Picks up pending deliveries every 5 s and POSTs them in parallel on a virtual
  * thread pool. Retries with exponential backoff (1 m, 5 m, 30 m, 2 h, 6 h,
  * 24 h). After 6 failed attempts the delivery is marked dead and stops retrying.
+ *
+ * Crash protection:
+ *  - Semaphore(200) caps concurrent in-flight HTTP calls — prevents unbounded
+ *    virtual-thread accumulation when target endpoints are slow/unreachable.
+ *    At 10 s timeout × 200 threads = max 200 concurrent blocked calls at any time.
  */
 @Component
 public class WebhookDeliveryWorker {
 
     private static final Logger log = LoggerFactory.getLogger(WebhookDeliveryWorker.class);
     private static final int MAX_ATTEMPTS = 6;
+    /** Hard cap on concurrent outbound webhook POSTs. Prevents runaway thread accumulation. */
+    private static final int MAX_CONCURRENT = 200;
     private static final Duration[] BACKOFF = {
         Duration.ofMinutes(1), Duration.ofMinutes(5), Duration.ofMinutes(30),
         Duration.ofHours(2), Duration.ofHours(6), Duration.ofHours(24)
@@ -44,6 +52,7 @@ public class WebhookDeliveryWorker {
         .connectTimeout(Duration.ofSeconds(5)).build();
     private final ExecutorService exec = Executors.newThreadPerTaskExecutor(
         Thread.ofVirtual().name("wh-", 0).factory());
+    private final Semaphore concurrencyLimit = new Semaphore(MAX_CONCURRENT);
 
     public WebhookDeliveryWorker(WebhookDeliveryRepository d, WebhookRepository w) {
         this.deliveries = d; this.webhooks = w;
@@ -52,7 +61,17 @@ public class WebhookDeliveryWorker {
     @Scheduled(fixedDelay = 5_000)
     public void tick() {
         var pending = deliveries.pending(Instant.now(), PageRequest.of(0, 50));
-        for (WebhookDelivery d : pending) exec.submit(() -> send(d));
+        for (WebhookDelivery d : pending) {
+            exec.submit(() -> {
+                try {
+                    concurrencyLimit.acquire();   // blocks if 200 already in-flight
+                    try { send(d); }
+                    finally { concurrencyLimit.release(); }
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        }
     }
 
     private void send(WebhookDelivery d) {
