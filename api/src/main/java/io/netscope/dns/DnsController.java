@@ -1,6 +1,7 @@
 package io.netscope.dns;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.BoundedDns;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -33,13 +34,11 @@ public class DnsController {
             Integer rt = TYPES.get(t);
             if (rt == null) continue;
             List<String> values = new ArrayList<>();
-            try {
-                Record[] result = new Lookup(domain, rt).run();
-                if (result != null) {
-                    for (Record r : result) values.add(r.rdataToString());
-                }
-            } catch (TextParseException e) {
-                throw ApiException.badRequest("bad domain: " + domain);
+            // Bounded — never blocks more than ~3 s per record type even if the
+            // remote nameserver is a tarpit. Returns null on timeout/error.
+            Record[] result = BoundedDns.run(domain, rt);
+            if (result != null) {
+                for (Record r : result) values.add(r.rdataToString());
             }
             records.put(t, values);
         }

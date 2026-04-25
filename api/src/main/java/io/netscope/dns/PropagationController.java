@@ -54,7 +54,21 @@ public class PropagationController {
             .map(r -> CompletableFuture.supplyAsync(() -> query(r, domain, recordType, type.toUpperCase()), exec))
             .toList();
 
-        List<Map<String, Object>> results = futures.stream().map(CompletableFuture::join).toList();
+        // Hard ceiling on the whole batch — even if every resolver is a tarpit,
+        // we return within ~6 s. Per-resolver timeout is 3 s on the resolver
+        // itself; this future-level cap is defence in depth.
+        List<Map<String, Object>> results = futures.stream()
+            .map(f -> {
+                try { return f.get(6, TimeUnit.SECONDS); }
+                catch (Exception e) {
+                    Map<String, Object> err = new LinkedHashMap<>();
+                    err.put("ok", false);
+                    err.put("error", "timeout");
+                    err.put("values", List.of());
+                    return err;
+                }
+            })
+            .toList();
 
         Set<String> unique = new HashSet<>();
         results.forEach(r -> {

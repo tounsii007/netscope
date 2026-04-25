@@ -1,6 +1,8 @@
 package io.netscope.webhook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netscope.common.ApiException;
+import io.netscope.common.TargetValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -47,15 +50,35 @@ public class WebhookDeliveryWorker {
 
     private final WebhookDeliveryRepository deliveries;
     private final WebhookRepository webhooks;
+    private final TargetValidator targetValidator;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final HttpClient http = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(5)).build();
+    // Lazy-init: HttpClient.newBuilder().build() touches the JDK NIO selector
+    // pipe which fails in restricted test sandboxes. Only created when needed.
+    private volatile HttpClient http;
+    private HttpClient http() {
+        HttpClient h = http;
+        if (h == null) {
+            synchronized (this) {
+                if ((h = http) == null) {
+                    h = http = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(5))
+                        // Refuse to follow redirects — a 30x to http://169.254.169.254
+                        // would bypass our SSRF guard entirely otherwise.
+                        .followRedirects(HttpClient.Redirect.NEVER)
+                        .build();
+                }
+            }
+        }
+        return h;
+    }
     private final ExecutorService exec = Executors.newThreadPerTaskExecutor(
         Thread.ofVirtual().name("wh-", 0).factory());
     private final Semaphore concurrencyLimit = new Semaphore(MAX_CONCURRENT);
 
-    public WebhookDeliveryWorker(WebhookDeliveryRepository d, WebhookRepository w) {
+    public WebhookDeliveryWorker(WebhookDeliveryRepository d, WebhookRepository w,
+                                 TargetValidator targetValidator) {
         this.deliveries = d; this.webhooks = w;
+        this.targetValidator = targetValidator;
     }
 
     @Scheduled(fixedDelay = 5_000)
@@ -79,6 +102,18 @@ public class WebhookDeliveryWorker {
         if (maybe.isEmpty()) { d.setDeadAt(Instant.now()); deliveries.save(d); return; }
         Webhook wh = maybe.get();
 
+        // Defence-in-depth SSRF check at delivery time. WebhookController validates
+        // at create-time, but DNS records can change (rebinding TOCTOU), and a
+        // database row could in principle be tampered with. Re-validate here.
+        if (!isSsrfSafeUrl(wh.getUrl())) {
+            d.setStatusCode(0);
+            d.setResponseBody("blocked: webhook URL resolves to a private/internal address");
+            d.setDeadAt(Instant.now());
+            log.warn("Blocked SSRF attempt via webhook {} → {}", wh.getId(), wh.getUrl());
+            deliveries.save(d);
+            return;
+        }
+
         try {
             String body = switch (wh.getKind()) {
                 case "slack"     -> slackBody(d);
@@ -98,7 +133,7 @@ public class WebhookDeliveryWorker {
                 reqB.header("X-NetScope-Signature", "sha256=" + signature);
                 reqB.header("X-NetScope-Delivery", d.getId().toString());
             }
-            HttpResponse<String> res = http.send(reqB.build(), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> res = http().send(reqB.build(), HttpResponse.BodyHandlers.ofString());
 
             d.setStatusCode(res.statusCode());
             d.setResponseBody(res.body());
@@ -113,6 +148,30 @@ public class WebhookDeliveryWorker {
             scheduleRetry(d, wh, e.getClass().getSimpleName());
         }
         deliveries.save(d);
+    }
+
+    /**
+     * Last-line SSRF check. Returns true only if the URL parses, uses http(s),
+     * and resolves to a non-private, non-loopback, non-cloud-metadata address.
+     */
+    boolean isSsrfSafeUrl(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) return false;
+        try {
+            URI uri = new URI(rawUrl);
+            String scheme = uri.getScheme();
+            String host   = uri.getHost();
+            if (scheme == null || host == null) return false;
+            if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) return false;
+            String hostForValidation = host.startsWith("[") && host.endsWith("]")
+                ? host.substring(1, host.length() - 1)
+                : host;
+            targetValidator.resolveAndValidate(hostForValidation);
+            return true;
+        } catch (URISyntaxException | ApiException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void scheduleRetry(WebhookDelivery d, Webhook wh, String reason) {

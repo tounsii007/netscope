@@ -1,6 +1,7 @@
 package io.netscope.blacklist;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.BoundedDns;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -42,7 +43,21 @@ public class BlacklistController {
             .map(bl -> CompletableFuture.supplyAsync(() -> query(bl, reversed), exec))
             .toList();
 
-        List<Map<String, Object>> results = futures.stream().map(CompletableFuture::join).toList();
+        // Hard cap on the *whole batch* — even if every DNSBL is a tarpit,
+        // the request returns within ~5 s. Per-query timeout in BoundedDns
+        // already bounds each future at ~3 s; this is a belt-and-braces
+        // ceiling for the aggregator.
+        List<Map<String, Object>> results = futures.stream()
+            .map(f -> {
+                try { return f.get(5, TimeUnit.SECONDS); }
+                catch (Exception e) {
+                    Map<String, Object> err = new LinkedHashMap<>();
+                    err.put("listed", false);
+                    err.put("error", "timeout");
+                    return err;
+                }
+            })
+            .toList();
         long listed = results.stream().filter(r -> Boolean.TRUE.equals(r.get("listed"))).count();
 
         Map<String, Object> out = new LinkedHashMap<>();
@@ -65,7 +80,8 @@ public class BlacklistController {
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("list", bl);
         try {
-            Record[] recs = new Lookup(reversed + "." + bl, Type.A).run();
+            // Bounded DNS lookup — never blocks more than ~3 s per query.
+            Record[] recs = BoundedDns.run(reversed + "." + bl, Type.A);
             if (recs != null && recs.length > 0) {
                 r.put("listed", true);
                 List<String> codes = new ArrayList<>();

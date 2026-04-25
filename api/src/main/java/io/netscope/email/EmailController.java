@@ -1,6 +1,7 @@
 package io.netscope.email;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.BoundedDns;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -74,7 +75,8 @@ public class EmailController {
 
     private List<String> lookupMx(String domain) {
         try {
-            Record[] recs = new Lookup(domain, Type.MX).run();
+            // Bounded — caps the lookup to ~3s even against tarpit nameservers.
+            Record[] recs = BoundedDns.run(domain, Type.MX);
             if (recs == null) return List.of();
             List<MXRecord> sorted = new ArrayList<>();
             for (Record r : recs) if (r instanceof MXRecord m) sorted.add(m);

@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -28,13 +30,37 @@ public class TargetValidator {
      *   • fd00:ec2::254    — AWS IPv6 IMDS
      *   • 100.100.100.200  — Alibaba Cloud
      *   • 192.0.0.192      — Oracle Cloud Infrastructure (legacy)
+     *
+     * Stored as raw byte arrays so byte-level comparison side-steps any
+     * IPv6 string-form ambiguity (compressed vs expanded; ::ffff:v4 vs
+     * pure v4). All comparisons go through {@link Arrays#equals(byte[],byte[])}.
      */
-    private static final Set<String> CLOUD_METADATA = Set.of(
+    private static final String[] CLOUD_METADATA_LITERALS = {
         "169.254.169.254",
         "fd00:ec2::254",
         "100.100.100.200",
         "192.0.0.192"
-    );
+    };
+    private static final Set<ByteBuf> CLOUD_METADATA_BYTES = buildMetadataSet();
+
+    private static Set<ByteBuf> buildMetadataSet() {
+        Set<ByteBuf> s = new HashSet<>();
+        for (String lit : CLOUD_METADATA_LITERALS) {
+            try { s.add(new ByteBuf(InetAddress.getByName(lit).getAddress())); }
+            catch (UnknownHostException e) {
+                throw new IllegalStateException("bad metadata literal: " + lit, e);
+            }
+        }
+        return s;
+    }
+
+    /** Wrapper providing equals/hashCode over raw IP bytes. */
+    private record ByteBuf(byte[] value) {
+        @Override public boolean equals(Object o) {
+            return o instanceof ByteBuf b && Arrays.equals(value, b.value);
+        }
+        @Override public int hashCode() { return Arrays.hashCode(value); }
+    }
 
     public InetAddress resolveAndValidate(String target) {
         if (target == null || target.isBlank()) {
@@ -61,7 +87,11 @@ public class TargetValidator {
             || addr.isMulticastAddress()) {
             return true;
         }
-        return CLOUD_METADATA.contains(addr.getHostAddress());
+        // IPv6 ULA (fc00::/7, RFC 4193) — Java's isSiteLocalAddress only
+        // catches the legacy fec0::/10 range, so handle ULA explicitly.
+        byte[] raw = addr.getAddress();
+        if (raw.length == 16 && (raw[0] & 0xfe) == 0xfc) return true;
+        return CLOUD_METADATA_BYTES.contains(new ByteBuf(raw));
     }
 
     private boolean isIpLiteral(String s) {

@@ -44,10 +44,32 @@ public class CtScheduler {
     private final CtSubscriptionRepository subs;
     private final CtObservationRepository obs;
     private final ApplicationEventPublisher events;
-    private final RestClient rest = RestClient.builder()
-        .defaultHeader("User-Agent", "NetScope/1.0")
-        .requestInterceptor((req, body, execution) -> execution.execute(req, body))
-        .build();
+    /**
+     * Lazy-init RestClient with explicit connect+read timeouts.
+     *
+     * The previous version had no timeouts at all — a slow-responding crt.sh
+     * (or a tarpit MITM) would block the polling thread until the surrounding
+     * @Scheduled fixedDelay overlapped. With Semaphore(50) that's still 50
+     * potentially-stuck threads. Now: 5 s connect, 15 s read, hard limits.
+     */
+    private volatile RestClient rest;
+    private RestClient rest() {
+        RestClient r = rest;
+        if (r == null) {
+            synchronized (this) {
+                if ((r = rest) == null) {
+                    var rf = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+                    rf.setConnectTimeout(5_000);
+                    rf.setReadTimeout(15_000);
+                    r = rest = RestClient.builder()
+                        .requestFactory(rf)
+                        .defaultHeader("User-Agent", "NetScope/1.0")
+                        .build();
+                }
+            }
+        }
+        return r;
+    }
     private final ObjectMapper mapper = new ObjectMapper();
     private final ExecutorService exec = Executors.newThreadPerTaskExecutor(
         Thread.ofVirtual().name("ct-", 0).factory());
@@ -81,7 +103,7 @@ public class CtScheduler {
     @CircuitBreaker(name = "crtsh", fallbackMethod = "fallback")
     public void poll(CtSubscription s) {
         try {
-            byte[] rawBytes = rest.get()
+            byte[] rawBytes = rest().get()
                 .uri("https://crt.sh/?q=%25.{d}&output=json", s.getDomain())
                 .retrieve().body(byte[].class);
             if (rawBytes == null) return;
