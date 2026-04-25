@@ -60,18 +60,18 @@ export function RobotsClient() {
                   : <XCircle className="h-5 w-5 text-danger" />}
                 <h3 className="font-semibold">{t("sitemaps")}</h3>
                 <span className="badge bg-bg-elevated text-xs">HTTP {s.status ?? "?"}</span>
-                {s.isIndex && <span className="badge bg-brand/10 text-brand text-xs">index</span>}
+                {s.isIndex && <span className="badge bg-brand/10 text-brand text-xs">{t("sitemap_index")}</span>}
               </div>
               <div className="font-mono text-xs text-fg-muted break-all">{s.url}</div>
               {s.urlCount != null && (
                 <div className="mt-2 text-sm">
                   <span className="text-2xl font-semibold">{s.urlCount}</span>
-                  <span className="text-fg-muted"> URLs</span>
+                  <span className="text-fg-muted"> {t("urls_label")}</span>
                 </div>
               )}
               {s.sample && s.sample.length > 0 && (
                 <details className="mt-3 text-sm">
-                  <summary className="cursor-pointer text-fg-muted">Sample URLs</summary>
+                  <summary className="cursor-pointer text-fg-muted">{t("sample_urls")}</summary>
                   <ul className="mt-2 space-y-1 font-mono text-xs">
                     {s.sample.map((u) => <li key={u} className="break-all">{u}</li>)}
                   </ul>

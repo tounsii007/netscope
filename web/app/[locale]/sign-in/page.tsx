@@ -1,23 +1,34 @@
 import { signIn } from "@/auth";
 import { Github } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Sign in",
-  robots: { index: false, follow: false },
-};
+/**
+ * Locale-aware metadata — title is translated per request locale.
+ * Next.js calls this on every render; getTranslations resolves against the
+ * active locale set by the [locale] segment.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return {
+    title: t("meta_title"),
+    robots: { index: false, follow: false },
+  };
+}
 
-export default function SignIn() {
+export default async function SignIn() {
+  const t = await getTranslations("auth");
   return (
     <div className="mx-auto max-w-md py-16">
       <div className="card text-center">
-        <h1 className="text-2xl font-semibold">Sign in to NetScope</h1>
+        <h1 className="text-2xl font-semibold">{t("signin_title")}</h1>
         <p className="mt-2 text-sm text-fg-muted">
-          Continue with your GitHub or Google account. We never request write access.
+          {t("signin_subtitle")}
         </p>
         <div className="mt-6 space-y-2">
           <form action={async () => { "use server"; await signIn("github", { redirectTo: "/app" }); }}>
             <button type="submit" className="btn-ghost w-full justify-center">
-              <Github className="h-4 w-4" /> Continue with GitHub
+              <Github className="h-4 w-4" /> {t("continue_github")}
             </button>
           </form>
           <form action={async () => { "use server"; await signIn("google", { redirectTo: "/app" }); }}>
@@ -28,7 +39,7 @@ export default function SignIn() {
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
               </svg>
-              Continue with Google
+              {t("continue_google")}
             </button>
           </form>
         </div>

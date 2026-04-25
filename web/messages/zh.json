@@ -9,10 +9,43 @@
     "pricing": "价格",
     "docs": "文档",
     "sign_in": "登录",
+    "switch_lang": "切换语言",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
-    "lang_zh": "中文"
+    "lang_zh": "中文",
+    "tools": {
+      "ports":      "端口",
+      "ip":         "IP",
+      "dns":        "DNS",
+      "propagation":"传播",
+      "headers":    "标头",
+      "tech":       "技术",
+      "redirects":  "重定向",
+      "subs":       "子域名",
+      "cdn":        "CDN",
+      "ssl":        "SSL",
+      "whois":      "WHOIS",
+      "email":      "邮箱",
+      "email_auth": "SPF/DMARC",
+      "blacklist":  "DNSBL",
+      "dnssec":     "DNSSEC",
+      "ipv6":       "IPv6",
+      "bgp":        "BGP",
+      "og":         "OG",
+      "cookies":    "Cookie",
+      "robots":     "Robots",
+      "mixed":      "混合",
+      "jwt":        "JWT",
+      "pwd":        "密码"
+    }
+  },
+  "auth": {
+    "meta_title":      "登录",
+    "signin_title":    "登录 NetScope",
+    "signin_subtitle": "使用您的 GitHub 或 Google 账户继续。我们从不请求写入权限。",
+    "continue_github": "使用 GitHub 继续",
+    "continue_google": "使用 Google 继续"
   },
   "home": {
     "badge": "所有系统运行正常",
@@ -389,7 +422,8 @@
     "safe": "在任何已知泄露事件中未找到",
     "found": "被发现 {count} 次",
     "safe_note": "此密码哈希不在 HIBP 列表中 — 但这不能保证密码强度。",
-    "unsafe_note": "请在您使用此密码的所有地方更改它。攻击者已知晓此密码。"
+    "unsafe_note": "请在您使用此密码的所有地方更改它。攻击者已知晓此密码。",
+    "privacy_note": "SHA-1 在您的浏览器中计算。仅前 5 个哈希字符发送至 HIBP。"
   },
   "ports": {
     "title": "端口检测",
@@ -404,7 +438,8 @@
     "closed": "关闭",
     "filtered": "过滤",
     "open_of": "{open} 开放 / {total} 已扫描",
-    "service": "服务"
+    "service": "服务",
+    "common_count": "{count} 个常用端口"
   },
   "reachability": {
     "title": "可达性检测",
@@ -428,7 +463,10 @@
     "subtitle": "解析 robots.txt 并验证引用的 sitemap。",
     "robots_txt": "robots.txt",
     "sitemaps": "Sitemap 列表",
-    "sitemap_errors": "错误"
+    "sitemap_errors": "错误",
+    "sitemap_index": "索引",
+    "urls_label": "URL",
+    "sample_urls": "示例 URL"
   },
   "ssl": {
     "title": "SSL 证书检测",
@@ -459,9 +497,11 @@
   "whois": {
     "title": "WHOIS / RDAP",
     "subtitle": "域名所有权和注册数据。",
+    "section_domain": "域名",
     "field_name": "名称",
     "field_handle": "标识符",
     "field_registrar": "注册商",
+    "field_status": "状态",
     "field_created": "注册时间",
     "field_updated": "更新时间",
     "field_expires": "到期时间",

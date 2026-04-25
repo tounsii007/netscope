@@ -50,7 +50,7 @@ export function PasswordLeakClient() {
       <ResultCard>
         <div className="mb-3 flex items-center gap-2 text-xs text-fg-muted">
           <Lock className="h-3.5 w-3.5" />
-          SHA-1 happens in your browser. Only the first 5 hash characters are sent to HIBP.
+          {t("privacy_note")}
         </div>
         <form onSubmit={check} className="flex gap-2">
           <div className="relative flex-1">

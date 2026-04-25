@@ -9,10 +9,43 @@
     "pricing": "मूल्य",
     "docs": "दस्तावेज़",
     "sign_in": "साइन इन",
+    "switch_lang": "भाषा बदलें",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
-    "lang_zh": "中文"
+    "lang_zh": "中文",
+    "tools": {
+      "ports":      "पोर्ट्स",
+      "ip":         "IP",
+      "dns":        "DNS",
+      "propagation":"प्रसार",
+      "headers":    "हेडर्स",
+      "tech":       "टेक",
+      "redirects":  "रीडायरेक्ट",
+      "subs":       "सब्स",
+      "cdn":        "CDN",
+      "ssl":        "SSL",
+      "whois":      "WHOIS",
+      "email":      "ईमेल",
+      "email_auth": "SPF/DMARC",
+      "blacklist":  "DNSBL",
+      "dnssec":     "DNSSEC",
+      "ipv6":       "IPv6",
+      "bgp":        "BGP",
+      "og":         "OG",
+      "cookies":    "कुकीज़",
+      "robots":     "रोबॉट्स",
+      "mixed":      "मिक्स्ड",
+      "jwt":        "JWT",
+      "pwd":        "पासवर्ड"
+    }
+  },
+  "auth": {
+    "meta_title":      "साइन इन",
+    "signin_title":    "NetScope में साइन इन करें",
+    "signin_subtitle": "अपने GitHub या Google खाते से जारी रखें। हम कभी भी राइट एक्सेस नहीं मांगते।",
+    "continue_github": "GitHub से जारी रखें",
+    "continue_google": "Google से जारी रखें"
   },
   "home": {
     "badge": "सभी सिस्टम चालू हैं",
@@ -389,7 +422,8 @@
     "safe": "किसी भी ज्ञात उल्लंघन में नहीं मिला",
     "found": "{count} बार मिला",
     "safe_note": "यह पासवर्ड हैश HIBP की सूची में नहीं है — लेकिन यह मज़बूती की गारंटी नहीं देता।",
-    "unsafe_note": "इस पासवर्ड को हर जगह बदलें। हमलावरों ने यह सटीक पासवर्ड देखा है।"
+    "unsafe_note": "इस पासवर्ड को हर जगह बदलें। हमलावरों ने यह सटीक पासवर्ड देखा है।",
+    "privacy_note": "SHA-1 आपके ब्राउज़र में होता है। केवल हैश के पहले 5 अक्षर HIBP को भेजे जाते हैं।"
   },
   "ports": {
     "title": "पोर्ट चेकर",
@@ -404,7 +438,8 @@
     "closed": "बंद",
     "filtered": "फ़िल्टर्ड",
     "open_of": "{open} खुले / {total} जांचे गए",
-    "service": "सेवा"
+    "service": "सेवा",
+    "common_count": "{count} सामान्य पोर्ट"
   },
   "reachability": {
     "title": "पहुंचनीयता",
@@ -428,7 +463,10 @@
     "subtitle": "robots.txt पार्स करें और संदर्भित Sitemap वैलिडेट करें।",
     "robots_txt": "robots.txt",
     "sitemaps": "Sitemap",
-    "sitemap_errors": "त्रुटियां"
+    "sitemap_errors": "त्रुटियां",
+    "sitemap_index": "इंडेक्स",
+    "urls_label": "URLs",
+    "sample_urls": "नमूना URLs"
   },
   "ssl": {
     "title": "SSL सर्टिफिकेट इंस्पेक्टर",
@@ -459,9 +497,11 @@
   "whois": {
     "title": "WHOIS / RDAP",
     "subtitle": "डोमेन स्वामित्व और पंजीकरण डेटा।",
+    "section_domain": "डोमेन",
     "field_name": "नाम",
     "field_handle": "हैंडल",
     "field_registrar": "रजिस्ट्रार",
+    "field_status": "स्थिति",
     "field_created": "निर्मित",
     "field_updated": "अपडेट किया गया",
     "field_expires": "समाप्त होता है",

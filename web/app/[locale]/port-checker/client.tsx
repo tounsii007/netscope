@@ -59,7 +59,7 @@ export function PortCheckerClient() {
               <input type="number" className="input" value={toPort} onChange={(e) => setToPort(+e.target.value)} />
             </div>
           )}
-          {mode === "common" && <div className="text-sm text-fg-muted self-center">20 common ports</div>}
+          {mode === "common" && <div className="text-sm text-fg-muted self-center">{t("common_count", { count: 20 })}</div>}
           <button className="btn" disabled={loading}>
             {loading ? <Spinner /> : tc("check")}
           </button>

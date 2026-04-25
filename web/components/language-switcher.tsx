@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
     <div className="relative group">
       <button
         className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-fg-muted hover:bg-bg-elevated hover:text-fg transition"
-        aria-label="Switch language"
+        aria-label={t("switch_lang")}
       >
         <span className="text-base leading-none">{FLAGS[locale]}</span>
         <span className="hidden sm:inline text-xs font-medium">{t(langKey(locale))}</span>

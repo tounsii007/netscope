@@ -33,13 +33,13 @@ export function WhoisClient() {
       {data && (
         <div className="grid gap-4 md:grid-cols-2">
           <ResultCard>
-            <h3 className="mb-3 text-sm font-semibold">Domain</h3>
+            <h3 className="mb-3 text-sm font-semibold">{t("section_domain")}</h3>
             <div className="space-y-2 text-sm">
               <Field label={t("field_name")} value={data.domain} mono />
               <Field label={t("field_handle")} value={data.handle} mono />
               <Field label={t("field_registrar")} value={data.registrar} />
               <div>
-                <div className="text-xs uppercase tracking-wide text-fg-subtle">Status</div>
+                <div className="text-xs uppercase tracking-wide text-fg-subtle">{t("field_status")}</div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {data.status.map((s) => <span key={s} className="badge bg-bg-elevated text-fg-muted">{s}</span>)}
                 </div>

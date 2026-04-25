@@ -9,10 +9,43 @@
     "pricing": "Preise",
     "docs": "Dokumentation",
     "sign_in": "Anmelden",
+    "switch_lang": "Sprache wechseln",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
-    "lang_zh": "中文"
+    "lang_zh": "中文",
+    "tools": {
+      "ports":      "Ports",
+      "ip":         "IP",
+      "dns":        "DNS",
+      "propagation":"Verbreitung",
+      "headers":    "Header",
+      "tech":       "Tech",
+      "redirects":  "Weiterleitungen",
+      "subs":       "Subs",
+      "cdn":        "CDN",
+      "ssl":        "SSL",
+      "whois":      "WHOIS",
+      "email":      "E-Mail",
+      "email_auth": "SPF/DMARC",
+      "blacklist":  "DNSBL",
+      "dnssec":     "DNSSEC",
+      "ipv6":       "IPv6",
+      "bgp":        "BGP",
+      "og":         "OG",
+      "cookies":    "Cookies",
+      "robots":     "Robots",
+      "mixed":      "Mixed",
+      "jwt":        "JWT",
+      "pwd":        "Passwort"
+    }
+  },
+  "auth": {
+    "meta_title":      "Anmelden",
+    "signin_title":    "Bei NetScope anmelden",
+    "signin_subtitle": "Mit Ihrem GitHub- oder Google-Konto fortfahren. Wir fordern niemals Schreibzugriff an.",
+    "continue_github": "Mit GitHub fortfahren",
+    "continue_google": "Mit Google fortfahren"
   },
   "home": {
     "badge": "Alle Systeme betriebsbereit",
@@ -389,7 +422,8 @@
     "safe": "In keinem bekannten Datenleck gefunden",
     "found": "{count}-mal gefunden",
     "safe_note": "Dieser Passwort-Hash ist nicht auf der HIBP-Liste — das garantiert jedoch keine Stärke.",
-    "unsafe_note": "Ändern Sie dieses Passwort überall. Angreifer kennen dieses genaue Passwort."
+    "unsafe_note": "Ändern Sie dieses Passwort überall. Angreifer kennen dieses genaue Passwort.",
+    "privacy_note": "SHA-1 wird in Ihrem Browser berechnet. Nur die ersten 5 Hash-Zeichen werden an HIBP gesendet."
   },
   "ports": {
     "title": "Port-Prüfer",
@@ -404,7 +438,8 @@
     "closed": "geschlossen",
     "filtered": "gefiltert",
     "open_of": "{open} offen / {total} geprüft",
-    "service": "Dienst"
+    "service": "Dienst",
+    "common_count": "{count} gängige Ports"
   },
   "reachability": {
     "title": "Erreichbarkeit",
@@ -428,7 +463,10 @@
     "subtitle": "robots.txt parsen und referenzierte Sitemaps validieren.",
     "robots_txt": "robots.txt",
     "sitemaps": "Sitemaps",
-    "sitemap_errors": "Fehler"
+    "sitemap_errors": "Fehler",
+    "sitemap_index": "Index",
+    "urls_label": "URLs",
+    "sample_urls": "Beispiel-URLs"
   },
   "ssl": {
     "title": "SSL-Zertifikat-Inspektion",
@@ -459,14 +497,16 @@
   "whois": {
     "title": "WHOIS / RDAP",
     "subtitle": "Domain-Eigentümer und Registrierungsdaten.",
+    "section_domain": "Domain",
     "field_name": "Name",
     "field_handle": "Kennung",
     "field_registrar": "Registrar",
+    "field_status": "Status",
     "field_created": "Erstellt",
     "field_updated": "Aktualisiert",
     "field_expires": "Läuft ab",
-    "dates": "Daten",
+    "dates": "Datum",
     "nameservers": "Nameserver",
-    "raw": "Rohes RDAP"
+    "raw": "RDAP-Rohdaten"
   }
 }
