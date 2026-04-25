@@ -168,6 +168,14 @@
     "error_title": "出现错误",
     "retry": "重试"
   },
+  "not_found": {
+    "code": "404",
+    "title": "页面未找到",
+    "desc": "您要查找的页面不存在或已被移动。",
+    "hint": "请检查 URL 是否正确，或返回控制台。",
+    "back": "返回首页",
+    "search_hint": "正在查找工具？请使用上方的搜索功能。"
+  },
   "bgp": {
     "title": "BGP / ASN",
     "subtitle": "通过 RIPE Stat 获取路由情报。",

@@ -168,6 +168,14 @@
     "error_title": "Something went wrong",
     "retry": "Try again"
   },
+  "not_found": {
+    "code": "404",
+    "title": "Page not found",
+    "desc": "The page you're looking for doesn't exist or has been moved.",
+    "hint": "Double-check the URL or head back to the dashboard.",
+    "back": "Back home",
+    "search_hint": "Looking for a tool? Try the search above."
+  },
   "bgp": {
     "title": "BGP / ASN",
     "subtitle": "Routing intelligence via RIPE Stat.",

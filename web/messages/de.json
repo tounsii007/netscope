@@ -168,6 +168,14 @@
     "error_title": "Etwas ist schiefgelaufen",
     "retry": "Erneut versuchen"
   },
+  "not_found": {
+    "code": "404",
+    "title": "Seite nicht gefunden",
+    "desc": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "hint": "Überprüfen Sie die URL oder kehren Sie zum Dashboard zurück.",
+    "back": "Zur Startseite",
+    "search_hint": "Ein Tool gesucht? Nutzen Sie die Suche oben."
+  },
   "bgp": {
     "title": "BGP / ASN",
     "subtitle": "Routing-Intelligenz via RIPE Stat.",
