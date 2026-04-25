@@ -1,4 +1,4 @@
-package io.netscope.audit;
+package io.netscope.testsupport;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,7 @@ import java.util.function.Function;
  * mock the JpaRepository interface (which fails on newer JVMs due to
  * bytecode instrumentation issues).
  */
-abstract class NoOpJpaRepository<T, ID> implements JpaRepository<T, ID> {
+public abstract class NoOpJpaRepository<T, ID> implements JpaRepository<T, ID> {
     @Override public List<T> findAll() { return List.of(); }
     @Override public List<T> findAll(Sort sort) { return List.of(); }
     @Override public Page<T> findAll(Pageable p) { return Page.empty(); }
