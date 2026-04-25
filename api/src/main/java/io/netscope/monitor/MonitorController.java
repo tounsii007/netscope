@@ -57,20 +57,20 @@ public class MonitorController {
                                       @RequestParam(defaultValue = "24") int hours,
                                       @RequestParam(defaultValue = "0") @Min(0) int page,
                                       @RequestParam(defaultValue = "100") @Min(1) @Max(1000) int size) {
-        Monitor m = monitors.findById(id).orElseThrow(() -> ApiException.notFound("monitor not found"));
-        if (!m.getApiKeyId().equals(ApiKeyContext.get().getId())) {
-            throw ApiException.forbidden("not your monitor");
-        }
+        // Atomic owner check — no timing gap to distinguish 403 from 404.
+        // findByIdAndApiKeyId returns empty for both "not yours" and "not exists",
+        // and the response collapses to 404 in both cases.
+        monitors.findByIdAndApiKeyId(id, ApiKeyContext.get().getId())
+            .orElseThrow(() -> ApiException.notFound("monitor not found"));
         PageRequest pr = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "checkedAt"));
         return checks.history(id, Instant.now().minus(Duration.ofHours(hours)), pr);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
-        Monitor m = monitors.findById(id).orElseThrow(() -> ApiException.notFound("monitor not found"));
-        if (!m.getApiKeyId().equals(ApiKeyContext.get().getId())) {
-            throw ApiException.forbidden("not your monitor");
-        }
+        // Atomic owner check — see history() for rationale.
+        Monitor m = monitors.findByIdAndApiKeyId(id, ApiKeyContext.get().getId())
+            .orElseThrow(() -> ApiException.notFound("monitor not found"));
         monitors.delete(m);
     }
 }

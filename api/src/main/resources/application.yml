@@ -20,6 +20,12 @@ logging:
 # ─── Server ───────────────────────────────────────────────────────────────────
 server:
   port: 8080
+  # Process X-Forwarded-* headers so getRemoteAddr() returns the REAL client IP
+  # instead of the load balancer's. Without this, the rate-limit filter and
+  # access logs would key on the LB IP (= one shared bucket for all traffic).
+  # Tomcat's RemoteIpValve drops/re-issues XFF based on `internal-proxies` so
+  # an attacker can't spoof XFF unless they're already inside the trusted CIDR.
+  forward-headers-strategy: native
   http2:
     enabled: true
   compression:

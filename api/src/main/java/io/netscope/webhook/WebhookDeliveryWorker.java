@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -82,6 +83,7 @@ public class WebhookDeliveryWorker {
     }
 
     @Scheduled(fixedDelay = 5_000)
+    @Transactional   // Holds the SELECT FOR UPDATE SKIP LOCKED lock during dispatch
     public void tick() {
         var pending = deliveries.pending(Instant.now(), PageRequest.of(0, 50));
         for (WebhookDelivery d : pending) {

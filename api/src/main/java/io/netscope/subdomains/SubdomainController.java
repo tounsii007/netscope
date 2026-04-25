@@ -19,8 +19,43 @@ import java.util.*;
 @RequestMapping("/api/v1/subdomains")
 public class SubdomainController {
 
-    private final RestClient rest = RestClient.builder()
-        .defaultHeader("User-Agent", "NetScope/1.0").build();
+    /**
+     * Hard cap on the number of subdomains we keep in memory / return to the
+     * client. Popular targets like example.com / google.com / facebook.com
+     * have 100 000+ certs in CT logs which would otherwise:
+     *   • Pin 50+ MB of heap per request
+     *   • Produce a 50+ MB JSON response (network amp + browser freeze)
+     *   • Inflate Redis cache entries past their max value size
+     *
+     * 10 000 is more than enough for any realistic recon use case; the
+     * response includes {@code truncated: true} so the caller knows.
+     */
+    static final int MAX_SUBDOMAINS = 10_000;
+
+    /** Hard cap on the upstream response body size (16 MB). */
+    static final long MAX_RESPONSE_BYTES = 16L * 1024 * 1024;
+
+    // Lazy-init: building a RestClient at field-init time triggers HTTP-stack
+    // setup that fails in restricted environments (and is wasted work for
+    // instances that never see traffic). Cached after first call.
+    private volatile RestClient rest;
+    private RestClient rest() {
+        RestClient r = rest;
+        if (r == null) {
+            synchronized (this) {
+                if ((r = rest) == null) {
+                    var rf = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+                    rf.setConnectTimeout(5_000);
+                    rf.setReadTimeout(20_000);
+                    r = rest = RestClient.builder()
+                        .requestFactory(rf)
+                        .defaultHeader("User-Agent", "NetScope/1.0")
+                        .build();
+                }
+            }
+        }
+        return r;
+    }
     private final ObjectMapper mapper = new ObjectMapper();
     private final StringRedisTemplate redis;
 
@@ -37,22 +72,39 @@ public class SubdomainController {
 
         long start = System.currentTimeMillis();
         TreeSet<String> subs = new TreeSet<>();
+        boolean truncated = false;
         try {
-            String body = rest.get()
+            // Fetch as bytes so we can enforce the body-size cap before parsing.
+            byte[] raw = rest().get()
                 .uri("https://crt.sh/?q=%25.{d}&output=json", domain)
-                .retrieve().body(String.class);
+                .retrieve().body(byte[].class);
+            if (raw == null) {
+                throw ApiException.badRequest("CT log returned empty response");
+            }
+            if (raw.length > MAX_RESPONSE_BYTES) {
+                throw ApiException.badRequest("CT log response too large (" + raw.length + " bytes)");
+            }
+            String body = new String(raw, java.nio.charset.StandardCharsets.UTF_8);
             JsonNode arr = mapper.readTree(body);
             if (arr.isArray()) {
+                outer:
                 for (JsonNode n : arr) {
                     for (String name : n.path("name_value").asText("").split("\n")) {
                         name = name.trim().toLowerCase();
                         if (name.startsWith("*.")) name = name.substring(2);
                         if (!name.isBlank() && (name.endsWith("." + domain) || name.equals(domain))) {
                             subs.add(name);
+                            if (subs.size() >= MAX_SUBDOMAINS) {
+                                // Stop processing — large enough sample for any realistic use.
+                                truncated = true;
+                                break outer;
+                            }
                         }
                     }
                 }
             }
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             throw ApiException.badRequest("CT log lookup failed: " + e.getMessage());
         }
@@ -61,6 +113,7 @@ public class SubdomainController {
         out.put("domain", domain);
         out.put("count", subs.size());
         out.put("subdomains", new ArrayList<>(subs));
+        out.put("truncated", truncated);
         out.put("source", "crt.sh (Certificate Transparency)");
         out.put("durationMs", System.currentTimeMillis() - start);
 
@@ -77,6 +130,7 @@ public class SubdomainController {
         out.put("message", "CT log provider unavailable, try again in a minute");
         out.put("subdomains", List.of());
         out.put("count", 0);
+        out.put("truncated", false);
         return out;
     }
 }

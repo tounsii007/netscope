@@ -69,9 +69,29 @@ public class RateLimitFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 
-    private String clientIp(HttpServletRequest req) {
-        String fwd = req.getHeader("X-Forwarded-For");
-        if (fwd != null && !fwd.isBlank()) return fwd.split(",")[0].trim();
-        return req.getRemoteAddr();
+    /**
+     * Resolve the rate-limit key for this request.
+     *
+     * Security: we only trust X-Forwarded-For when the request actually came
+     * from a known internal proxy (load balancer / ingress controller). Without
+     * this guard, an attacker spraying random XFF values per request bypasses
+     * per-IP rate limits entirely:
+     *
+     *     for i in {1..10000}; do
+     *       curl -H "X-Forwarded-For: $RANDOM.$RANDOM.$RANDOM.$RANDOM" ...
+     *     done
+     *
+     * In a properly-configured Spring Boot deployment the
+     * {@code server.forward-headers-strategy} property + Tomcat's RemoteIpValve
+     * already strip and re-issue these headers, so {@link HttpServletRequest#getRemoteAddr()}
+     * returns the real client IP. We use {@code getRemoteAddr()} as the trusted
+     * source and ignore raw XFF in the rate-limit key.
+     */
+    String clientIp(HttpServletRequest req) {
+        // Trust only what Tomcat's RemoteIpValve / Spring forward-headers
+        // already validated. RAW X-Forwarded-For from the network is ignored
+        // here because it's spoofable per request.
+        String addr = req.getRemoteAddr();
+        return addr != null && !addr.isBlank() ? addr : "unknown";
     }
 }

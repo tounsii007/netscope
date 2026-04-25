@@ -85,19 +85,40 @@ public class EmailController {
         } catch (Exception e) { return List.of(); }
     }
 
+    /** Hard ceiling on the TOTAL probe time (connect + all RCPT roundtrips). */
+    private static final long SMTP_PROBE_TOTAL_MS = 12_000;
+    /** Per-read timeout. Below the total cap so a single slow read can't eat the whole budget. */
+    private static final int  SMTP_READ_TIMEOUT_MS = 4_000;
+    /** Refuse a multi-line SMTP response longer than this (Slowloris guard). */
+    private static final int  SMTP_MAX_LINES_PER_RESPONSE = 50;
+
+    /**
+     * SMTP RCPT probe with three layers of timeout:
+     *
+     *   1. Connect timeout         5 s     (TCP SYN-ACK ceiling)
+     *   2. Per-read socket timeout 4 s     (each readLine cannot block longer)
+     *   3. Total wall-clock cap   12 s     (sum of all roundtrips + reads)
+     *   4. Per-response line cap  50       (Slowloris-style multi-line abuse)
+     *
+     * Without (3) and (4), a malicious SMTP server returning multi-line
+     * 4xx responses one byte per second would eat 5 s × 4 commands = 20 s
+     * of thread time per probe, allowing an attacker to DoS the verifier
+     * by submitting many email-verify requests targeting their server.
+     */
     private Map<String, Object> smtpProbe(String mxHost, String email) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("mx", mxHost);
+        long deadline = System.currentTimeMillis() + SMTP_PROBE_TOTAL_MS;
         try (Socket s = new Socket()) {
             s.connect(new InetSocketAddress(InetAddress.getByName(mxHost), 25), 5000);
-            s.setSoTimeout(5000);
+            s.setSoTimeout(SMTP_READ_TIMEOUT_MS);
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
             BufferedWriter w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), StandardCharsets.UTF_8));
-            readCode(in); // banner
-            write(w, "EHLO netscope.io"); readCode(in);
-            write(w, "MAIL FROM:<probe@netscope.io>"); readCode(in);
+            readCode(in, deadline); // banner
+            write(w, "EHLO netscope.io"); readCode(in, deadline);
+            write(w, "MAIL FROM:<probe@netscope.io>"); readCode(in, deadline);
             write(w, "RCPT TO:<" + email + ">");
-            int code = readCode(in);
+            int code = readCode(in, deadline);
             write(w, "QUIT");
             out.put("code", code);
             out.put("accepted", code >= 200 && code < 300);
@@ -112,10 +133,22 @@ public class EmailController {
         w.write(cmd); w.write("\r\n"); w.flush();
     }
 
-    private int readCode(BufferedReader in) throws IOException {
+    /**
+     * Read an SMTP status code with a deadline. Aborts if:
+     *   • The total probe time has already elapsed.
+     *   • More than {@link #SMTP_MAX_LINES_PER_RESPONSE} continuation lines are received.
+     */
+    private int readCode(BufferedReader in, long deadline) throws IOException {
         String line;
         int code = 0;
+        int lineCount = 0;
         while ((line = in.readLine()) != null) {
+            if (System.currentTimeMillis() >= deadline) {
+                throw new IOException("SMTP probe exceeded total time cap");
+            }
+            if (++lineCount > SMTP_MAX_LINES_PER_RESPONSE) {
+                throw new IOException("SMTP server sent too many continuation lines");
+            }
             if (line.length() < 3) break;
             try { code = Integer.parseInt(line.substring(0, 3)); } catch (Exception ignored) {}
             if (line.charAt(3) != '-') break;

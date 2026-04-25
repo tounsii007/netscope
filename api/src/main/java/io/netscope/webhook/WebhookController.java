@@ -151,14 +151,27 @@ public class WebhookController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
         Webhook w = webhooks.findById(id).orElseThrow(() -> ApiException.notFound("webhook"));
-        workspaces.requireRole(w.getWorkspaceId(), WorkspaceMember.Role.OWNER, WorkspaceMember.Role.ADMIN);
+        // IDOR mask: a cross-tenant attacker probing UUIDs cannot distinguish
+        // "doesn't exist" (404) from "exists but you have no rights" (403).
+        // Both return identical 404 responses.
+        try {
+            workspaces.requireRole(w.getWorkspaceId(),
+                WorkspaceMember.Role.OWNER, WorkspaceMember.Role.ADMIN);
+        } catch (ApiException e) {
+            throw ApiException.notFound("webhook");
+        }
         webhooks.delete(w);
     }
 
     @GetMapping("/{id}/deliveries")
     public List<WebhookDelivery> history(@PathVariable UUID id) {
         Webhook w = webhooks.findById(id).orElseThrow(() -> ApiException.notFound("webhook"));
-        workspaces.requireAccess(w.getWorkspaceId());
+        // Same IDOR mask as delete().
+        try {
+            workspaces.requireAccess(w.getWorkspaceId());
+        } catch (ApiException e) {
+            throw ApiException.notFound("webhook");
+        }
         return deliveries.findByWebhookIdOrderByCreatedAtDesc(id, PageRequest.of(0, 50));
     }
 

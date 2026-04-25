@@ -202,6 +202,7 @@ class WebhookSsrfTest {
         @Override public <S extends Webhook> S save(S entity) { return entity; }
         @Override public List<Webhook> findByWorkspaceId(UUID id) { return List.of(); }
         @Override public List<Webhook> findByWorkspaceIdAndActiveTrue(UUID id) { return List.of(); }
+        @Override public java.util.Optional<Webhook> findByIdAndWorkspaceId(UUID id, UUID workspaceId) { return java.util.Optional.empty(); }
     }
 
     static class StubDeliveryRepo extends NoOpJpaRepository<WebhookDelivery, UUID> implements WebhookDeliveryRepository {

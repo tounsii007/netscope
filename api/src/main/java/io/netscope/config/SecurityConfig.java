@@ -20,7 +20,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
@@ -76,8 +78,29 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        // Trim + filter empty entries. If the env var is empty/missing, FAIL
+        // FAST at boot rather than silently defaulting Spring's CORS layer to
+        // accept any origin — that would void the entire same-origin policy
+        // for our API.
+        List<String> origins = (allowedOrigins == null ? List.<String>of()
+            : Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList()));
+        if (origins.isEmpty()) {
+            throw new IllegalStateException(
+                "netscope.cors.allowed-origins must be set to one or more origins; "
+                    + "e.g. CORS_ORIGINS=https://app.netscope.io,https://staging.netscope.io");
+        }
+        // Disallow wildcard '*' in production — it negates the whitelist.
+        if (origins.contains("*")) {
+            throw new IllegalStateException(
+                "netscope.cors.allowed-origins must not contain '*'; "
+                    + "list explicit origins instead.");
+        }
+
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        cfg.setAllowedOrigins(origins);
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Content-Type", "X-API-Key", "Accept"));
         cfg.setExposedHeaders(List.of("X-RateLimit-Remaining", "X-RateLimit-Limit", "Retry-After"));

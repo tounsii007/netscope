@@ -21,6 +21,15 @@ import java.util.*;
 public class RedirectController {
 
     private static final int MAX_HOPS = 20;
+    /**
+     * Hard ceiling on the total time the redirect tracer is allowed to spend.
+     *
+     * Without this cap, an attacker can craft a chain where each hop returns
+     * a 302 after 7.9 s (just under the per-hop timeout). With MAX_HOPS=20
+     * that's ~158 s of blocked thread per request — easy DoS through the
+     * thread-pool. The cumulative cap keeps the worst case tight.
+     */
+    private static final long MAX_TOTAL_MS = 30_000;
 
     private final TargetValidator validator;
     private final HttpClient client = HttpClient.newBuilder()
@@ -41,7 +50,14 @@ public class RedirectController {
         String finalStatus = "unknown";
         int finalCode = 0;
 
+        long traceStart = System.currentTimeMillis();
         for (int i = 0; i < MAX_HOPS; i++) {
+            // Cumulative-time guard: stop chasing the chain if we've already
+            // burned the whole budget on slow hops.
+            if (System.currentTimeMillis() - traceStart > MAX_TOTAL_MS) {
+                finalStatus = "total-timeout";
+                break;
+            }
             validator.resolveAndValidate(current.getHost());
             if (!seen.add(current.toString())) { loop = true; break; }
             long start = System.currentTimeMillis();
