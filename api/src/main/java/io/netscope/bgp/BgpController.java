@@ -17,8 +17,22 @@ import java.util.*;
 @RequestMapping("/api/v1/bgp")
 public class BgpController {
 
-    private final RestClient rest = RestClient.builder()
-        .defaultHeader("User-Agent", "NetScope/1.0").build();
+    // Lazy-init: building a RestClient at field-init time triggers HTTP-stack
+    // setup that can fail in restricted test environments (and is wasted work
+    // for instances that never see traffic). Cached after first call.
+    private volatile RestClient rest;
+    private RestClient rest() {
+        RestClient r = rest;
+        if (r == null) {
+            synchronized (this) {
+                if ((r = rest) == null) {
+                    r = rest = RestClient.builder()
+                        .defaultHeader("User-Agent", "NetScope/1.0").build();
+                }
+            }
+        }
+        return r;
+    }
     private final ObjectMapper mapper = new ObjectMapper();
 
     @GetMapping("/ip/{ip}")
@@ -81,7 +95,7 @@ public class BgpController {
     }
 
     private JsonNode ripe(String endpoint, String resource) throws Exception {
-        String body = rest.get()
+        String body = rest().get()
             .uri("https://stat.ripe.net/data/{e}/data.json?resource={r}&sourceapp=netscope",
                 endpoint, resource)
             .retrieve().body(String.class);

@@ -10,6 +10,9 @@
     "docs": "文档",
     "sign_in": "登录",
     "switch_lang": "切换语言",
+    "open_menu":   "打开菜单",
+    "close_menu":  "关闭菜单",
+    "tools_menu":  "工具",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
@@ -439,7 +442,8 @@
     "filtered": "过滤",
     "open_of": "{open} 开放 / {total} 已扫描",
     "service": "服务",
-    "common_count": "{count} 个常用端口"
+    "common_count": "{count} 个常用端口",
+    "port_status": "端口 {port} 状态：<s>{status}</s>"
   },
   "reachability": {
     "title": "可达性检测",

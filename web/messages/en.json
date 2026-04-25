@@ -10,6 +10,9 @@
     "docs": "Docs",
     "sign_in": "Sign in",
     "switch_lang": "Switch language",
+    "open_menu":   "Open menu",
+    "close_menu":  "Close menu",
+    "tools_menu":  "Tools",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
@@ -439,7 +442,8 @@
     "filtered": "filtered",
     "open_of": "{open} open / {total} scanned",
     "service": "Service",
-    "common_count": "{count} common ports"
+    "common_count": "{count} common ports",
+    "port_status": "Port {port} is <s>{status}</s>"
   },
   "reachability": {
     "title": "Reachability",

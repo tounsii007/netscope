@@ -99,6 +99,11 @@ netscope:
   tor:
     exit-list-url: https://check.torproject.org/torbulkexitlist
   jwt:
+    # ⚠ SECURITY: this default value is recognised by JwtService as a known
+    # placeholder. Production boots (spring.profiles.active=prod) will REFUSE
+    # to start when this value is in use. In dev/test it is permitted but logs
+    # a loud warning at startup. To set a real secret:
+    #   export JWT_SECRET="$(openssl rand -base64 48)"
     secret: ${JWT_SECRET:change-me-in-production-must-be-32-characters-minimum}
     issuer: ${JWT_ISSUER:https://netscope.io}
     ttl-seconds: ${JWT_TTL:3600}

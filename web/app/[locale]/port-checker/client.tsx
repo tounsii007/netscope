@@ -76,9 +76,13 @@ export function PortCheckerClient() {
               : <XCircle className="h-8 w-8 text-danger" />}
             <div>
               <div className="text-lg font-medium">
-                Port {single.port} is <span className={single.open ? "text-success" : "text-danger"}>
-                  {single.open ? t("open").toUpperCase() : t("closed").toUpperCase()}
-                </span>
+                {t.rich("port_status", {
+                  port:   single.port,
+                  status: single.open ? t("open").toUpperCase() : t("closed").toUpperCase(),
+                  s:      (chunks) => (
+                    <span className={single.open ? "text-success" : "text-danger"}>{chunks}</span>
+                  ),
+                })}
               </div>
               <div className="font-mono text-sm text-fg-muted">
                 {single.target} → {single.resolvedIp}

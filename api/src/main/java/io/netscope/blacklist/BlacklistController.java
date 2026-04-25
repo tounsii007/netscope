@@ -3,6 +3,7 @@ package io.netscope.blacklist;
 import io.netscope.common.ApiException;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
+import org.xbill.DNS.Record;
 
 import java.net.InetAddress;
 import java.util.*;

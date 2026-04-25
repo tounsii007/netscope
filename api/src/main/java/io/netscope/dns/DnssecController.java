@@ -3,6 +3,7 @@ package io.netscope.dns;
 import io.netscope.common.ApiException;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
+import org.xbill.DNS.Record;
 
 import java.util.*;
 

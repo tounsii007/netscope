@@ -92,7 +92,6 @@ public class CtScheduler {
             }
             String body = new String(rawBytes, java.nio.charset.StandardCharsets.UTF_8);
             JsonNode arr = mapper.readTree(body);
-            JsonNode arr = mapper.readTree(body);
             if (!arr.isArray()) return;
 
             long maxId = s.getLastSeenId() == null ? 0L : s.getLastSeenId();

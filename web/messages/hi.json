@@ -10,6 +10,9 @@
     "docs": "दस्तावेज़",
     "sign_in": "साइन इन",
     "switch_lang": "भाषा बदलें",
+    "open_menu":   "मेनू खोलें",
+    "close_menu":  "मेनू बंद करें",
+    "tools_menu":  "टूल्स",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
@@ -439,7 +442,8 @@
     "filtered": "फ़िल्टर्ड",
     "open_of": "{open} खुले / {total} जांचे गए",
     "service": "सेवा",
-    "common_count": "{count} सामान्य पोर्ट"
+    "common_count": "{count} सामान्य पोर्ट",
+    "port_status": "पोर्ट {port} है <s>{status}</s>"
   },
   "reachability": {
     "title": "पहुंचनीयता",

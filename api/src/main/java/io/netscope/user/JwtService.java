@@ -2,7 +2,10 @@ package io.netscope.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -18,6 +21,21 @@ import java.util.*;
 @Service
 public class JwtService {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+
+    /**
+     * Known placeholder values that MUST NOT be used in production.
+     * Listed here so we can detect and refuse them on startup.
+     */
+    static final Set<String> KNOWN_WEAK_SECRETS = Set.of(
+        "change-me-in-production-must-be-32-characters-minimum",
+        "change-me-in-production",
+        "your-secret-key-here",
+        "default-secret-please-change",
+        "00000000000000000000000000000000",
+        "11111111111111111111111111111111"
+    );
+
     @Value("${netscope.jwt.secret}")
     private String secret;
 
@@ -27,15 +45,47 @@ public class JwtService {
     @Value("${netscope.jwt.ttl-seconds:3600}")
     private long ttlSeconds;
 
+    private final Environment env;
     private final ObjectMapper mapper = new ObjectMapper();
     private SecretKeySpec keySpec;
+
+    public JwtService(Environment env) {
+        this.env = env;
+    }
 
     @PostConstruct
     void init() {
         if (secret == null || secret.length() < 32) {
-            throw new IllegalStateException("netscope.jwt.secret must be >= 32 chars");
+            throw new IllegalStateException(
+                "netscope.jwt.secret must be at least 32 characters (current: "
+                    + (secret == null ? "null" : secret.length()) + ")");
         }
+
+        boolean isProd = isProductionProfile();
+        boolean isWeak = KNOWN_WEAK_SECRETS.contains(secret);
+
+        if (isWeak && isProd) {
+            // Hard fail in production — refuse to boot with a placeholder secret.
+            throw new IllegalStateException(
+                "netscope.jwt.secret is set to a known placeholder value. "
+                + "Set the JWT_SECRET environment variable to a strong random secret "
+                + "(e.g. `openssl rand -base64 48`).");
+        }
+        if (isWeak) {
+            // In dev/test we warn loudly so it's impossible to miss in logs.
+            log.warn("⚠ JWT secret is a known placeholder value. This is acceptable for "
+                + "local development ONLY. Production deploys must set JWT_SECRET to a "
+                + "strong random value (e.g. `openssl rand -base64 48`).");
+        }
+
         keySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    }
+
+    private boolean isProductionProfile() {
+        for (String p : env.getActiveProfiles()) {
+            if ("prod".equalsIgnoreCase(p) || "production".equalsIgnoreCase(p)) return true;
+        }
+        return false;
     }
 
     public String issue(UUID userId, String email, Map<String, Object> extras) {

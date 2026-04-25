@@ -2,12 +2,14 @@ import Link from "next/link";
 import { Activity } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "./language-switcher";
+import { MobileNav } from "./mobile-nav";
 
 /**
  * Tool nav links — labels are i18n keys under `nav.tools.*`.
  * Order is curated for visual balance; do not sort alphabetically.
+ * Exported for the mobile drawer to render the same set.
  */
-const TOOL_LINKS: { href: string; key: string }[] = [
+export const TOOL_LINKS: { href: string; key: string }[] = [
   { href: "/port-checker",   key: "ports"       },
   { href: "/ip-lookup",      key: "ip"          },
   { href: "/dns-lookup",     key: "dns"         },
@@ -59,8 +61,9 @@ export async function SiteNav() {
         </ul>
         <div className="ml-auto flex items-center gap-2">
           <LanguageSwitcher />
-          <Link href="/api-docs" className="btn-ghost text-xs">{t("api")}</Link>
-          <Link href="/pricing"  className="btn       text-xs">{t("pricing")}</Link>
+          <Link href="/api-docs" className="hidden md:inline-flex btn-ghost text-xs">{t("api")}</Link>
+          <Link href="/pricing"  className="hidden md:inline-flex btn       text-xs">{t("pricing")}</Link>
+          <MobileNav toolLinks={TOOL_LINKS} />
         </div>
       </nav>
     </header>

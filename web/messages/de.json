@@ -10,6 +10,9 @@
     "docs": "Dokumentation",
     "sign_in": "Anmelden",
     "switch_lang": "Sprache wechseln",
+    "open_menu":   "Menü öffnen",
+    "close_menu":  "Menü schließen",
+    "tools_menu":  "Werkzeuge",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
@@ -439,7 +442,8 @@
     "filtered": "gefiltert",
     "open_of": "{open} offen / {total} geprüft",
     "service": "Dienst",
-    "common_count": "{count} gängige Ports"
+    "common_count": "{count} gängige Ports",
+    "port_status": "Port {port} ist <s>{status}</s>"
   },
   "reachability": {
     "title": "Erreichbarkeit",
