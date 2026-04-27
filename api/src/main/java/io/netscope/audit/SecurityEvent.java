@@ -14,7 +14,9 @@ public class SecurityEvent {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(name = "event_type", nullable = false) private String eventType;
     @Column(nullable = false) private String severity;
-    @Column(name = "client_ip", columnDefinition = "inet") private String clientIp;
+    // Stored as VARCHAR(45) (V4 migration). INET would require a custom
+    // Hibernate JdbcType to avoid "type varchar vs inet" rejections on insert.
+    @Column(name = "client_ip", length = 45) private String clientIp;
     @Column(name = "api_key_id") private UUID apiKeyId;
     @JdbcTypeCode(SqlTypes.JSON) @Column(columnDefinition = "jsonb")
     private Map<String, Object> details;

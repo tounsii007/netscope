@@ -49,7 +49,7 @@ export function MobileNav({
         aria-label={t("open_menu")}
         aria-expanded={open}
         aria-controls="mobile-nav-drawer"
-        className="md:hidden flex h-9 w-9 items-center justify-center rounded-md text-fg-muted hover:bg-bg-elevated hover:text-fg transition"
+        className="lg:hidden flex h-9 w-9 items-center justify-center rounded-md text-fg-muted hover:bg-bg-elevated hover:text-fg transition"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -60,7 +60,7 @@ export function MobileNav({
           <div
             onClick={() => setOpen(false)}
             aria-hidden="true"
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden animate-fade-in-up"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in-up"
             style={{ animationDuration: "200ms" }}
           />
 
@@ -70,7 +70,7 @@ export function MobileNav({
             role="dialog"
             aria-modal="true"
             aria-label={t("tools_menu")}
-            className="fixed right-0 top-0 z-50 h-full w-[85vw] max-w-sm overflow-y-auto border-l border-border bg-bg-card shadow-2xl md:hidden"
+            className="fixed right-0 top-0 z-50 h-full w-[85vw] max-w-sm overflow-y-auto border-l border-border bg-bg-card shadow-2xl lg:hidden"
             style={{ animation: "slideInRight 250ms ease-out" }}
           >
             <div className="sticky top-0 flex items-center justify-between border-b border-border bg-bg-card/95 px-4 py-3 backdrop-blur">

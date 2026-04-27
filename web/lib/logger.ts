@@ -81,8 +81,15 @@ function createLogger() {
 
     // ── Transports ────────────────────────────────────────────────────────
 
+    // Minimal shape for the parts of DailyRotateFile we actually call. Keeps
+    // strict TypeScript happy without depending on @types/winston-daily-rotate-file.
+    type EventEmitterLike = {
+      on(event: string, listener: (...args: unknown[]) => void): unknown;
+    };
+    type DailyRotateCtor = new (opts: unknown) => EventEmitterLike;
+
     /** server.YYYY-MM-DD.log — INFO and above */
-    const serverTransport = new (winston.transports as Record<string, new (opts: unknown) => unknown>).DailyRotateFile({
+    const serverTransport = new (winston.transports as Record<string, DailyRotateCtor>).DailyRotateFile({
       filename:     path.join(logPath, "server.%DATE%.log"),
       datePattern:  "YYYY-MM-DD",
       zippedArchive: true,
@@ -94,7 +101,7 @@ function createLogger() {
     });
 
     /** error.YYYY-MM-DD.log — ERROR only */
-    const errorTransport = new (winston.transports as Record<string, new (opts: unknown) => unknown>).DailyRotateFile({
+    const errorTransport = new (winston.transports as Record<string, DailyRotateCtor>).DailyRotateFile({
       filename:     path.join(logPath, "error.%DATE%.log"),
       datePattern:  "YYYY-MM-DD",
       zippedArchive: true,
@@ -118,7 +125,8 @@ function createLogger() {
     });
 
     // Emit warnings when queue flushes to prevent silent drops in high volume
-    serverTransport.on("rotate", (oldFile: string, newFile: string) => {
+    serverTransport.on("rotate", (...args: unknown[]) => {
+      const [oldFile, newFile] = args as [string, string];
       instance.info("Log rotated", { old: oldFile, new: newFile });
     });
 

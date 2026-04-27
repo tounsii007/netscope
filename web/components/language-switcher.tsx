@@ -10,6 +10,15 @@ const FLAGS: Record<string, string> = {
   zh: "🇸🇬",
 };
 
+/** next-intl reads this cookie before falling back to Accept-Language. Setting
+ *  it here makes the switch sticky even when the user's browser language
+ *  disagrees with what they just picked.  Path=/ so every locale-prefixed
+ *  route shares the same cookie; one-year max-age. */
+function setLocaleCookie(locale: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+}
+
 export function LanguageSwitcher() {
   const locale = useLocale();
   const t = useTranslations("nav");
@@ -25,7 +34,15 @@ export function LanguageSwitcher() {
       if (path.startsWith(`/${loc}/`)) { path = path.slice(loc.length + 1); break; }
       if (path === `/${loc}`) { path = "/"; break; }
     }
-    router.push(next === routing.defaultLocale ? path : `/${next}${path}`);
+    // Persist the choice so the middleware doesn't redirect us back to
+    // the browser's Accept-Language locale on the next page load.
+    setLocaleCookie(next);
+    const target = next === routing.defaultLocale ? path : `/${next}${path}`;
+    router.push(target);
+    // Force a refresh so next-intl re-reads the cookie + re-renders with
+    // the new messages bundle. Without this, the visible page can stay on
+    // the previous locale until the user navigates somewhere else.
+    router.refresh();
   }
 
   return (
