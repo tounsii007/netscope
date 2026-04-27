@@ -150,7 +150,19 @@ export type HeadersResult = {
   checks: Array<{ header: string; present: boolean; good: boolean; value: string; weight: number; detail: string }>;
   rawHeaders: Record<string, string>;
 };
-export type SubdomainsResult = { domain: string; count: number; subdomains: string[]; source: string; durationMs: number };
+export type SubdomainsResult = {
+  domain: string;
+  count: number;
+  subdomains: string[];
+  source?: string;
+  durationMs?: number;
+  /** True when the response is capped at MAX_SUBDOMAINS — there are more matches we didn't return. */
+  truncated?: boolean;
+  /** True when the upstream CT log (crt.sh) was unreachable / circuit-open — list will be empty. */
+  degraded?: boolean;
+  /** Human-readable explanation when degraded=true. */
+  message?: string;
+};
 export type CdnResult = {
   host: string; resolvedIp: string; cdns: string[]; usesCdn: boolean;
   server?: string; status: number;

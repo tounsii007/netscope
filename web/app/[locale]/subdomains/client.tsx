@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type SubdomainsResult } from "@/lib/api";
 import { ResultCard, Spinner } from "@/components/tool-shell";
-import { Download, Search } from "lucide-react";
+import { Download, Search, AlertTriangle, Info } from "lucide-react";
 
 export function SubdomainsClient() {
   const t = useTranslations("subdomains");
@@ -46,12 +46,34 @@ export function SubdomainsClient() {
 
       {err && <div className="card border-danger/50 text-danger">{err}</div>}
 
-      {data && (
+      {/* Upstream CT log (crt.sh) is open-circuit: clearly tell the user
+          the result is empty by NECESSITY, not because the domain has no
+          subdomains. Without this banner "0 Subdomains" is misleading —
+          facebook.com has thousands. */}
+      {data && data.degraded && (
+        <div className="card border-warn/50 bg-warn/5 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-warn shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <div className="font-medium text-warn">{t("degraded_title")}</div>
+            <div className="mt-1 text-fg-muted">
+              {data.message ?? t("degraded_message")}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {data && !data.degraded && (
         <ResultCard>
           <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
             <div>
               <div className="text-2xl font-semibold">{data.count.toLocaleString()}</div>
               <div className="text-xs text-fg-muted">{t("count", { count: data.count })} · {data.durationMs}ms · {data.source}</div>
+              {data.truncated && (
+                <div className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-warn/10 px-2 py-0.5 text-xs text-warn">
+                  <Info className="h-3 w-3" />
+                  {t("truncated_notice")}
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               <div className="relative">
