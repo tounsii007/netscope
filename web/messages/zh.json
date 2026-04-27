@@ -369,6 +369,8 @@
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_coords": "坐标",
+    "field_org": "组织",
+    "field_user_agent": "您的 User-Agent",
     "threat_title": "威胁情报",
     "risk_score": "风险评分",
     "threat_tor": "TOR 出口",

@@ -369,6 +369,8 @@
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_coords": "Koordinaten",
+    "field_org": "Organisation",
+    "field_user_agent": "Ihr User-Agent",
     "threat_title": "Bedrohungsanalyse",
     "risk_score": "Risikopunktzahl",
     "threat_tor": "TOR-Ausgang",

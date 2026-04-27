@@ -1,14 +1,20 @@
 package io.netscope.common;
 
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler.
@@ -46,6 +52,69 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of(
             "error", "Bad Request",
             "message", ex.getMessage() == null ? "invalid request" : ex.getMessage(),
+            "timestamp", Instant.now().toString()
+        ));
+    }
+
+    /**
+     * Bean-Validation failure on a {@code @Valid @RequestBody} (e.g. invalid
+     * email syntax, blank required field, out-of-range number). The message
+     * comes from the validation annotation and is end-user-safe.
+     *
+     * Without this handler Spring would let the exception fall through to
+     * {@link #handleOther(Exception)} and the user would see a confusing
+     * "Internal Server Error" with a correlation ID for what is in fact a
+     * trivial input mistake.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleBodyValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+            .map(GlobalExceptionHandler::fieldErrorMessage)
+            .collect(Collectors.joining("; "));
+        if (message.isBlank()) message = "validation failed";
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "Bad Request",
+            "message", message,
+            "timestamp", Instant.now().toString()
+        ));
+    }
+
+    private static String fieldErrorMessage(FieldError fe) {
+        String field = fe.getField();
+        String msg = fe.getDefaultMessage();
+        return field + ": " + (msg == null ? "invalid" : msg);
+    }
+
+    /** Validation on a query parameter or path variable (no @RequestBody). */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraint(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+            .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+            .collect(Collectors.joining("; "));
+        if (message.isBlank()) message = "validation failed";
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "Bad Request",
+            "message", message,
+            "timestamp", Instant.now().toString()
+        ));
+    }
+
+    /** Malformed JSON body — also a 400, never a 500. */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnparseableBody(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "Bad Request",
+            "message", "request body is malformed JSON",
+            "timestamp", Instant.now().toString()
+        ));
+    }
+
+    /** Wrong type on a path variable / query parameter (e.g. ?port=abc). */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "Bad Request",
+            "message", ex.getName() + ": invalid value",
             "timestamp", Instant.now().toString()
         ));
     }

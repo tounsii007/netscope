@@ -369,6 +369,8 @@
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_coords": "निर्देशांक",
+    "field_org": "संगठन",
+    "field_user_agent": "आपका User-Agent",
     "threat_title": "खतरा विश्लेषण",
     "risk_score": "जोखिम स्कोर",
     "threat_tor": "TOR एग्जिट",
