@@ -15,7 +15,13 @@ export function RedirectsClient() {
   const [data, setData] = useState<RedirectResult | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setData(null);
+    e.preventDefault();
+    if (!url.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    setErr(null); setLoading(true); setData(null);
     try { setData(await api.redirects(url)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
@@ -24,7 +30,7 @@ export function RedirectsClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} required />
+        <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("trace")}</button>
       </form>
 

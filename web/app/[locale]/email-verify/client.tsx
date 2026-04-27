@@ -16,7 +16,13 @@ export function EmailVerifyClient() {
   const [data, setData] = useState<EmailVerifyResult | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setData(null);
+    e.preventDefault();
+    if (!email.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    setErr(null); setLoading(true); setData(null);
     try { setData(await api.emailVerify(email, smtp)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
@@ -26,7 +32,7 @@ export function EmailVerifyClient() {
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-3">
         <div className="flex gap-2">
-          <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("verify")}</button>
         </div>
         <label className="flex items-center gap-2 text-sm text-fg-muted">

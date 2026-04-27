@@ -16,7 +16,13 @@ export function EmailAuthClient() {
   const [data, setData] = useState<EmailAuthResult | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setData(null);
+    e.preventDefault();
+    if (!domain.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    setErr(null); setLoading(true); setData(null);
     try { setData(await api.emailAuth(domain, sel || undefined)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
@@ -26,7 +32,7 @@ export function EmailAuthClient() {
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-3">
         <div className="grid gap-2 md:grid-cols-[2fr_1fr_auto]">
-          <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder={t("placeholder_domain")} required />
+          <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder={t("placeholder_domain")} />
           <input className="input" value={sel} onChange={(e) => setSel(e.target.value)} placeholder={t("placeholder_selector")} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("analyze")}</button>
         </div>

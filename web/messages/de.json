@@ -250,6 +250,7 @@
   "common": {
     "loading": "Lädt…",
     "error": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
+    "input_required": "Bitte das Feld ausfüllen, bevor Sie absenden.",
     "lookup": "Abfragen",
     "check": "Prüfen",
     "analyze": "Analysieren",

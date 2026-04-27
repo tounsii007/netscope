@@ -16,7 +16,13 @@ export function BgpClient() {
   const [asn, setAsn] = useState<BgpAsnResult | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setIp(null); setAsn(null);
+    e.preventDefault();
+    if (!value.trim()) {
+      setErr(tc("input_required"));
+      setIp(null); setAsn(null);
+      return;
+    }
+    setErr(null); setLoading(true); setIp(null); setAsn(null);
     try {
       if (mode === "ip") setIp(await api.bgpIp(value));
       else setAsn(await api.bgpAsn(value));
@@ -36,7 +42,7 @@ export function BgpClient() {
           ))}
         </div>
         <div className="flex gap-2">
-          <input className="input" value={value} onChange={(e) => setValue(e.target.value)} required />
+          <input className="input" value={value} onChange={(e) => setValue(e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
         </div>
       </form>

@@ -18,6 +18,11 @@ export function DnsClient() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!domain.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try {
       const types = Array.from(selected).join(",");
@@ -36,7 +41,7 @@ export function DnsClient() {
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-4">
         <div className="flex gap-2">
-          <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} required />
+          <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
         </div>
         <div className="flex flex-wrap gap-2">

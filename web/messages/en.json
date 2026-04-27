@@ -250,6 +250,7 @@
   "common": {
     "loading": "Loading…",
     "error": "Something went wrong. Please try again.",
+    "input_required": "Please fill in this field before submitting.",
     "lookup": "Lookup",
     "check": "Check",
     "analyze": "Analyze",

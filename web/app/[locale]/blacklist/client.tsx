@@ -15,7 +15,13 @@ export function BlacklistClient() {
   const [data, setData] = useState<BlacklistResult | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setData(null);
+    e.preventDefault();
+    if (!ip.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    setErr(null); setLoading(true); setData(null);
     try { setData(await api.blacklist(ip)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
@@ -24,7 +30,7 @@ export function BlacklistClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={ip} onChange={(e) => setIp(e.target.value)} placeholder={t("placeholder")} required />
+        <input className="input" value={ip} onChange={(e) => setIp(e.target.value)} placeholder={t("placeholder")} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("check")}</button>
       </form>
 

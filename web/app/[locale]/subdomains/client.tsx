@@ -22,6 +22,11 @@ export function SubdomainsClient() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!domain.trim()) {
+      setErr(tc("input_required"));
+      setData(null); setFilter("");
+      return;
+    }
     setErr(null); setLoading(true); setData(null); setFilter("");
     try { setData(await api.subdomains(domain)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -40,7 +45,7 @@ export function SubdomainsClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} required />
+        <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("enumerate")}</button>
       </form>
 

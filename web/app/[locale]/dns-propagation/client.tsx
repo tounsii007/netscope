@@ -19,6 +19,11 @@ export function PropagationClient() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!domain.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.propagation(domain, type)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -29,7 +34,7 @@ export function PropagationClient() {
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-3">
         <div className="flex gap-2">
-          <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} required />
+          <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
           <select className="input max-w-[7rem]" value={type} onChange={(e) => setType(e.target.value)}>
             {TYPES.map((tp) => <option key={tp} value={tp}>{tp}</option>)}
           </select>

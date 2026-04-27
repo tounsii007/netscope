@@ -23,7 +23,11 @@ export function PasswordLeakClient() {
 
   async function check(e: React.FormEvent) {
     e.preventDefault();
-    if (!pwd) return;
+    if (!pwd.trim()) {
+      setErr(tc("input_required"));
+      setCount(null);
+      return;
+    }
     setLoading(true); setErr(null); setCount(null);
     try {
       const hash = await sha1(pwd);

@@ -17,6 +17,11 @@ export function ReachClient() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!target.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.reach(target, port)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -27,7 +32,7 @@ export function ReachClient() {
     <div className="space-y-6">
       <form onSubmit={run} className="card">
         <div className="grid gap-3 md:grid-cols-[3fr_1fr_auto]">
-          <input className="input" value={target} onChange={(e) => setTarget(e.target.value)} required />
+          <input className="input" value={target} onChange={(e) => setTarget(e.target.value)} />
           <input type="number" className="input" value={port} onChange={(e) => setPort(+e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("check")}</button>
         </div>

@@ -25,6 +25,11 @@ export function PortCheckerClient() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!target.trim()) {
+      setErr(tc("input_required"));
+      setSingle(null); setScan(null);
+      return;
+    }
     setErr(null); setLoading(true); setSingle(null); setScan(null);
     try {
       if (mode === "single") setSingle(await api.portCheck(target, port));
@@ -48,7 +53,7 @@ export function PortCheckerClient() {
 
         <div className="grid gap-3 md:grid-cols-[2fr_1fr_auto]">
           <input className="input" placeholder={t("placeholder_host")}
-            value={target} onChange={(e) => setTarget(e.target.value)} required />
+            value={target} onChange={(e) => setTarget(e.target.value)} />
           {mode === "single" && (
             <input type="number" min={1} max={65535} className="input"
               value={port} onChange={(e) => setPort(+e.target.value)} required />

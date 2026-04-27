@@ -50,7 +50,7 @@ export function IpClient({ initial }: { initial?: IpResult }) {
 
   async function lookup(target: string) {
     const cleaned = normaliseIp(target);
-    if (!cleaned) { setErr("invalid IP"); return; }
+    if (!cleaned) { setErr(tc("input_required")); setData(null); return; }
     setErr(null); setLoading(true);
     try { setData(await api.ip(cleaned)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -75,7 +75,6 @@ export function IpClient({ initial }: { initial?: IpResult }) {
           placeholder={t("placeholder")}
           autoComplete="off"
           spellCheck={false}
-          required
         />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
       </form>

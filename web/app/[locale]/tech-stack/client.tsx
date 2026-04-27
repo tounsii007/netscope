@@ -23,7 +23,7 @@ export function TechClient() {
     // hostname before sending — and reflect the cleaned value in the input.
     const cleaned = normaliseHost(host);
     if (cleaned !== host) setHost(cleaned);
-    if (!cleaned) { setErr(tc("error")); return; }
+    if (!cleaned) { setErr(tc("input_required")); setData(null); return; }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.tech(cleaned)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -33,7 +33,7 @@ export function TechClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={host} onChange={(e) => setHost(e.target.value)} required />
+        <input className="input" value={host} onChange={(e) => setHost(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("detect")}</button>
       </form>
 

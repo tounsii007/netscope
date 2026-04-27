@@ -4,7 +4,22 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type Ipv6Result } from "@/lib/api";
 import { ResultCard, Spinner } from "@/components/tool-shell";
-import { CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, ServerCrash } from "lucide-react";
+import { normaliseHost } from "@/lib/normalise-host";
+
+/**
+ * A response with EVERY DNS field empty is almost always a non-existent
+ * domain (NXDOMAIN). Returning 0/100 with six red ✗ rows is technically
+ * correct but misleading — the user thinks their domain "fails IPv6"
+ * when in fact the domain doesn't exist. We detect this and show a
+ * clearer message.
+ */
+function looksUnresolved(d: Ipv6Result): boolean {
+  return !d.apex.a && !d.apex.aaaa
+      && !d.www.a  && !d.www.aaaa
+      && d.nameservers.total === 0
+      && d.mxRecords.total === 0;
+}
 
 export function Ipv6Client() {
   const t = useTranslations("ipv6");
@@ -15,22 +30,55 @@ export function Ipv6Client() {
   const [data, setData] = useState<Ipv6Result | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setData(null);
-    try { setData(await api.ipv6(domain)); }
+    e.preventDefault();
+    // Strip scheme/path users may have pasted (e.g. "https://www.bahnhof.de/x")
+    const cleaned = normaliseHost(domain);
+    if (cleaned !== domain) setDomain(cleaned);
+    if (!cleaned) { setErr(tc("input_required")); setData(null); return; }
+    setErr(null); setLoading(true); setData(null);
+    try { setData(await api.ipv6(cleaned)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
 
+  const unresolved = data && looksUnresolved(data);
+
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} required />
+        <input
+          className="input"
+          value={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          onBlur={(e) => setDomain(normaliseHost(e.target.value))}
+          autoComplete="off"
+          spellCheck={false}
+        />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("score")}</button>
       </form>
 
       {err && <div className="card border-danger/50 text-danger">{err}</div>}
 
-      {data && (
+      {/* Domain doesn't exist — show ONE clear message instead of the
+          confusing 0/100 score with six red ✗ rows. */}
+      {unresolved && (
+        <div className="card border-danger/50 bg-danger/5 flex items-start gap-3">
+          <ServerCrash className="h-5 w-5 text-danger shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold text-danger">{t("nxdomain_title")}</div>
+            <div className="mt-1 text-sm text-fg-muted">
+              {t("nxdomain_message", { domain: data!.domain })}
+            </div>
+            <ul className="mt-3 list-disc list-inside text-sm text-fg-muted space-y-0.5">
+              <li>{t("nxdomain_hint_typo")}</li>
+              <li>{t("nxdomain_hint_scheme")}</li>
+              <li>{t("nxdomain_hint_resolver")}</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {data && !unresolved && (
         <>
           <ResultCard>
             <div className="flex items-center gap-6">

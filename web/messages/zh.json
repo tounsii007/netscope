@@ -250,6 +250,7 @@
   "common": {
     "loading": "加载中…",
     "error": "出现错误，请重试。",
+    "input_required": "请填写此字段后再提交。",
     "lookup": "查询",
     "check": "检查",
     "analyze": "分析",

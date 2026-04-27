@@ -15,7 +15,13 @@ export function RobotsClient() {
   const [data, setData] = useState<RobotsResult | null>(null);
 
   async function run(e: React.FormEvent) {
-    e.preventDefault(); setErr(null); setLoading(true); setData(null);
+    e.preventDefault();
+    if (!host.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    setErr(null); setLoading(true); setData(null);
     try { setData(await api.robots(host)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
@@ -24,7 +30,7 @@ export function RobotsClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={host} onChange={(e) => setHost(e.target.value)} required />
+        <input className="input" value={host} onChange={(e) => setHost(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("check")}</button>
       </form>
 

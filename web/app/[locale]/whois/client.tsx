@@ -15,6 +15,11 @@ export function WhoisClient() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!domain.trim()) {
+      setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.whois(domain)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -24,7 +29,7 @@ export function WhoisClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} required />
+        <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
       </form>
 
