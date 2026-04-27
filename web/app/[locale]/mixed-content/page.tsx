@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Unlock } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { MixedClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "Mixed Content Scanner",
-  description: "Find insecure http:// resources on your HTTPS pages that browsers block or warn about.",
-  alternates: { canonical: "/mixed-content" },
-};
+const SLUG = "mixed-content";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/mixed-content` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="Mixed Content" subtitle="Find insecure http:// resources on HTTPS pages." icon={<Unlock className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Unlock className="h-5 w-5" />}
+    >
       <MixedClient />
     </ToolShell>
   );

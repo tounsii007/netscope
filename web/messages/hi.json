@@ -10,47 +10,47 @@
     "docs": "दस्तावेज़",
     "sign_in": "साइन इन",
     "switch_lang": "भाषा बदलें",
-    "open_menu":   "मेनू खोलें",
-    "close_menu":  "मेनू बंद करें",
-    "tools_menu":  "टूल्स",
-    "cat_dns":        "DNS और डोमेन",
-    "cat_network":    "नेटवर्क",
-    "cat_security":   "सुरक्षा",
-    "cat_email":      "ईमेल",
-    "cat_web":        "वेब विश्लेषण",
+    "open_menu": "मेनू खोलें",
+    "close_menu": "मेनू बंद करें",
+    "tools_menu": "टूल्स",
+    "cat_dns": "DNS और डोमेन",
+    "cat_network": "नेटवर्क",
+    "cat_security": "सुरक्षा",
+    "cat_email": "ईमेल",
+    "cat_web": "वेब विश्लेषण",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
     "lang_zh": "中文",
     "tools": {
-      "ports":      "पोर्ट्स",
-      "ip":         "IP",
-      "dns":        "DNS",
-      "propagation":"प्रसार",
-      "headers":    "हेडर्स",
-      "tech":       "टेक",
-      "redirects":  "रीडायरेक्ट",
-      "subs":       "सब्स",
-      "cdn":        "CDN",
-      "ssl":        "SSL",
-      "whois":      "WHOIS",
-      "email":      "ईमेल",
+      "ports": "पोर्ट्स",
+      "ip": "IP",
+      "dns": "DNS",
+      "propagation": "प्रसार",
+      "headers": "हेडर्स",
+      "tech": "टेक",
+      "redirects": "रीडायरेक्ट",
+      "subs": "सब्स",
+      "cdn": "CDN",
+      "ssl": "SSL",
+      "whois": "WHOIS",
+      "email": "ईमेल",
       "email_auth": "SPF/DMARC",
-      "blacklist":  "DNSBL",
-      "dnssec":     "DNSSEC",
-      "ipv6":       "IPv6",
-      "bgp":        "BGP",
-      "og":         "OG",
-      "cookies":    "कुकीज़",
-      "robots":     "रोबॉट्स",
-      "mixed":      "मिक्स्ड",
-      "jwt":        "JWT",
-      "pwd":        "पासवर्ड"
+      "blacklist": "DNSBL",
+      "dnssec": "DNSSEC",
+      "ipv6": "IPv6",
+      "bgp": "BGP",
+      "og": "OG",
+      "cookies": "कुकीज़",
+      "robots": "रोबॉट्स",
+      "mixed": "मिक्स्ड",
+      "jwt": "JWT",
+      "pwd": "पासवर्ड"
     }
   },
   "auth": {
-    "meta_title":      "साइन इन",
-    "signin_title":    "NetScope में साइन इन करें",
+    "meta_title": "साइन इन",
+    "signin_title": "NetScope में साइन इन करें",
     "signin_subtitle": "अपने GitHub या Google खाते से जारी रखें। हम कभी भी राइट एक्सेस नहीं मांगते।",
     "continue_github": "GitHub से जारी रखें",
     "continue_google": "Google से जारी रखें"
@@ -68,103 +68,153 @@
   "tools": {
     "port-checker": {
       "title": "पोर्ट चेकर",
-      "desc": "TCP/UDP पोर्ट जांचें, रेंज स्कैन करें, सेवाएं पहचानें।"
+      "desc": "TCP/UDP पोर्ट जांचें, रेंज स्कैन करें, सेवाएं पहचानें।",
+      "meta_title": "पोर्ट चेकर — ऑनलाइन TCP पोर्ट स्कैन करें",
+      "meta_description": "जाँचें कि किसी सर्वर पर कोई पोर्ट खुला है या नहीं। एकल पोर्ट, रेंज या सामान्य पोर्ट को विलंबता और सेवा पहचान के साथ स्कैन करें।"
     },
     "ip-lookup": {
       "title": "IP लुकअप",
-      "desc": "जियोलोकेशन, ASN, ISP, प्रॉक्सी/VPN/TOR पहचान।"
+      "desc": "जियोलोकेशन, ASN, ISP, प्रॉक्सी/VPN/TOR पहचान।",
+      "meta_title": "IP लुकअप — जियोलोकेशन, ASN, VPN/प्रॉक्सी पहचान",
+      "meta_description": "किसी भी IP को देखें: देश, शहर, ISP, ASN, समय क्षेत्र। VPN, प्रॉक्सी, TOR, होस्टिंग का पता लगाएं।"
     },
     "dns-lookup": {
       "title": "DNS लुकअप",
-      "desc": "A, AAAA, MX, TXT, CNAME, NS रिकॉर्ड।"
+      "desc": "A, AAAA, MX, TXT, CNAME, NS रिकॉर्ड।",
+      "meta_title": "DNS लुकअप — A, AAAA, MX, TXT, NS रिकॉर्ड",
+      "meta_description": "किसी भी डोमेन के लिए तेज़ DNS लुकअप। A, AAAA, MX, TXT, CNAME, NS और CAA रिकॉर्ड देखें।"
     },
     "dns-propagation": {
       "title": "DNS प्रसार",
-      "desc": "15 वैश्विक रिज़ॉल्वर समानांतर में क्वेरी करें।"
+      "desc": "15 वैश्विक रिज़ॉल्वर समानांतर में क्वेरी करें।",
+      "meta_title": "DNS प्रसार चेकर — 15 वैश्विक रिज़ॉल्वर",
+      "meta_description": "दुनिया भर के 15+ सार्वजनिक रिज़ॉल्वर में DNS प्रसार जाँचें। देखें कि आपका A, AAAA, MX या TXT बदलाव हर जगह सक्रिय है या नहीं।"
     },
     "http-headers": {
       "title": "HTTP सुरक्षा हेडर",
-      "desc": "सुरक्षा हेडर को A+ से F तक ग्रेड करें।"
+      "desc": "सुरक्षा हेडर को A+ से F तक ग्रेड करें।",
+      "meta_title": "HTTP सुरक्षा हेडर इंस्पेक्टर",
+      "meta_description": "अपनी साइट के HTTP सुरक्षा हेडर को A+ से F तक ग्रेड करें। HSTS, CSP, X-Frame-Options और अधिक जाँचें।"
     },
     "tech-stack": {
       "title": "टेक स्टैक",
-      "desc": "फ्रेमवर्क, CMS, एनालिटिक्स, होस्टिंग पहचानें।"
+      "desc": "फ्रेमवर्क, CMS, एनालिटिक्स, होस्टिंग पहचानें।",
+      "meta_title": "टेक स्टैक डिटेक्टर — यह साइट किससे बनी है?",
+      "meta_description": "सार्वजनिक प्रतिक्रिया डेटा से फ्रेमवर्क, CMS, एनालिटिक्स, ईकॉमर्स, होस्टिंग और लाइब्रेरी का पता लगाएं।"
     },
     "redirects": {
       "title": "रीडायरेक्ट ट्रेसर",
-      "desc": "हर हॉप फॉलो करें, लूप और डाउनग्रेड पहचानें।"
+      "desc": "हर हॉप फॉलो करें, लूप और डाउनग्रेड पहचानें।",
+      "meta_title": "रीडायरेक्ट चेन ट्रेसर",
+      "meta_description": "URL की रीडायरेक्ट श्रृंखला के हर हॉप को ट्रेस करें। SEO को नुकसान पहुँचाने वाले लूप, HTTPS डाउनग्रेड और बहुत अधिक रीडायरेक्ट खोजें।"
     },
     "subdomains": {
       "title": "सबडोमेन फाइंडर",
-      "desc": "CT लॉग के माध्यम से निष्क्रिय गणना।"
+      "desc": "CT लॉग के माध्यम से निष्क्रिय गणना।",
+      "meta_title": "सबडोमेन फाइंडर — Certificate Transparency",
+      "meta_description": "सार्वजनिक Certificate Transparency लॉग से सबडोमेन गिनें। तेज़, निष्क्रिय, कोई स्कैनिंग नहीं।"
     },
     "cdn-detector": {
       "title": "CDN डिटेक्टर",
-      "desc": "Cloudflare, Fastly, Akamai आदि पहचानें।"
+      "desc": "Cloudflare, Fastly, Akamai आदि पहचानें।",
+      "meta_title": "CDN डिटेक्टर — यह साइट कौन सा CDN उपयोग कर रही है?",
+      "meta_description": "Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify और 12+ अन्य CDN का पता लगाएं।"
     },
     "ssl-check": {
       "title": "SSL सर्टिफिकेट",
-      "desc": "चेन, समाप्ति, सिफर, TLS संस्करण।"
+      "desc": "चेन, समाप्ति, सिफर, TLS संस्करण।",
+      "meta_title": "SSL प्रमाणपत्र चेकर — TLS निरीक्षण",
+      "meta_description": "SSL/TLS प्रमाणपत्र देखें: जारीकर्ता, श्रृंखला, समाप्ति, सिफर सूट और TLS संस्करण।"
     },
     "whois": {
       "title": "WHOIS / RDAP",
-      "desc": "डोमेन स्वामित्व और पंजीकरण डेटा।"
+      "desc": "डोमेन स्वामित्व और पंजीकरण डेटा।",
+      "meta_title": "WHOIS / RDAP लुकअप",
+      "meta_description": "आधुनिक RDAP-आधारित डोमेन पंजीकरण लुकअप: रजिस्ट्रार, स्थिति, नेमसर्वर, तिथियाँ।"
     },
     "reachability": {
       "title": "पहुंचनीयता",
-      "desc": "HTTP, TCP, पिंग और वैश्विक स्थिति।"
+      "desc": "HTTP, TCP, पिंग और वैश्विक स्थिति।",
+      "meta_title": "सर्वर पहुँच परीक्षण",
+      "meta_description": "किसी भी सर्वर तक HTTP, TCP और ping पहुँच का परीक्षण, प्रतिक्रिया समय के साथ।"
     },
     "email-verify": {
       "title": "ईमेल वेरिफायर",
-      "desc": "MX + डिस्पोजेबल + SMTP जांच।"
+      "desc": "MX + डिस्पोजेबल + SMTP जांच।",
+      "meta_title": "ईमेल वेरिफायर — MX, डिस्पोज़ेबल, SMTP प्रोब",
+      "meta_description": "किसी भी ईमेल पते को सत्यापित करें: सिंटैक्स, MX रिकॉर्ड, डिस्पोज़ेबल प्रदाता जाँच, वैकल्पिक SMTP हैंडशेक।"
     },
     "email-auth": {
       "title": "SPF / DMARC / DKIM",
-      "desc": "ईमेल प्रमाणीकरण ग्रेड करें।"
+      "desc": "ईमेल प्रमाणीकरण ग्रेड करें।",
+      "meta_title": "SPF / DKIM / DMARC विश्लेषक",
+      "meta_description": "किसी भी डोमेन के लिए ईमेल प्रमाणीकरण रिकॉर्ड जाँचें। SPF नीति, DMARC प्रवर्तन और DKIM सेटअप चेतावनियों के साथ देखें।"
     },
     "blacklist": {
       "title": "IP ब्लैकलिस्ट",
-      "desc": "20+ स्पैम DNSBL पर IP जांचें।"
+      "desc": "20+ स्पैम DNSBL पर IP जांचें।",
+      "meta_title": "IP ब्लैकलिस्ट जाँच — 20+ DNSBL",
+      "meta_description": "जाँचें कि कोई IP 20+ प्रमुख स्पैम ब्लैकलिस्ट (Spamhaus, Barracuda, SORBS) पर है या नहीं। तत्काल, समानांतर DNSBL प्रश्न।"
     },
     "jwt": {
       "title": "JWT डिकोडर",
-      "desc": "केवल क्लाइंट-साइड JWT क्लेम देखें।"
+      "desc": "केवल क्लाइंट-साइड JWT क्लेम देखें।",
+      "meta_title": "JWT डिकोडर — JSON Web Tokens की जाँच करें",
+      "meta_description": "JWT पेस्ट करें ताकि हेडर और पेलोड को डिकोड करें, क्लेम जाँचें और समाप्ति सत्यापित करें — पूरी तरह से आपके ब्राउज़र में, सर्वर पर कुछ नहीं भेजा जाता।"
     },
     "password-leak": {
       "title": "पासवर्ड लीक जांच",
-      "desc": "k-अनामिता के साथ HIBP जांच — ब्राउज़र नहीं छोड़ता।"
+      "desc": "k-अनामिता के साथ HIBP जांच — ब्राउज़र नहीं छोड़ता।",
+      "meta_title": "पासवर्ड लीक जाँच — HIBP k-Anonymity",
+      "meta_description": "जाँचें कि क्या आपका पासवर्ड ज्ञात डेटा उल्लंघनों में दिखाई देता है। Have I Been Pwned के k-anonymity API का उपयोग करता है — केवल पहले 5 SHA-1 अक्षर भेजे जाते हैं।"
     },
     "dnssec": {
       "title": "DNSSEC वैलिडेटर",
-      "desc": "DS, DNSKEY और हस्ताक्षर जांच।"
+      "desc": "DS, DNSKEY और हस्ताक्षर जांच।",
+      "meta_title": "DNSSEC वैलिडेटर",
+      "meta_description": "किसी भी डोमेन के लिए DNSSEC परिनियोजन जाँचें। DS, DNSKEY और RRSIG रिकॉर्ड चेतावनियों के साथ देखें।"
     },
     "cookies": {
       "title": "कुकी / GDPR",
-      "desc": "कुकी फ्लैग + थर्ड-पार्टी ट्रैकर पहचान।"
+      "desc": "कुकी फ्लैग + थर्ड-पार्टी ट्रैकर पहचान।",
+      "meta_title": "कुकी और GDPR विश्लेषक",
+      "meta_description": "किसी भी पृष्ठ पर लोड होने वाले Set-Cookie फ़्लैग और थर्ड-पार्टी ट्रैकर का निरीक्षण करें। GDPR जोखिम स्कोर।"
     },
     "opengraph": {
       "title": "OG प्रीव्यू",
-      "desc": "किसी भी URL के लिए सोशल शेयर प्रीव्यू।"
+      "desc": "किसी भी URL के लिए सोशल शेयर प्रीव्यू।",
+      "meta_title": "Open Graph और मेटा पूर्वावलोकन",
+      "meta_description": "देखें कि आपकी URL Twitter, Facebook, LinkedIn, Slack पर साझा करने पर कैसी दिखती है।"
     },
     "robots": {
       "title": "Robots & Sitemap",
-      "desc": "robots.txt पार्स करें और sitemap वैलिडेट करें।"
+      "desc": "robots.txt पार्स करें और sitemap वैलिडेट करें।",
+      "meta_title": "Robots.txt और साइटमैप वैलिडेटर",
+      "meta_description": "किसी भी होस्ट के लिए robots.txt नियमों और साइटमैप XML को पार्स और सत्यापित करें।"
     },
     "ipv6": {
       "title": "IPv6 तैयारी",
-      "desc": "apex/www/NS/MX पर AAAA कवरेज ग्रेड करें।"
+      "desc": "apex/www/NS/MX पर AAAA कवरेज ग्रेड करें।",
+      "meta_title": "IPv6 तत्परता स्कोर",
+      "meta_description": "अपने डोमेन की IPv6 परिनियोजन को apex, www, नेमसर्वर और मेल पर ग्रेड करें।"
     },
     "bgp": {
       "title": "BGP / ASN",
-      "desc": "RIPE Stat के माध्यम से रूटिंग इंटेलिजेंस।"
+      "desc": "RIPE Stat के माध्यम से रूटिंग इंटेलिजेंस।",
+      "meta_title": "BGP / ASN व्यूअर",
+      "meta_description": "किसी भी IP का BGP प्रीफ़िक्स, घोषणा करने वाले ASN और मार्ग देखें। या किसी ASN के घोषित प्रीफ़िक्स का निरीक्षण करें।"
     },
     "mixed-content": {
       "title": "मिश्रित सामग्री",
-      "desc": "HTTPS पृष्ठों पर http:// संसाधन खोजें।"
+      "desc": "HTTPS पृष्ठों पर http:// संसाधन खोजें।",
+      "meta_title": "मिक्स्ड कंटेंट स्कैनर",
+      "meta_description": "अपने HTTPS पृष्ठों पर असुरक्षित http:// संसाधन खोजें जिन्हें ब्राउज़र ब्लॉक या चेतावनी देते हैं।"
     },
     "dashboard": {
       "title": "मेरी IP",
-      "desc": "आपकी IP, स्थान, ISP, ब्राउज़र, OS।"
+      "desc": "आपकी IP, स्थान, ISP, ब्राउज़र, OS।",
+      "meta_title": "मेरा IP डैशबोर्ड",
+      "meta_description": "आपकी IP, स्थान, ISP, ब्राउज़र, OS, स्क्रीन, समय क्षेत्र — सब एक ही दृश्य में।"
     },
     "monitoring": {
       "title": "मॉनिटरिंग",

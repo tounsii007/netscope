@@ -1,19 +1,29 @@
 import type { Metadata } from "next";
-import { PortCheckerClient } from "./client";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Network } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { PortCheckerClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "Port Checker — Scan TCP ports online",
-  description: "Check if a port is open on any server. Scan single ports, ranges, or common ports with latency and service detection.",
-  alternates: { canonical: "/port-checker" },
-};
+const SLUG = "port-checker";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/port-checker` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
     <ToolShell
-      title="Port Checker"
-      subtitle="Check a port or scan ranges on any host — with service detection and latency."
+      title={t("title")}
+      subtitle={t("desc")}
       icon={<Network className="h-5 w-5" />}
     >
       <PortCheckerClient />

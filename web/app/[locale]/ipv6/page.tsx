@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Wifi } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { Ipv6Client } from "./client";
 
-export const metadata: Metadata = {
-  title: "IPv6 Readiness Score",
-  description: "Grade your domain's IPv6 deployment across apex, www, nameservers, and mail.",
-  alternates: { canonical: "/ipv6" },
-};
+const SLUG = "ipv6";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/ipv6` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="IPv6 Readiness" subtitle="AAAA coverage across apex, www, NS and MX." icon={<Wifi className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Wifi className="h-5 w-5" />}
+    >
       <Ipv6Client />
     </ToolShell>
   );

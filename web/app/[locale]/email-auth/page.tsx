@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ShieldAlert } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { EmailAuthClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "SPF / DKIM / DMARC Analyzer",
-  description: "Check email authentication records for any domain. See SPF policy, DMARC enforcement and DKIM setup with warnings.",
-  alternates: { canonical: "/email-auth" },
-};
+const SLUG = "email-auth";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/email-auth` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="SPF / DKIM / DMARC" subtitle="Parse and grade email authentication for any domain." icon={<ShieldAlert className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<ShieldAlert className="h-5 w-5" />}
+    >
       <EmailAuthClient />
     </ToolShell>
   );

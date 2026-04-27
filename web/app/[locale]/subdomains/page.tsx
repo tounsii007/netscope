@@ -1,19 +1,29 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { GitBranch } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { SubdomainsClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "Subdomain Finder — Certificate Transparency",
-  description: "Enumerate subdomains from public Certificate Transparency logs. Fast, passive, no scanning.",
-  alternates: { canonical: "/subdomains" },
-};
+const SLUG = "subdomains";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/subdomains` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
     <ToolShell
-      title="Subdomain Finder"
-      subtitle="Passive enumeration from Certificate Transparency logs (crt.sh)."
+      title={t("title")}
+      subtitle={t("desc")}
       icon={<GitBranch className="h-5 w-5" />}
     >
       <SubdomainsClient />

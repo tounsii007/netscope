@@ -1,19 +1,29 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ShieldCheck } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { HeadersClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "HTTP Security Headers Inspector",
-  description: "Grade your site's HTTP security headers A+ to F. Check HSTS, CSP, X-Frame-Options and more.",
-  alternates: { canonical: "/http-headers" },
-};
+const SLUG = "http-headers";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/http-headers` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
     <ToolShell
-      title="HTTP Security Headers"
-      subtitle="Analyze response headers and grade the security posture from A+ to F."
+      title={t("title")}
+      subtitle={t("desc")}
       icon={<ShieldCheck className="h-5 w-5" />}
     >
       <HeadersClient />

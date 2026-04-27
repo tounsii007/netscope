@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Layers } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { TechClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "Tech Stack Detector — What's this site built with?",
-  description: "Detect frameworks, CMS, analytics, ecommerce, hosting and libraries from public response data.",
-  alternates: { canonical: "/tech-stack" },
-};
+const SLUG = "tech-stack";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/tech-stack` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="Tech Stack Detector" subtitle="Fingerprint frameworks, CMS, analytics, widgets and hosting." icon={<Layers className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Layers className="h-5 w-5" />}
+    >
       <TechClient />
     </ToolShell>
   );

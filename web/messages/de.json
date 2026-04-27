@@ -10,47 +10,47 @@
     "docs": "Dokumentation",
     "sign_in": "Anmelden",
     "switch_lang": "Sprache wechseln",
-    "open_menu":   "Menü öffnen",
-    "close_menu":  "Menü schließen",
-    "tools_menu":  "Werkzeuge",
-    "cat_dns":        "DNS & Domain",
-    "cat_network":    "Netzwerk",
-    "cat_security":   "Sicherheit",
-    "cat_email":      "E-Mail",
-    "cat_web":        "Web-Analyse",
+    "open_menu": "Menü öffnen",
+    "close_menu": "Menü schließen",
+    "tools_menu": "Werkzeuge",
+    "cat_dns": "DNS & Domain",
+    "cat_network": "Netzwerk",
+    "cat_security": "Sicherheit",
+    "cat_email": "E-Mail",
+    "cat_web": "Web-Analyse",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
     "lang_zh": "中文",
     "tools": {
-      "ports":      "Ports",
-      "ip":         "IP",
-      "dns":        "DNS",
-      "propagation":"Verbreitung",
-      "headers":    "Header",
-      "tech":       "Tech",
-      "redirects":  "Weiterleitungen",
-      "subs":       "Subs",
-      "cdn":        "CDN",
-      "ssl":        "SSL",
-      "whois":      "WHOIS",
-      "email":      "E-Mail",
+      "ports": "Ports",
+      "ip": "IP",
+      "dns": "DNS",
+      "propagation": "Verbreitung",
+      "headers": "Header",
+      "tech": "Tech",
+      "redirects": "Weiterleitungen",
+      "subs": "Subs",
+      "cdn": "CDN",
+      "ssl": "SSL",
+      "whois": "WHOIS",
+      "email": "E-Mail",
       "email_auth": "SPF/DMARC",
-      "blacklist":  "DNSBL",
-      "dnssec":     "DNSSEC",
-      "ipv6":       "IPv6",
-      "bgp":        "BGP",
-      "og":         "OG",
-      "cookies":    "Cookies",
-      "robots":     "Robots",
-      "mixed":      "Mixed",
-      "jwt":        "JWT",
-      "pwd":        "Passwort"
+      "blacklist": "DNSBL",
+      "dnssec": "DNSSEC",
+      "ipv6": "IPv6",
+      "bgp": "BGP",
+      "og": "OG",
+      "cookies": "Cookies",
+      "robots": "Robots",
+      "mixed": "Mixed",
+      "jwt": "JWT",
+      "pwd": "Passwort"
     }
   },
   "auth": {
-    "meta_title":      "Anmelden",
-    "signin_title":    "Bei NetScope anmelden",
+    "meta_title": "Anmelden",
+    "signin_title": "Bei NetScope anmelden",
     "signin_subtitle": "Mit Ihrem GitHub- oder Google-Konto fortfahren. Wir fordern niemals Schreibzugriff an.",
     "continue_github": "Mit GitHub fortfahren",
     "continue_google": "Mit Google fortfahren"
@@ -68,103 +68,153 @@
   "tools": {
     "port-checker": {
       "title": "Port-Prüfer",
-      "desc": "TCP/UDP-Ports prüfen, Bereiche scannen, Dienste erkennen."
+      "desc": "TCP/UDP-Ports prüfen, Bereiche scannen, Dienste erkennen.",
+      "meta_title": "Port-Checker — TCP-Ports online prüfen",
+      "meta_description": "Prüfen Sie, ob ein Port auf einem Server offen ist. Einzelne Ports, Bereiche oder gängige Ports mit Latenz- und Diensterkennung scannen."
     },
     "ip-lookup": {
       "title": "IP-Abfrage",
-      "desc": "Geolokation, ASN, ISP, Proxy/VPN/TOR-Erkennung."
+      "desc": "Geolokation, ASN, ISP, Proxy/VPN/TOR-Erkennung.",
+      "meta_title": "IP-Abfrage — Geolokation, ASN, VPN/Proxy-Erkennung",
+      "meta_description": "Beliebige IP abfragen: Land, Stadt, ISP, ASN, Zeitzone. VPN, Proxy, TOR und Hosting erkennen."
     },
     "dns-lookup": {
       "title": "DNS-Abfrage",
-      "desc": "A, AAAA, MX, TXT, CNAME, NS-Einträge."
+      "desc": "A, AAAA, MX, TXT, CNAME, NS-Einträge.",
+      "meta_title": "DNS-Abfrage — A, AAAA, MX, TXT, NS-Einträge",
+      "meta_description": "Schnelle DNS-Abfrage für jede Domain. A, AAAA, MX, TXT, CNAME, NS und CAA-Einträge anzeigen."
     },
     "dns-propagation": {
       "title": "DNS-Ausbreitung",
-      "desc": "15 globale Resolver parallel abfragen."
+      "desc": "15 globale Resolver parallel abfragen.",
+      "meta_title": "DNS-Verbreitungs-Checker — 15 globale Resolver",
+      "meta_description": "DNS-Verbreitung über 15+ öffentliche Resolver weltweit prüfen. Sehen Sie, ob Ihre A-, AAAA-, MX- oder TXT-Änderung überall aktiv ist."
     },
     "http-headers": {
       "title": "HTTP-Sicherheits-Header",
-      "desc": "Sicherheits-Header von A+ bis F bewerten."
+      "desc": "Sicherheits-Header von A+ bis F bewerten.",
+      "meta_title": "HTTP-Sicherheits-Header-Inspektor",
+      "meta_description": "Bewerten Sie die HTTP-Sicherheits-Header Ihrer Seite von A+ bis F. HSTS, CSP, X-Frame-Options und mehr prüfen."
     },
     "tech-stack": {
       "title": "Tech-Stack",
-      "desc": "Frameworks, CMS, Analytics, Hosting erkennen."
+      "desc": "Frameworks, CMS, Analytics, Hosting erkennen.",
+      "meta_title": "Tech-Stack-Erkennung — Womit ist diese Seite gebaut?",
+      "meta_description": "Frameworks, CMS, Analytics, E-Commerce, Hosting und Bibliotheken aus öffentlichen Antwortdaten erkennen."
     },
     "redirects": {
       "title": "Weiterleitungs-Tracer",
-      "desc": "Jeden Hop verfolgen, Schleifen und Downgrades erkennen."
+      "desc": "Jeden Hop verfolgen, Schleifen und Downgrades erkennen.",
+      "meta_title": "Weiterleitungsketten-Tracer",
+      "meta_description": "Jeden Hop einer URL-Weiterleitungskette verfolgen. Schleifen, HTTPS-Downgrades und zu viele Weiterleitungen erkennen, die das SEO schaden."
     },
     "subdomains": {
       "title": "Subdomain-Finder",
-      "desc": "Passive Enumeration über CT-Logs."
+      "desc": "Passive Enumeration über CT-Logs.",
+      "meta_title": "Subdomain-Finder — Certificate Transparency",
+      "meta_description": "Subdomains aus öffentlichen Certificate-Transparency-Logs ermitteln. Schnell, passiv, ohne Scannen."
     },
     "cdn-detector": {
       "title": "CDN-Erkennung",
-      "desc": "Cloudflare, Fastly, Akamai und mehr identifizieren."
+      "desc": "Cloudflare, Fastly, Akamai und mehr identifizieren.",
+      "meta_title": "CDN-Erkennung — Welches CDN nutzt diese Seite?",
+      "meta_description": "Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify und 12+ weitere CDNs erkennen."
     },
     "ssl-check": {
       "title": "SSL-Zertifikat",
-      "desc": "Kette, Ablauf, Verschlüsselung, TLS-Version."
+      "desc": "Kette, Ablauf, Verschlüsselung, TLS-Version.",
+      "meta_title": "SSL-Zertifikat-Prüfer — TLS-Inspektion",
+      "meta_description": "SSL/TLS-Zertifikate prüfen: Aussteller, Kette, Ablauf, Cipher-Suite und TLS-Version."
     },
     "whois": {
       "title": "WHOIS / RDAP",
-      "desc": "Domain-Eigentümer und Registrierungsdaten."
+      "desc": "Domain-Eigentümer und Registrierungsdaten.",
+      "meta_title": "WHOIS / RDAP-Abfrage",
+      "meta_description": "Moderne RDAP-basierte Domain-Registrierungsabfrage: Registrar, Status, Nameserver, Daten."
     },
     "reachability": {
       "title": "Erreichbarkeit",
-      "desc": "HTTP, TCP, Ping und globaler Status."
+      "desc": "HTTP, TCP, Ping und globaler Status.",
+      "meta_title": "Server-Erreichbarkeitstest",
+      "meta_description": "HTTP-, TCP- und Ping-Erreichbarkeit zu jedem Server testen, inklusive Antwortzeit."
     },
     "email-verify": {
       "title": "E-Mail-Prüfer",
-      "desc": "MX + Wegwerf-Adressen + SMTP-Probe."
+      "desc": "MX + Wegwerf-Adressen + SMTP-Probe.",
+      "meta_title": "E-Mail-Prüfer — MX, Wegwerf, SMTP-Probe",
+      "meta_description": "Beliebige E-Mail-Adresse prüfen: Syntax, MX-Einträge, Wegwerf-Anbieter-Check, optionaler SMTP-Handshake."
     },
     "email-auth": {
       "title": "SPF / DMARC / DKIM",
-      "desc": "E-Mail-Authentifizierung bewerten."
+      "desc": "E-Mail-Authentifizierung bewerten.",
+      "meta_title": "SPF / DKIM / DMARC-Analyse",
+      "meta_description": "E-Mail-Authentifizierungseinträge für jede Domain prüfen. SPF-Richtlinie, DMARC-Durchsetzung und DKIM-Setup mit Warnungen einsehen."
     },
     "blacklist": {
       "title": "IP-Blacklist",
-      "desc": "IP auf 20+ Spam-DNSBLs prüfen."
+      "desc": "IP auf 20+ Spam-DNSBLs prüfen.",
+      "meta_title": "IP-Blacklist-Check — 20+ DNSBLs",
+      "meta_description": "Prüfen, ob eine IP auf 20+ großen Spam-Blacklists steht (Spamhaus, Barracuda, SORBS). Sofortige, parallele DNSBL-Abfragen."
     },
     "jwt": {
       "title": "JWT-Decoder",
-      "desc": "JWT-Ansprüche nur clientseitig einsehen."
+      "desc": "JWT-Ansprüche nur clientseitig einsehen.",
+      "meta_title": "JWT-Decoder — JSON Web Tokens prüfen",
+      "meta_description": "JWT einfügen, um Header und Payload zu dekodieren, Claims zu prüfen und Ablauf zu verifizieren — vollständig im Browser, nichts wird an Server gesendet."
     },
     "password-leak": {
       "title": "Passwort-Leak-Check",
-      "desc": "HIBP-Prüfung mit k-Anonymität — verlässt nie den Browser."
+      "desc": "HIBP-Prüfung mit k-Anonymität — verlässt nie den Browser.",
+      "meta_title": "Passwort-Leak-Check — HIBP k-Anonymität",
+      "meta_description": "Prüfen Sie, ob Ihr Passwort in bekannten Datenlecks vorkommt. Nutzt die k-Anonymitäts-API von Have I Been Pwned — nur die ersten 5 SHA-1-Zeichen werden gesendet."
     },
     "dnssec": {
       "title": "DNSSEC-Validator",
-      "desc": "DS, DNSKEY und Signaturprüfungen."
+      "desc": "DS, DNSKEY und Signaturprüfungen.",
+      "meta_title": "DNSSEC-Validator",
+      "meta_description": "DNSSEC-Bereitstellung für jede Domain prüfen. DS-, DNSKEY- und RRSIG-Einträge mit Warnungen einsehen."
     },
     "cookies": {
       "title": "Cookie / DSGVO",
-      "desc": "Cookie-Flags + Drittanbieter-Tracker erkennen."
+      "desc": "Cookie-Flags + Drittanbieter-Tracker erkennen.",
+      "meta_title": "Cookie- & DSGVO-Analyse",
+      "meta_description": "Set-Cookie-Flags und Drittanbieter-Tracker auf jeder Seite untersuchen. DSGVO-Risikobewertung."
     },
     "opengraph": {
       "title": "OG-Vorschau",
-      "desc": "Social-Share-Vorschau für beliebige URLs."
+      "desc": "Social-Share-Vorschau für beliebige URLs.",
+      "meta_title": "Open Graph & Meta-Vorschau",
+      "meta_description": "Vorschau, wie Ihre URL beim Teilen auf Twitter, Facebook, LinkedIn und Slack aussieht."
     },
     "robots": {
       "title": "Robots & Sitemap",
-      "desc": "robots.txt parsen und Sitemaps validieren."
+      "desc": "robots.txt parsen und Sitemaps validieren.",
+      "meta_title": "Robots.txt- & Sitemap-Validator",
+      "meta_description": "robots.txt-Regeln und Sitemap-XML für jeden Host parsen und validieren."
     },
     "ipv6": {
       "title": "IPv6-Bereitschaft",
-      "desc": "AAAA-Abdeckung über Apex/www/NS/MX bewerten."
+      "desc": "AAAA-Abdeckung über Apex/www/NS/MX bewerten.",
+      "meta_title": "IPv6-Bereitschafts-Score",
+      "meta_description": "Bewerten Sie die IPv6-Bereitstellung Ihrer Domain für Apex, www, Nameserver und E-Mail."
     },
     "bgp": {
       "title": "BGP / ASN",
-      "desc": "Routing-Intelligenz via RIPE Stat."
+      "desc": "Routing-Intelligenz via RIPE Stat.",
+      "meta_title": "BGP / ASN-Viewer",
+      "meta_description": "BGP-Präfix, ankündigende ASNs und Route jeder IP abfragen. Oder die angekündigten Präfixe einer ASN einsehen."
     },
     "mixed-content": {
       "title": "Gemischter Inhalt",
-      "desc": "http://-Ressourcen auf HTTPS-Seiten finden."
+      "desc": "http://-Ressourcen auf HTTPS-Seiten finden.",
+      "meta_title": "Mixed-Content-Scanner",
+      "meta_description": "Unsichere http://-Ressourcen auf Ihren HTTPS-Seiten finden, die Browser blockieren oder davor warnen."
     },
     "dashboard": {
       "title": "Meine IP",
-      "desc": "Ihre IP, Standort, ISP, Browser, Betriebssystem."
+      "desc": "Ihre IP, Standort, ISP, Browser, Betriebssystem.",
+      "meta_title": "Mein IP-Dashboard",
+      "meta_description": "Ihre IP, Standort, ISP, Browser, OS, Bildschirm, Zeitzone — alles auf einen Blick."
     },
     "monitoring": {
       "title": "Monitoring",

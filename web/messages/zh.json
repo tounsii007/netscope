@@ -10,47 +10,47 @@
     "docs": "文档",
     "sign_in": "登录",
     "switch_lang": "切换语言",
-    "open_menu":   "打开菜单",
-    "close_menu":  "关闭菜单",
-    "tools_menu":  "工具",
-    "cat_dns":        "DNS 与域名",
-    "cat_network":    "网络",
-    "cat_security":   "安全",
-    "cat_email":      "邮件",
-    "cat_web":        "网站分析",
+    "open_menu": "打开菜单",
+    "close_menu": "关闭菜单",
+    "tools_menu": "工具",
+    "cat_dns": "DNS 与域名",
+    "cat_network": "网络",
+    "cat_security": "安全",
+    "cat_email": "邮件",
+    "cat_web": "网站分析",
     "lang_en": "English",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
     "lang_zh": "中文",
     "tools": {
-      "ports":      "端口",
-      "ip":         "IP",
-      "dns":        "DNS",
-      "propagation":"传播",
-      "headers":    "标头",
-      "tech":       "技术",
-      "redirects":  "重定向",
-      "subs":       "子域名",
-      "cdn":        "CDN",
-      "ssl":        "SSL",
-      "whois":      "WHOIS",
-      "email":      "邮箱",
+      "ports": "端口",
+      "ip": "IP",
+      "dns": "DNS",
+      "propagation": "传播",
+      "headers": "标头",
+      "tech": "技术",
+      "redirects": "重定向",
+      "subs": "子域名",
+      "cdn": "CDN",
+      "ssl": "SSL",
+      "whois": "WHOIS",
+      "email": "邮箱",
       "email_auth": "SPF/DMARC",
-      "blacklist":  "DNSBL",
-      "dnssec":     "DNSSEC",
-      "ipv6":       "IPv6",
-      "bgp":        "BGP",
-      "og":         "OG",
-      "cookies":    "Cookie",
-      "robots":     "Robots",
-      "mixed":      "混合",
-      "jwt":        "JWT",
-      "pwd":        "密码"
+      "blacklist": "DNSBL",
+      "dnssec": "DNSSEC",
+      "ipv6": "IPv6",
+      "bgp": "BGP",
+      "og": "OG",
+      "cookies": "Cookie",
+      "robots": "Robots",
+      "mixed": "混合",
+      "jwt": "JWT",
+      "pwd": "密码"
     }
   },
   "auth": {
-    "meta_title":      "登录",
-    "signin_title":    "登录 NetScope",
+    "meta_title": "登录",
+    "signin_title": "登录 NetScope",
     "signin_subtitle": "使用您的 GitHub 或 Google 账户继续。我们从不请求写入权限。",
     "continue_github": "使用 GitHub 继续",
     "continue_google": "使用 Google 继续"
@@ -68,103 +68,153 @@
   "tools": {
     "port-checker": {
       "title": "端口检测",
-      "desc": "检查 TCP/UDP 端口，扫描范围，检测服务。"
+      "desc": "检查 TCP/UDP 端口，扫描范围，检测服务。",
+      "meta_title": "端口检测 — 在线扫描 TCP 端口",
+      "meta_description": "检查任意服务器上的端口是否开放。扫描单个端口、端口范围或常用端口,并提供延迟和服务识别。"
     },
     "ip-lookup": {
       "title": "IP 查询",
-      "desc": "地理位置、ASN、ISP、代理/VPN/TOR 检测。"
+      "desc": "地理位置、ASN、ISP、代理/VPN/TOR 检测。",
+      "meta_title": "IP 查询 — 地理位置、ASN、VPN/代理检测",
+      "meta_description": "查询任意 IP:国家、城市、ISP、ASN、时区。检测 VPN、代理、TOR 与托管。"
     },
     "dns-lookup": {
       "title": "DNS 查询",
-      "desc": "A、AAAA、MX、TXT、CNAME、NS 记录。"
+      "desc": "A、AAAA、MX、TXT、CNAME、NS 记录。",
+      "meta_title": "DNS 查询 — A、AAAA、MX、TXT、NS 记录",
+      "meta_description": "对任意域名进行快速 DNS 查询。查看 A、AAAA、MX、TXT、CNAME、NS 和 CAA 记录。"
     },
     "dns-propagation": {
       "title": "DNS 传播检测",
-      "desc": "并行查询 15 个全球解析器。"
+      "desc": "并行查询 15 个全球解析器。",
+      "meta_title": "DNS 传播检测 — 15 个全球解析器",
+      "meta_description": "检查 DNS 在全球 15 多个公共解析器中的传播情况。查看您的 A、AAAA、MX 或 TXT 变更是否已在各处生效。"
     },
     "http-headers": {
       "title": "HTTP 安全头部",
-      "desc": "安全头部评级 A+ 至 F。"
+      "desc": "安全头部评级 A+ 至 F。",
+      "meta_title": "HTTP 安全标头检测器",
+      "meta_description": "为您站点的 HTTP 安全标头从 A+ 到 F 评级。检查 HSTS、CSP、X-Frame-Options 等。"
     },
     "tech-stack": {
       "title": "技术栈检测",
-      "desc": "检测框架、CMS、分析工具、托管服务。"
+      "desc": "检测框架、CMS、分析工具、托管服务。",
+      "meta_title": "技术栈检测 — 这个网站用什么搭建?",
+      "meta_description": "从公开响应数据中识别框架、CMS、分析工具、电商、托管和库。"
     },
     "redirects": {
       "title": "重定向追踪",
-      "desc": "追踪每一跳，发现循环和降级。"
+      "desc": "追踪每一跳，发现循环和降级。",
+      "meta_title": "重定向链跟踪器",
+      "meta_description": "跟踪 URL 重定向链的每一跳。发现影响 SEO 的循环、HTTPS 降级和过多重定向。"
     },
     "subdomains": {
       "title": "子域名查找",
-      "desc": "通过 CT 日志进行被动枚举。"
+      "desc": "通过 CT 日志进行被动枚举。",
+      "meta_title": "子域查找器 — Certificate Transparency",
+      "meta_description": "从公开的 Certificate Transparency 日志中枚举子域。快速、被动、无需扫描。"
     },
     "cdn-detector": {
       "title": "CDN 检测",
-      "desc": "识别 Cloudflare、Fastly、Akamai 等。"
+      "desc": "识别 Cloudflare、Fastly、Akamai 等。",
+      "meta_title": "CDN 检测 — 这个网站使用哪个 CDN?",
+      "meta_description": "检测 Cloudflare、Fastly、Akamai、CloudFront、Vercel、Netlify 及 12 多家其他 CDN。"
     },
     "ssl-check": {
       "title": "SSL 证书",
-      "desc": "证书链、有效期、加密套件、TLS 版本。"
+      "desc": "证书链、有效期、加密套件、TLS 版本。",
+      "meta_title": "SSL 证书检测 — TLS 检查",
+      "meta_description": "检查 SSL/TLS 证书:颁发者、证书链、有效期、加密套件和 TLS 版本。"
     },
     "whois": {
       "title": "WHOIS / RDAP",
-      "desc": "域名所有权和注册数据。"
+      "desc": "域名所有权和注册数据。",
+      "meta_title": "WHOIS / RDAP 查询",
+      "meta_description": "基于现代 RDAP 的域名注册查询:注册商、状态、名称服务器、日期。"
     },
     "reachability": {
       "title": "可达性检测",
-      "desc": "HTTP、TCP、Ping 和全局状态。"
+      "desc": "HTTP、TCP、Ping 和全局状态。",
+      "meta_title": "服务器可达性测试",
+      "meta_description": "对任意服务器进行 HTTP、TCP 和 ping 可达性测试,并显示响应时间。"
     },
     "email-verify": {
       "title": "邮箱验证",
-      "desc": "MX + 一次性邮箱 + SMTP 探测。"
+      "desc": "MX + 一次性邮箱 + SMTP 探测。",
+      "meta_title": "邮箱验证 — MX、一次性、SMTP 探测",
+      "meta_description": "验证任意邮箱地址:语法、MX 记录、一次性提供商检查、可选 SMTP 握手。"
     },
     "email-auth": {
       "title": "SPF / DMARC / DKIM",
-      "desc": "评估邮件认证配置。"
+      "desc": "评估邮件认证配置。",
+      "meta_title": "SPF / DKIM / DMARC 分析",
+      "meta_description": "检查任意域名的邮件认证记录。查看带警告的 SPF 策略、DMARC 强制执行和 DKIM 配置。"
     },
     "blacklist": {
       "title": "IP 黑名单",
-      "desc": "在 20+ 垃圾邮件 DNSBL 上检查 IP。"
+      "desc": "在 20+ 垃圾邮件 DNSBL 上检查 IP。",
+      "meta_title": "IP 黑名单检测 — 20+ DNSBL",
+      "meta_description": "检查 IP 是否在 20 多个主要垃圾邮件黑名单(Spamhaus、Barracuda、SORBS)上。即时、并行的 DNSBL 查询。"
     },
     "jwt": {
       "title": "JWT 解码器",
-      "desc": "仅在客户端检查 JWT 声明。"
+      "desc": "仅在客户端检查 JWT 声明。",
+      "meta_title": "JWT 解码器 — 检查 JSON Web Token",
+      "meta_description": "粘贴 JWT 即可解码头部与负载、检查声明并验证过期 — 全程在您的浏览器中完成,不向服务器发送任何数据。"
     },
     "password-leak": {
       "title": "密码泄露检测",
-      "desc": "使用 k-匿名性的 HIBP 检查 — 不离开浏览器。"
+      "desc": "使用 k-匿名性的 HIBP 检查 — 不离开浏览器。",
+      "meta_title": "密码泄露检测 — HIBP k-Anonymity",
+      "meta_description": "检查您的密码是否出现在已知的数据泄露中。采用 Have I Been Pwned 的 k-anonymity API — 仅发送 SHA-1 哈希的前 5 个字符。"
     },
     "dnssec": {
       "title": "DNSSEC 验证",
-      "desc": "DS、DNSKEY 和签名检查。"
+      "desc": "DS、DNSKEY 和签名检查。",
+      "meta_title": "DNSSEC 验证器",
+      "meta_description": "检查任意域名的 DNSSEC 部署。查看带警告的 DS、DNSKEY 和 RRSIG 记录。"
     },
     "cookies": {
       "title": "Cookie / GDPR",
-      "desc": "Cookie 标志 + 第三方追踪器检测。"
+      "desc": "Cookie 标志 + 第三方追踪器检测。",
+      "meta_title": "Cookie 与 GDPR 分析",
+      "meta_description": "检查任意页面加载的 Set-Cookie 标志和第三方追踪器。GDPR 风险评分。"
     },
     "opengraph": {
       "title": "OG 预览",
-      "desc": "任意 URL 的社交分享预览。"
+      "desc": "任意 URL 的社交分享预览。",
+      "meta_title": "Open Graph 与元数据预览",
+      "meta_description": "预览您的 URL 在 Twitter、Facebook、LinkedIn、Slack 分享时的样式。"
     },
     "robots": {
       "title": "Robots 和 Sitemap",
-      "desc": "解析 robots.txt 并验证 sitemap。"
+      "desc": "解析 robots.txt 并验证 sitemap。",
+      "meta_title": "Robots.txt 与站点地图验证",
+      "meta_description": "为任意主机解析并验证 robots.txt 规则和站点地图 XML。"
     },
     "ipv6": {
       "title": "IPv6 就绪性",
-      "desc": "评估 apex/www/NS/MX 的 AAAA 覆盖范围。"
+      "desc": "评估 apex/www/NS/MX 的 AAAA 覆盖范围。",
+      "meta_title": "IPv6 就绪度评分",
+      "meta_description": "在 apex、www、名称服务器和邮件层面评估您域名的 IPv6 部署。"
     },
     "bgp": {
       "title": "BGP / ASN",
-      "desc": "通过 RIPE Stat 获取路由情报。"
+      "desc": "通过 RIPE Stat 获取路由情报。",
+      "meta_title": "BGP / ASN 查看器",
+      "meta_description": "查询任意 IP 的 BGP 前缀、宣告 ASN 与路由。或查看某个 ASN 宣告的前缀。"
     },
     "mixed-content": {
       "title": "混合内容",
-      "desc": "查找 HTTPS 页面上的 http:// 资源。"
+      "desc": "查找 HTTPS 页面上的 http:// 资源。",
+      "meta_title": "混合内容扫描",
+      "meta_description": "查找 HTTPS 页面上被浏览器阻止或警告的不安全 http:// 资源。"
     },
     "dashboard": {
       "title": "我的 IP",
-      "desc": "您的 IP、位置、ISP、浏览器、操作系统。"
+      "desc": "您的 IP、位置、ISP、浏览器、操作系统。",
+      "meta_title": "我的 IP 仪表盘",
+      "meta_description": "您的 IP、位置、ISP、浏览器、操作系统、屏幕、时区 — 一览无余。"
     },
     "monitoring": {
       "title": "监控",

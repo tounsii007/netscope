@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowRightLeft } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { RedirectsClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "Redirect Chain Tracer",
-  description: "Trace every hop of a URL's redirect chain. Spot loops, HTTPS downgrades, and too-many-redirects that hurt SEO.",
-  alternates: { canonical: "/redirects" },
-};
+const SLUG = "redirects";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/redirects` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="Redirect Tracer" subtitle="Follow every hop and flag loops, downgrades, slow redirects." icon={<ArrowRightLeft className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<ArrowRightLeft className="h-5 w-5" />}
+    >
       <RedirectsClient />
     </ToolShell>
   );

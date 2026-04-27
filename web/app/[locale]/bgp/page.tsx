@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Route } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { BgpClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "BGP / ASN Viewer",
-  description: "Look up the BGP prefix, announcing ASNs and route of any IP. Or inspect an ASN's announced prefixes.",
-  alternates: { canonical: "/bgp" },
-};
+const SLUG = "bgp";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/bgp` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="BGP / ASN" subtitle="Routing intelligence via RIPE Stat." icon={<Route className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Route className="h-5 w-5" />}
+    >
       <BgpClient />
     </ToolShell>
   );

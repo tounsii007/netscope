@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Lock } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { SslClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "SSL Certificate Checker — TLS inspection",
-  description: "Inspect SSL/TLS certificates: issuer, chain, expiry, cipher suite and TLS version.",
-  alternates: { canonical: "/ssl-check" },
-};
+const SLUG = "ssl-check";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/ssl-check` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="SSL Certificate" subtitle="Inspect the TLS certificate served by any host." icon={<Lock className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Lock className="h-5 w-5" />}
+    >
       <SslClient />
     </ToolShell>
   );

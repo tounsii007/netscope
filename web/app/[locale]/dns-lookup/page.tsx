@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
-import { DnsClient } from "./client";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Search } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { DnsClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "DNS Lookup — A, AAAA, MX, TXT, NS records",
-  description: "Fast DNS lookup for any domain. View A, AAAA, MX, TXT, CNAME, NS and CAA records.",
-  alternates: { canonical: "/dns-lookup" },
-};
+const SLUG = "dns-lookup";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/dns-lookup` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="DNS Lookup" subtitle="Query DNS records for any domain." icon={<Search className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Search className="h-5 w-5" />}
+    >
       <DnsClient />
     </ToolShell>
   );

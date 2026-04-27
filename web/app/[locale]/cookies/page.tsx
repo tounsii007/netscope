@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Cookie } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { CookieClient } from "./client";
 
-export const metadata: Metadata = {
-  title: "Cookie & GDPR Analyzer",
-  description: "Inspect Set-Cookie flags and third-party trackers loaded on any page. GDPR risk score.",
-  alternates: { canonical: "/cookies" },
-};
+const SLUG = "cookies";
 
-export default function Page() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: `tools.${SLUG}` });
+  return {
+    title:       t("meta_title"),
+    description: t("meta_description"),
+    alternates:  { canonical: `/cookies` },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations(`tools.${SLUG}`);
   return (
-    <ToolShell title="Cookie & GDPR" subtitle="Cookie flags + third-party tracker detection." icon={<Cookie className="h-5 w-5" />}>
+    <ToolShell
+      title={t("title")}
+      subtitle={t("desc")}
+      icon={<Cookie className="h-5 w-5" />}
+    >
       <CookieClient />
     </ToolShell>
   );
