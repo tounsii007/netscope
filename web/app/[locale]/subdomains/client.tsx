@@ -2,59 +2,102 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { AlertTriangle } from "lucide-react";
 import { api, type SubdomainsResult } from "@/lib/api";
-import { ResultCard, Spinner } from "@/components/tool-shell";
-import { Download, Search, AlertTriangle, Info } from "lucide-react";
+import { normaliseRegistrableDomain } from "@/lib/normalise-host";
+import { ResultCard } from "@/components/tool-shell";
+import { SubdomainsForm } from "./subdomains-form";
+import { StatsHeader } from "./stats-header";
+import { SubdomainsList } from "./subdomains-list";
 
+/**
+ * Subdomain Finder — orchestrator only.
+ *
+ * Decomposed into:
+ *   • subdomains-form.tsx       — input + submit
+ *   • stats-header.tsx          — count, filter, copy-all, export menu
+ *   • export-menu.tsx           — txt/csv/json dropdown
+ *   • export-helpers.ts         — pure download functions
+ *   • subdomains-list.tsx       — scrollable list + per-row actions
+ *   • highlight.tsx             — filter-match highlighting helper
+ *
+ * This file owns the network call and the cross-cutting pieces of state
+ * (domain input, fetch result, filter) that multiple children depend on.
+ * Every other concern lives in its own focused file.
+ */
 export function SubdomainsClient() {
   const t = useTranslations("subdomains");
   const tc = useTranslations("common");
+
   const [domain, setDomain] = useState("github.com");
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<SubdomainsResult | null>(null);
 
+  // Live-normalise so the user can preview what we'll actually query.
+  const normalisedDomain = useMemo(
+    () => normaliseRegistrableDomain(domain),
+    [domain]
+  );
+
   const filtered = useMemo(
-    () => data ? data.subdomains.filter((s) => s.includes(filter.toLowerCase())) : [],
+    () =>
+      data
+        ? data.subdomains.filter((s) =>
+            s.toLowerCase().includes(filter.trim().toLowerCase())
+          )
+        : [],
     [data, filter]
   );
 
+  // Per-depth distribution (apex.example.com → 0, foo.bar.example.com → 1)
+  // for the at-a-glance distribution badges in the header.
+  const depthDistribution = useMemo(() => {
+    if (!data || data.subdomains.length === 0) return null;
+    const map = new Map<number, number>();
+    const baseDepth = data.domain.split(".").length;
+    for (const s of data.subdomains) {
+      const depth = s.split(".").length - baseDepth;
+      map.set(depth, (map.get(depth) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => a[0] - b[0]);
+  }, [data]);
+
   async function run(e: React.FormEvent) {
     e.preventDefault();
-    if (!domain.trim()) {
+    const target = normalisedDomain;
+    if (!target) {
       setErr(tc("input_required"));
-      setData(null); setFilter("");
+      setData(null);
+      setFilter("");
       return;
     }
-    setErr(null); setLoading(true); setData(null); setFilter("");
-    try { setData(await api.subdomains(domain)); }
-    catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
-    finally { setLoading(false); }
-  }
-
-  function download() {
-    if (!data) return;
-    const blob = new Blob([data.subdomains.join("\n")], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${data.domain}-subdomains.txt`;
-    a.click();
+    setErr(null);
+    setLoading(true);
+    setData(null);
+    setFilter("");
+    try {
+      setData(await api.subdomains(target));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Error");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex gap-2">
-        <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
-        <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("enumerate")}</button>
-      </form>
+      <SubdomainsForm
+        domain={domain}
+        onDomainChange={setDomain}
+        normalisedDomain={normalisedDomain}
+        loading={loading}
+        onSubmit={run}
+      />
 
       {err && <div className="card border-danger/50 text-danger">{err}</div>}
 
-      {/* Upstream CT log (crt.sh) is open-circuit: clearly tell the user
-          the result is empty by NECESSITY, not because the domain has no
-          subdomains. Without this banner "0 Subdomains" is misleading —
-          facebook.com has thousands. */}
       {data && data.degraded && (
         <div className="card border-warn/50 bg-warn/5 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-warn shrink-0 mt-0.5" />
@@ -69,40 +112,19 @@ export function SubdomainsClient() {
 
       {data && !data.degraded && (
         <ResultCard>
-          <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <div className="text-2xl font-semibold">{data.count.toLocaleString()}</div>
-              <div className="text-xs text-fg-muted">{t("count", { count: data.count })} · {data.durationMs}ms · {data.source}</div>
-              {data.truncated && (
-                <div className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-warn/10 px-2 py-0.5 text-xs text-warn">
-                  <Info className="h-3 w-3" />
-                  {t("truncated_notice")}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle" />
-                <input className="input pl-8" placeholder={t("filter_placeholder")}
-                  value={filter} onChange={(e) => setFilter(e.target.value)} />
-              </div>
-              <button type="button" onClick={download} className="btn-ghost">
-                <Download className="h-4 w-4" /> .txt
-              </button>
-            </div>
-          </div>
-
-          <div className="max-h-[500px] overflow-auto rounded-lg border border-border">
-            <ul className="divide-y divide-border/40 font-mono text-sm">
-              {filtered.map((s) => (
-                <li key={s} className="flex items-center justify-between px-3 py-1.5 hover:bg-bg-elevated">
-                  <span className="break-all">{s}</span>
-                  <a href={`/ip-lookup?host=${s}`} className="text-xs text-fg-subtle hover:text-brand">lookup →</a>
-                </li>
-              ))}
-              {filtered.length === 0 && <li className="p-6 text-center text-fg-subtle text-sm">{tc("no_results")}</li>}
-            </ul>
-          </div>
+          <StatsHeader
+            data={data}
+            filter={filter}
+            onFilterChange={setFilter}
+            filteredCount={filtered.length}
+            depthDistribution={depthDistribution}
+          />
+          <SubdomainsList
+            filter={filter}
+            onClearFilter={() => setFilter("")}
+            filtered={filtered}
+            totalCount={data.count}
+          />
         </ResultCard>
       )}
     </div>

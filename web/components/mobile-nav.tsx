@@ -1,43 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
+import { DrawerBody } from "@/components/mobile-nav/drawer-body";
 
 /**
- * Slide-out drawer with all 23 tool links. Visible on <md breakpoints,
- * complements the horizontal desktop nav in <SiteNav>.
+ * Slide-out drawer for tool navigation on screens narrower than `lg`
+ * (1024 px). Owns only the open/close state and the side-effects that
+ * accompany it (route-change auto-close, Escape, body-scroll lock);
+ * the actual category list lives in {@link DrawerBody} and the static
+ * tool catalog in {@link CATEGORIES} so adding a new tool is a one-line
+ * change.
  *
- * • Closes on route change (pathname effect)
- * • Closes on Escape key
- * • Locks body scroll while open
- * • Backdrop click closes
+ * The `toolLinks` prop is kept for API compatibility with the parent
+ * SiteNav, but is no longer consumed — categories are derived
+ * internally so a future reshuffle in SiteNav can't desync the drawer.
  */
 export function MobileNav({
-  toolLinks,
+  toolLinks: _toolLinks,
 }: {
   toolLinks: { href: string; key: string }[];
 }) {
-  const t      = useTranslations("nav");
-  const tTools = useTranslations("nav.tools");
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Close on route change
-  useEffect(() => { setOpen(false); }, [pathname]);
-
-  // Escape to close + body scroll lock
+  // Close drawer on route change so the user is never stranded behind
+  // a blocking modal after tapping a link.
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(false); }
-    if (open) {
-      document.addEventListener("keydown", onKey);
-      document.body.style.overflow = "hidden";
+    setOpen(false);
+  }, [pathname]);
+
+  // Escape closes; body scroll-locks while open and is restored on close.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
     }
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = prevOverflow;
     };
   }, [open]);
 
@@ -55,26 +62,24 @@ export function MobileNav({
       </button>
 
       {open && (
-        <>
-          {/* Backdrop */}
+        <div className="lg:hidden">
           <div
             onClick={() => setOpen(false)}
             aria-hidden="true"
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in-up"
-            style={{ animationDuration: "200ms" }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-fade-in-up"
+            style={{ animationDuration: "180ms" }}
           />
 
-          {/* Drawer */}
           <aside
             id="mobile-nav-drawer"
             role="dialog"
             aria-modal="true"
             aria-label={t("tools_menu")}
-            className="fixed right-0 top-0 z-50 h-full w-[85vw] max-w-sm overflow-y-auto border-l border-border bg-bg-card shadow-2xl lg:hidden"
-            style={{ animation: "slideInRight 250ms ease-out" }}
+            className="fixed right-0 top-0 z-50 flex h-full w-[88vw] max-w-sm flex-col border-l border-border bg-bg-card shadow-2xl animate-slide-up"
+            style={{ animationDuration: "220ms" }}
           >
             <div className="sticky top-0 flex items-center justify-between border-b border-border bg-bg-card/95 px-4 py-3 backdrop-blur">
-              <span className="font-semibold">{t("tools_menu")}</span>
+              <span className="font-semibold text-fg">{t("tools_menu")}</span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -85,48 +90,9 @@ export function MobileNav({
               </button>
             </div>
 
-            <nav className="p-2">
-              <ul className="space-y-0.5">
-                {toolLinks.map((tool) => {
-                  const active =
-                    pathname === tool.href ||
-                    pathname.endsWith(tool.href) ||
-                    pathname.includes(`${tool.href}/`);
-                  return (
-                    <li key={tool.href}>
-                      <Link
-                        href={tool.href}
-                        className={`block rounded-md px-3 py-2.5 text-sm transition ${
-                          active
-                            ? "bg-brand/10 text-brand font-medium"
-                            : "text-fg-muted hover:bg-bg-elevated hover:text-fg"
-                        }`}
-                      >
-                        {tTools(tool.key)}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <div className="mt-4 border-t border-border pt-4 px-1 space-y-2">
-                <Link href="/api-docs" className="btn-ghost w-full justify-center text-sm">
-                  {t("api")}
-                </Link>
-                <Link href="/pricing" className="btn w-full justify-center text-sm">
-                  {t("pricing")}
-                </Link>
-              </div>
-            </nav>
+            <DrawerBody onNavigate={() => setOpen(false)} />
           </aside>
-
-          <style jsx>{`
-            @keyframes slideInRight {
-              from { transform: translateX(100%); }
-              to   { transform: translateX(0); }
-            }
-          `}</style>
-        </>
+        </div>
       )}
     </>
   );

@@ -13,6 +13,14 @@ export default function middleware(req: NextRequest) {
   const start = Date.now();
   const res = intlMiddleware(req);
 
+  // Forward the original pathname to downstream Server Components so the
+  // not-found page can render the URL the user actually typed.  next-intl's
+  // middleware rewrites the URL internally (adding /<locale>/), so RSCs
+  // can't see the original via headers without us echoing it here.
+  if (res instanceof NextResponse) {
+    res.headers.set("x-pathname", req.nextUrl.pathname);
+  }
+
   // Log after intl middleware resolves (non-blocking — fire & forget)
   // We write directly to stdout in a structured format; the PM2 / Docker
   // log driver picks it up, and the Node.js logger in lib/logger.ts
@@ -54,7 +62,14 @@ export default function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except _next internals and static files
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+    // Match every path EXCEPT:
+    //  • Next.js internals (_next/static, _next/image)
+    //  • Top-level static files served from app/ or public/ — favicon,
+    //    icon.png, apple-icon, robots.txt, sitemap.xml, manifest, etc.
+    //  • Anything with a file extension (.png, .svg, .ico, .jpg, .css,
+    //    .js, .woff, .woff2, .json, .txt, .xml, .map, .webp, .avif).
+    //    Without this, next-intl rewrites /icon.png → /de/icon.png,
+    //    which 404s because the file is only served from the root.
+    "/((?!_next/static|_next/image|favicon\\.ico|icon\\.png|icon\\.svg|apple-icon\\.png|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|css|js|woff|woff2|ttf|otf|eot|map|json|txt|xml)$).*)",
   ],
 };

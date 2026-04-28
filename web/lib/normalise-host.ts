@@ -51,6 +51,25 @@ export function normaliseHost(raw: string): string {
 }
 
 /**
+ * Normalise input for tools that operate on the *registered* domain rather
+ * than a specific hostname — Subdomain Finder being the prime example. crt.sh
+ * / CertSpotter index by the suffix, so querying "www.example.com" returns
+ * only certs that include "www.example.com" literally (typically just one),
+ * while querying "example.com" returns the full set.
+ *
+ * On top of {@link normaliseHost}'s scheme/path/port stripping this also:
+ *   • drops a single leading "www." (the most common false-precision)
+ *
+ * Multiple-leading subdomains ("api.staging.example.com") are kept as-is —
+ * the user is presumed to want that specific subtree's certs.
+ */
+export function normaliseRegistrableDomain(raw: string): string {
+  let s = normaliseHost(raw);
+  if (s.startsWith("www.")) s = s.slice(4);
+  return s;
+}
+
+/**
  * Same as {@link normaliseHost} but keeps the protocol and path — useful for
  * tools that legitimately want the full URL (HTTP Headers, Redirects,
  * OpenGraph, Mixed Content). We just trim and add a default scheme if the
