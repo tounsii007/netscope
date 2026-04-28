@@ -14,8 +14,10 @@ import { sleep } from "k6";
 import http from "k6/http";
 import { check } from "k6";
 import {
-  BASE_URL, reqOk, reqFail, errorRate, ttfb, buildSummary,
+  BASE_URL, reqOk, reqFail, errorRate, ttfb, buildSummary, preflightOrAbort,
 } from "./scenarios.js";
+
+export function setup() { preflightOrAbort(); }
 
 export const options = {
   scenarios: {

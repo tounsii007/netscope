@@ -29,18 +29,34 @@ export const SLA_THRESHOLDS = {
 // expect real traffic to look like — port-check and IP-lookup are the
 // two most-used tools. Subdomain enumeration is rarer because it's
 // expensive on the upstream CT log.
+//
+// IMPORTANT — every entry sets a stable `nameTag` because k6 normally
+// uses the full URL as a metric tag, which would create one time-series
+// per unique random IP (millions of them under stress). The reserved
+// `name` tag collapses every variant into a single endpoint key in the
+// metrics store, keeping cardinality flat.
 const ENDPOINT_MIX = [
-  { weight: 25, name: "ip",         path: () => `/api/v1/ip/${randIp()}`, method: "GET" },
-  { weight: 20, name: "port",       path: () => `/api/v1/port/check`, method: "POST",
+  { weight: 25, name: "ip",          nameTag: "/api/v1/ip/:ip",
+    path: () => `/api/v1/ip/${randIp()}`, method: "GET" },
+  { weight: 20, name: "port",        nameTag: "/api/v1/port/check",
+    path: () => `/api/v1/port/check`, method: "POST",
     body: () => JSON.stringify({ target: pick(HOSTS), port: pick(PORTS), protocol: "tcp" }) },
-  { weight: 15, name: "dns",        path: () => `/api/v1/dns/${pick(DOMAINS)}?type=A,AAAA,MX`, method: "GET" },
-  { weight: 10, name: "ssl",        path: () => `/api/v1/ssl/${pick(DOMAINS)}?port=443`, method: "GET" },
-  { weight:  8, name: "headers",    path: () => `/api/v1/headers?url=${encodeURIComponent("https://" + pick(DOMAINS))}`, method: "GET" },
-  { weight:  7, name: "whois",      path: () => `/api/v1/whois/${pick(DOMAINS)}`, method: "GET" },
-  { weight:  5, name: "blacklist",  path: () => `/api/v1/blacklist/${randIp()}`, method: "GET" },
-  { weight:  5, name: "propagation",path: () => `/api/v1/dns-propagation/${pick(DOMAINS)}?type=A`, method: "GET" },
-  { weight:  3, name: "subdomains", path: () => `/api/v1/subdomains/${pick(DOMAINS)}`, method: "GET" },
-  { weight:  2, name: "bgp",        path: () => `/api/v1/bgp/ip/${randIp()}`, method: "GET" },
+  { weight: 15, name: "dns",         nameTag: "/api/v1/dns/:domain",
+    path: () => `/api/v1/dns/${pick(DOMAINS)}?type=A,AAAA,MX`, method: "GET" },
+  { weight: 10, name: "ssl",         nameTag: "/api/v1/ssl/:host",
+    path: () => `/api/v1/ssl/${pick(DOMAINS)}?port=443`, method: "GET" },
+  { weight:  8, name: "headers",     nameTag: "/api/v1/headers",
+    path: () => `/api/v1/headers?url=${encodeURIComponent("https://" + pick(DOMAINS))}`, method: "GET" },
+  { weight:  7, name: "whois",       nameTag: "/api/v1/whois/:domain",
+    path: () => `/api/v1/whois/${pick(DOMAINS)}`, method: "GET" },
+  { weight:  5, name: "blacklist",   nameTag: "/api/v1/blacklist/:ip",
+    path: () => `/api/v1/blacklist/${randIp()}`, method: "GET" },
+  { weight:  5, name: "propagation", nameTag: "/api/v1/dns-propagation/:domain",
+    path: () => `/api/v1/dns-propagation/${pick(DOMAINS)}?type=A`, method: "GET" },
+  { weight:  3, name: "subdomains",  nameTag: "/api/v1/subdomains/:domain",
+    path: () => `/api/v1/subdomains/${pick(DOMAINS)}`, method: "GET" },
+  { weight:  2, name: "bgp",         nameTag: "/api/v1/bgp/ip/:ip",
+    path: () => `/api/v1/bgp/ip/${randIp()}`, method: "GET" },
 ];
 
 const HOSTS   = ["google.com", "cloudflare.com", "github.com", "amazon.com", "wikipedia.org", "stackoverflow.com"];
@@ -72,7 +88,11 @@ export function hitRandomEndpoint() {
   const url = `${BASE_URL}${ep.path()}`;
   const params = {
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    tags: { endpoint: ep.name },
+    // k6's reserved `name` tag — collapses every variant of the same
+    // endpoint into one row in the summary, regardless of how many
+    // unique URLs we hit. Without this, random-IP paths would create
+    // millions of unique time-series and OOM the metrics engine.
+    tags: { name: ep.nameTag, endpoint: ep.name },
     timeout: "10s",
   };
   const res = ep.method === "POST"
@@ -96,7 +116,7 @@ export function hitNamed(name) {
   const url = `${BASE_URL}${ep.path()}`;
   const params = {
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    tags: { endpoint: ep.name, scenario: "same-endpoint" },
+    tags: { name: ep.nameTag, endpoint: ep.name, scenario: "same-endpoint" },
     timeout: "10s",
   };
   const res = ep.method === "POST"
@@ -111,6 +131,37 @@ export function hitNamed(name) {
   errorRate.add(!ok);
   if (res.timings.waiting > 0) ttfb.add(res.timings.waiting);
   return res;
+}
+
+/**
+ * Pre-flight reachability check. Run from k6 setup() so the whole
+ * scenario aborts cleanly if BASE_URL isn't reachable instead of
+ * burning 10 minutes producing 100 % connection-refused noise.
+ *
+ * Detects three common mistakes:
+ *   • dev server not running                  (ECONNREFUSED)
+ *   • wrong host in Docker (need host.docker.internal, not localhost)
+ *   • DNS typo in BASE_URL                    (ENOTFOUND)
+ */
+export function preflightOrAbort() {
+  const probe = http.get(`${BASE_URL}/api/v1/ip/me`, {
+    timeout: "5s",
+    tags: { name: "preflight" },
+  });
+  if (probe.error_code) {
+    throw new Error(
+      `\n  Preflight to ${BASE_URL} failed: ${probe.error || probe.error_code}\n` +
+      `  → Is the dev server running?  Run \`npm run dev\` (or your prod stack).\n` +
+      `  → On Docker, BASE_URL must be http://host.docker.internal:3000, not localhost.\n` +
+      `  → Override per-run with:  BASE_URL=https://staging.example.com k6 run …\n`
+    );
+  }
+  if (probe.status >= 500) {
+    throw new Error(
+      `\n  Preflight got HTTP ${probe.status} from ${BASE_URL}.\n` +
+      `  Backend is reachable but unhealthy — fix that first.\n`
+    );
+  }
 }
 
 /** Pretty summary saved as both JSON and a human-readable text report. */

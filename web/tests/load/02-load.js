@@ -5,7 +5,11 @@
 // Env:  BASE_URL
 
 import { sleep } from "k6";
-import { hitRandomEndpoint, buildSummary, SLA_THRESHOLDS } from "./scenarios.js";
+import {
+  hitRandomEndpoint, buildSummary, preflightOrAbort, SLA_THRESHOLDS,
+} from "./scenarios.js";
+
+export function setup() { preflightOrAbort(); }
 
 export const options = {
   scenarios: {

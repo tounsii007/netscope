@@ -2,12 +2,12 @@
   "$schema": "Performance budget enforced in CI by tests/perf/check-bundle-budget.mjs",
   "description": "Hard ceilings on bundle and route-segment sizes. CI fails when any value is exceeded — bumping a budget should be a deliberate, reviewed decision, not a surprise.",
 
-  "totalJsKb":   { "max": 1500,
-                   "comment": "Sum of all JS chunks Next.js emits, gzipped." },
-  "firstLoadJsKb": { "max": 250,
-                     "comment": "Initial bundle a fresh visitor downloads on the home page (Next.js' 'First Load JS shared by all')." },
-  "perRouteFirstLoadJsKb": { "max": 350,
-                             "comment": "Tool pages — they include client-side state but should still be lean." },
+  "totalJsKb":   { "max": 600,
+                   "comment": "Sum of every JS chunk in .next/static, gzipped (level 9). Comfortable ceiling for a 24-tool app; bump only when adding a heavy new dependency." },
+  "firstLoadJsKb": { "max": 280,
+                     "comment": "Gzipped 'First Load JS shared by all'. React 19 + Next 15 framework + next-intl + lucide adds up here; ~250 KB is realistic, with 30 KB headroom for routine commits." },
+  "perRouteFirstLoadJsKb": { "max": 200,
+                             "comment": "Per-route gzipped weight. ip-lookup is the heaviest at ~127 KB (Leaflet, multi-source panel) — 200 KB ceiling allows ~1.5× growth before tripping." },
 
   "vitals": {
     "FCP_ms_p75":  1800,

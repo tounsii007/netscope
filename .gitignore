@@ -39,6 +39,9 @@ test-results/
 .vitest/
 api/target/pit-reports/
 api/target/site/
+# k6 load-test outputs — keep the folder (.gitkeep) but never the runs
+web/tests/load/results/*
+!web/tests/load/results/.gitkeep
 
 # Secrets
 *.pem

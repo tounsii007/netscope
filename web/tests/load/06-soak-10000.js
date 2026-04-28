@@ -11,7 +11,9 @@
 // Run time: ~50 minutes — only run on dedicated staging.
 
 import { sleep } from "k6";
-import { hitRandomEndpoint, buildSummary } from "./scenarios.js";
+import { hitRandomEndpoint, buildSummary, preflightOrAbort } from "./scenarios.js";
+
+export function setup() { preflightOrAbort(); }
 
 export const options = {
   scenarios: {

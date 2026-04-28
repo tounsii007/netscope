@@ -5,7 +5,13 @@
 // Env:  BASE_URL  (default http://localhost:3000)
 
 import { sleep } from "k6";
-import { hitRandomEndpoint, buildSummary, SLA_THRESHOLDS } from "./scenarios.js";
+import {
+  hitRandomEndpoint, buildSummary, preflightOrAbort, SLA_THRESHOLDS,
+} from "./scenarios.js";
+
+// Bail loudly with a useful error if BASE_URL isn't reachable instead
+// of running for a minute and producing 100 % connection-refused noise.
+export function setup() { preflightOrAbort(); }
 
 export const options = {
   scenarios: {

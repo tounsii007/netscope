@@ -6,7 +6,9 @@
 // Env:  BASE_URL  (REQUIRED — never run this against prod)
 
 import { sleep } from "k6";
-import { hitRandomEndpoint, buildSummary } from "./scenarios.js";
+import { hitRandomEndpoint, buildSummary, preflightOrAbort } from "./scenarios.js";
+
+export function setup() { preflightOrAbort(); }
 
 export const options = {
   scenarios: {
