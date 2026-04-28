@@ -63,7 +63,9 @@ describe("PasswordLeakClient", () => {
 
   it("renders the translated privacy note in German", () => {
     renderWithLocale(<PasswordLeakClient />, "de");
-    expect(screen.getByText(/SHA-1 wird in Ihrem Browser/i)).toBeInTheDocument();
+    // Polish pass standardised on the informal "du"-form, so the privacy
+    // note now says "in deinem Browser" — not "Ihrem Browser".
+    expect(screen.getByText(/SHA-1 wird in deinem Browser/i)).toBeInTheDocument();
   });
 
   it("renders the translated privacy note in Chinese", () => {

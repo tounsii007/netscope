@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Image } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
 import { ToolExplainer } from "@/components/tool-explainer";
 import { OgClient } from "./client";
@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<Image className="h-5 w-5" />}
+      icon={<ImageIcon className="h-5 w-5" />}
     >
       <OgClient />
       <ToolExplainer slug={SLUG} locale={locale} />

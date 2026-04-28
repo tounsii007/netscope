@@ -7,6 +7,18 @@ import { Menu, X } from "lucide-react";
 import { DrawerBody } from "@/components/mobile-nav/drawer-body";
 
 /**
+ * Module-level reference counter for body scroll locking.
+ *
+ * If two MobileNav instances are mounted in parallel (e.g. one in the
+ * header and one elsewhere on the same page) and both open at once,
+ * naive "save & restore prevOverflow" would corrupt the body style as
+ * each instance restores the value the OTHER one had captured.
+ * Reference counting decouples the two: body stays locked while ANY
+ * drawer is open, unlocks only when the LAST one closes.
+ */
+let openDrawerCount = 0;
+
+/**
  * Slide-out drawer for tool navigation on screens narrower than `lg`
  * (1024 px). Owns only the open/close state and the side-effects that
  * accompany it (route-change auto-close, Escape, body-scroll lock);
@@ -18,11 +30,8 @@ import { DrawerBody } from "@/components/mobile-nav/drawer-body";
  * SiteNav, but is no longer consumed — categories are derived
  * internally so a future reshuffle in SiteNav can't desync the drawer.
  */
-export function MobileNav({
-  toolLinks: _toolLinks,
-}: {
-  toolLinks: { href: string; key: string }[];
-}) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function MobileNav(_props: { toolLinks: { href: string; key: string }[] }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -33,18 +42,25 @@ export function MobileNav({
     setOpen(false);
   }, [pathname]);
 
-  // Escape closes; body scroll-locks while open and is restored on close.
+  // Escape closes; body scroll-locks while ANY drawer is open. We use a
+  // module-level refcount so two parallel drawers can't fight over the
+  // body.style.overflow value (see openDrawerCount above).
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
     document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    openDrawerCount += 1;
+    if (openDrawerCount === 1) {
+      document.body.style.overflow = "hidden";
+    }
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
+      openDrawerCount = Math.max(0, openDrawerCount - 1);
+      if (openDrawerCount === 0) {
+        document.body.style.overflow = "";
+      }
     };
   }, [open]);
 

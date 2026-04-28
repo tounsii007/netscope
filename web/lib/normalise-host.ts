@@ -77,7 +77,7 @@ export function normaliseRegistrableDomain(raw: string): string {
  */
 export function normaliseUrl(raw: string): string {
   if (!raw) return "";
-  let s = raw.trim();
+  const s = raw.trim();
   if (!s) return "";
   // Already has a scheme? Trust it.
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) return s;

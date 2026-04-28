@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type PropagationResult } from "@/lib/api";
-import { ResultCard, Spinner } from "@/components/tool-shell";
+import { Spinner } from "@/components/tool-shell";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 const TYPES = ["A", "AAAA", "MX", "TXT", "NS", "CNAME"];

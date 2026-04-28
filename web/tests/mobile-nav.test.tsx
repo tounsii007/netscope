@@ -30,9 +30,11 @@ describe("MobileNav", () => {
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveAttribute("aria-modal", "true");
 
-    expect(screen.getByRole("link", { name: /Ports/ })).toHaveAttribute("href", "/port-checker");
-    expect(screen.getByRole("link", { name: /DNS/   })).toHaveAttribute("href", "/dns-lookup");
-    expect(screen.getByRole("link", { name: /WHOIS/ })).toHaveAttribute("href", "/whois");
+    // Use exact labels — substring matches collide with DNSSEC/DNSBL etc.
+    // since the drawer now shows every tool grouped by category.
+    expect(screen.getByRole("link", { name: "Ports" })).toHaveAttribute("href", "/port-checker");
+    expect(screen.getByRole("link", { name: "DNS"   })).toHaveAttribute("href", "/dns-lookup");
+    expect(screen.getByRole("link", { name: "WHOIS" })).toHaveAttribute("href", "/whois");
   });
 
   it("closes via the close button", async () => {
@@ -59,7 +61,7 @@ describe("MobileNav", () => {
     const user = userEvent.setup();
     renderWithIntl(<MobileNav toolLinks={links} />);
     await user.click(screen.getByLabelText(/Open menu/i));
-    const active = screen.getByRole("link", { name: /Ports/ });
+    const active = screen.getByRole("link", { name: "Ports" });
     expect(active.className).toMatch(/text-brand/);
   });
 

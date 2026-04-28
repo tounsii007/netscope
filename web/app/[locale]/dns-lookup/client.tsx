@@ -8,7 +8,6 @@ import { ResultCard, Spinner } from "@/components/tool-shell";
 const TYPES = ["A", "AAAA", "MX", "TXT", "CNAME", "NS", "SOA", "CAA"];
 
 export function DnsClient() {
-  const t = useTranslations("dns");
   const tc = useTranslations("common");
   const [domain, setDomain] = useState("example.com");
   const [selected, setSelected] = useState(new Set(["A", "AAAA", "MX", "TXT", "NS"]));
@@ -33,7 +32,8 @@ export function DnsClient() {
 
   function toggle(tp: string) {
     const s = new Set(selected);
-    s.has(tp) ? s.delete(tp) : s.add(tp);
+    if (s.has(tp)) s.delete(tp);
+    else s.add(tp);
     setSelected(s);
   }
 
