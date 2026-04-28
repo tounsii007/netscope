@@ -12,13 +12,28 @@ import java.util.*;
 public class IpController {
 
     private final IpService ipService;
+    private final IpMultiSourceService multiService;
     private final Parser uaParser = new Parser();
 
-    public IpController(IpService ipService) { this.ipService = ipService; }
+    public IpController(IpService ipService, IpMultiSourceService multiService) {
+        this.ipService = ipService;
+        this.multiService = multiService;
+    }
 
     @GetMapping("/{ip}")
     public Map<String, Object> lookup(@PathVariable String ip) {
         return ipService.lookup(ip);
+    }
+
+    /**
+     * Aggregated multi-source view — queries every configured geolocation
+     * provider in parallel and returns each provider's verbatim answer plus
+     * a combined "best-of" view. Useful when the user wants to compare
+     * accuracy across providers (which often differ noticeably).
+     */
+    @GetMapping("/{ip}/sources")
+    public Map<String, Object> sources(@PathVariable String ip) {
+        return multiService.lookup(ip);
     }
 
     @GetMapping("/me")
