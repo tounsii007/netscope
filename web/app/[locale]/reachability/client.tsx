@@ -41,7 +41,7 @@ export function ReachClient() {
       {err && <div className="card border-danger/50 text-danger">{err}</div>}
 
       {data && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
           <Row label="HTTP" ok={data.http?.ok} meta={data.http?.status ? `${data.http.status}` : data.http?.error} latency={data.http?.latencyMs} reachable={t("reachable")} unreachable={t("unreachable")} />
           <Row label={`TCP :${port}`} ok={data.tcp?.ok} meta={data.tcp?.error} latency={data.tcp?.latencyMs} reachable={t("reachable")} unreachable={t("unreachable")} />
           <Row label="Ping" ok={data.ping?.ok} meta={data.ping?.error} latency={data.ping?.latencyMs} reachable={t("reachable")} unreachable={t("unreachable")} />

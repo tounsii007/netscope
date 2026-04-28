@@ -1,0 +1,767 @@
+{
+  "meta": {
+    "title": "Traceronix — Diagnostyka sieci i analiza IP",
+    "description": "Tester portów, sprawdzanie IP, DNS, WHOIS, inspekcja SSL i monitoring. Profesjonalna diagnostyka sieci bezpośrednio w przeglądarce."
+  },
+  "nav": {
+    "home": "Strona główna",
+    "docs": "Dokumentacja",
+    "sign_in": "Zaloguj się",
+    "switch_lang": "Zmień język",
+    "open_menu": "Otwórz menu",
+    "close_menu": "Zamknij menu",
+    "tools_menu": "Narzędzia",
+    "cat_dns": "DNS i domena",
+    "cat_network": "Sieć",
+    "cat_security": "Bezpieczeństwo",
+    "cat_email": "E-mail",
+    "cat_web": "Analiza WWW",
+    "lang_en": "English (US)",
+    "lang_de": "Deutsch",
+    "lang_fr": "Français",
+    "lang_es": "Español",
+    "lang_it": "Italiano",
+    "lang_pl": "Polski",
+    "lang_ru": "Русский",
+    "lang_uk": "Українська",
+    "lang_tr": "Türkçe",
+    "lang_hi": "हिन्दी",
+    "lang_zh": "中文",
+    "tools": {
+      "ports": "Porty",
+      "ip": "IP",
+      "dns": "DNS",
+      "propagation": "Propagacja",
+      "headers": "Nagłówki",
+      "tech": "Tech",
+      "redirects": "Przekierowania",
+      "subs": "Subdomeny",
+      "cdn": "CDN",
+      "ssl": "SSL",
+      "whois": "WHOIS",
+      "email": "E-mail",
+      "email_auth": "SPF/DMARC",
+      "blacklist": "DNSBL",
+      "dnssec": "DNSSEC",
+      "ipv6": "IPv6",
+      "bgp": "BGP",
+      "og": "OG",
+      "cookies": "Cookies",
+      "robots": "Robots",
+      "mixed": "Mixed",
+      "jwt": "JWT",
+      "pwd": "Hasło"
+    }
+  },
+  "auth": {
+    "meta_title": "Zaloguj się",
+    "signin_title": "Zaloguj się do Traceronix",
+    "signin_subtitle": "Kontynuuj z kontem GitHub lub Google. Nigdy nie prosimy o dostęp do zapisu.",
+    "continue_github": "Kontynuuj z GitHubem",
+    "continue_google": "Kontynuuj z Googlem"
+  },
+  "home": {
+    "badge": "Wszystko działa",
+    "title_1": "Diagnostyka sieci,",
+    "title_2": "zrobiona porządnie.",
+    "subtitle": "Sprawdzanie portów, analiza IP, DNS, WHOIS, inspekcja SSL i monitoring dostępności — jedna szybka platforma — zacznij za darmo.",
+    "cta_tools": "Wypróbuj narzędzia",
+    "tools_heading": "Wszystkie narzędzia sieciowe",
+    "tools_count": "{count} narzędzi · z darmowym planem"
+  },
+  "tools": {
+    "port-checker": {
+      "title": "Tester portów",
+      "desc": "Sprawdź porty TCP/UDP, skanuj zakresy, wykrywaj usługi.",
+      "meta_title": "Tester portów — Skanuj porty TCP online",
+      "meta_description": "Sprawdź czy port jest otwarty na dowolnym serwerze. Skanuj pojedyncze porty, zakresy lub popularne porty z opóźnieniem i wykrywaniem usług.",
+      "explainer": {
+        "purpose": "Tester portów sprawdza, czy port TCP na zdalnym hoście jest osiągalny z publicznego Internetu. Użyj go do walidacji reguł firewalla, security groups w chmurze, usług lokalnych za NAT-em i routingu dostawcy — bez SSH i nmapa na twojej maszynie.",
+        "how_it_works": "Serwer otwiera połączenie TCP do celu i raportuje otwarty / zamknięty / timeout.\nOpóźnienie mierzone jest w milisekundach, więc widać wolne hopy sieciowe.\nPopularne porty (21, 22, 80, 443, 3306, …) są opisane podpowiedzią usługi.",
+        "when_to_use": "Weryfikuj reguły firewalla po provisioningu nowego serwera.\nReprodukuj zgłoszenie klienta „nie mogę się połączyć” bez dostępu do jego sieci.\nSprawdź z zewnątrz, czy usługa jest publicznie wystawiona (przed pentestem).",
+        "limits": "Tylko TCP — usługi UDP jak DNS, NTP, WireGuard nie da się sondować.\nBez szerokich skanów zakresów (prawnie ryzykowne i prawdopodobnie blokowane)."
+      }
+    },
+    "ip-lookup": {
+      "title": "Sprawdzanie IP",
+      "desc": "Geolokalizacja, ASN, ISP, wykrywanie proxy/VPN/TOR.",
+      "meta_title": "Sprawdzanie IP — Geolokalizacja, ASN, wykrywanie VPN/Proxy",
+      "meta_description": "Sprawdź dowolny IP: kraj, miasto, ISP, ASN, strefa czasowa. Wykryj VPN, proxy, TOR, hosting.",
+      "explainer": {
+        "purpose": "Sprawdzanie IP agreguje geolokalizację, informacje sieciowe i threat intelligence dla każdego publicznego adresu IPv4 lub IPv6. Pokazuje kraj, miasto, strefę czasową, ISP, ASN oraz czy IP należy do VPN-a, proxy, węzła wyjściowego TOR lub dostawcy hostingu.",
+        "how_it_works": "Kilka API geolokalizacyjnych jest odpytywanych równolegle; rozbieżności są uwidaczniane.\nNumer AS i wykrywanie hostingu pochodzą z danych routingowych BGP.\nWęzły wyjściowe TOR są dopasowywane do oficjalnej listy; VPN/proxy heurystycznie.",
+        "when_to_use": "Kontekstualizuj podejrzane logowania lub rejestracje.\nZgrubnie weryfikuj lokalizację klienta (geo-pricing, compliance).\nŚledź nadużyciowy ruch do pul proxy lub IP hostingowych.",
+        "limits": "Dokładność na poziomie miasta jest niedokładna — często to PoP ISP, nie użytkownik końcowy.\nSieci komórkowe i CGNAT maskują rzeczywiste lokalizacje."
+      }
+    },
+    "dns-lookup": {
+      "title": "Sprawdzanie DNS",
+      "desc": "Rekordy A, AAAA, MX, TXT, CNAME, NS.",
+      "meta_title": "Sprawdzanie DNS — Rekordy A, AAAA, MX, TXT, NS",
+      "meta_description": "Szybkie sprawdzanie DNS dla dowolnej domeny. Wyświetl rekordy A, AAAA, MX, TXT, CNAME, NS i CAA.",
+      "explainer": {
+        "purpose": "Sprawdzanie DNS pobiera wszystkie typowe rekordy zasobów (A, AAAA, MX, TXT, CNAME, NS, SOA, CAA) dla domeny w jednym wywołaniu. Zobacz, co naprawdę zwracają serwery autorytatywne, bez instalowania `dig` lokalnie.",
+        "how_it_works": "Zapytania idą przez DNS-over-HTTPS (Cloudflare 1.1.1.1) — szybko i odpornie na manipulację.\nKilka typów rekordów ładuje się równolegle.\nInformacje TTL i autorytetu są wyświetlane obok.",
+        "when_to_use": "Zweryfikuj, że zmiana DNS jest aktywna po edycji strefy.\nWaliduj konfigurację poczty (MX, SPF w TXT, selektory DKIM).\nSprawdź rekordy CAA przed wystawieniem certyfikatów.",
+        "limits": "Zwraca dane z jednego resolvera — dla globalnej propagacji użyj DNS Propagacja.\nOdpowiedzi Geo-DNS / anycast mogą się różnić w zależności od lokalizacji."
+      }
+    },
+    "dns-propagation": {
+      "title": "Propagacja DNS",
+      "desc": "Odpytaj 15 globalnych resolverów równolegle.",
+      "meta_title": "Tester propagacji DNS — 15 globalnych resolverów",
+      "meta_description": "Sprawdź propagację DNS w 15+ publicznych resolverach na świecie. Zobacz, czy twoja zmiana A, AAAA, MX lub TXT jest aktywna wszędzie.",
+      "explainer": {
+        "purpose": "Tester propagacji DNS odpytuje 15+ publicznych resolverów DNS na całym świecie równolegle dla tego samego typu rekordu i porównuje odpowiedzi. Użyj go, aby sprawdzić, czy twoja zmiana DNS dotarła do każdego zakątka Internetu, czy tylko do niektórych regionów.",
+        "how_it_works": "Równoległe zapytania do Cloudflare, Google, Quad9, OpenDNS, Yandex, NextDNS i innych.\nKażda odpowiedź jest tabelaryzowana z opóźnieniem.\nRozbieżne odpowiedzi są podświetlone kolorem.",
+        "when_to_use": "Po zmianie DNS zweryfikuj, że propagowała się globalnie (uwzględnij TTL).\nWaliduj konfigurację geo-DNS / anycast.\nWykryj porwanie DNS na poziomie resolvera (rzadkie, ale możliwe).",
+        "limits": "Resolvery cache'ują agresywnie — zmiany z wysokim TTL trwają długo.\nTylko publiczne resolvery — wewnętrzny DNS firmowy nie jest dostępny."
+      }
+    },
+    "http-headers": {
+      "title": "Nagłówki HTTP",
+      "desc": "Oceń nagłówki bezpieczeństwa od A+ do F.",
+      "meta_title": "Inspektor nagłówków bezpieczeństwa HTTP",
+      "meta_description": "Oceń nagłówki bezpieczeństwa HTTP swojej strony od A+ do F. Sprawdź HSTS, CSP, X-Frame-Options i więcej.",
+      "explainer": {
+        "purpose": "Inspektor nagłówków HTTP pobiera URL i ocenia jego nagłówki bezpieczeństwa (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) od A+ do F. Zobacz w sekundach, czy strona jest utwardzona przeciw XSS, clickjackingowi i atakom mixed-content.",
+        "how_it_works": "Serwer wysyła żądanie HEAD i parsuje nagłówki odpowiedzi.\nKażdy nagłówek jest oceniany według aktualnych best practice (OWASP).\nNagłówki niebezpieczeństwowe jak Server i X-Powered-By też są pokazywane.",
+        "when_to_use": "Waliduj konfigurację nagłówków przed wejściem na produkcję.\nAudyt bezpieczeństwa własnej lub cudzej aplikacji webowej.\nZnajdź braki HSTS lub luki CSP przed pentestem.",
+        "limits": "Ocenia tylko standardowe nagłówki — niestandardowe nagłówki bezpieczeństwa nie są zaliczane.\nRaporty CSP i polityki nonce-based nie są aktywnie testowane."
+      }
+    },
+    "tech-stack": {
+      "title": "Tech Stack",
+      "desc": "Wykryj frameworki, CMS, analytics, hosting.",
+      "meta_title": "Detektor Tech Stack — Z czego zbudowana jest ta strona?",
+      "meta_description": "Wykryj frameworki, CMS, analytics, e-commerce, hosting i biblioteki z publicznych danych odpowiedzi.",
+      "explainer": {
+        "purpose": "Detektor tech stacku identyfikuje frameworki, CMS, analytics, e-commerce, hosting i biblioteki strony z jej publicznych danych odpowiedzi — markup HTML, nagłówki HTTP, nazwy cookies i globale JS. Popularne do badania konkurencji i kwalifikacji leadów.",
+        "how_it_works": "HTML, nagłówki i cookies są dopasowywane do 200+ znanych fingerprintów.\nWskaźniki są ważone score'em pewności.\nWiele trafień w tej samej kategorii (np. 2 analytics) jest pokazywanych.",
+        "when_to_use": "Analizuj tech stack konkurencji przed rozmową handlową.\nKwalifikacja leadów B2B (kto używa Shopify? kto jeszcze nie?).\nAudyt deprekacji: czy ta strona działa na starym jQuery?",
+        "limits": "Strony chronione botem (challenge Cloudflare) nie zwracają użytecznego HTML — puste wyniki są oczekiwane.\nSPA tylko-kliencki ujawnia stack dopiero po wykonaniu JS."
+      }
+    },
+    "redirects": {
+      "title": "Tracer przekierowań",
+      "desc": "Śledź każdy hop, wykryj pętle i degradacje.",
+      "meta_title": "Tracer łańcucha przekierowań",
+      "meta_description": "Śledź każdy hop łańcucha przekierowań URL. Wykryj pętle, degradacje HTTPS i zbyt wiele przekierowań szkodzących SEO.",
+      "explainer": {
+        "purpose": "Tracer przekierowań śledzi URL przez każdy hop HTTP, logując kod statusu, URL docelowy i opóźnienie. Wykrywaj pętle, degradacje HTTPS i zbyt wiele przekierowań szkodzących SEO i wydajności.",
+        "how_it_works": "Serwer ręcznie podąża za każdym 3xx, aż do końcowej odpowiedzi 2xx.\nTwardy limit 20 hopów zapobiega nieskończonym pętlom.\nZmiany protokołu i hosta są wizualnie podświetlone.",
+        "when_to_use": "Migracja strony: zweryfikuj, że stare URL-e przekierowują poprawnie do nowej struktury.\nAudyt SEO: Google karze łańcuchy z 4+ hopami.\nAudyt bezpieczeństwa: wykryj degradacje HTTP→HTTPS jako wektor XSS.",
+        "limits": "Podąża tylko za 3xx serwera — przekierowania JS (window.location) lub meta-refresh nie są wykrywane.\nPrzekierowania bramkowane cookie (login walls) odbijają się od ściany."
+      }
+    },
+    "subdomains": {
+      "title": "Wyszukiwarka subdomen",
+      "desc": "Pasywna enumeracja przez logi CT.",
+      "meta_title": "Wyszukiwarka subdomen — Certificate Transparency",
+      "meta_description": "Enumeruj subdomeny z publicznych logów Certificate Transparency. Szybko, pasywnie, bez skanowania.",
+      "explainer": {
+        "purpose": "Wyszukiwarka subdomen enumeruje subdomeny domeny z publicznych logów Certificate Transparency (CT). Ponieważ każdy wystawiony certyfikat SSL jest logowany w CT, te logi ujawniają niemal każdą subdomenę, która kiedykolwiek istniała — całkowicie pasywnie, bez skanowania.",
+        "how_it_works": "crt.sh jest odpytywany jako główne źródło CT.\nGdy crt.sh nie działa, CertSpotter (SSLMate) służy jako niezawodny backup.\nWyniki są deduplikowane i grupowane według głębokości pod apexem.",
+        "when_to_use": "Asset discovery przed pentestem lub bug bounty.\nZidentyfikuj zapomniane subdomeny staging/dev, zanim zrobi to atakujący.\nDue diligence M&A: jakie subdomeny prowadzi cel?",
+        "limits": "Znajduje tylko subdomeny, które kiedykolwiek miały publiczny certyfikat SSL.\nCzyste wildcardy (*.example.com) nie ujawniają konkretnych hostów."
+      }
+    },
+    "cdn-detector": {
+      "title": "Detektor CDN",
+      "desc": "Identyfikuj Cloudflare, Fastly, Akamai i inne.",
+      "meta_title": "Detektor CDN — Z jakiego CDN korzysta ta strona?",
+      "meta_description": "Wykryj Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify i 12+ innych CDN-ów.",
+      "explainer": {
+        "purpose": "Detektor CDN identyfikuje, z jakiej sieci dostarczania treści korzysta domena — Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify i więcej. Przydatne do analizy wydajności, rekonesansu przed pentestem i badania konkurencji.",
+        "how_it_works": "Łączy się wiele sygnałów: nagłówki HTTP (Server, X-Cache, Via), cel CNAME, WHOIS IP.\nKażdy CDN ma unikalne fingerprinty, które rozpoznaje nasza baza.\nWielowarstwowe konfiguracje (np. Cloudflare przed Fastly) są wykrywane.",
+        "when_to_use": "Analiza wydajności: który CDN serwuje stronę?\nPrzed pentestem: zidentyfikuj WAF (Cloudflare, Imperva).\nAnalizuj tech stack konkurencji.",
+        "limits": "Niektóre CDN-y ukrywają tożsamość (niestandardowe CNAME-y, generyczne nagłówki).\nWidoczna jest tylko najbardziej zewnętrzna warstwa — serwer origin pozostaje ukryty."
+      }
+    },
+    "ssl-check": {
+      "title": "Certyfikat SSL",
+      "desc": "Łańcuch, wygaśnięcie, szyfrowanie, wersja TLS.",
+      "meta_title": "Tester certyfikatu SSL — Inspekcja TLS",
+      "meta_description": "Sprawdź certyfikaty SSL/TLS: wystawca, łańcuch, wygaśnięcie, suite szyfrowania i wersja TLS.",
+      "explainer": {
+        "purpose": "Sprawdzanie certyfikatu SSL pobiera certyfikat z hosta TLS i pokazuje wystawcę, łańcuch, ważność, listę SAN, suite szyfrowania i wynegocjowaną wersję TLS. Użyj do wykrywania błędnych konfiguracji, wygasłych certyfikatów i brakujących certyfikatów pośrednich.",
+        "how_it_works": "Handshake TLS na porcie 443 (lub niestandardowym) zwraca certyfikat serwera.\nPełny łańcuch aż do CA root jest przechodzony i walidowany.\nOdciski (SHA-1/SHA-256) i typ klucza publicznego są raportowane.",
+        "when_to_use": "Zweryfikuj pokrycie wildcard lub SAN przed wdrożeniem.\nProaktywnie ostrzegaj przed wygaśnięciem (zautomatyzuj monitoringiem).\nReprodukuj ostrzeżenia przeglądarki (hostname mismatch, self-signed).",
+        "limits": "Działa tylko z hostami TCP na standardowych portach TLS.\nUwierzytelnianie klienta (mTLS) nie jest wykonywane."
+      }
+    },
+    "whois": {
+      "title": "WHOIS / RDAP",
+      "desc": "Właściciel domeny i dane rejestracyjne.",
+      "meta_title": "Sprawdzanie WHOIS / RDAP",
+      "meta_description": "Nowoczesne sprawdzanie rejestracji domeny oparte na RDAP: rejestrar, status, serwery nazw, daty.",
+      "explainer": {
+        "purpose": "WHOIS / RDAP ujawnia dane rejestracyjne domeny: rejestrar, status, serwery nazw, daty utworzenia i wygaśnięcia. Nowoczesne API RDAP zwraca strukturyzowany JSON zamiast starego formatu wolnego tekstu WHOIS.",
+        "how_it_works": "Zapytanie idzie do rdap.org lub serwera RDAP specyficznego dla TLD.\nPola jak status, eventy, encje są normalizowane do czytelnej formy.\nFallback do klasycznego WHOIS, gdy RDAP nie jest dostępny dla TLD.",
+        "when_to_use": "Zidentyfikuj właściciela domeny dla outreachu lub akwizycji.\nWyprzedź wygaśnięcie domeny, od której zależysz.\nZgłoś nadużyciową domenę, znajdując kontakt abuse.",
+        "limits": "Usługi prywatności ukrywają właściciela — zobaczysz tylko proxy.\nDane WHOIS nie są gwarantowane jako aktualne ani dokładne (RODO/GDPR)."
+      }
+    },
+    "reachability": {
+      "title": "Osiągalność",
+      "desc": "HTTP, TCP, ping i globalny status.",
+      "meta_title": "Test osiągalności serwera",
+      "meta_description": "Testuj osiągalność HTTP, TCP i ping do dowolnego serwera, z czasem odpowiedzi.",
+      "explainer": {
+        "purpose": "Test osiągalności sonduje trzy warstwy równolegle: odpowiedź HTTP, połączenie TCP i ping ICMP. Można poznać, czy serwer jest całkowicie offline, czy tylko usługa webowa jest down, czy firewall filtruje ICMP.",
+        "how_it_works": "Trzy równoległe sondy z serwera: ping, TCP connect, GET HTTP.\nOpóźnienie mierzone na warstwę.\nKrótkie kody statusu (błąd DNS, timeout, refused) są tłumaczone na polski.",
+        "when_to_use": "Szybka diagnoza dostępności bez SSH do data center.\nOdróżnij „routing internetowy popsuty” od „tylko aplikacja down”.\nWykryj filtrowanie ICMP — wielu dostawców cloud blokuje pingi.",
+        "limits": "Testowane z jednej lokalizacji serwera — dla globalnego widoku potrzeba wielu sond.\nBez ciągłej obserwacji; tylko zrzut chwilowy."
+      }
+    },
+    "email-verify": {
+      "title": "Weryfikator e-mail",
+      "desc": "MX + jednorazowy + sonda SMTP.",
+      "meta_title": "Weryfikator e-mail — MX, jednorazowy, sonda SMTP",
+      "meta_description": "Zweryfikuj dowolny adres e-mail: składnia, rekordy MX, sprawdzanie dostawcy jednorazowego, opcjonalny handshake SMTP.",
+      "explainer": {
+        "purpose": "Weryfikator e-mail testuje, czy adres e-mail jest prawidłowy i dostarczalny — składnia, rekordy MX, dostawca jednorazowy oraz opcjonalny handshake SMTP. Zapobiega nieprawidłowym rejestracjom i odbiciom newsletterów.",
+        "how_it_works": "Składnia jest sprawdzana wg RFC 5322.\nRekordy MX domeny są resolvowane — brak oznacza, że adres jest niedoręczalny.\nDostawcy jednorazowi są dopasowywani do kuratorowanej listy; sonda SMTP potwierdza dostarczalność.",
+        "when_to_use": "Waliduj rejestracje newslettera bezpośrednio na formularzu.\nWyczyść stare listy mailingowe przed kampanią.\nZablokuj jednorazowe adresy przy rejestracji.",
+        "limits": "Sondy SMTP są coraz częściej blokowane przez serwery pocztowe.\nDomeny catch-all akceptują każdy adres — werdykt dla nich nie jest rozstrzygający."
+      }
+    },
+    "email-auth": {
+      "title": "SPF / DMARC / DKIM",
+      "desc": "Oceń konfigurację uwierzytelniania poczty.",
+      "meta_title": "Analizator SPF / DKIM / DMARC",
+      "meta_description": "Sprawdź rekordy uwierzytelniania poczty dla dowolnej domeny. Zobacz politykę SPF, enforcement DMARC i konfigurację DKIM z ostrzeżeniami.",
+      "explainer": {
+        "purpose": "Analizator SPF / DKIM / DMARC audytuje uwierzytelnianie poczty domeny — trzy standardy, które razem zapobiegają wysyłaniu maili przez atakujących w twoim imieniu (spoofing, phishing). Wystawia ocenę z konkretnymi sugestiami poprawy.",
+        "how_it_works": "Czyta rekordy TXT: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF jest sprawdzany wobec limitu 10 lookupów; DMARC dla p= i rua=.\nSelektory DKIM są sondowane typowymi nazwami (default, google, mail).",
+        "when_to_use": "Audytuj własne uwierzytelnianie poczty przed krytyczną kampanią newsletterową.\nZweryfikuj, że enforcement DMARC (p=quarantine/reject) działa po konfiguracji.\nDiagnozuj problemy ze spoofingiem na domenach klientów.",
+        "limits": "Wykrywanie selektora DKIM jest heurystyczne; niestandardowe selektory mogą zostać pominięte.\nNie testuje rzeczywistych ścieżek wysyłki — oceniana jest tylko konfiguracja."
+      }
+    },
+    "blacklist": {
+      "title": "Blacklist IP",
+      "desc": "Sprawdź IP na 20+ DNSBL antyspamowych.",
+      "meta_title": "Sprawdzanie blacklist IP — 20+ DNSBL",
+      "meta_description": "Sprawdź, czy IP jest na 20+ głównych blacklistach antyspamowych (Spamhaus, Barracuda, SORBS). Natychmiastowe równoległe zapytania DNSBL.",
+      "explainer": {
+        "purpose": "Sprawdzanie blacklist IP testuje IP wobec 20+ znanych DNSBL antyspamowych (Spamhaus, Barracuda, SORBS, SpamCop, …) równolegle. Trafienia zawierają powód wpisu. Ważne dla operatorów serwerów pocztowych i forensyki IT.",
+        "how_it_works": "Jeden lookup DNS na listę z odwróconym IP pod domeną DNSBL.\nWszystkie listy odpytywane równolegle z timeoutem 3 s każda.\nRozwiązane odpowiedzi często niosą kod ujawniający powód wpisu.",
+        "when_to_use": "Gdy twoje maile są odrzucane jako spam — sprawdź, czy IP pocztowy jest wpisany.\nPonownie sprawdź po zmianie IP u ISP / dostawcy cloud.\nSprawdź podejrzane IP z logów wobec Spamhaus.",
+        "limits": "„Czysty” IP nie jest gwarancją — niektóre listy są prywatne.\nWpisy mogą być krótko cache'owane (TTL DNSBL)."
+      }
+    },
+    "jwt": {
+      "title": "Dekoder JWT",
+      "desc": "Sprawdź claims JWT tylko po stronie klienta.",
+      "meta_title": "Dekoder JWT — Sprawdź JSON Web Tokens",
+      "meta_description": "Wklej JWT, aby zdekodować nagłówek i payload, sprawdzić claims i zweryfikować wygaśnięcie — wszystko w przeglądarce, nic nie idzie do serwerów.",
+      "explainer": {
+        "purpose": "Dekoder JWT dekoduje JSON Web Tokens (nagłówek + payload) i pokazuje claims (sub, exp, iat, iss, aud …) w czytelnej formie. Działa całkowicie w przeglądarce — twój token nigdy nie opuszcza urządzenia ani nie jest wysyłany na serwer.",
+        "how_it_works": "Token jest dzielony na dwóch kropkach na trzy segmenty base64url.\nNagłówek i payload są dekodowane po stronie klienta.\nWygaśnięcie (exp) jest porównywane z bieżącym czasem i wizualizowane.",
+        "when_to_use": "Sprawdź claims podczas debugowania flow auth w swoich aplikacjach.\nAnalizuj token klienta bez obaw o prywatność (nic nie opuszcza strony).\nSzybko sprawdź, czy refresh token wygasł.",
+        "limits": "NIE weryfikuje podpisu — do tego potrzebujesz klucza publicznego wystawcy.\nTylko JWS (podpisane JWT); JWE (szyfrowane) nie jest deszyfrowane."
+      }
+    },
+    "password-leak": {
+      "title": "Wyciek hasła",
+      "desc": "Sprawdzanie HIBP z k-anonymity — nigdy nie opuszcza przeglądarki.",
+      "meta_title": "Sprawdzanie wycieku hasła — HIBP k-Anonymity",
+      "meta_description": "Sprawdź, czy twoje hasło pojawia się w znanych wyciekach. Używa API k-anonymity Have I Been Pwned — wysyłane są tylko pierwsze 5 znaków SHA-1.",
+      "explainer": {
+        "purpose": "Sprawdzanie wycieku hasła mówi, czy twoje hasło pojawia się w znanych wyciekach (3 mld+ wpisów). Używa API k-anonymity Have I Been Pwned — wysyłane jest tylko pierwsze 5 znaków hasha SHA-1, twoje hasło nigdy nie opuszcza przeglądarki.",
+        "how_it_works": "SHA-1 hasła jest liczony w przeglądarce.\nTylko pierwsze 5 znaków hasha jest wysyłane do api.pwnedpasswords.com.\nSerwer zwraca WSZYSTKIE hashe z tym prefiksem; porównanie odbywa się po stronie klienta.",
+        "when_to_use": "Sprawdź nowe hasło, zanim je przyjmiesz.\nAudytuj stare hasła pod kątem kompromitacji.\nSzkolenia security-awareness (demo na żywo liczby wycieków).",
+        "limits": "Tylko dopasowanie hasha — warianty (Pa$$word vs password) mają różne hashe.\nBez pokrycia zero-day; raportowane wycieki mogą być sprzed miesięcy."
+      }
+    },
+    "dnssec": {
+      "title": "Walidator DNSSEC",
+      "desc": "Sprawdzanie DS, DNSKEY i podpisów.",
+      "meta_title": "Walidator DNSSEC",
+      "meta_description": "Sprawdź wdrożenie DNSSEC dla dowolnej domeny. Zobacz rekordy DS, DNSKEY i RRSIG z ostrzeżeniami.",
+      "explainer": {
+        "purpose": "Walidator DNSSEC sprawdza, czy domena ma DNSSEC wdrożony poprawnie — rekordy DS w strefie nadrzędnej, rekordy DNSKEY, podpisy RRSIG i łańcuch zaufania do KSK root. Chroni przed spoofingiem DNS i cache poisoning.",
+        "how_it_works": "Pełna resolucja DNSSEC z weryfikacją bitu AD.\nDS, DNSKEY i RRSIG są pobierane indywidualnie i sprawdzane wobec whitelist algorytmów.\nBrakujące lub słabe algorytmy (RSA-MD5, SHA-1) wywołują ostrzeżenia.",
+        "when_to_use": "Zweryfikuj, że podpisy są ważne przed / po włączeniu DNSSEC.\nMonitoruj key rollovers — stare i nowe DNSKEY-e muszą się nakładać.\nDiagnozuj problemy ze zgłaszaniem DS po stronie rejestrara.",
+        "limits": "Raportuje tylko status walidacji; naprawy wykonuje się u rejestrara.\nNIE waliduje subdomen self-signed bez DS rodzica."
+      }
+    },
+    "cookies": {
+      "title": "Cookie / RODO",
+      "desc": "Flagi cookies + wykrywanie trackerów stron trzecich.",
+      "meta_title": "Analizator Cookie i RODO",
+      "meta_description": "Sprawdź flagi Set-Cookie i trackery stron trzecich załadowane na dowolnej stronie. Score ryzyka RODO.",
+      "explainer": {
+        "purpose": "Analizator Cookie i RODO ładuje URL i listuje każdy ustawiony cookie, w tym flagi bezpieczeństwa (Secure, HttpOnly, SameSite, Max-Age) plus wykryte trackery stron trzecich. Pomaga z compliance RODO i audytami prywatności.",
+        "how_it_works": "Browser-like fetch zbiera każdy nagłówek Set-Cookie z odpowiedzi.\nDomeny stron trzecich są mapowane na kuratorowaną listę trackerów / reklam / analytics.\nBrakujące flagi bezpieczeństwa są raportowane z powodem ich znaczenia.",
+        "when_to_use": "Audyt RODO własnej strony przed przeglądem prawnym.\nWykryj podejrzane trackery na stronach konkurencji.\nZnajdź błędną konfigurację (brak HttpOnly, SameSite=None bez Secure).",
+        "limits": "Cookies ustawiane dopiero po interakcji użytkownika (banner zgody) są pomijane.\nTo nie pełna przeglądarka — złożone trackery JS mogą się prześlizgnąć."
+      }
+    },
+    "opengraph": {
+      "title": "Podgląd OG",
+      "desc": "Podgląd udostępnienia społecznościowego dla dowolnego URL.",
+      "meta_title": "Podgląd Open Graph i Meta",
+      "meta_description": "Zobacz, jak twój URL wygląda po udostępnieniu na Twitterze, Facebooku, LinkedInie, Slacku.",
+      "explainer": {
+        "purpose": "Podgląd OpenGraph i Meta pokazuje, jak twój URL będzie wyglądać udostępniony na Twitterze/X, Facebooku, LinkedInie, Slacku i Discordzie. Przydatne do debugowania tagów OG przed publikacją.",
+        "how_it_works": "Serwer pobiera HTML i parsuje każdy meta-tag og: i twitter:.\nBrakujące podstawowe tagi (og:title, og:image, og:description) są raportowane.\nKarty podglądu dla wielu platform są symulowane.",
+        "when_to_use": "Przetestuj podgląd przed publikacją ważnego posta.\nZdebuguj, dlaczego Twitter / Facebook nie pokazuje karty z obrazkiem.\nAudytuj całą stronę pod kątem spójności tagów OG.",
+        "limits": "Tylko tagi renderowane po stronie serwera — aplikacje JS ustawiające OG po stronie klienta nie są oceniane.\nPrawdziwe crawlery platform cache'ują; zmiany mogą wymagać re-scrape."
+      }
+    },
+    "robots": {
+      "title": "Robots i Sitemap",
+      "desc": "Parsuj robots.txt i waliduj sitemapy.",
+      "meta_title": "Walidator Robots.txt i Sitemap",
+      "meta_description": "Parsuj i waliduj reguły robots.txt oraz XML sitemap dla dowolnego hosta.",
+      "explainer": {
+        "purpose": "Walidator Robots.txt i Sitemap parsuje robots.txt domeny, grupuje wszystkie reguły Allow/Disallow według user agenta i waliduje powiązane XML-e sitemap wobec schematu. Ważne dla zarządzania crawl-budgetem i SEO.",
+        "how_it_works": "robots.txt jest parsowany wg RFC 9309; każda linia jest sprawdzana składniowo.\nURL-e sitemap są pobierane i walidowane jako poprawnie sformowany XML.\nSprzeczności (sitemap zablokowany przez robots.txt!) są oznaczane.",
+        "when_to_use": "Przed startem zweryfikuj, że wyszukiwarki indeksują właściwe rzeczy.\nAnalizuj robots.txt konkurencji (co blokują?).\nZdebuguj, dlaczego Google Search Console raportuje strony jako „zablokowane”.",
+        "limits": "Tylko walidacja składniowa — nie testujemy, czy crawlery faktycznie respektują reguły.\nBez głębokiego crawla sitemap; walidowany jest tylko XML najwyższego poziomu."
+      }
+    },
+    "ipv6": {
+      "title": "Gotowość IPv6",
+      "desc": "Oceń pokrycie AAAA na apex/www/NS/MX.",
+      "meta_title": "Score gotowości IPv6",
+      "meta_description": "Oceń wdrożenie IPv6 swojej domeny na apex, www, serwerach nazw i poczcie.",
+      "explainer": {
+        "purpose": "Score gotowości IPv6 ocenia, jak dobrze domena jest przygotowana na IPv6 — apex (example.com), www, serwery nazw i serwery MX są sprawdzane pod kątem rekordów AAAA. Ważne dla sieci komórkowych i compliance IPv6 z rządami / telekomami.",
+        "how_it_works": "Cztery warstwy są sprawdzane: apex AAAA, www AAAA, NS AAAA, MX AAAA.\nKażda obecna warstwa daje 25 punktów; suma 0–100.\nBrakujące warstwy są opisane wskazówką naprawczą.",
+        "when_to_use": "Udokumentuj status quo przed migracją IPv6.\nAudyty rządowe / compliance (BSI baseline, US Federal IPv6).\nUstal priorytety, którą warstwę uczynić IPv6-ready jako pierwszą.",
+        "limits": "Sprawdza tylko istnienie DNS, nie rzeczywistą osiągalność IPv6.\nWildcardowe AAAA są znajdowane, ale nie zaliczane jako „prawdziwa” gotowość."
+      }
+    },
+    "bgp": {
+      "title": "BGP / ASN",
+      "desc": "Inteligencja routingu przez RIPE Stat.",
+      "meta_title": "Przeglądarka BGP / ASN",
+      "meta_description": "Sprawdź prefix BGP, ASN-y ogłaszające i trasę dowolnego IP. Lub sprawdź ogłaszane prefiksy ASN-a.",
+      "explainer": {
+        "purpose": "Sprawdzanie BGP odpytuje globalne tablice routingu, aby pokazać, który AS ogłasza dany IP, jakie prefiksy ma AS i z jakimi sąsiadującymi AS-ami peeruje. Dane na żywo z RIPEstat — tego samego źródła, którego inżynierowie sieci używają do diagnostyki routingu.",
+        "how_it_works": "Zapytania trafiają do stat.ripe.net (RIPE NCC), który ma pełen widok routingu.\nDla IP zwracany jest najbardziej szczegółowy ogłaszany prefix i origin AS.\nDla AS-a dostajesz każdy ogłaszany prefix i listę peeringów.",
+        "when_to_use": "Odróżnij dostawców cloud od ISP rezydencyjnych (wykrywanie hostingu).\nDiagnozuj route hijacks lub niezamierzone re-ogłoszenia.\nSprawdź globalną widoczność własnego prefiksu.",
+        "limits": "Dane routingu są snapshotowane; bardzo świeże zmiany pojawiają się z opóźnieniem minut.\nBez pełnej wizualizacji ścieżek AS (tylko bezpośredni sąsiedzi)."
+      }
+    },
+    "mixed-content": {
+      "title": "Mixed Content",
+      "desc": "Znajdź zasoby http:// na stronach HTTPS.",
+      "meta_title": "Skaner Mixed Content",
+      "meta_description": "Znajdź niezabezpieczone zasoby http:// na swoich stronach HTTPS, które przeglądarki blokują lub o nich ostrzegają.",
+      "explainer": {
+        "purpose": "Skanowanie Mixed Content znajduje zasoby http:// osadzone na stronie HTTPS (obrazy, skrypty, iframe'y, fonty) — które przeglądarki albo wprost blokują, albo o nich ostrzegają. Powodują zepsute layouty, brakujące obrazy i ostrzeżenia bezpieczeństwa.",
+        "how_it_works": "Serwer ładuje HTML i parsuje każdy atrybut src / href.\nKażdy URL http:// jest klasyfikowany: blokujący (skrypty, iframe'y) lub ostrzegający (obrazy, fonty).\nImporty CSS i deklaracje @font-face też są sprawdzane.",
+        "when_to_use": "Przed migracją starego backendu na HTTPS, znajdź, które zasoby wymagają aktualizacji.\nPo zainstalowaniu pluginu strony trzeciej, sprawdź, czy nie wstrzykuje wywołań http.\nReprodukuj ostrzeżenia Google Search Console.",
+        "limits": "Tylko statyczny HTML — zasoby http wstrzykiwane przez JS nie są znajdowane.\nTylko pierwszy poziom; iframe'y nie są śledzone."
+      }
+    },
+    "dashboard": {
+      "title": "Moje IP",
+      "desc": "Twój IP, lokalizacja, ISP, przeglądarka, OS.",
+      "meta_title": "Dashboard Moje IP",
+      "meta_description": "Twój IP, lokalizacja, ISP, przeglądarka, OS, ekran, strefa czasowa — wszystko w jednym widoku."
+    },
+    "monitoring": {
+      "title": "Monitoring",
+      "desc": "Zaplanowane sprawdzenia dostępności i alerty."
+    }
+  },
+  "footer": {
+    "tagline": "Profesjonalna diagnostyka sieci.",
+    "status": "Status",
+    "copyright": "© {year} Traceronix."
+  },
+  "common": {
+    "loading": "Ładowanie…",
+    "error": "Coś poszło nie tak. Spróbuj jeszcze raz.",
+    "input_required": "Wypełnij to pole przed wysyłką.",
+    "lookup": "Sprawdź",
+    "check": "Sprawdź",
+    "analyze": "Analizuj",
+    "detect": "Wykryj",
+    "verify": "Zweryfikuj",
+    "trace": "Śledź",
+    "scan": "Skanuj",
+    "inspect": "Sprawdź",
+    "enumerate": "Enumeruj",
+    "preview": "Podgląd",
+    "score": "Oceń",
+    "enter_host": "Wpisz hostname lub IP",
+    "enter_domain": "Wpisz domenę",
+    "enter_url": "Wpisz URL",
+    "enter_ip": "Wpisz adres IPv4",
+    "enter_email": "Wpisz adres e-mail",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano!",
+    "clear": "Wyczyść",
+    "source": "Źródło",
+    "filter": "filtruj…",
+    "no_records": "Brak rekordów",
+    "no_results": "Brak wyników.",
+    "records_count": "{count} rekordów",
+    "resolved_in": "Rozwiązano w {ms} ms",
+    "yes": "tak",
+    "no": "nie",
+    "error_title": "Coś poszło nie tak",
+    "retry": "Spróbuj ponownie"
+  },
+  "not_found": {
+    "code": "404",
+    "title": "Strona nie znaleziona",
+    "desc": "Strona, której szukasz, nie istnieje lub została przeniesiona.",
+    "hint": "Sprawdź adres URL albo wróć na stronę główną.",
+    "back": "Wróć na stronę główną",
+    "search_hint": "Szukasz narzędzia? Skorzystaj z wyszukiwania powyżej.",
+    "did_you_mean": "Może chodziło ci o",
+    "explore_tools": "Odkryj narzędzia",
+    "popular_tools": "Popularne narzędzia"
+  },
+  "bgp": {
+    "title": "BGP / ASN",
+    "subtitle": "Routing na żywo z RIPEstat.",
+    "tab_ip": "IP",
+    "tab_asn": "ASN",
+    "field_ip": "IP",
+    "field_prefix": "Prefix",
+    "field_block": "Blok",
+    "field_announced": "Ogłoszony",
+    "field_country": "Kraj",
+    "field_city": "Miasto",
+    "field_asn": "ASN",
+    "field_holder": "Posiadacz",
+    "field_announced_prefixes": "Ogłaszane prefiksy",
+    "field_neighbours": "Sąsiedzi",
+    "announcing_asns": "Ogłaszające ASN-y",
+    "prefix_sample": "Próbka prefiksów"
+  },
+  "blacklist": {
+    "title": "Sprawdzanie blacklist IP",
+    "subtitle": "Odpytaj 20+ głównych DNSBL-i równolegle.",
+    "placeholder": "Adres IPv4",
+    "clean": "Czysty",
+    "listed_on": "Wpisany na {listed} z {total} list",
+    "col_list": "Lista",
+    "col_status": "Status",
+    "status_listed": "wpisany",
+    "status_clean": "czysty"
+  },
+  "cdn": {
+    "title": "Detektor CDN",
+    "subtitle": "Identyfikuj CDN lub WAF przed dowolnym hostem.",
+    "powered_by": "Napędzane przez",
+    "no_cdn": "Nie wykryto CDN-a poprzez nagłówki.",
+    "server_label": "serwer",
+    "detection_signals": "Sygnały wykrycia"
+  },
+  "cookies": {
+    "title": "Analizator Cookie i RODO",
+    "subtitle": "Flagi cookies + wykrywanie trackerów stron trzecich.",
+    "gdpr_score": "Score ryzyka RODO",
+    "summary": "{cookies} cookies, {trackers} trackerów, {hosts} hostów stron trzecich",
+    "col_name": "Nazwa",
+    "col_secure": "Secure",
+    "col_httponly": "HttpOnly",
+    "col_samesite": "SameSite",
+    "section_cookies": "Cookies",
+    "section_trackers": "Trackery stron trzecich"
+  },
+  "dashboard": {
+    "title": "Dashboard Moje IP",
+    "subtitle": "Wszystko, co możemy wykryć o twoim połączeniu.",
+    "detecting": "Wykrywanie twojego połączenia…",
+    "section_connection": "Połączenie",
+    "section_location": "Lokalizacja",
+    "section_client": "Klient",
+    "section_threat": "Zagrożenie / Prywatność",
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_country": "Kraj",
+    "field_region": "Region",
+    "field_city": "Miasto",
+    "field_tz_ip": "Strefa (IP)",
+    "field_tz_browser": "Strefa (przeglądarka)",
+    "field_browser": "Przeglądarka",
+    "field_os": "OS",
+    "field_device": "Urządzenie",
+    "field_screen": "Ekran",
+    "field_lang": "Accept-Language",
+    "threat_tor": "TOR",
+    "threat_hosting": "Hosting",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Rezydencyjny"
+  },
+  "dns": {
+    "title": "Sprawdzanie DNS",
+    "subtitle": "Odpytaj rekordy DNS dla dowolnej domeny.",
+    "record_types": "Typy rekordów",
+    "records_count": "{count} rekordów",
+    "no_records": "Brak rekordów"
+  },
+  "propagation": {
+    "title": "Propagacja DNS",
+    "subtitle": "Odpytaj 15 globalnych resolverów równolegle.",
+    "stat_resolvers": "Resolvery",
+    "stat_unique": "Unikalne odpowiedzi",
+    "stat_status": "Status",
+    "propagated": "Propagowane",
+    "propagating": "Propaguje",
+    "col_resolver": "Resolver",
+    "col_region": "Region",
+    "col_answer": "Odpowiedź",
+    "col_ms": "ms"
+  },
+  "dnssec": {
+    "title": "Walidator DNSSEC",
+    "subtitle": "Sprawdzanie DS, DNSKEY i RRSIG.",
+    "active": "DNSSEC aktywny",
+    "not_signed": "Niepodpisany",
+    "stat_ds": "Rekordy DS",
+    "stat_dnskey": "Rekordy DNSKEY",
+    "stat_rrsig": "RRSIG obecny",
+    "findings": "Wyniki",
+    "ds_records": "Rekordy DS"
+  },
+  "email_auth": {
+    "title": "SPF / DKIM / DMARC",
+    "subtitle": "Parsuj i oceń uwierzytelnianie poczty dla dowolnej domeny.",
+    "placeholder_domain": "przyklad.pl",
+    "placeholder_selector": "Selektor DKIM (opcjonalny)",
+    "score_label": "Score uwierzytelniania poczty"
+  },
+  "email_verify": {
+    "title": "Weryfikator e-mail",
+    "subtitle": "Składnia + MX + wykrywanie jednorazowych + opcjonalna sonda SMTP.",
+    "smtp_label": "Wykonaj sondę SMTP RCPT (wolniej, może wyzwolić filtry antyspamowe)",
+    "deliverable": "Prawdopodobnie doręczalny",
+    "problematic": "Problematyczny",
+    "flag_syntax": "Prawidłowa składnia",
+    "flag_mx": "Ma rekordy MX",
+    "flag_not_disposable": "Niejednorazowy",
+    "flag_not_role": "Nie konto rolowe",
+    "mx_records": "Rekordy MX",
+    "no_mx": "Brak rekordów MX — domena nie może odbierać poczty.",
+    "smtp_probe": "Sonda SMTP",
+    "smtp_mx": "MX",
+    "smtp_code": "Kod"
+  },
+  "headers": {
+    "title": "Nagłówki bezpieczeństwa HTTP",
+    "subtitle": "Analizuj nagłówki odpowiedzi i oceń postawę bezpieczeństwa od A+ do F.",
+    "score": "Score {score}/100",
+    "http_status": "HTTP {status}",
+    "security_checks": "Sprawdzenia nagłówków bezpieczeństwa",
+    "raw_headers": "Surowe nagłówki odpowiedzi"
+  },
+  "ip": {
+    "title": "Sprawdzanie IP",
+    "subtitle": "Geolokalizacja, ASN, ISP i threat intelligence.",
+    "placeholder": "IPv4 lub IPv6",
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_country": "Kraj",
+    "field_region": "Region",
+    "field_city": "Miasto",
+    "field_timezone": "Strefa czasowa",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_coords": "Współrzędne",
+    "field_org": "Organizacja",
+    "field_user_agent": "Twój User-Agent",
+    "multi_title": "Porównaj między dostawcami",
+    "multi_subtitle": "Ten sam IP odpytany równolegle wobec wielu API geolokalizacyjnych — rozbieżności ujawniają różnice między źródłami danych.",
+    "multi_loading": "Odpytywanie dostawców równolegle…",
+    "multi_summary": "{ok} z {total} źródeł powiodło się",
+    "multi_cached": "z cache",
+    "multi_country": "Kraj",
+    "multi_city": "Miasto",
+    "multi_asn": "ASN",
+    "multi_country_name": "Nazwa kraju",
+    "multi_continent": "Kontynent",
+    "multi_postal": "Kod pocztowy",
+    "multi_iptype": "Typ IP",
+    "multi_lat": "Szerokość",
+    "multi_lon": "Długość",
+    "multi_org": "Organizacja",
+    "multi_domain": "Domena",
+    "multi_currency": "Waluta",
+    "multi_calling_code": "Numer kierunkowy",
+    "multi_languages": "Języki",
+    "multi_eu": "Członek UE",
+    "multi_open_raw": "Otwórz surową odpowiedź",
+    "threat_title": "Threat intelligence",
+    "risk_score": "score ryzyka",
+    "threat_tor": "Wyjście TOR",
+    "threat_hosting": "Hosting / DC",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Rezydencyjny"
+  },
+  "ipv6": {
+    "title": "Gotowość IPv6",
+    "subtitle": "Pokrycie AAAA na apex, www, NS i MX.",
+    "grade": "Ocena IPv6",
+    "row_apex_a": "Apex (A)",
+    "row_apex_aaaa": "Apex (AAAA)",
+    "row_www_a": "www (A)",
+    "row_www_aaaa": "www (AAAA)",
+    "row_ns": "Serwery nazw z IPv6 ({with}/{total})",
+    "row_mx": "MX z IPv6 ({with}/{total})",
+    "warnings": "Ostrzeżenia"
+  },
+  "jwt": {
+    "title": "Dekoder JWT",
+    "subtitle": "Wklej dowolny JWT — dekodowany całkowicie w przeglądarce. Nic nie opuszcza twojego urządzenia.",
+    "placeholder": "Wklej tutaj JWT…",
+    "header": "Nagłówek",
+    "payload": "Payload",
+    "signature": "Podpis",
+    "claim_issued": "Wystawiony",
+    "claim_expires": "Wygasa",
+    "claim_status": "Status",
+    "claim_subject": "Subject",
+    "valid": "Ważny",
+    "expired": "Wygasły",
+    "not_yet": "Jeszcze nieważny",
+    "sig_note": "Podpisu nie można zweryfikować po stronie klienta."
+  },
+  "mixed": {
+    "title": "Skaner Mixed Content",
+    "subtitle": "Znajdź zasoby http:// na stronach HTTPS.",
+    "placeholder": "https://…",
+    "clean": "Czysto",
+    "insecure_count": "{count} niezabezpieczonych zasobów"
+  },
+  "opengraph": {
+    "title": "Podgląd OG",
+    "subtitle": "Podgląd udostępnienia społecznościowego dla dowolnego URL.",
+    "no_title": "(brak tytułu)",
+    "no_desc": "(brak opisu)",
+    "field_site": "Nazwa strony",
+    "field_type": "Typ",
+    "field_twitter": "Karta Twitter",
+    "field_favicon": "Favicon",
+    "raw_tags": "Surowe tagi OG"
+  },
+  "password": {
+    "title": "Sprawdzanie wycieku hasła",
+    "subtitle": "Sprawdzanie HIBP k-anonymity — twoje hasło nigdy nie opuszcza przeglądarki.",
+    "placeholder": "Wpisz hasło",
+    "safe": "Nie znaleziono w żadnym znanym wycieku",
+    "found": "Znaleziono {count} razy",
+    "safe_note": "Ten hash hasła nie jest na liście HIBP — ale to nie gwarantuje, że hasło jest mocne.",
+    "unsafe_note": "Zmień to hasło wszędzie, gdzie go używasz. Atakujący znają dokładnie to hasło.",
+    "privacy_note": "SHA-1 dzieje się w twojej przeglądarce. Tylko pierwsze 5 znaków hasha jest wysyłane do HIBP."
+  },
+  "ports": {
+    "title": "Tester portów",
+    "subtitle": "Sprawdź osiągalność portu TCP, skanuj popularne porty lub przejdź zakres.",
+    "mode_single": "Pojedynczy port",
+    "mode_common": "Popularne porty",
+    "mode_range": "Zakres portów",
+    "placeholder_host": "przyklad.pl lub IP",
+    "placeholder_port": "443",
+    "placeholder_range": "1-1024",
+    "open": "otwarty",
+    "closed": "zamknięty",
+    "filtered": "filtrowany",
+    "open_of": "{open} otwartych / {total} sprawdzonych",
+    "service": "Usługa",
+    "common_count": "{count} popularnych portów",
+    "port_status": "Port {port} jest <s>{status}</s>"
+  },
+  "reachability": {
+    "title": "Osiągalność",
+    "subtitle": "Sprawdzanie HTTP, TCP, ping i status globalny.",
+    "reachable": "Osiągalny",
+    "unreachable": "Nieosiągalny"
+  },
+  "redirects": {
+    "title": "Tracer przekierowań",
+    "subtitle": "Śledź każdy hop przekierowania, wykrywaj pętle i degradacje HTTPS.",
+    "stat_hops": "Hopy",
+    "stat_final_status": "Status końcowy",
+    "stat_downgrade": "Degradacja",
+    "stat_result": "Wynik",
+    "downgrade_yes": "TAK",
+    "downgrade_no": "nie",
+    "location": "Location"
+  },
+  "robots": {
+    "title": "Robots i Sitemap",
+    "subtitle": "Parsuj robots.txt i waliduj powiązane sitemapy.",
+    "robots_txt": "robots.txt",
+    "sitemaps": "Sitemapy",
+    "sitemap_errors": "Błędy",
+    "sitemap_index": "indeks",
+    "urls_label": "URL-e",
+    "sample_urls": "Przykładowe URL-e"
+  },
+  "ssl": {
+    "title": "Inspektor certyfikatu SSL",
+    "subtitle": "Łańcuch TLS, wygaśnięcie, suite szyfrowania i ocena.",
+    "valid": "Ważny",
+    "invalid": "Nieważny / Wygasły",
+    "field_tls": "TLS",
+    "field_cipher": "Szyfrowanie",
+    "field_valid_from": "Ważny od",
+    "field_valid_to": "Ważny do",
+    "field_issuer": "Wystawca",
+    "field_expiry": "Dni do wygaśnięcia",
+    "field_subject_alt": "Subject Alt Names",
+    "grade": "Ocena",
+    "chain": "Łańcuch certyfikatów"
+  },
+  "subdomains": {
+    "title": "Wyszukiwarka subdomen",
+    "subtitle": "Pasywna enumeracja przez logi CT.",
+    "input_placeholder": "np. przyklad.pl",
+    "input_hint": "Akceptuje pełne URL-e (https://przyklad.pl/foo) — schemat, ścieżka, port i „www.” są usuwane automatycznie.",
+    "query_as": "Zapytanie: {domain}",
+    "filter_placeholder": "Filtruj subdomeny…",
+    "filter_match_label": "dopasowanie",
+    "count": "{count} znalezionych subdomen",
+    "showing_total": "{total} wpisów",
+    "showing_filtered": "{shown} z {total} wpisów",
+    "degraded_title": "Log CT chwilowo niedostępny",
+    "degraded_message": "crt.sh jest obecnie nieosiągalny lub nas ogranicza. Spróbuj ponownie za minutę — to NIE oznacza, że domena nie ma subdomen.",
+    "truncated_notice": "Wynik ograniczony — jest więcej subdomen, których nie zwróciliśmy",
+    "depth_label": "Głębokość {depth} poziomów pod domeną nadrzędną",
+    "copy_all": "Skopiuj wszystkie",
+    "export": "Eksportuj",
+    "lookup_action": "Szukaj →"
+  },
+  "tech": {
+    "title": "Detektor Tech Stack",
+    "subtitle": "Wykryj frameworki, CMS, analytics i dostawcę hostingu.",
+    "detected": "Wykryto {count} technologii",
+    "empty_title": "Nie wykryto żadnych technologii",
+    "empty_reasons": "Strona prawdopodobnie ma ochronę bota (challenge Cloudflare, captcha) lub zwróciła minimalną stronę HTML (login wall, shell SPA). To NIE oznacza, że strona nie używa technologii — wypróbuj publiczną stronę marketingową zamiast URL-a aplikacji/logowania."
+  },
+  "whois": {
+    "title": "WHOIS / RDAP",
+    "subtitle": "Właściciel domeny i dane rejestracyjne.",
+    "section_domain": "Domena",
+    "field_name": "Nazwa",
+    "field_handle": "Handle",
+    "field_registrar": "Rejestrar",
+    "field_status": "Status",
+    "field_created": "Utworzona",
+    "field_updated": "Zaktualizowana",
+    "field_expires": "Wygasa",
+    "dates": "Daty",
+    "nameservers": "Serwery nazw",
+    "raw": "Surowy RDAP"
+  },
+  "explainer": {
+    "about_title": "O tym narzędziu",
+    "how_title": "Jak działa",
+    "when_title": "Kiedy używać",
+    "limits_title": "Ograniczenia"
+  }
+}

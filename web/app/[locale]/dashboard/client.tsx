@@ -22,7 +22,7 @@ export function DashboardClient() {
   if (!data) return <div className="card flex items-center gap-2"><Spinner /> {t("detecting")}</div>;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <ResultCard>
         <h3 className="mb-2 text-sm font-semibold">{t("section_connection")}</h3>
         <Row l={t("field_ip")} v={data.ip} mono />

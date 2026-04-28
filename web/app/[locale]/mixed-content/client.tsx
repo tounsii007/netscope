@@ -29,7 +29,7 @@ export function MixedClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex gap-2">
+      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
         <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("placeholder")} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("scan")}</button>
       </form>

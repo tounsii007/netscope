@@ -28,7 +28,7 @@ export function WhoisClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex gap-2">
+      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
         <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
       </form>
@@ -36,7 +36,7 @@ export function WhoisClient() {
       {err && <div className="card border-danger/50 text-danger">{err}</div>}
 
       {data && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <ResultCard>
             <h3 className="mb-3 text-sm font-semibold">{t("section_domain")}</h3>
             <div className="space-y-2 text-sm">

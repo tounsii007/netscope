@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
   return {
-    metadataBase: new URL("https://netscope.io"),
-    title: { default: t("title"), template: "%s · NetScope" },
+    metadataBase: new URL("https://traceronix.io"),
+    title: { default: t("title"), template: "%s · Traceronix" },
     description: t("description"),
-    openGraph: { type: "website", siteName: "NetScope" },
+    openGraph: { type: "website", siteName: "Traceronix" },
     twitter: { card: "summary_large_image" },
   };
 }
@@ -39,7 +39,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body className="min-h-screen bg-bg font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           <SiteNav />
-          <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+          <main className="mx-auto w-full max-w-6xl 2xl:max-w-7xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">{children}</main>
           <SiteFooter />
         </NextIntlClientProvider>
       </body>

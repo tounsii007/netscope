@@ -52,7 +52,7 @@ export function SslClient() {
               <div className="flex-1">
                 <div className="font-mono text-lg">{data.host}:{data.port}</div>
                 <div className="mt-0.5 text-sm text-fg-muted">{healthy ? t("valid") : t("invalid")}</div>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2 text-sm">
+                <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3 text-sm">
                   <Field label={t("field_tls")} value={data.tlsVersion} />
                   <Field label={t("field_cipher")} value={data.cipherSuite} />
                   <Field label={t("field_valid_from")} value={new Date(data.validFrom).toLocaleDateString()} />

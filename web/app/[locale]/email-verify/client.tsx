@@ -31,7 +31,7 @@ export function EmailVerifyClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-3">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("verify")}</button>
         </div>
@@ -57,7 +57,7 @@ export function EmailVerifyClient() {
             </div>
           </ResultCard>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Flag label={t("flag_syntax")} v={data.syntaxValid} />
             <Flag label={t("flag_mx")} v={data.hasMx} />
             <Flag label={t("flag_not_disposable")} v={!data.disposable} />

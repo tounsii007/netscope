@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Lock } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { ToolExplainer } from "@/components/tool-explainer";
 import { SslClient } from "./client";
 
 const SLUG = "ssl-check";
@@ -27,6 +28,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       icon={<Lock className="h-5 w-5" />}
     >
       <SslClient />
+      <ToolExplainer slug={SLUG} locale={locale} />
     </ToolShell>
   );
 }

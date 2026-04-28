@@ -32,7 +32,7 @@ export function TechClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex gap-2">
+      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
         <input className="input" value={host} onChange={(e) => setHost(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("detect")}</button>
       </form>
@@ -63,7 +63,7 @@ export function TechClient() {
             )}
           </ResultCard>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {Object.entries(data.technologies).map(([cat, techs]) => (
               <ResultCard key={cat}>
                 <h3 className="mb-2 text-xs font-semibold uppercase text-fg-subtle">{cat}</h3>

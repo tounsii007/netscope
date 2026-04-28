@@ -29,7 +29,7 @@ export function DnssecClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex gap-2">
+      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
         <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("check")}</button>
       </form>
@@ -49,7 +49,7 @@ export function DnssecClient() {
             </div>
           </ResultCard>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
             <Stat label={t("stat_ds")} value={data.dsRecords.length} ok={data.dsRecords.length > 0} />
             <Stat label={t("stat_dnskey")} value={data.dnskeyRecords.length} ok={data.dnskeyRecords.length > 0} />
             <Stat label={t("stat_rrsig")} value={data.hasRrsig ? tc("yes") : tc("no")} ok={data.hasRrsig} />

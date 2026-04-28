@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Server } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { ToolExplainer } from "@/components/tool-explainer";
 import { WhoisClient } from "./client";
 
 const SLUG = "whois";
@@ -27,6 +28,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       icon={<Server className="h-5 w-5" />}
     >
       <WhoisClient />
+      <ToolExplainer slug={SLUG} locale={locale} />
     </ToolShell>
   );
 }

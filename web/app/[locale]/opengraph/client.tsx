@@ -29,7 +29,7 @@ export function OgClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex gap-2">
+      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
         <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} />
         <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("preview")}</button>
       </form>
@@ -51,7 +51,7 @@ export function OgClient() {
             </div>
           </ResultCard>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <Field label={t("field_site")} value={data.siteName} />
             <Field label={t("field_type")} value={data.type} />
             <Field label={t("field_twitter")} value={data.twitterCard} />

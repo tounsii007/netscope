@@ -40,7 +40,7 @@ export function DnsClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
         </div>

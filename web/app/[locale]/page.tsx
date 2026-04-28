@@ -52,7 +52,6 @@ export default function Home() {
           <p className="mx-auto mt-4 max-w-2xl text-lg text-fg-muted">{t("subtitle")}</p>
           <div className="mt-8 flex justify-center gap-3">
             <Link href="/port-checker" className="btn glow">{t("cta_tools")}</Link>
-            <Link href="/api-docs" className="btn-ghost">{t("cta_api")}</Link>
           </div>
         </div>
       </section>
@@ -62,7 +61,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold">{t("tools_heading")}</h2>
           <span className="text-sm text-fg-muted">{t("tools_count", { count: toolKeys.length })}</span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-4">
           {toolKeys.map(({ href, icon: Icon }) => {
             const key = href.replace("/", "") as string;
             return (

@@ -56,7 +56,7 @@ export function PasswordLeakClient() {
           <Lock className="h-3.5 w-3.5" />
           {t("privacy_note")}
         </div>
-        <form onSubmit={check} className="flex gap-2">
+        <form onSubmit={check} className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <input type={show ? "text" : "password"} className="input pr-10"
               value={pwd} onChange={(e) => setPwd(e.target.value)}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Globe2 } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { ToolExplainer } from "@/components/tool-explainer";
 import { PropagationClient } from "./client";
 
 const SLUG = "dns-propagation";
@@ -27,6 +28,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       icon={<Globe2 className="h-5 w-5" />}
     >
       <PropagationClient />
+      <ToolExplainer slug={SLUG} locale={locale} />
     </ToolShell>
   );
 }

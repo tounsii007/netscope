@@ -1,0 +1,767 @@
+{
+  "meta": {
+    "title": "Traceronix — Ağ Tanılama ve IP Zekâsı",
+    "description": "Port denetleyici, IP araması, DNS, WHOIS, SSL incelemesi ve izleme. Profesyonel ağ tanılaması doğrudan tarayıcında."
+  },
+  "nav": {
+    "home": "Ana sayfa",
+    "docs": "Dokümanlar",
+    "sign_in": "Giriş yap",
+    "switch_lang": "Dili değiştir",
+    "open_menu": "Menüyü aç",
+    "close_menu": "Menüyü kapat",
+    "tools_menu": "Araçlar",
+    "cat_dns": "DNS ve domain",
+    "cat_network": "Ağ",
+    "cat_security": "Güvenlik",
+    "cat_email": "E-posta",
+    "cat_web": "Web analizi",
+    "lang_en": "English (US)",
+    "lang_de": "Deutsch",
+    "lang_fr": "Français",
+    "lang_es": "Español",
+    "lang_it": "Italiano",
+    "lang_pl": "Polski",
+    "lang_ru": "Русский",
+    "lang_uk": "Українська",
+    "lang_tr": "Türkçe",
+    "lang_hi": "हिन्दी",
+    "lang_zh": "中文",
+    "tools": {
+      "ports": "Portlar",
+      "ip": "IP",
+      "dns": "DNS",
+      "propagation": "Yayılım",
+      "headers": "Başlıklar",
+      "tech": "Tech",
+      "redirects": "Yönlendirmeler",
+      "subs": "Alt domainler",
+      "cdn": "CDN",
+      "ssl": "SSL",
+      "whois": "WHOIS",
+      "email": "E-posta",
+      "email_auth": "SPF/DMARC",
+      "blacklist": "DNSBL",
+      "dnssec": "DNSSEC",
+      "ipv6": "IPv6",
+      "bgp": "BGP",
+      "og": "OG",
+      "cookies": "Çerezler",
+      "robots": "Robots",
+      "mixed": "Mixed",
+      "jwt": "JWT",
+      "pwd": "Parola"
+    }
+  },
+  "auth": {
+    "meta_title": "Giriş yap",
+    "signin_title": "Traceronix'e giriş yap",
+    "signin_subtitle": "GitHub veya Google hesabınla devam et. Yazma erişimi asla istemiyoruz.",
+    "continue_github": "GitHub ile devam et",
+    "continue_google": "Google ile devam et"
+  },
+  "home": {
+    "badge": "Her şey çalışıyor",
+    "title_1": "Ağ tanılama,",
+    "title_2": "olması gerektiği gibi.",
+    "subtitle": "Port kontrolleri, IP zekâsı, DNS, WHOIS, SSL incelemesi ve uptime izleme — hızlı bir platform — ücretsiz başla.",
+    "cta_tools": "Araçları dene",
+    "tools_heading": "Tüm ağ araçları",
+    "tools_count": "{count} araç · ücretsiz plan dahil"
+  },
+  "tools": {
+    "port-checker": {
+      "title": "Port denetleyici",
+      "desc": "TCP/UDP portlarını kontrol et, aralıkları tara, servisleri tespit et.",
+      "meta_title": "Port denetleyici — TCP portlarını çevrimiçi tara",
+      "meta_description": "Herhangi bir sunucuda portun açık olup olmadığını kontrol et. Tek port, aralık veya yaygın portları gecikme ve servis tespitiyle tara.",
+      "explainer": {
+        "purpose": "Port denetleyici, uzaktaki bir hosttaki TCP portunun genel internetten erişilebilir olup olmadığını test eder. Firewall kurallarını, bulut security group'larını, NAT arkasındaki yerel servisleri ve sağlayıcı yönlendirmesini doğrulamak için kullan — makinende SSH veya nmap'e gerek yok.",
+        "how_it_works": "Sunucu hedefe TCP bağlantısı açar ve open / closed / timeout raporlar.\nGecikme milisaniye cinsinden ölçülür, böylece yavaş ağ sıçramaları görünür.\nYaygın portlar (21, 22, 80, 443, 3306, …) servis ipucuyla işaretlenir.",
+        "when_to_use": "Yeni sunucu provizyonundan sonra firewall kurallarını doğrula.\nMüşterinin 'bağlanamıyorum' raporunu ağına erişmeden yeniden üret.\nDışarıdan bir servisin herkese açık olup olmadığını kontrol et (pentest öncesi).",
+        "limits": "Yalnızca TCP — DNS, NTP, WireGuard gibi UDP servisleri sondalanamaz.\nGeniş port aralığı taramaları yapılmaz (yasal olarak riskli ve genelde engellenir)."
+      }
+    },
+    "ip-lookup": {
+      "title": "IP araması",
+      "desc": "Coğrafi konum, ASN, ISP, proxy/VPN/TOR tespiti.",
+      "meta_title": "IP araması — Coğrafi konum, ASN, VPN/Proxy tespiti",
+      "meta_description": "Herhangi bir IP'yi ara: ülke, şehir, ISP, ASN, saat dilimi. VPN, proxy, TOR, hosting tespit et.",
+      "explainer": {
+        "purpose": "IP araması, herhangi bir genel IPv4 veya IPv6 adresi için coğrafi konum, ağ ve threat intelligence bilgilerini birleştirir. Ülke, şehir, saat dilimi, ISP, ASN'yi ve IP'nin VPN, proxy, TOR çıkışı ya da hosting sağlayıcısına ait olup olmadığını söyler.",
+        "how_it_works": "Birden fazla coğrafi konum API'si paralel sorgulanır; ayrılıklar öne çıkarılır.\nAS numarası ve hosting tespiti BGP yönlendirme verilerinden gelir.\nTOR çıkışları resmi listeyle eşleştirilir; VPN/proxy sezgiseldir.",
+        "when_to_use": "Şüpheli login veya kayıt denemelerini bağlamlandır.\nMüşteri konumunu kabaca doğrula (geo-pricing veya compliance için).\nKötüye kullanım trafiğini proxy havuzlarına veya hosting IP'lerine kadar izle.",
+        "limits": "Şehir düzeyinde doğruluk hassas değildir — genelde son kullanıcı değil ISP PoP'u.\nMobil ağlar ve CGNAT gerçek konumları maskeler."
+      }
+    },
+    "dns-lookup": {
+      "title": "DNS araması",
+      "desc": "A, AAAA, MX, TXT, CNAME, NS kayıtları.",
+      "meta_title": "DNS araması — A, AAAA, MX, TXT, NS kayıtları",
+      "meta_description": "Herhangi bir domain için hızlı DNS araması. A, AAAA, MX, TXT, CNAME, NS ve CAA kayıtlarını görüntüle.",
+      "explainer": {
+        "purpose": "DNS araması bir domainin tüm yaygın resource record'larını (A, AAAA, MX, TXT, CNAME, NS, SOA, CAA) tek çağrıda alır. Authoritative sunucuların gerçekte ne döndürdüğünü `dig`'i lokalde kurmadan gör.",
+        "how_it_works": "Sorgular DNS-over-HTTPS (Cloudflare 1.1.1.1) üzerinden çalışır — hızlı ve manipülasyona dayanıklı.\nBirden fazla kayıt türü paralel yüklenir.\nTTL ve authority bilgisi yanında gösterilir.",
+        "when_to_use": "Bir bölgeyi düzenledikten sonra DNS değişikliğinin canlı olduğunu doğrula.\nE-posta kurulumunu doğrula (MX, TXT'deki SPF, DKIM seçicileri).\nSertifika düzenlemeden önce CAA kayıtlarını kontrol et.",
+        "limits": "Tek bir resolver'dan veri döndürür — global yayılım için DNS Yayılımı'nı kullan.\nGeo-DNS / anycast yanıtları konuma göre değişebilir."
+      }
+    },
+    "dns-propagation": {
+      "title": "DNS yayılımı",
+      "desc": "15 global resolver'ı paralel sorgula.",
+      "meta_title": "DNS yayılım denetleyicisi — 15 global resolver",
+      "meta_description": "Dünya genelinde 15+ genel resolver'da DNS yayılımını kontrol et. A, AAAA, MX veya TXT değişikliğinin her yerde aktif olup olmadığını gör.",
+      "explainer": {
+        "purpose": "DNS yayılım kontrolü, dünya genelinde 15+ genel DNS resolver'ı aynı kayıt türü için paralel sorgular ve yanıtları karşılaştırır. DNS değişikliğinin internetin her köşesine ulaşıp ulaşmadığını ya da sadece bazı bölgelere ulaştığını görmek için kullan.",
+        "how_it_works": "Cloudflare, Google, Quad9, OpenDNS, Yandex, NextDNS ve diğerlerine paralel sorgular.\nHer yanıt gecikmesiyle birlikte tablolanır.\nFarklılaşan yanıtlar renkli vurgulanır.",
+        "when_to_use": "DNS değişikliğinden sonra global yayıldığını doğrula (TTL'ye saygı duy).\nGeo-DNS / anycast yapılandırmasını doğrula.\nResolver düzeyinde DNS hijacking'i tespit et (nadir, ama mümkün).",
+        "limits": "Resolver'lar agresif önbelleğe alır — yüksek TTL'li değişiklikler uzun sürer.\nYalnızca genel resolver'lar — kurumsal iç DNS erişilemez."
+      }
+    },
+    "http-headers": {
+      "title": "HTTP başlıkları",
+      "desc": "Güvenlik başlıklarını A+ ile F arasında derecelendir.",
+      "meta_title": "HTTP güvenlik başlığı denetleyicisi",
+      "meta_description": "Sitenin HTTP güvenlik başlıklarını A+ ile F arasında derecelendir. HSTS, CSP, X-Frame-Options ve daha fazlasını kontrol et.",
+      "explainer": {
+        "purpose": "HTTP başlık denetleyicisi bir URL'yi yükler ve güvenlik başlıklarını (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) A+ ile F arasında derecelendirir. Sitenin XSS, clickjacking ve mixed-content saldırılarına karşı sağlamlaştırılıp sağlamlaştırılmadığını saniyeler içinde gör.",
+        "how_it_works": "Sunucu HEAD isteği gönderir ve yanıt başlıklarını parse eder.\nHer başlık güncel best practice'lere (OWASP) göre değerlendirilir.\nServer ve X-Powered-By gibi güvenlik dışı başlıklar da gösterilir.",
+        "when_to_use": "Canlıya geçmeden önce başlık yapılandırmasını doğrula.\nKendi veya üçüncü taraf web uygulamasının güvenlik denetimi.\nPentest öncesi eksik HSTS veya CSP açıklarını bul.",
+        "limits": "Yalnızca standart başlıkları derecelendirir — özel güvenlik başlıkları sayılmaz.\nCSP raporları ve nonce tabanlı politikalar aktif olarak test edilmez."
+      }
+    },
+    "tech-stack": {
+      "title": "Tech Stack",
+      "desc": "Framework, CMS, analytics, hosting tespit et.",
+      "meta_title": "Tech Stack tespit edici — Bu site neyle yapılmış?",
+      "meta_description": "Genel yanıt verilerinden framework, CMS, analytics, e-ticaret, hosting ve kütüphaneleri tespit et.",
+      "explainer": {
+        "purpose": "Tech Stack tespit edicisi, bir sitenin genel yanıt verilerinden — HTML markup, HTTP başlıkları, çerez adları ve JS global'leri — framework, CMS, analytics, e-ticaret, hosting ve kütüphaneleri tanımlar. Rakip araştırması ve lead niteliklendirmesi için popülerdir.",
+        "how_it_works": "HTML, başlıklar ve çerezler 200+ bilinen parmak iziyle eşleştirilir.\nGöstergeler güven skoruyla ağırlıklandırılır.\nAynı kategoride birden fazla isabet (örn. 2 analytics) gösterilir.",
+        "when_to_use": "Satış görüşmesinden önce rakibin tech stack'ini analiz et.\nB2B lead niteliklendirmesi (kim Shopify kullanıyor? kim henüz kullanmıyor?).\nDeprekasyon denetimi: bu site eski bir jQuery üzerinde mi çalışıyor?",
+        "limits": "Bot korumalı siteler (Cloudflare challenge) kullanılabilir HTML döndürmez — boş sonuçlar beklenir.\nYalnızca istemci SPA'lar yığınlarını JS yürütüldükten sonra gösterir."
+      }
+    },
+    "redirects": {
+      "title": "Yönlendirme izleyici",
+      "desc": "Her sıçramayı takip et, döngü ve düşürmeleri tespit et.",
+      "meta_title": "Yönlendirme zinciri izleyicisi",
+      "meta_description": "URL'nin yönlendirme zincirinin her sıçramasını izle. Döngüleri, HTTPS düşürmelerini ve SEO'ya zarar veren çok fazla yönlendirmeyi tespit et.",
+      "explainer": {
+        "purpose": "Yönlendirme izleyici bir URL'yi her HTTP yönlendirme sıçraması boyunca takip eder, durum kodu, hedef URL ve gecikmeyi loglar. Döngüleri, HTTPS düşürmelerini ve SEO ile performansa zarar veren çok fazla yönlendirmeyi tespit et.",
+        "how_it_works": "Sunucu nihai 2xx yanıta kadar her 3xx'i manuel takip eder.\n20 sıçramalık sert sınır sonsuz döngüleri önler.\nProtokol ve host değişimleri görsel olarak vurgulanır.",
+        "when_to_use": "Site taşınması: eski URL'lerin yeni yapıya doğru yönlendirdiğini doğrula.\nSEO denetimi: Google 4+ sıçramalı zincirleri cezalandırır.\nGüvenlik denetimi: HTTP→HTTPS düşürmelerini XSS vektörü olarak tespit et.",
+        "limits": "Yalnızca sunucu 3xx'lerini takip eder — JS tabanlı (window.location) veya meta-refresh tespit edilmez.\nÇerez bağımlı yönlendirmeler (login wall'lar) duvara çarpar."
+      }
+    },
+    "subdomains": {
+      "title": "Alt domain bulucu",
+      "desc": "CT logları üzerinden pasif numaralandırma.",
+      "meta_title": "Alt domain bulucu — Certificate Transparency",
+      "meta_description": "Genel Certificate Transparency loglarından alt domainleri numaralandır. Hızlı, pasif, taramasız.",
+      "explainer": {
+        "purpose": "Alt domain bulucu, bir domainin alt domainlerini genel Certificate Transparency (CT) loglarından numaralandırır. Çıkarılan her SSL sertifikası CT'ye loglandığı için, bu loglar hiç var olmuş neredeyse tüm alt domainleri ortaya çıkarır — tamamen pasif, taramasız.",
+        "how_it_works": "crt.sh birincil CT log kaynağı olarak sorgulanır.\ncrt.sh çalışmıyorsa CertSpotter (SSLMate) güvenilir yedek olarak hizmet verir.\nSonuçlar deduplike edilir ve apex altındaki derinliğe göre gruplanır.",
+        "when_to_use": "Pentest veya bug bounty öncesi asset discovery.\nSaldırgandan önce unutulmuş staging/dev alt domainlerini tanımla.\nM&A due diligence: hedef hangi alt domainleri çalıştırıyor?",
+        "limits": "Yalnızca herhangi bir zamanda genel SSL sertifikası olmuş alt domainleri bulur.\nSaf wildcard sertifikalar (*.example.com) somut hostları açıklamaz."
+      }
+    },
+    "cdn-detector": {
+      "title": "CDN tespit edici",
+      "desc": "Cloudflare, Fastly, Akamai ve daha fazlasını tanımla.",
+      "meta_title": "CDN tespit edici — Bu site hangi CDN'i kullanıyor?",
+      "meta_description": "Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify ve 12+ diğer CDN'i tespit et.",
+      "explainer": {
+        "purpose": "CDN tespit edici, bir domainin hangi içerik dağıtım ağını kullandığını tanımlar — Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify ve daha fazlası. Performans analizi, pentest keşfi ve rakip araştırması için yararlıdır.",
+        "how_it_works": "Birden fazla sinyal birleştirilir: HTTP başlıkları (Server, X-Cache, Via), CNAME hedefi, IP WHOIS.\nHer CDN'in veritabanımızın tanıdığı benzersiz parmak izleri vardır.\nÇok katmanlı kurulumlar (örn. Fastly önünde Cloudflare) tespit edilir.",
+        "when_to_use": "Performans analizi: siteyi hangi CDN sunuyor?\nPentest öncesi: WAF'ı (Cloudflare, Imperva) tanımla.\nRakibin tech stack'ini analiz et.",
+        "limits": "Bazı CDN'ler kimliklerini gizler (özel CNAME'ler, jenerik başlıklar).\nYalnızca en dış katman görünür — origin sunucu gizli kalır."
+      }
+    },
+    "ssl-check": {
+      "title": "SSL sertifikası",
+      "desc": "Zincir, son kullanma, şifreleme, TLS sürümü.",
+      "meta_title": "SSL sertifikası denetleyicisi — TLS incelemesi",
+      "meta_description": "SSL/TLS sertifikalarını incele: yayıncı, zincir, son kullanma, cipher suite ve TLS sürümü.",
+      "explainer": {
+        "purpose": "SSL sertifikası kontrolü bir TLS hostundan sertifikayı alır ve yayıncı, zincir, geçerlilik, SAN listesi, cipher suite ve müzakere edilen TLS sürümünü gösterir. Yanlış yapılandırmaları, süresi dolmuş sertifikaları ve eksik intermediate'leri tespit etmek için kullan.",
+        "how_it_works": "443 numaralı portta (veya özel) TLS handshake sunucu sertifikasını döndürür.\nKök CA'ya kadar tam zincir geçilir ve doğrulanır.\nParmak izleri (SHA-1/SHA-256) ve genel anahtar türü raporlanır.",
+        "when_to_use": "Bir deploy öncesi wildcard veya SAN kapsamını doğrula.\nSon kullanma öncesi proaktif uyar (izlemeyle otomatize et).\nTarayıcı uyarılarını yeniden üret (hostname mismatch, self-signed).",
+        "limits": "Yalnızca standart TLS portlarındaki TCP hostlarıyla çalışır.\nİstemci kimlik doğrulaması (mTLS) gerçekleştirilmez."
+      }
+    },
+    "whois": {
+      "title": "WHOIS / RDAP",
+      "desc": "Domain sahibi ve kayıt verileri.",
+      "meta_title": "WHOIS / RDAP araması",
+      "meta_description": "Modern RDAP tabanlı domain kayıt araması: kayıt firması, durum, name server'lar, tarihler.",
+      "explainer": {
+        "purpose": "WHOIS / RDAP bir domainin kayıt verilerini ortaya çıkarır: kayıt firması, durum, name server'lar, oluşturma ve son kullanma tarihleri. Modern RDAP API'si eski serbest metinli WHOIS biçimi yerine yapılandırılmış JSON döndürür.",
+        "how_it_works": "Sorgu rdap.org'a veya TLD'ye özel RDAP sunucusuna gönderilir.\nDurum, etkinlikler, varlıklar gibi alanlar okunabilir biçime normalleştirilir.\nBir TLD için RDAP yoksa klasik WHOIS'a fallback yapar.",
+        "when_to_use": "Outreach veya satın alma için domain sahibini tanımla.\nBağımlı olduğun bir domainin son kullanmasının önüne geç.\nKötüye kullanılan bir domaini abuse iletişiminden bularak raporla.",
+        "limits": "Privacy hizmetleri sahipliği gizler — yalnızca proxy'yi görürsün.\nWHOIS verilerinin güncel veya doğru olduğu garanti edilmez (KVKK/GDPR)."
+      }
+    },
+    "reachability": {
+      "title": "Erişilebilirlik",
+      "desc": "HTTP, TCP, ping ve global durum.",
+      "meta_title": "Sunucu erişilebilirlik testi",
+      "meta_description": "Herhangi bir sunucuya HTTP, TCP ve ping erişilebilirliğini yanıt süresiyle test et.",
+      "explainer": {
+        "purpose": "Erişilebilirlik testi paralel olarak üç katmanı sondalar: HTTP yanıtı, TCP bağlantısı ve ICMP ping. Bir sunucunun tamamen offline olduğunu, yalnızca web servisinin çöktüğünü ya da firewall'un ICMP'yi filtrelediğini ayırt edebilirsin.",
+        "how_it_works": "Sunucudan üç paralel sonda: ping, TCP connect, HTTP GET.\nGecikme her katman için ölçülür.\nKısa durum kodları (DNS hatası, timeout, refused) Türkçe'ye çevrilir.",
+        "when_to_use": "Veri merkezine SSH atmadan hızlı erişilebilirlik tanılaması.\n'İnternet yönlendirmesi bozuldu' ile 'sadece uygulama çöktü'yü ayır.\nICMP filtrelemesini tespit et — birçok bulut sağlayıcısı pingi engeller.",
+        "limits": "Tek bir sunucu konumundan test edilir — global görünüm için birden fazla sonda gerekir.\nSürekli gözlem yok; sadece anlık görüntü."
+      }
+    },
+    "email-verify": {
+      "title": "E-posta doğrulayıcı",
+      "desc": "MX + tek kullanımlık + SMTP sondası.",
+      "meta_title": "E-posta doğrulayıcı — MX, tek kullanımlık, SMTP sondası",
+      "meta_description": "Herhangi bir e-posta adresini doğrula: söz dizimi, MX kayıtları, tek kullanımlık sağlayıcı kontrolü, opsiyonel SMTP handshake.",
+      "explainer": {
+        "purpose": "E-posta doğrulayıcı bir e-posta adresinin geçerli ve teslim edilebilir olup olmadığını test eder — söz dizimi, MX kayıtları, tek kullanımlık sağlayıcı ve opsiyonel SMTP handshake. Geçersiz kayıtları ve newsletter bounce'larını önler.",
+        "how_it_works": "Söz dizimi RFC 5322'ye göre kontrol edilir.\nDomainin MX kayıtları çözümlenir — eksikse teslim edilemez demektir.\nTek kullanımlık sağlayıcılar küratörlü listeyle eşleştirilir; SMTP sondası teslim edilebilirliği doğrular.",
+        "when_to_use": "Newsletter kayıtlarını formda inline doğrula.\nKampanya öncesi eski mailing listelerini temizle.\nKayıt sırasında atılabilir adresleri engelle.",
+        "limits": "SMTP sondaları posta sunucuları tarafından giderek daha çok engelleniyor.\nCatch-all domainler herhangi bir adresi kabul eder — onlar için karar belirsizdir."
+      }
+    },
+    "email-auth": {
+      "title": "SPF / DMARC / DKIM",
+      "desc": "E-posta kimlik doğrulama yapılandırmanı derecelendir.",
+      "meta_title": "SPF / DKIM / DMARC analizörü",
+      "meta_description": "Herhangi bir domain için e-posta kimlik doğrulama kayıtlarını kontrol et. SPF politikasını, DMARC enforcement'ı ve DKIM yapılandırmasını uyarılarla gör.",
+      "explainer": {
+        "purpose": "SPF / DKIM / DMARC analizörü bir domainin e-posta kimlik doğrulamasını denetler — birlikte saldırganların senin adına e-posta göndermesini (spoofing, phishing) önleyen üç standart. Somut iyileştirme önerileriyle bir derece çıkarır.",
+        "how_it_works": "TXT kayıtlarını okur: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF 10 lookup limitine karşı kontrol edilir; DMARC için p= ve rua=.\nDKIM seçicileri yaygın isimlerle (default, google, mail) sondalanır.",
+        "when_to_use": "Kritik bir newsletter kampanyası öncesi kendi e-posta kimlik doğrulamanı denetle.\nKurulumdan sonra DMARC enforcement (p=quarantine/reject) etkin olduğunu doğrula.\nMüşteri domainlerindeki spoofing sorunlarını tanıla.",
+        "limits": "DKIM seçici tespiti sezgiseldir; özel seçiciler kaçırılabilir.\nGerçek gönderme yollarını test etmez — yalnızca yapılandırma derecelendirilir."
+      }
+    },
+    "blacklist": {
+      "title": "IP blacklist",
+      "desc": "Bir IP'yi 20+ spam DNSBL'inde kontrol et.",
+      "meta_title": "IP blacklist kontrolü — 20+ DNSBL",
+      "meta_description": "Bir IP'nin 20+ büyük spam blacklistinde (Spamhaus, Barracuda, SORBS) olup olmadığını kontrol et. Anlık paralel DNSBL sorguları.",
+      "explainer": {
+        "purpose": "IP blacklist kontrolü, bir IP'yi 20+ tanınmış spam DNSBL'ine (Spamhaus, Barracuda, SORBS, SpamCop, …) paralel olarak test eder. İsabetler listelenme nedenini içerir. Posta sunucusu operatörleri ve IT adli bilişimi için önemli.",
+        "how_it_works": "DNSBL alanı altında tersine çevrilmiş IP kullanılarak liste başına bir DNS lookup.\nTüm listeler 3 sn timeout ile paralel sorgulanır.\nÇözümlenen yanıtlar genellikle listelenme nedenini ifşa eden bir kod taşır.",
+        "when_to_use": "E-postan spam olarak reddedilirken — posta IP'nin listelenip listelenmediğini kontrol et.\nISP / bulut sağlayıcısında IP değişiminden sonra yeniden kontrol et.\nLog'lardaki şüpheli IP'leri Spamhaus'a karşı kontrol et.",
+        "limits": "'Temiz' bir IP garanti değildir — bazı listeler özeldir.\nListelenmeler kısaca önbelleğe alınmış olabilir (DNSBL TTL)."
+      }
+    },
+    "jwt": {
+      "title": "JWT decoder",
+      "desc": "Yalnızca istemci tarafında JWT claim'lerini incele.",
+      "meta_title": "JWT decoder — JSON Web Token'ları incele",
+      "meta_description": "Bir JWT'yi yapıştır: başlığı ve payload'ı çöz, claim'leri incele ve son kullanmasını doğrula — tamamen tarayıcında, sunuculara hiçbir şey gönderilmez.",
+      "explainer": {
+        "purpose": "JWT decoder JSON Web Token'ları (başlık + payload) çözer ve claim'leri (sub, exp, iat, iss, aud …) okunabilir biçimde gösterir. Tamamen tarayıcıda çalışır — token'ın asla cihazını terk etmez ve hiçbir sunucuya gönderilmez.",
+        "how_it_works": "Token iki noktayla üç base64url segmentine bölünür.\nBaşlık ve payload istemci tarafında çözülür.\nSon kullanma (exp) mevcut zamanla karşılaştırılır ve görselleştirilir.",
+        "when_to_use": "Kendi uygulamalarında auth flow'larını debug ederken claim'leri incele.\nMüşteri token'ını privacy endişesi olmadan analiz et (sayfadan hiçbir şey çıkmaz).\nBir refresh token'ın süresinin dolup dolmadığını hızlıca kontrol et.",
+        "limits": "İmzayı DOĞRULAMAZ — bunun için yayıncının genel anahtarı gerekir.\nYalnızca JWS (imzalı JWT'ler); JWE (şifreli) çözülmez."
+      }
+    },
+    "password-leak": {
+      "title": "Parola sızıntısı",
+      "desc": "k-anonimity ile HIBP kontrolü — tarayıcıyı asla terk etmez.",
+      "meta_title": "Parola sızıntı kontrolü — HIBP k-Anonymity",
+      "meta_description": "Parolanın bilinen sızıntılarda olup olmadığını kontrol et. Have I Been Pwned'in k-anonimity API'sini kullanır — yalnızca ilk 5 SHA-1 karakteri gönderilir.",
+      "explainer": {
+        "purpose": "Parola sızıntı kontrolü, parolanın bilinen sızıntılarda (3 milyar+ giriş) olup olmadığını söyler. Have I Been Pwned'in k-anonimity API'sini kullanır — SHA-1 hash'inin yalnızca ilk 5 karakteri gönderilir, parolan asla tarayıcıyı terk etmez.",
+        "how_it_works": "Parolanın SHA-1'i tarayıcıda hesaplanır.\nHash'in yalnızca ilk 5 karakteri api.pwnedpasswords.com'a gönderilir.\nSunucu bu önekle TÜM hash'leri döner; karşılaştırma istemci tarafında olur.",
+        "when_to_use": "Yeni bir parolayı benimsemeden önce kontrol et.\nEski parolaları compromise için denetle.\nGüvenlik farkındalık eğitimi (sızıntı sayısının canlı demosu).",
+        "limits": "Yalnızca hash eşleşmesi — varyantlar (Pa$$word vs password) ayrı hash'lenir.\nZero-day kapsamı yok; raporlanan sızıntılar aylar öncesine ait olabilir."
+      }
+    },
+    "dnssec": {
+      "title": "DNSSEC doğrulayıcı",
+      "desc": "DS, DNSKEY ve imza kontrolleri.",
+      "meta_title": "DNSSEC doğrulayıcı",
+      "meta_description": "Herhangi bir domain için DNSSEC dağıtımını kontrol et. DS, DNSKEY ve RRSIG kayıtlarını uyarılarla gör.",
+      "explainer": {
+        "purpose": "DNSSEC doğrulayıcı bir domainin DNSSEC'in doğru dağıtılıp dağıtılmadığını kontrol eder — üst bölgede DS kayıtları, DNSKEY kayıtları, RRSIG imzaları ve kök KSK'ya kadar güven zinciri. DNS spoofing ve cache poisoning'e karşı korur.",
+        "how_it_works": "AD-bit doğrulamasıyla tam DNSSEC çözümlemesi.\nDS, DNSKEY ve RRSIG ayrı ayrı alınır ve algoritma whitelist'ine karşı kontrol edilir.\nEksik veya zayıf algoritmalar (RSA-MD5, SHA-1) uyarı tetikler.",
+        "when_to_use": "DNSSEC'i etkinleştirmeden önce / sonra imzaların geçerli olduğunu doğrula.\nKey rollover'ları izle — eski ve yeni DNSKEY'ler örtüşmeli.\nKayıt firması tarafındaki DS gönderim sorunlarını tanıla.",
+        "limits": "Yalnızca doğrulama durumunu raporlar; tamiratlar kayıt firmasında yapılır.\nÜst DS olmadan kendi imzalanmış alt domainleri DOĞRULAMAZ."
+      }
+    },
+    "cookies": {
+      "title": "Çerez / KVKK",
+      "desc": "Çerez bayrakları + üçüncü taraf tracker tespiti.",
+      "meta_title": "Çerez ve KVKK analizörü",
+      "meta_description": "Herhangi bir sayfada Set-Cookie bayraklarını ve yüklenen üçüncü taraf tracker'larını incele. KVKK risk skoru.",
+      "explainer": {
+        "purpose": "Çerez ve KVKK analizörü bir URL'yi yükler ve set edilen her çerezi listeler, güvenlik bayrakları (Secure, HttpOnly, SameSite, Max-Age) ile tespit edilen üçüncü taraf tracker'ları dahil. KVKK uyumluluğu ve gizlilik denetimleri için yardımcıdır.",
+        "how_it_works": "Tarayıcı benzeri fetch yanıttaki her Set-Cookie başlığını toplar.\nÜçüncü taraf domainler küratörlü tracker / reklam / analytics listesiyle eşleştirilir.\nEksik güvenlik bayrakları neden önemli olduklarıyla raporlanır.",
+        "when_to_use": "Yasal incelemeden önce kendi sitenin KVKK denetimi.\nRakip sitelerde şüpheli tracker'ları tespit et.\nYanlış yapılandırmayı bul (eksik HttpOnly, Secure olmadan SameSite=None).",
+        "limits": "Yalnızca kullanıcı etkileşimi sonrası (consent banner) set edilen çerezler kaçırılır.\nTam tarayıcı değil — karmaşık JS-driven tracker'lar atlatabilir."
+      }
+    },
+    "opengraph": {
+      "title": "OG önizleme",
+      "desc": "Herhangi bir URL için sosyal paylaşım önizlemesi.",
+      "meta_title": "Open Graph ve Meta önizleme",
+      "meta_description": "URL'nin Twitter, Facebook, LinkedIn, Slack'te paylaşıldığında nasıl göründüğünü önizle.",
+      "explainer": {
+        "purpose": "OpenGraph ve Meta önizleme, URL'nin Twitter/X, Facebook, LinkedIn, Slack ve Discord'da paylaşıldığında nasıl görüneceğini gösterir. Paylaşmadan önce OG etiketlerini debug etmek için kullanışlı.",
+        "how_it_works": "Sunucu HTML'i alır ve her og: ve twitter: meta etiketini parse eder.\nEksik temel etiketler (og:title, og:image, og:description) raporlanır.\nBirden fazla platform için önizleme kartları simüle edilir.",
+        "when_to_use": "Önemli bir gönderiyi yayımlamadan önce önizlemeyi test et.\nTwitter / Facebook'un neden image kartı göstermediğini debug et.\nTüm siteyi tutarlı OG etiketleri için denetle.",
+        "limits": "Yalnızca sunucuda render edilen etiketler — OG'yi istemci tarafında set eden JS uygulamaları değerlendirilmez.\nGerçek platform crawler'ları önbelleğe alır; değişiklikler re-scrape gerektirebilir."
+      }
+    },
+    "robots": {
+      "title": "Robots ve Sitemap",
+      "desc": "robots.txt'i parse et ve sitemap'leri doğrula.",
+      "meta_title": "Robots.txt ve Sitemap doğrulayıcı",
+      "meta_description": "Herhangi bir host için robots.txt kurallarını ve sitemap XML'i parse et ve doğrula.",
+      "explainer": {
+        "purpose": "Robots.txt ve Sitemap doğrulayıcı bir domainin robots.txt'ini parse eder, tüm Allow/Disallow kurallarını user agent'a göre gruplar ve bağlantılı sitemap XML'lerini şemaya karşı doğrular. Crawl bütçesi yönetimi ve SEO için önemli.",
+        "how_it_works": "robots.txt RFC 9309'a göre parse edilir; her satır söz dizimi açısından kontrol edilir.\nSitemap URL'leri alınır ve well-formed XML olarak doğrulanır.\nÇelişkiler (sitemap robots.txt tarafından engellenmiş!) işaretlenir.",
+        "when_to_use": "Lansman öncesi arama motorlarının doğru şeyleri indekslediğini doğrula.\nRakibin robots.txt'ini analiz et (neyi engelliyorlar?).\nGoogle Search Console'un sayfaları neden 'engellenmiş' olarak raporladığını debug et.",
+        "limits": "Yalnızca söz dizimi doğrulaması — crawler'ların kuralları gerçekten respect edip etmediğini test etmiyoruz.\nDerin sitemap crawl'u yok; yalnızca üst düzey XML doğrulanır."
+      }
+    },
+    "ipv6": {
+      "title": "IPv6 hazırlık",
+      "desc": "Apex/www/NS/MX'te AAAA kapsamını derecelendir.",
+      "meta_title": "IPv6 hazırlık skoru",
+      "meta_description": "Apex, www, name server'lar ve mail'de domainin IPv6 dağıtımını derecelendir.",
+      "explainer": {
+        "purpose": "IPv6 hazırlık skoru bir domainin IPv6'ya ne kadar hazır olduğunu derecelendirir — apex (example.com), www, name server'lar ve MX sunucuları — her biri AAAA kayıtları için kontrol edilir. Mobil ağlar ve hükümetler / telekomlarla IPv6 uyumluluğu için önemli.",
+        "how_it_works": "Dört katman kontrol edilir: apex AAAA, www AAAA, NS AAAA, MX AAAA.\nMevcut her katman 25 puan kazandırır; toplam 0–100.\nEksik katmanlar fix ipucuyla notlandırılır.",
+        "when_to_use": "IPv6 göçünden önce status quo'yu belgele.\nHükümet / uyumluluk denetimleri (BSI baseline, US Federal IPv6).\nÖnce hangi katmanı IPv6-ready yapmak gerektiğine öncelik ver.",
+        "limits": "Yalnızca DNS varlığını kontrol eder, gerçek IPv6 erişilebilirliğini değil.\nWildcard AAAA'lar bulunur ama 'gerçek' hazırlık olarak sayılmaz."
+      }
+    },
+    "bgp": {
+      "title": "BGP / ASN",
+      "desc": "RIPE Stat üzerinden yönlendirme zekâsı.",
+      "meta_title": "BGP / ASN görüntüleyici",
+      "meta_description": "Herhangi bir IP'nin BGP prefix'ini, anons eden ASN'leri ve rotasını ara. Veya bir ASN'nin anons ettiği prefix'leri incele.",
+      "explainer": {
+        "purpose": "BGP araması, hangi AS'in belirli bir IP'yi anons ettiğini, bir AS'in hangi prefix'leri tuttuğunu ve hangi komşu AS'lerle peer'ladığını göstermek için global yönlendirme tablolarını sorgular. Veriler RIPEstat'tan canlı gelir — ağ mühendislerinin yönlendirme tanılaması için kullandığı kaynaktan.",
+        "how_it_works": "Sorgular tam yönlendirme görünümüne sahip stat.ripe.net'e (RIPE NCC) gider.\nBir IP için en spesifik anons edilen prefix ve origin AS döndürülür.\nBir AS için her anons edilen prefix ve peering listesi alınır.",
+        "when_to_use": "Bulut sağlayıcılarını residential ISP'lerden ayır (hosting tespiti).\nRoute hijack veya istenmeyen yeniden anonsları tanıla.\nKendi prefix'inin global görünürlüğünü kontrol et.",
+        "limits": "Yönlendirme verileri snapshot'tır; çok yeni değişikliklerin görünmesi dakikalar alır.\nTam AS yolu görselleştirmesi yok (yalnızca doğrudan komşular)."
+      }
+    },
+    "mixed-content": {
+      "title": "Mixed Content",
+      "desc": "HTTPS sayfalarında http:// kaynaklarını bul.",
+      "meta_title": "Mixed Content tarayıcı",
+      "meta_description": "HTTPS sayfalarında tarayıcıların engellediği veya uyardığı güvensiz http:// kaynaklarını bul.",
+      "explainer": {
+        "purpose": "Mixed Content taraması bir HTTPS sayfasında gömülü http:// kaynaklarını (görseller, scriptler, iframe'ler, fontlar) bulur — tarayıcıların ya doğrudan engellediği ya da uyardığı. Bunlar bozuk layout'lara, eksik görsellere ve güvenlik uyarılarına neden olur.",
+        "how_it_works": "Sunucu HTML'i yükler ve her src / href özniteliğini parse eder.\nHer http:// URL sınıflandırılır: engelleyici (scriptler, iframe'ler) veya uyarıcı (görseller, fontlar).\nCSS import'ları ve @font-face beyanları da incelenir.",
+        "when_to_use": "Eski bir backend'i HTTPS'e taşımadan önce, hangi kaynakların güncellenmesi gerektiğini bul.\nÜçüncü taraf eklenti kurduktan sonra http çağrıları enjekte edip etmediğini kontrol et.\nGoogle Search Console uyarılarını yeniden üret.",
+        "limits": "Yalnızca statik HTML — JS tarafından enjekte edilen http kaynakları bulunmaz.\nYalnızca ilk seviye; iframe'ler takip edilmez."
+      }
+    },
+    "dashboard": {
+      "title": "IP'm",
+      "desc": "Senin IP'n, konum, ISP, tarayıcı, OS.",
+      "meta_title": "IP'm dashboard'u",
+      "meta_description": "Senin IP'n, konum, ISP, tarayıcı, OS, ekran, saat dilimi — tek bir görünümde."
+    },
+    "monitoring": {
+      "title": "İzleme",
+      "desc": "Zamanlanmış uptime kontrolleri ve uyarılar."
+    }
+  },
+  "footer": {
+    "tagline": "Profesyonel ağ tanılaması.",
+    "status": "Durum",
+    "copyright": "© {year} Traceronix."
+  },
+  "common": {
+    "loading": "Yükleniyor…",
+    "error": "Bir şeyler ters gitti, tekrar dene.",
+    "input_required": "Göndermeden önce alanı doldur.",
+    "lookup": "Ara",
+    "check": "Kontrol et",
+    "analyze": "Analiz et",
+    "detect": "Tespit et",
+    "verify": "Doğrula",
+    "trace": "İzle",
+    "scan": "Tara",
+    "inspect": "İncele",
+    "enumerate": "Numaralandır",
+    "preview": "Önizleme",
+    "score": "Derecelendir",
+    "enter_host": "Hostname veya IP gir",
+    "enter_domain": "Domain gir",
+    "enter_url": "URL gir",
+    "enter_ip": "IPv4 adresi gir",
+    "enter_email": "E-posta adresi gir",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "clear": "Temizle",
+    "source": "Kaynak",
+    "filter": "filtrele…",
+    "no_records": "Kayıt yok",
+    "no_results": "Sonuç yok.",
+    "records_count": "{count} kayıt",
+    "resolved_in": "{ms} ms'de çözüldü",
+    "yes": "evet",
+    "no": "hayır",
+    "error_title": "Bir şeyler ters gitti",
+    "retry": "Tekrar dene"
+  },
+  "not_found": {
+    "code": "404",
+    "title": "Sayfa bulunamadı",
+    "desc": "Aradığın sayfa mevcut değil ya da taşınmış.",
+    "hint": "URL'yi kontrol et ya da ana sayfaya dön.",
+    "back": "Ana sayfaya dön",
+    "search_hint": "Bir araç mı arıyorsun? Yukarıdaki aramayı dene.",
+    "did_you_mean": "Belki şunu arıyordun",
+    "explore_tools": "Araçları keşfet",
+    "popular_tools": "Popüler araçlar"
+  },
+  "bgp": {
+    "title": "BGP / ASN",
+    "subtitle": "RIPEstat üzerinden canlı yönlendirme.",
+    "tab_ip": "IP",
+    "tab_asn": "ASN",
+    "field_ip": "IP",
+    "field_prefix": "Prefix",
+    "field_block": "Blok",
+    "field_announced": "Anons edilen",
+    "field_country": "Ülke",
+    "field_city": "Şehir",
+    "field_asn": "ASN",
+    "field_holder": "Sahip",
+    "field_announced_prefixes": "Anons edilen prefix'ler",
+    "field_neighbours": "Komşular",
+    "announcing_asns": "Anons eden ASN'ler",
+    "prefix_sample": "Prefix örnekleri"
+  },
+  "blacklist": {
+    "title": "IP blacklist kontrolü",
+    "subtitle": "20+ büyük DNSBL'i paralel sorgula.",
+    "placeholder": "IPv4 adresi",
+    "clean": "Temiz",
+    "listed_on": "{total} listenin {listed}'sinde listelendi",
+    "col_list": "Liste",
+    "col_status": "Durum",
+    "status_listed": "listelendi",
+    "status_clean": "temiz"
+  },
+  "cdn": {
+    "title": "CDN tespit edici",
+    "subtitle": "Herhangi bir hostun önündeki CDN veya WAF'ı tanımla.",
+    "powered_by": "Sağlayıcı",
+    "no_cdn": "Başlıklar üzerinden CDN tespit edilmedi.",
+    "server_label": "sunucu",
+    "detection_signals": "Tespit sinyalleri"
+  },
+  "cookies": {
+    "title": "Çerez ve KVKK analizörü",
+    "subtitle": "Çerez bayrakları + üçüncü taraf tracker tespiti.",
+    "gdpr_score": "KVKK risk skoru",
+    "summary": "{cookies} çerez, {trackers} tracker, {hosts} üçüncü taraf host",
+    "col_name": "İsim",
+    "col_secure": "Secure",
+    "col_httponly": "HttpOnly",
+    "col_samesite": "SameSite",
+    "section_cookies": "Çerezler",
+    "section_trackers": "Üçüncü taraf tracker'lar"
+  },
+  "dashboard": {
+    "title": "IP'm dashboard'u",
+    "subtitle": "Bağlantın hakkında tespit edebildiğimiz her şey.",
+    "detecting": "Bağlantın tespit ediliyor…",
+    "section_connection": "Bağlantı",
+    "section_location": "Konum",
+    "section_client": "İstemci",
+    "section_threat": "Tehdit / Gizlilik",
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_country": "Ülke",
+    "field_region": "Bölge",
+    "field_city": "Şehir",
+    "field_tz_ip": "Saat dilimi (IP)",
+    "field_tz_browser": "Saat dilimi (tarayıcı)",
+    "field_browser": "Tarayıcı",
+    "field_os": "OS",
+    "field_device": "Cihaz",
+    "field_screen": "Ekran",
+    "field_lang": "Accept-Language",
+    "threat_tor": "TOR",
+    "threat_hosting": "Hosting",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Residential"
+  },
+  "dns": {
+    "title": "DNS araması",
+    "subtitle": "Herhangi bir domain için DNS kayıtlarını sorgula.",
+    "record_types": "Kayıt türleri",
+    "records_count": "{count} kayıt",
+    "no_records": "Kayıt yok"
+  },
+  "propagation": {
+    "title": "DNS yayılımı",
+    "subtitle": "15 global resolver'ı paralel sorgula.",
+    "stat_resolvers": "Resolver'lar",
+    "stat_unique": "Benzersiz yanıtlar",
+    "stat_status": "Durum",
+    "propagated": "Yayıldı",
+    "propagating": "Yayılıyor",
+    "col_resolver": "Resolver",
+    "col_region": "Bölge",
+    "col_answer": "Yanıt",
+    "col_ms": "ms"
+  },
+  "dnssec": {
+    "title": "DNSSEC doğrulayıcı",
+    "subtitle": "DS, DNSKEY ve RRSIG kontrolleri.",
+    "active": "DNSSEC aktif",
+    "not_signed": "İmzalı değil",
+    "stat_ds": "DS kayıtları",
+    "stat_dnskey": "DNSKEY kayıtları",
+    "stat_rrsig": "RRSIG mevcut",
+    "findings": "Bulgular",
+    "ds_records": "DS kayıtları"
+  },
+  "email_auth": {
+    "title": "SPF / DKIM / DMARC",
+    "subtitle": "Herhangi bir domain için e-posta kimlik doğrulamasını parse et ve derecelendir.",
+    "placeholder_domain": "ornek.com.tr",
+    "placeholder_selector": "DKIM seçici (opsiyonel)",
+    "score_label": "E-posta kimlik doğrulama skoru"
+  },
+  "email_verify": {
+    "title": "E-posta doğrulayıcı",
+    "subtitle": "Söz dizimi + MX + tek kullanımlık tespiti + opsiyonel SMTP sondası.",
+    "smtp_label": "SMTP RCPT sondası uygula (daha yavaş, antispam filtrelerini tetikleyebilir)",
+    "deliverable": "Muhtemelen teslim edilebilir",
+    "problematic": "Sorunlu",
+    "flag_syntax": "Geçerli söz dizimi",
+    "flag_mx": "MX kayıtları var",
+    "flag_not_disposable": "Tek kullanımlık değil",
+    "flag_not_role": "Rol hesabı değil",
+    "mx_records": "MX kayıtları",
+    "no_mx": "MX kaydı yok — domain posta alamaz.",
+    "smtp_probe": "SMTP sondası",
+    "smtp_mx": "MX",
+    "smtp_code": "Kod"
+  },
+  "headers": {
+    "title": "HTTP güvenlik başlıkları",
+    "subtitle": "Yanıt başlıklarını analiz et ve güvenlik duruşunu A+ ile F arasında derecelendir.",
+    "score": "Skor {score}/100",
+    "http_status": "HTTP {status}",
+    "security_checks": "Güvenlik başlığı kontrolleri",
+    "raw_headers": "Ham yanıt başlıkları"
+  },
+  "ip": {
+    "title": "IP araması",
+    "subtitle": "Coğrafi konum, ASN, ISP ve threat intelligence.",
+    "placeholder": "IPv4 veya IPv6",
+    "field_ip": "IP",
+    "field_hostname": "Hostname",
+    "field_country": "Ülke",
+    "field_region": "Bölge",
+    "field_city": "Şehir",
+    "field_timezone": "Saat dilimi",
+    "field_isp": "ISP",
+    "field_asn": "ASN",
+    "field_coords": "Koordinatlar",
+    "field_org": "Organizasyon",
+    "field_user_agent": "Senin User-Agent",
+    "multi_title": "Sağlayıcılar arası karşılaştırma",
+    "multi_subtitle": "Aynı IP birden fazla coğrafi konum API'sine paralel sorulur — ayrılıklar veri kaynağı farklarını ortaya çıkarır.",
+    "multi_loading": "Sağlayıcılar paralel sorgulanıyor…",
+    "multi_summary": "{total} kaynaktan {ok} tanesi başarılı",
+    "multi_cached": "önbellekten",
+    "multi_country": "Ülke",
+    "multi_city": "Şehir",
+    "multi_asn": "ASN",
+    "multi_country_name": "Ülke adı",
+    "multi_continent": "Kıta",
+    "multi_postal": "Posta kodu",
+    "multi_iptype": "IP türü",
+    "multi_lat": "Enlem",
+    "multi_lon": "Boylam",
+    "multi_org": "Organizasyon",
+    "multi_domain": "Domain",
+    "multi_currency": "Para birimi",
+    "multi_calling_code": "Ülke kodu",
+    "multi_languages": "Diller",
+    "multi_eu": "AB üyesi",
+    "multi_open_raw": "Ham yanıtı aç",
+    "threat_title": "Threat intelligence",
+    "risk_score": "risk skoru",
+    "threat_tor": "TOR çıkışı",
+    "threat_hosting": "Hosting / DC",
+    "threat_vpn": "VPN",
+    "threat_proxy": "Proxy",
+    "threat_residential": "Residential"
+  },
+  "ipv6": {
+    "title": "IPv6 hazırlık",
+    "subtitle": "Apex, www, NS ve MX'te AAAA kapsamı.",
+    "grade": "IPv6 derecesi",
+    "row_apex_a": "Apex (A)",
+    "row_apex_aaaa": "Apex (AAAA)",
+    "row_www_a": "www (A)",
+    "row_www_aaaa": "www (AAAA)",
+    "row_ns": "IPv6'lı name server'lar ({with}/{total})",
+    "row_mx": "IPv6'lı MX ({with}/{total})",
+    "warnings": "Uyarılar"
+  },
+  "jwt": {
+    "title": "JWT decoder",
+    "subtitle": "Herhangi bir JWT'yi yapıştır — tamamen tarayıcında çözülür. Hiçbir şey cihazını terk etmez.",
+    "placeholder": "JWT'yi buraya yapıştır…",
+    "header": "Başlık",
+    "payload": "Payload",
+    "signature": "İmza",
+    "claim_issued": "Çıkarıldı",
+    "claim_expires": "Süresi dolar",
+    "claim_status": "Durum",
+    "claim_subject": "Subject",
+    "valid": "Geçerli",
+    "expired": "Süresi dolmuş",
+    "not_yet": "Henüz geçerli değil",
+    "sig_note": "İmza tarayıcıda doğrulanamaz."
+  },
+  "mixed": {
+    "title": "Mixed Content tarayıcı",
+    "subtitle": "HTTPS sayfalarında http:// kaynaklarını bul.",
+    "placeholder": "https://…",
+    "clean": "Temiz",
+    "insecure_count": "{count} güvensiz kaynak"
+  },
+  "opengraph": {
+    "title": "OG önizleme",
+    "subtitle": "Herhangi bir URL için sosyal paylaşım önizlemesi.",
+    "no_title": "(başlık yok)",
+    "no_desc": "(açıklama yok)",
+    "field_site": "Site adı",
+    "field_type": "Tür",
+    "field_twitter": "Twitter kartı",
+    "field_favicon": "Favicon",
+    "raw_tags": "Ham OG etiketleri"
+  },
+  "password": {
+    "title": "Parola sızıntı kontrolü",
+    "subtitle": "HIBP k-anonimity kontrolü — parolan asla tarayıcıyı terk etmez.",
+    "placeholder": "Bir parola gir",
+    "safe": "Bilinen hiçbir sızıntıda bulunamadı",
+    "found": "{count} kez bulundu",
+    "safe_note": "Bu parola hash'i HIBP listesinde değil — ancak bu güçlü olduğunu garanti etmez.",
+    "unsafe_note": "Bu parolayı kullandığın her yerde değiştir. Saldırganlar tam olarak bu parolayı biliyor.",
+    "privacy_note": "SHA-1 tarayıcında olur. HIBP'a yalnızca hash'in ilk 5 karakteri gönderilir."
+  },
+  "ports": {
+    "title": "Port denetleyici",
+    "subtitle": "TCP port erişilebilirliğini kontrol et, yaygın portları tara veya bir aralığı geç.",
+    "mode_single": "Tek port",
+    "mode_common": "Yaygın portlar",
+    "mode_range": "Port aralığı",
+    "placeholder_host": "ornek.com veya IP",
+    "placeholder_port": "443",
+    "placeholder_range": "1-1024",
+    "open": "açık",
+    "closed": "kapalı",
+    "filtered": "filtrelenmiş",
+    "open_of": "{open} açık / {total} taranan",
+    "service": "Servis",
+    "common_count": "{count} yaygın port",
+    "port_status": "Port {port} <s>{status}</s>"
+  },
+  "reachability": {
+    "title": "Erişilebilirlik",
+    "subtitle": "HTTP, TCP, ping ve global durum kontrolü.",
+    "reachable": "Erişilebilir",
+    "unreachable": "Erişilemez"
+  },
+  "redirects": {
+    "title": "Yönlendirme izleyici",
+    "subtitle": "Her yönlendirme sıçramasını takip et, döngü ve HTTPS düşürmelerini tespit et.",
+    "stat_hops": "Sıçramalar",
+    "stat_final_status": "Nihai durum",
+    "stat_downgrade": "Düşürme",
+    "stat_result": "Sonuç",
+    "downgrade_yes": "EVET",
+    "downgrade_no": "hayır",
+    "location": "Location"
+  },
+  "robots": {
+    "title": "Robots ve Sitemap",
+    "subtitle": "robots.txt'i parse et ve referans verilen sitemap'leri doğrula.",
+    "robots_txt": "robots.txt",
+    "sitemaps": "Sitemap'ler",
+    "sitemap_errors": "Hatalar",
+    "sitemap_index": "indeks",
+    "urls_label": "URL'ler",
+    "sample_urls": "Örnek URL'ler"
+  },
+  "ssl": {
+    "title": "SSL sertifikası denetleyicisi",
+    "subtitle": "TLS zinciri, son kullanma, cipher suite ve derece.",
+    "valid": "Geçerli",
+    "invalid": "Geçersiz / Süresi dolmuş",
+    "field_tls": "TLS",
+    "field_cipher": "Şifreleme",
+    "field_valid_from": "Geçerli başlangıç",
+    "field_valid_to": "Geçerli son",
+    "field_issuer": "Yayıncı",
+    "field_expiry": "Son kullanmaya gün",
+    "field_subject_alt": "Subject Alt Names",
+    "grade": "Derece",
+    "chain": "Sertifika zinciri"
+  },
+  "subdomains": {
+    "title": "Alt domain bulucu",
+    "subtitle": "CT logları üzerinden pasif numaralandırma.",
+    "input_placeholder": "örn. ornek.com.tr",
+    "input_hint": "Tam URL'leri kabul eder (https://ornek.com.tr/foo) — şema, yol, port ve 'www.' otomatik kaldırılır.",
+    "query_as": "Sorgulanıyor: {domain}",
+    "filter_placeholder": "Alt domainleri filtrele…",
+    "filter_match_label": "eşleşme",
+    "count": "{count} alt domain bulundu",
+    "showing_total": "{total} giriş",
+    "showing_filtered": "{total} girişten {shown}",
+    "degraded_title": "CT log geçici olarak kullanılamıyor",
+    "degraded_message": "crt.sh şu anda erişilemez veya bizi sınırlıyor. Bir dakika sonra tekrar dene — bu domainin alt domaini OLMADIĞI anlamına GELMEZ.",
+    "truncated_notice": "Sonuç sınırlandırıldı — döndürmediğimiz daha fazla alt domain var",
+    "depth_label": "Üst domainin altında {depth} seviye derinlik",
+    "copy_all": "Tümünü kopyala",
+    "export": "Dışa aktar",
+    "lookup_action": "Ara →"
+  },
+  "tech": {
+    "title": "Tech Stack tespit edici",
+    "subtitle": "Framework, CMS, analytics ve hosting sağlayıcısını tespit et.",
+    "detected": "{count} teknoloji tespit edildi",
+    "empty_title": "Hiç teknoloji tespit edilmedi",
+    "empty_reasons": "Site muhtemelen bot korumasına sahip (Cloudflare challenge, captcha) veya minimal HTML sayfa döndürdü (login wall, SPA shell). Bu sitenin teknoloji KULLANMADIĞI anlamına GELMEZ — uygulama/login URL'si yerine genel bir pazarlama sayfası dene."
+  },
+  "whois": {
+    "title": "WHOIS / RDAP",
+    "subtitle": "Domain sahibi ve kayıt verileri.",
+    "section_domain": "Domain",
+    "field_name": "İsim",
+    "field_handle": "Handle",
+    "field_registrar": "Kayıt firması",
+    "field_status": "Durum",
+    "field_created": "Oluşturulma",
+    "field_updated": "Güncellenme",
+    "field_expires": "Son kullanma",
+    "dates": "Tarihler",
+    "nameservers": "Name server'lar",
+    "raw": "Ham RDAP"
+  },
+  "explainer": {
+    "about_title": "Bu araç hakkında",
+    "how_title": "Nasıl çalışır",
+    "when_title": "Ne zaman kullanılır",
+    "limits_title": "Sınırlamalar"
+  }
+}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Wifi } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { ToolExplainer } from "@/components/tool-explainer";
 import { Ipv6Client } from "./client";
 
 const SLUG = "ipv6";
@@ -27,6 +28,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       icon={<Wifi className="h-5 w-5" />}
     >
       <Ipv6Client />
+      <ToolExplainer slug={SLUG} locale={locale} />
     </ToolShell>
   );
 }

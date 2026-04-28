@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://netscope.io";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://traceronix.io";
 
 const tools = [
   "", "/port-checker", "/ip-lookup", "/dns-lookup", "/dns-propagation",

@@ -33,7 +33,7 @@ export function PropagationClient() {
   return (
     <div className="space-y-6">
       <form onSubmit={run} className="card space-y-3">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} />
           <select className="input max-w-[7rem]" value={type} onChange={(e) => setType(e.target.value)}>
             {TYPES.map((tp) => <option key={tp} value={tp}>{tp}</option>)}

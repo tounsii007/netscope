@@ -1,12 +1,10 @@
 {
   "meta": {
-    "title": "NetScope — Network Diagnostics & IP Intelligence",
+    "title": "Traceronix — Network Diagnostics & IP Intelligence",
     "description": "Port Checker, IP Lookup, DNS, WHOIS, SSL Inspection and Monitoring. Professional-grade network diagnostics in your browser."
   },
   "nav": {
     "home": "Home",
-    "api": "API",
-    "pricing": "Pricing",
     "docs": "Docs",
     "sign_in": "Sign in",
     "switch_lang": "Switch language",
@@ -18,7 +16,7 @@
     "cat_security": "Security",
     "cat_email": "Email",
     "cat_web": "Web Analysis",
-    "lang_en": "English",
+    "lang_en": "English (US)",
     "lang_de": "Deutsch",
     "lang_hi": "हिन्दी",
     "lang_zh": "中文",
@@ -46,11 +44,18 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Pwd"
-    }
+    },
+    "lang_fr": "Français",
+    "lang_es": "Español",
+    "lang_it": "Italiano",
+    "lang_pl": "Polski",
+    "lang_ru": "Русский",
+    "lang_uk": "Українська",
+    "lang_tr": "Türkçe"
   },
   "auth": {
     "meta_title": "Sign in",
-    "signin_title": "Sign in to NetScope",
+    "signin_title": "Sign in to Traceronix",
     "signin_subtitle": "Continue with your GitHub or Google account. We never request write access.",
     "continue_github": "Continue with GitHub",
     "continue_google": "Continue with Google"
@@ -61,7 +66,6 @@
     "title_2": "done right.",
     "subtitle": "Port checks, IP intelligence, DNS, WHOIS, SSL inspection and uptime monitoring — one fast platform, free to start.",
     "cta_tools": "Try the tools",
-    "cta_api": "API docs",
     "tools_heading": "All network tools",
     "tools_count": "{count} tools · free tier available"
   },
@@ -70,145 +74,289 @@
       "title": "Port Checker",
       "desc": "Check TCP/UDP ports, scan ranges, detect services.",
       "meta_title": "Port Checker — Scan TCP ports online",
-      "meta_description": "Check if a port is open on any server. Scan single ports, ranges, or common ports with latency and service detection."
+      "meta_description": "Check if a port is open on any server. Scan single ports, ranges, or common ports with latency and service detection.",
+      "explainer": {
+        "purpose": "The Port Checker tests whether a TCP port on a remote host is reachable from the public Internet. Use it to validate firewall rules, cloud security groups, local services behind NAT, and provider routing — no SSH or nmap on your machine required.",
+        "how_it_works": "The server opens a TCP connection to the target and reports open / closed / timeout.\nLatency is measured in milliseconds so slow network hops are visible.\nCommon ports (21, 22, 80, 443, 3306, …) are annotated with the service hint.",
+        "when_to_use": "Verify firewall rules after provisioning a new server.\nReproduce a client's 'cannot connect' report without access to their network.\nCheck from the outside whether a service is publicly exposed (pre-pentest).",
+        "limits": "TCP only — UDP services like DNS, NTP, WireGuard cannot be probed.\nNo broad port-range scans (legally risky and likely blocked)."
+      }
     },
     "ip-lookup": {
       "title": "IP Lookup",
       "desc": "Geolocation, ASN, ISP, proxy/VPN/TOR detection.",
       "meta_title": "IP Lookup — Geolocation, ASN, VPN/Proxy detection",
-      "meta_description": "Look up any IP: country, city, ISP, ASN, timezone. Detect VPN, proxy, TOR, hosting."
+      "meta_description": "Look up any IP: country, city, ISP, ASN, timezone. Detect VPN, proxy, TOR, hosting.",
+      "explainer": {
+        "purpose": "IP Lookup aggregates geolocation, network and threat information for any public IPv4 or IPv6 address. It tells you the country, city, timezone, ISP, ASN, and whether the IP belongs to a VPN, proxy, TOR exit or hosting provider.",
+        "how_it_works": "Several geolocation APIs are queried in parallel; divergences are surfaced.\nAS number and hosting detection come from BGP routing data.\nTOR exits are matched against the official exit list; VPN/proxy is heuristic.",
+        "when_to_use": "Contextualise suspicious logins or sign-up attempts.\nRoughly verify a customer's location for geo-pricing or compliance.\nTrace abusive traffic back to proxy pools or hosting IPs.",
+        "limits": "City-level accuracy is imprecise — often just the ISP PoP, not the end user.\nMobile networks and CGNAT mask real locations."
+      }
     },
     "dns-lookup": {
       "title": "DNS Lookup",
       "desc": "A, AAAA, MX, TXT, CNAME, NS records.",
       "meta_title": "DNS Lookup — A, AAAA, MX, TXT, NS records",
-      "meta_description": "Fast DNS lookup for any domain. View A, AAAA, MX, TXT, CNAME, NS and CAA records."
+      "meta_description": "Fast DNS lookup for any domain. View A, AAAA, MX, TXT, CNAME, NS and CAA records.",
+      "explainer": {
+        "purpose": "DNS Lookup fetches every common resource record (A, AAAA, MX, TXT, CNAME, NS, SOA, CAA) for a domain in a single call. See what authoritative servers actually return without installing `dig` locally.",
+        "how_it_works": "Queries run over DNS-over-HTTPS (Cloudflare 1.1.1.1) — fast and tamper-resistant.\nMultiple record types are loaded in parallel.\nTTL and authority info is shown alongside.",
+        "when_to_use": "Verify a DNS change is live after you edited a zone.\nValidate mail setup (MX, SPF in TXT, DKIM selectors).\nCheck CAA records before issuing certificates.",
+        "limits": "Returns data from one resolver — for global propagation use DNS Propagation.\nGeo-DNS / anycast responses may vary by location."
+      }
     },
     "dns-propagation": {
       "title": "DNS Propagation",
       "desc": "Query 15 global resolvers in parallel.",
       "meta_title": "DNS Propagation Checker — 15 global resolvers",
-      "meta_description": "Check DNS propagation across 15+ public resolvers worldwide. See if your A, AAAA, MX, or TXT change is live everywhere."
+      "meta_description": "Check DNS propagation across 15+ public resolvers worldwide. See if your A, AAAA, MX, or TXT change is live everywhere.",
+      "explainer": {
+        "purpose": "DNS Propagation Check queries 15+ public DNS resolvers worldwide in parallel for the same record type and compares answers. Use it to see whether your DNS change has reached every corner of the Internet or only some regions.",
+        "how_it_works": "Parallel queries to Cloudflare, Google, Quad9, OpenDNS, Yandex, NextDNS and more.\nEvery answer is tabulated with its latency.\nDivergent answers are color-highlighted.",
+        "when_to_use": "After a DNS change, verify it has propagated globally (respect TTL).\nValidate geo-DNS / anycast configuration.\nSpot resolver-level DNS hijacking (rare but possible).",
+        "limits": "Resolvers cache aggressively — high-TTL changes take a long time.\nPublic resolvers only — internal corporate DNS isn't accessible."
+      }
     },
     "http-headers": {
       "title": "HTTP Headers",
       "desc": "Grade security headers A+ to F.",
       "meta_title": "HTTP Security Headers Inspector",
-      "meta_description": "Grade your site's HTTP security headers A+ to F. Check HSTS, CSP, X-Frame-Options and more."
+      "meta_description": "Grade your site's HTTP security headers A+ to F. Check HSTS, CSP, X-Frame-Options and more.",
+      "explainer": {
+        "purpose": "HTTP Headers Inspector fetches a URL and grades its security headers (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) from A+ to F. See in seconds whether the site is hardened against XSS, clickjacking, and mixed-content attacks.",
+        "how_it_works": "Server sends a HEAD request and parses the response headers.\nEach header is evaluated against current best practice (OWASP).\nNon-security headers like Server and X-Powered-By are also shown.",
+        "when_to_use": "Validate header configuration before going live.\nSecurity audit your own or a third-party web app.\nFind missing HSTS or CSP gaps ahead of a pentest.",
+        "limits": "Grades standard headers only — custom security headers aren't credited.\nCSP reports and nonce-based policies aren't actively tested."
+      }
     },
     "tech-stack": {
       "title": "Tech Stack",
       "desc": "Detect frameworks, CMS, analytics, hosting.",
       "meta_title": "Tech Stack Detector — What's this site built with?",
-      "meta_description": "Detect frameworks, CMS, analytics, ecommerce, hosting and libraries from public response data."
+      "meta_description": "Detect frameworks, CMS, analytics, ecommerce, hosting and libraries from public response data.",
+      "explainer": {
+        "purpose": "Tech Stack Detector identifies frameworks, CMS, analytics, ecommerce, hosting and libraries from a site's public response data — HTML markup, HTTP headers, cookie names and JS globals. Popular for competitor research and lead qualification.",
+        "how_it_works": "HTML, headers and cookies are matched against 200+ known fingerprints.\nIndicators are weighted with a confidence score.\nMultiple hits in the same category (e.g. 2 analytics) are shown.",
+        "when_to_use": "Analyze a competitor's tech stack before pitching them.\nB2B lead qualification (who uses Shopify? who doesn't yet?).\nDeprecation audit: is this site running an ancient jQuery?",
+        "limits": "Bot-protected sites (Cloudflare challenge) return no usable HTML — empty results are expected.\nClient-only SPAs reveal their stack only after JS execution."
+      }
     },
     "redirects": {
       "title": "Redirect Tracer",
       "desc": "Follow every hop, spot loops and downgrades.",
       "meta_title": "Redirect Chain Tracer",
-      "meta_description": "Trace every hop of a URL's redirect chain. Spot loops, HTTPS downgrades, and too-many-redirects that hurt SEO."
+      "meta_description": "Trace every hop of a URL's redirect chain. Spot loops, HTTPS downgrades, and too-many-redirects that hurt SEO.",
+      "explainer": {
+        "purpose": "Redirect Tracer follows a URL through every HTTP redirect hop, logging status code, target URL and latency. Spot loops, HTTPS downgrades, and too-many-redirects that hurt SEO and performance.",
+        "how_it_works": "The server manually follows every 3xx until a final 2xx response.\nA hard cap of 20 hops prevents infinite loops.\nProtocol and host changes are visually highlighted.",
+        "when_to_use": "Site migration: verify old URLs redirect correctly to the new structure.\nSEO audit: Google penalizes chains with 4+ hops.\nSecurity audit: detect HTTP→HTTPS downgrades as an XSS vector.",
+        "limits": "Follows server 3xx only — JS-based (window.location) or meta-refresh aren't detected.\nCookie-gated redirects (login walls) hit a wall."
+      }
     },
     "subdomains": {
       "title": "Subdomain Finder",
       "desc": "Passive enumeration via CT logs.",
       "meta_title": "Subdomain Finder — Certificate Transparency",
-      "meta_description": "Enumerate subdomains from public Certificate Transparency logs. Fast, passive, no scanning."
+      "meta_description": "Enumerate subdomains from public Certificate Transparency logs. Fast, passive, no scanning.",
+      "explainer": {
+        "purpose": "Subdomain Finder enumerates a domain's subdomains from public Certificate Transparency (CT) logs. Because every SSL certificate ever issued is logged in CT, those logs reveal almost every subdomain that ever existed — entirely passively, no scanning.",
+        "how_it_works": "crt.sh is queried as the primary CT-log source.\nIf crt.sh is down, CertSpotter (SSLMate) serves as a reliable backup.\nResults are deduplicated and grouped by depth below the apex.",
+        "when_to_use": "Asset discovery before a pentest or bug bounty.\nIdentify forgotten staging/dev subdomains before an attacker does.\nM&A due diligence: what subdomains does the target run?",
+        "limits": "Only finds subdomains that ever had a public SSL certificate.\nPure wildcard certificates (*.example.com) don't reveal concrete hosts."
+      }
     },
     "cdn-detector": {
       "title": "CDN Detector",
       "desc": "Identify Cloudflare, Fastly, Akamai and more.",
       "meta_title": "CDN Detector — What CDN is this site using?",
-      "meta_description": "Detect Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify and 12+ other CDNs."
+      "meta_description": "Detect Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify and 12+ other CDNs.",
+      "explainer": {
+        "purpose": "CDN Detector identifies which content-delivery network a domain uses — Cloudflare, Fastly, Akamai, CloudFront, Vercel, Netlify and more. Useful for performance analysis, pentest reconnaissance, and competitor research.",
+        "how_it_works": "Multiple signals are combined: HTTP headers (Server, X-Cache, Via), CNAME target, IP WHOIS.\nEach CDN has unique fingerprints our database recognizes.\nMulti-layer setups (e.g. Cloudflare in front of Fastly) are detected.",
+        "when_to_use": "Performance analysis: which CDN serves the site?\nBefore a pentest: identify the WAF (Cloudflare, Imperva).\nAnalyze a competitor's tech stack.",
+        "limits": "Some CDNs obscure their identity (custom CNAMEs, generic headers).\nOnly the outermost layer is visible — origin server stays hidden."
+      }
     },
     "ssl-check": {
       "title": "SSL Certificate",
       "desc": "Chain, expiry, cipher, TLS version.",
       "meta_title": "SSL Certificate Checker — TLS inspection",
-      "meta_description": "Inspect SSL/TLS certificates: issuer, chain, expiry, cipher suite and TLS version."
+      "meta_description": "Inspect SSL/TLS certificates: issuer, chain, expiry, cipher suite and TLS version.",
+      "explainer": {
+        "purpose": "SSL Certificate Check fetches the certificate from a TLS host and shows the issuer, chain, validity, SAN list, cipher suite and negotiated TLS version. Use it to spot misconfigurations, expired certificates and missing intermediates.",
+        "how_it_works": "A TLS handshake on port 443 (or custom) returns the server certificate.\nThe full chain up to the root CA is walked and validated.\nFingerprints (SHA-1/SHA-256) and public-key type are reported.",
+        "when_to_use": "Verify wildcard or SAN coverage before a deploy.\nProactively warn before expiry (automate with monitoring).\nReproduce browser warnings (hostname mismatch, self-signed).",
+        "limits": "Only works against TCP hosts on standard TLS ports.\nClient authentication (mTLS) is not performed."
+      }
     },
     "whois": {
       "title": "WHOIS / RDAP",
       "desc": "Domain ownership and registration data.",
       "meta_title": "WHOIS / RDAP Lookup",
-      "meta_description": "Modern RDAP-based domain registration lookup: registrar, status, nameservers, dates."
+      "meta_description": "Modern RDAP-based domain registration lookup: registrar, status, nameservers, dates.",
+      "explainer": {
+        "purpose": "WHOIS / RDAP reveals a domain's registration data: registrar, status, nameservers, creation and expiry dates. The modern RDAP API returns structured JSON instead of the legacy free-text WHOIS format.",
+        "how_it_works": "The query is dispatched to rdap.org or the TLD-specific RDAP server.\nFields like status, events, entities are normalized into a readable form.\nFalls back to classic WHOIS when RDAP is unavailable for a TLD.",
+        "when_to_use": "Identify a domain owner for outreach or acquisition.\nGet ahead of an expiring domain you depend on.\nReport an abusive domain by finding the abuse contact.",
+        "limits": "Privacy services obscure ownership — you'll see only the proxy.\nWHOIS data is not guaranteed up-to-date or accurate (GDPR)."
+      }
     },
     "reachability": {
       "title": "Reachability",
       "desc": "HTTP, TCP, ping and global status.",
       "meta_title": "Server Reachability Test",
-      "meta_description": "Test HTTP, TCP and ping reachability to any server, with response time."
+      "meta_description": "Test HTTP, TCP and ping reachability to any server, with response time.",
+      "explainer": {
+        "purpose": "Reachability Test probes three layers in parallel: HTTP response, TCP connect, and ICMP ping. You can tell whether a server is fully offline, only the web service is down, or the firewall is filtering ICMP.",
+        "how_it_works": "Three parallel probes from the server: ping, TCP connect, HTTP GET.\nLatency is measured per layer.\nShort status codes (DNS error, timeout, refused) are translated to English.",
+        "when_to_use": "Quick availability diagnosis without SSH into the data center.\nTell apart 'internet routing is broken' from 'only the app is down'.\nDetect ICMP filtering — many cloud providers block pings.",
+        "limits": "Tested from one server location — for a global view you need multiple probes.\nNo continuous observation; only a snapshot."
+      }
     },
     "email-verify": {
       "title": "Email Verifier",
       "desc": "MX + disposable + SMTP probe.",
       "meta_title": "Email Verifier — MX, disposable, SMTP probe",
-      "meta_description": "Verify any email address: syntax, MX records, disposable provider check, optional SMTP handshake."
+      "meta_description": "Verify any email address: syntax, MX records, disposable provider check, optional SMTP handshake.",
+      "explainer": {
+        "purpose": "Email Verifier tests whether an email address is valid and deliverable — syntax, MX records, disposable provider, and optional SMTP handshake. Prevents invalid sign-ups and newsletter bounces.",
+        "how_it_works": "Syntax is checked against RFC 5322.\nThe domain's MX records are resolved — missing means undeliverable.\nDisposable providers are matched against a curated list; SMTP probe confirms deliverability.",
+        "when_to_use": "Validate newsletter sign-ups inline at the form.\nClean old mailing lists before a campaign.\nBlock throwaway addresses on signup.",
+        "limits": "SMTP probes are increasingly blocked by mail servers.\nCatch-all domains accept any address — verdict is inconclusive there."
+      }
     },
     "email-auth": {
       "title": "SPF / DMARC / DKIM",
       "desc": "Grade your email authentication setup.",
       "meta_title": "SPF / DKIM / DMARC Analyzer",
-      "meta_description": "Check email authentication records for any domain. See SPF policy, DMARC enforcement and DKIM setup with warnings."
+      "meta_description": "Check email authentication records for any domain. See SPF policy, DMARC enforcement and DKIM setup with warnings.",
+      "explainer": {
+        "purpose": "SPF / DKIM / DMARC Analyzer audits a domain's email authentication — three standards that together prevent attackers from sending mail in your name (spoofing, phishing). Outputs a grade with concrete improvement suggestions.",
+        "how_it_works": "Reads TXT records: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF is checked against the 10-lookup limit; DMARC for p= and rua=.\nDKIM selectors are probed with common names (default, google, mail).",
+        "when_to_use": "Audit your own mail authentication before a critical newsletter campaign.\nVerify DMARC enforcement (p=quarantine/reject) is in effect after setup.\nDiagnose spoofing problems on customer domains.",
+        "limits": "DKIM-selector detection is heuristic; custom selectors may be missed.\nDoes not test actual send paths — only configuration is graded."
+      }
     },
     "blacklist": {
       "title": "IP Blacklist",
       "desc": "Check an IP on 20+ spam DNSBLs.",
       "meta_title": "IP Blacklist Check — 20+ DNSBLs",
-      "meta_description": "Check if an IP is on 20+ major spam blacklists (Spamhaus, Barracuda, SORBS). Instant, parallel DNSBL queries."
+      "meta_description": "Check if an IP is on 20+ major spam blacklists (Spamhaus, Barracuda, SORBS). Instant, parallel DNSBL queries.",
+      "explainer": {
+        "purpose": "IP Blacklist Check tests an IP against 20+ well-known spam DNSBLs (Spamhaus, Barracuda, SORBS, SpamCop, …) in parallel. Hits include the listing reason. Important for mail-server operators and IT forensics.",
+        "how_it_works": "One DNS lookup per list using reversed-IP under the DNSBL domain.\nAll lists are queried in parallel with a 3 s timeout each.\nResolved answers often carry a code revealing the listing reason.",
+        "when_to_use": "When your mail is being rejected as spam — check whether your mail IP is listed.\nRe-check after an IP change at your ISP / cloud provider.\nCheck suspicious IPs from logs against Spamhaus.",
+        "limits": "A 'clean' IP isn't a guarantee — some lists are private.\nListings may be cached briefly (DNSBL TTL)."
+      }
     },
     "jwt": {
       "title": "JWT Decoder",
       "desc": "Inspect JWT claims client-side only.",
       "meta_title": "JWT Decoder — Inspect JSON Web Tokens",
-      "meta_description": "Paste a JWT to decode header and payload, inspect claims, and verify expiry — entirely in your browser, nothing sent to servers."
+      "meta_description": "Paste a JWT to decode header and payload, inspect claims, and verify expiry — entirely in your browser, nothing sent to servers.",
+      "explainer": {
+        "purpose": "JWT Decoder decodes JSON Web Tokens (header + payload) and shows claims (sub, exp, iat, iss, aud …) in human-readable form. Runs entirely in the browser — your token never leaves the device and is not sent to any server.",
+        "how_it_works": "The token is split on the two dots into three base64url segments.\nHeader and payload are decoded client-side.\nExpiry (exp) is compared against current time and visualized.",
+        "when_to_use": "Inspect claims while debugging auth flows in your own apps.\nAnalyze a customer's token without privacy worries (nothing leaves the page).\nQuick check whether a refresh token has expired.",
+        "limits": "Does NOT verify the signature — you need the issuer's public key for that.\nOnly JWS (signed JWTs); JWE (encrypted) is not decrypted."
+      }
     },
     "password-leak": {
       "title": "Password Leak",
       "desc": "HIBP check with k-anonymity — never leaves browser.",
       "meta_title": "Password Leak Check — HIBP k-Anonymity",
-      "meta_description": "Check if your password appears in known data breaches. Uses Have I Been Pwned's k-anonymity API — only the first 5 SHA-1 characters are ever sent."
+      "meta_description": "Check if your password appears in known data breaches. Uses Have I Been Pwned's k-anonymity API — only the first 5 SHA-1 characters are ever sent.",
+      "explainer": {
+        "purpose": "Password Leak Check tells you whether your password appears in known breaches (3B+ entries). Uses Have I Been Pwned's k-anonymity API — only the first 5 characters of the SHA-1 hash are sent, your password never leaves the browser.",
+        "how_it_works": "SHA-1 of the password is computed in the browser.\nOnly the first 5 hash characters are sent to api.pwnedpasswords.com.\nServer returns ALL hashes with that prefix; comparison happens client-side.",
+        "when_to_use": "Check a new password before adopting it.\nAudit old passwords for compromise.\nSecurity-awareness training (live demo of breach count).",
+        "limits": "Hash match only — variants (Pa$$word vs password) hash separately.\nNo zero-day coverage; reported breaches can be months old."
+      }
     },
     "dnssec": {
       "title": "DNSSEC Validator",
       "desc": "DS, DNSKEY and signature checks.",
       "meta_title": "DNSSEC Validator",
-      "meta_description": "Check DNSSEC deployment for any domain. See DS, DNSKEY and RRSIG records with warnings."
+      "meta_description": "Check DNSSEC deployment for any domain. See DS, DNSKEY and RRSIG records with warnings.",
+      "explainer": {
+        "purpose": "DNSSEC Validator checks whether a domain has DNSSEC deployed correctly — DS records at the parent zone, DNSKEY records, RRSIG signatures and the chain of trust to the root KSK. Protects against DNS spoofing and cache poisoning.",
+        "how_it_works": "Full DNSSEC resolution with AD-bit verification.\nDS, DNSKEY and RRSIG are fetched individually and checked against an algorithm whitelist.\nMissing or weak algorithms (RSA-MD5, SHA-1) trigger warnings.",
+        "when_to_use": "Verify signatures are valid before / after enabling DNSSEC.\nMonitor key rollovers — old and new DNSKEYs must overlap.\nDiagnose registrar-side DS submission problems.",
+        "limits": "Only reports validation status; repairs are made at the registrar.\nDoes NOT validate subdomains self-signed without a parent DS."
+      }
     },
     "cookies": {
       "title": "Cookie / GDPR",
       "desc": "Cookie flags + third-party tracker detection.",
       "meta_title": "Cookie & GDPR Analyzer",
-      "meta_description": "Inspect Set-Cookie flags and third-party trackers loaded on any page. GDPR risk score."
+      "meta_description": "Inspect Set-Cookie flags and third-party trackers loaded on any page. GDPR risk score.",
+      "explainer": {
+        "purpose": "Cookie & GDPR Analyzer loads a URL and lists every cookie set, including security flags (Secure, HttpOnly, SameSite, Max-Age) plus third-party trackers detected. Helps with GDPR compliance and privacy audits.",
+        "how_it_works": "Browser-like fetch collects every Set-Cookie header on the response.\nThird-party domains are mapped against a curated tracker / ads / analytics list.\nMissing security flags are reported with the reason they matter.",
+        "when_to_use": "GDPR audit your own site before a legal review.\nSpot suspicious trackers on competitor sites.\nFind misconfiguration (missing HttpOnly, SameSite=None without Secure).",
+        "limits": "Cookies set only after user interaction (consent banner) are missed.\nNot a full browser — complex JS-driven trackers may slip past."
+      }
     },
     "opengraph": {
       "title": "OG Preview",
       "desc": "Social share preview for any URL.",
       "meta_title": "Open Graph & Meta Preview",
-      "meta_description": "Preview how your URL looks when shared on Twitter, Facebook, LinkedIn, Slack."
+      "meta_description": "Preview how your URL looks when shared on Twitter, Facebook, LinkedIn, Slack.",
+      "explainer": {
+        "purpose": "OpenGraph & Meta Preview shows how your URL will look when shared on Twitter/X, Facebook, LinkedIn, Slack and Discord. Handy for debugging OG tags before you post.",
+        "how_it_works": "Server fetches the HTML and parses every og: and twitter: meta tag.\nMissing essential tags (og:title, og:image, og:description) are reported.\nPreview cards for multiple platforms are simulated.",
+        "when_to_use": "Test the preview before publishing an important post.\nDebug why Twitter / Facebook doesn't show an image card.\nAudit a whole site for consistent OG tags.",
+        "limits": "Server-rendered tags only — JS apps setting OG client-side aren't evaluated.\nReal platform crawlers cache; changes may need a re-scrape."
+      }
     },
     "robots": {
       "title": "Robots & Sitemap",
       "desc": "Parse robots.txt and validate sitemaps.",
       "meta_title": "Robots.txt & Sitemap Validator",
-      "meta_description": "Parse and validate robots.txt rules and sitemap XML for any host."
+      "meta_description": "Parse and validate robots.txt rules and sitemap XML for any host.",
+      "explainer": {
+        "purpose": "Robots.txt & Sitemap Validator parses a domain's robots.txt, groups all Allow/Disallow rules by user agent, and validates linked sitemap XMLs against the schema. Important for crawl-budget management and SEO.",
+        "how_it_works": "robots.txt is parsed per RFC 9309; every line is syntax-checked.\nSitemap URLs are fetched and validated as well-formed XML.\nContradictions (sitemap blocked by robots.txt!) are flagged.",
+        "when_to_use": "Before launch, verify search engines index the right things.\nAnalyze a competitor's robots.txt (what are they blocking?).\nDebug why Google Search Console reports pages as 'blocked'.",
+        "limits": "Syntax validation only — we don't test whether crawlers actually respect the rules.\nNo deep sitemap crawl; only the top-level XML is validated."
+      }
     },
     "ipv6": {
       "title": "IPv6 Readiness",
       "desc": "Grade AAAA coverage across apex/www/NS/MX.",
       "meta_title": "IPv6 Readiness Score",
-      "meta_description": "Grade your domain's IPv6 deployment across apex, www, nameservers, and mail."
+      "meta_description": "Grade your domain's IPv6 deployment across apex, www, nameservers, and mail.",
+      "explainer": {
+        "purpose": "IPv6 Readiness Score grades how well a domain is prepared for IPv6 — apex (example.com), www, name servers and MX servers are each checked for AAAA records. Important for mobile networks and IPv6 compliance with governments / telcos.",
+        "how_it_works": "Four layers are checked: apex AAAA, www AAAA, NS AAAA, MX AAAA.\nEach present layer scores 25 points; total ranges 0–100.\nMissing layers are annotated with a fix hint.",
+        "when_to_use": "Document the status quo before an IPv6 migration.\nGovernment / compliance audits (BSI baseline, US Federal IPv6).\nPrioritise which layer to make IPv6-ready first.",
+        "limits": "Only checks DNS existence, not actual IPv6 reachability.\nWildcard AAAAs are found but not credited as 'real' readiness."
+      }
     },
     "bgp": {
       "title": "BGP / ASN",
       "desc": "Routing intelligence via RIPE Stat.",
       "meta_title": "BGP / ASN Viewer",
-      "meta_description": "Look up the BGP prefix, announcing ASNs and route of any IP. Or inspect an ASN's announced prefixes."
+      "meta_description": "Look up the BGP prefix, announcing ASNs and route of any IP. Or inspect an ASN's announced prefixes.",
+      "explainer": {
+        "purpose": "BGP Lookup queries the global routing tables to show which AS announces a given IP, which prefixes an AS holds, and which neighbour ASes it peers with. Data comes live from RIPEstat — the same source network engineers use for routing diagnostics.",
+        "how_it_works": "Queries hit stat.ripe.net (RIPE NCC), which has a full routing view.\nFor an IP, the most-specific announced prefix and the origin AS are returned.\nFor an AS, you get every announced prefix and its peering list.",
+        "when_to_use": "Distinguish cloud providers from residential ISPs (hosting detection).\nDiagnose route hijacks or unintended re-announcements.\nCheck global visibility of your own prefix.",
+        "limits": "Routing data is snapshotted; very recent changes take minutes to surface.\nNo full AS-path visualisation (only direct neighbours)."
+      }
     },
     "mixed-content": {
       "title": "Mixed Content",
       "desc": "Find http:// resources on HTTPS pages.",
       "meta_title": "Mixed Content Scanner",
-      "meta_description": "Find insecure http:// resources on your HTTPS pages that browsers block or warn about."
+      "meta_description": "Find insecure http:// resources on your HTTPS pages that browsers block or warn about.",
+      "explainer": {
+        "purpose": "Mixed Content Scan finds http:// resources embedded on an HTTPS page (images, scripts, iframes, fonts) — which browsers either block outright or warn about. These cause broken layouts, missing images, and security warnings.",
+        "how_it_works": "The server loads the HTML and parses every src / href attribute.\nEach http:// URL is classified: blocking (scripts, iframes) or warning (images, fonts).\nCSS imports and @font-face declarations are also inspected.",
+        "when_to_use": "Before migrating a legacy backend to HTTPS, find which resources need updating.\nAfter installing a third-party plugin, check whether it injects http calls.\nReproduce Google Search Console warnings.",
+        "limits": "Static HTML only — JS-injected http resources aren't found.\nFirst level only; iframes are not followed."
+      }
     },
     "dashboard": {
       "title": "My IP",
@@ -223,79 +371,8 @@
   },
   "footer": {
     "tagline": "Professional network diagnostics.",
-    "pricing": "Pricing",
-    "api": "API",
     "status": "Status",
-    "copyright": "© {year} NetScope."
-  },
-  "pricing": {
-    "title": "Simple, transparent pricing",
-    "subtitle": "Start free. Scale when you need to. Cancel any time.",
-    "free": "Free",
-    "pro": "Pro",
-    "enterprise": "Enterprise",
-    "month": "month",
-    "year": "year",
-    "popular": "Most popular",
-    "cta_free": "Start for free",
-    "cta_pro": "Go Pro",
-    "cta_enterprise": "Contact sales",
-    "free_price": "0",
-    "pro_price": "29",
-    "enterprise_price": "Custom",
-    "free_desc": "Everything you need to test and diagnose. No credit card required.",
-    "pro_desc": "For teams that depend on always-on monitoring and a higher rate limit.",
-    "enterprise_desc": "For organisations with custom SLAs, audit logs and on-prem options.",
-    "f_30_tools": "All 30+ tools",
-    "f_rate_anon": "30 requests / minute",
-    "f_rate_pro": "600 requests / minute",
-    "f_rate_ent": "Custom rate limits",
-    "f_history_7d": "7-day query history",
-    "f_history_90d": "90-day query history",
-    "f_history_unlimited": "Unlimited history",
-    "f_monitors_3": "3 uptime monitors",
-    "f_monitors_50": "50 uptime monitors",
-    "f_monitors_unlimited": "Unlimited monitors",
-    "f_webhooks": "Webhooks (Slack, Discord, PagerDuty)",
-    "f_api_access": "API access",
-    "f_workspaces": "Multi-user workspaces",
-    "f_sso": "SSO + SAML",
-    "f_audit": "Compliance & audit logs",
-    "f_sla": "99.99 % uptime SLA",
-    "f_support_email": "Email support",
-    "f_support_priority": "Priority support",
-    "f_support_dedicated": "Dedicated support engineer",
-    "faq_title": "Questions?",
-    "faq_change_text": "You can upgrade or downgrade any time. Annual billing comes with two months free.",
-    "faq_change_q": "Can I change my plan later?",
-    "faq_refund_q": "Do you offer refunds?",
-    "faq_refund_text": "Yes — within 14 days, no questions asked.",
-    "faq_data_q": "Where is my data stored?",
-    "faq_data_text": "All data is hosted in EU data centres (Frankfurt, AWS eu-central-1). We never sell or share it."
-  },
-  "api_docs": {
-    "title": "API Reference",
-    "subtitle": "REST + JSON. Same endpoints the web UI uses. Free tier: 30 req/min, no API key required.",
-    "auth_title": "Authentication",
-    "auth_text": "Free tier requires no key. Pro/Enterprise pass it in the X-API-Key header.",
-    "base_url": "Base URL",
-    "rate_title": "Rate limits",
-    "rate_text": "Per IP for anonymous requests, per key for authenticated. The current count is returned in X-RateLimit-Remaining; on 429, retry after Retry-After seconds.",
-    "swagger_title": "Interactive Swagger UI",
-    "swagger_text": "Try every endpoint live, with autogenerated examples and schema. Lives at:",
-    "swagger_open": "Open Swagger UI ↗",
-    "examples_title": "Quick examples",
-    "endpoints_title": "Endpoints",
-    "ep_port": "Check whether a TCP port is open",
-    "ep_dns": "Look up A / AAAA / MX / TXT / NS / SOA / CAA records",
-    "ep_ip": "Geolocate an IP address with threat intelligence",
-    "ep_ssl": "Inspect an SSL/TLS certificate chain",
-    "ep_whois": "RDAP / WHOIS for any domain",
-    "ep_email": "Verify an email address (syntax + MX + optional SMTP probe)",
-    "errors_title": "Error format",
-    "errors_text": "All errors return JSON with these fields:",
-    "library_title": "Libraries & SDKs",
-    "library_text": "No official SDKs yet — but every endpoint speaks plain JSON over HTTPS, so any HTTP client works."
+    "copyright": "© {year} Traceronix."
   },
   "common": {
     "loading": "Loading…",
@@ -319,6 +396,8 @@
     "enter_email": "Enter email address",
     "copy": "Copy",
     "copied": "Copied!",
+    "clear": "Clear",
+    "source": "Source",
     "filter": "filter…",
     "no_records": "No records",
     "no_results": "No results found.",
@@ -335,7 +414,10 @@
     "desc": "The page you're looking for doesn't exist or has been moved.",
     "hint": "Double-check the URL or head back to the dashboard.",
     "back": "Back home",
-    "search_hint": "Looking for a tool? Try the search above."
+    "search_hint": "Looking for a tool? Try the search above.",
+    "did_you_mean": "Did you mean",
+    "explore_tools": "Explore tools",
+    "popular_tools": "Popular tools"
   },
   "bgp": {
     "title": "BGP / ASN",
@@ -491,6 +573,27 @@
     "field_coords": "Coordinates",
     "field_org": "Organization",
     "field_user_agent": "Your User-Agent",
+    "multi_title": "Compare across providers",
+    "multi_subtitle": "Same IP queried in parallel against multiple geolocation APIs — divergences reveal data-source differences.",
+    "multi_loading": "Querying providers in parallel…",
+    "multi_summary": "{ok} of {total} sources succeeded",
+    "multi_cached": "from cache",
+    "multi_country": "Country",
+    "multi_city": "City",
+    "multi_asn": "ASN",
+    "multi_country_name": "Country name",
+    "multi_continent": "Continent",
+    "multi_postal": "Postal code",
+    "multi_iptype": "IP type",
+    "multi_lat": "Latitude",
+    "multi_lon": "Longitude",
+    "multi_org": "Organization",
+    "multi_domain": "Domain",
+    "multi_currency": "Currency",
+    "multi_calling_code": "Calling code",
+    "multi_languages": "Languages",
+    "multi_eu": "EU member",
+    "multi_open_raw": "Open raw response",
     "threat_title": "Threat intelligence",
     "risk_score": "risk score",
     "threat_tor": "TOR exit",
@@ -617,11 +720,21 @@
   "subdomains": {
     "title": "Subdomain Finder",
     "subtitle": "Passive enumeration via CT logs.",
-    "filter_placeholder": "filter…",
+    "input_placeholder": "e.g. example.com",
+    "input_hint": "Accepts full URLs (https://example.com/foo) — scheme, path, port and \"www.\" are stripped automatically.",
+    "query_as": "Querying as: {domain}",
+    "filter_placeholder": "Filter subdomains…",
+    "filter_match_label": "match",
     "count": "{count} subdomains found",
+    "showing_total": "{total} entries",
+    "showing_filtered": "{shown} of {total} entries",
     "degraded_title": "CT log temporarily unavailable",
     "degraded_message": "crt.sh is currently unreachable or rate-limiting us. Try again in a minute — this does NOT mean the domain has no subdomains.",
-    "truncated_notice": "Result capped — there are more subdomains we didn't return"
+    "truncated_notice": "Result capped — there are more subdomains we didn't return",
+    "depth_label": "Depth {depth} levels below the parent domain",
+    "copy_all": "Copy all",
+    "export": "Export",
+    "lookup_action": "Lookup →"
   },
   "tech": {
     "title": "Tech Stack Detector",
@@ -644,5 +757,11 @@
     "dates": "Dates",
     "nameservers": "Nameservers",
     "raw": "Raw RDAP"
+  },
+  "explainer": {
+    "about_title": "About this tool",
+    "how_title": "How it works",
+    "when_title": "When to use",
+    "limits_title": "Limits"
   }
 }

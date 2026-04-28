@@ -14,22 +14,32 @@ html, body { background: #0a0a0a; color: #fafafa; }
     background-size: 48px 48px;
   }
   .glow { box-shadow: 0 0 40px -10px rgba(249,115,22,0.35); }
+  /* Card padding scales down on phones so result tables don't waste 40px
+     of horizontal space, but stays comfortable on tablet/desktop. */
   .card {
-    @apply rounded-xl border border-border bg-bg-card p-5 shadow-lg shadow-black/20;
+    @apply rounded-xl border border-border bg-bg-card p-3 sm:p-4 md:p-5
+           shadow-lg shadow-black/20;
   }
+  /* Input min-h prevents iOS Safari from auto-zooming on focus when font
+     size dips below 16px. We keep visual size at 14px but force at least
+     a 44px hit-target for fingers. */
   .input {
-    @apply w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm
-           text-fg placeholder:text-fg-subtle focus:border-brand focus:outline-none
-           focus:ring-2 focus:ring-brand/30 transition;
+    @apply block w-full min-h-[44px] rounded-lg border border-border bg-bg-elevated
+           px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:border-brand
+           focus:outline-none focus:ring-2 focus:ring-brand/30 transition;
   }
+  /* Buttons match input min-height so input + button rows align without
+     manual sizing.  flex-shrink-0 stops the button from collapsing when
+     the adjacent input is wider than the row. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2
-           text-sm font-medium text-white transition hover:bg-brand-hover
-           disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex shrink-0 items-center justify-center gap-2 rounded-lg
+           bg-brand px-4 py-2 min-h-[44px] text-sm font-medium text-white transition
+           hover:bg-brand-hover disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-border
-           bg-bg-elevated px-4 py-2 text-sm font-medium hover:border-fg-muted transition;
+    @apply inline-flex shrink-0 items-center justify-center gap-2 rounded-lg
+           border border-border bg-bg-elevated px-3 sm:px-4 py-2 min-h-[40px]
+           text-sm font-medium hover:border-fg-muted transition;
   }
   .badge {
     @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium;

@@ -41,7 +41,7 @@ export function BgpClient() {
               }`}>{m}</button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input className="input" value={value} onChange={(e) => setValue(e.target.value)} />
           <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("lookup")}</button>
         </div>
@@ -52,7 +52,7 @@ export function BgpClient() {
       {ip && (
         <>
           <ResultCard>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <Field label={t("field_ip")} value={ip.ip} mono />
               <Field label={t("field_prefix")} value={ip.prefix} mono />
               <Field label={t("field_block")} value={ip.block} mono />

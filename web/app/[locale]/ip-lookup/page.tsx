@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Spinner } from "@/components/tool-shell";
 import { Globe } from "lucide-react";
 import { ToolShell } from "@/components/tool-shell";
+import { ToolExplainer } from "@/components/tool-explainer";
 import { IpClient } from "./client";
 
 const SLUG = "ip-lookup";
@@ -33,6 +34,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       <Suspense fallback={<div className="card flex items-center gap-2"><Spinner /> Loading…</div>}>
         <IpClient />
       </Suspense>
+      <ToolExplainer slug={SLUG} locale={locale} />
     </ToolShell>
   );
 }
