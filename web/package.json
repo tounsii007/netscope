@@ -10,7 +10,14 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:load:smoke":    "k6 run tests/load/01-smoke.js",
+    "test:load:standard": "k6 run tests/load/02-load.js",
+    "test:load:stress":   "k6 run tests/load/03-stress-1000.js",
+    "test:load:same":     "k6 run tests/load/04-stress-1000-same.js",
+    "test:load:spike":    "k6 run tests/load/05-spike-5000.js",
+    "test:load:soak":     "k6 run tests/load/06-soak-10000.js",
+    "perf:budget": "node tests/perf/check-bundle-budget.mjs"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",

@@ -40,6 +40,14 @@ export default defineConfig({
         functions:  35,
         statements: 45,
         branches:   55,
+        // Critical helpers — anything that runs on every request — must be
+        // very thoroughly covered. CI fails when these slip below 90%.
+        "lib/not-found/levenshtein.ts":            { lines: 95, functions: 100, branches: 90 },
+        "lib/not-found/suggest-tool.ts":           { lines: 90, functions: 100, branches: 80 },
+        "lib/rate-limit.ts":                       { lines: 90, functions: 90, branches: 80 },
+        "app/[locale]/jwt/jwt-decode.ts":          { lines: 95, functions: 100, branches: 90 },
+        "components/tool-explainer/split-bullets.ts": { lines: 95, functions: 100, branches: 90 },
+        "app/[locale]/subdomains/highlight.tsx":   { lines: 95, functions: 100, branches: 85 },
       },
     },
   },

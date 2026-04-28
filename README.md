@@ -1,162 +1,207 @@
-# NetScope — Network Diagnostics & IP Intelligence Platform
+# Traceronix — Network Diagnostics & IP Intelligence Platform
 
-Produktionsreife SaaS-Plattform für Netzwerk-Diagnostik: Port Checker, IP Lookup, DNS, WHOIS, SSL, Reachability, Monitoring.
+Production-ready SaaS for developers, DevOps and security engineers. **24 network
+diagnostic tools** in one fast, free, no-login web app — from Port Checker and
+DNS Propagation across 15+ global resolvers to JWT decoding, BGP/ASN routing
+inspection, IPv6 readiness scoring, multi-source IP geolocation comparison and
+much more.
+
+[![Tests](https://img.shields.io/badge/tests-vitest-success)]()
+[![Locales](https://img.shields.io/badge/locales-11-blue)]()
+[![License](https://img.shields.io/badge/license-Proprietary-lightgrey)]()
+
+---
 
 ## Stack
 
-| Layer        | Technologie                                                      |
+| Layer        | Technology                                                       |
 | ------------ | ---------------------------------------------------------------- |
-| Frontend     | Next.js 15 (App Router), TypeScript, TailwindCSS, shadcn/ui      |
-| Karten       | react-leaflet + OpenStreetMap                                    |
+| Frontend     | Next.js 15 (App Router) · React 19 · TypeScript · TailwindCSS    |
+| i18n         | next-intl 4 — 11 locales (EN-US, DE, FR, ES, IT, PL, RU, UK, TR, HI, ZH) |
+| Maps         | react-leaflet + OpenStreetMap                                    |
 | Charts       | Recharts                                                         |
-| Backend      | Spring Boot 3.4, Java 21, Maven                                  |
-| DB           | PostgreSQL 16 (Flyway Migrations)                                |
-| Cache/Queue  | Redis 7 (Ergebnis-Cache, Rate-Limit via Bucket4j)                |
-| Netz-Libs    | dnsjava, BouncyCastle (SSL), ICMP via Java NIO, JNA für Traceroute |
-| GeoIP        | MaxMind GeoLite2 (lokal) + ipinfo.io Fallback                    |
-| Auth (v2)    | Spring Security + JWT (API Keys für Developer Plan)              |
-| Deployment   | Frontend: Vercel · Backend: Fly.io/Railway · DB: Neon/Supabase   |
+| Backend      | Spring Boot 3.4 · Java 21 · Maven                                |
+| Database     | PostgreSQL 16 (Flyway migrations)                                |
+| Cache / RL   | Redis 7 (result cache + Bucket4j rate limiter)                   |
+| Net libs     | dnsjava · BouncyCastle · ICMP via NIO                            |
+| GeoIP        | MaxMind GeoLite2 (local) + 4 fallback APIs in parallel           |
+| Resilience   | Resilience4j circuit breakers + retry + timeout                  |
+| Logging      | Winston + daily-rotate-file (server / error / access channels)   |
+| Tests        | Vitest + RTL + jsdom · MSW · k6 for load                          |
+| Deployment   | Frontend: Vercel · Backend: Fly.io · DB/Redis: managed           |
 
-## Architektur
+---
+
+## Tools (24)
+
+### DNS & Domain
+DNS Lookup · DNS Propagation (15+ resolvers) · DNSSEC Validator · WHOIS/RDAP · Subdomain Finder (CT logs)
+
+### Network
+Port Checker · IP Lookup (multi-source compare) · IPv6 Readiness · BGP/ASN · CDN Detector · Reachability
+
+### Security
+SSL/TLS Inspector · IP Blacklist (20+ DNSBLs) · JWT Decoder · Password Leak (HIBP k-anonymity) · Mixed Content
+
+### Email
+Email Verifier · SPF/DKIM/DMARC
+
+### Web Analysis
+HTTP Security Headers (A+→F grade) · Tech Stack Detector · Redirect Tracer · OpenGraph Preview · Cookies & GDPR · Robots & Sitemap · Dashboard (My IP)
+
+---
+
+## Architecture
 
 ```
 ┌─────────────────────┐       ┌──────────────────────┐       ┌────────────┐
 │  Next.js (Vercel)   │──────▶│  Spring Boot API     │──────▶│ PostgreSQL │
 │  SSR tool pages     │  REST │  /api/v1/*           │  JPA  │  + Flyway  │
-│  SEO optimiert      │       │  Rate-Limit (Redis)  │       └────────────┘
-└─────────────────────┘       │  Result-Cache        │──────▶┌────────────┐
-          │                   └──────────┬───────────┘       │   Redis    │
-          │                              │                   └────────────┘
-          │                   ┌──────────▼───────────┐
-          │                   │  Scheduled Monitors  │
-          │                   │  (Spring @Scheduled) │
-          │                   └──────────────────────┘
-          │
-          ▼
-     OpenStreetMap · MaxMind · ipinfo · RDAP · DNS-Root
+│  i18n × 11 · CSP    │       │  Bucket4j RL         │       └────────────┘
+│  Web Vitals report  │       │  Resilience4j CB     │──────▶┌────────────┐
+└─────────┬───────────┘       │  Multi-source agg    │       │   Redis    │
+          │ /api/vitals       └──────────┬───────────┘       │  cache+RL  │
+          ▼                              │                   └────────────┘
+  Performance budget         ┌───────────▼──────────┐
+  monitoring + CI gate       │  Scheduled Monitors  │
+                             └──────────────────────┘
+                                          │
+                                          ▼
+            OpenStreetMap · MaxMind · 4 GeoIP APIs · RDAP · DNSBL · CT logs
 ```
 
-## Features (Status)
+---
 
-| #  | Feature              | MVP     |
-| -- | -------------------- | ------- |
-| 1  | Port Checker         | ✅      |
-| 2  | Server Reachability  | ✅ (TCP/HTTP), 🟡 traceroute |
-| 3  | IP Location Lookup   | ✅      |
-| 4  | Proxy/VPN/TOR        | 🟡 Stub + TOR-Liste |
-| 5  | DNS Lookup           | ✅      |
-| 6  | Reverse IP Lookup    | 🟡 Stub (nutzt hackertarget API) |
-| 7  | WHOIS                | ✅ (RDAP) |
-| 8  | SSL Certificate      | ✅      |
-| 9  | Global Server Status | 🟡 Architektur vorhanden (Worker in mehreren Regionen) |
-| 10 | User IP Dashboard    | ✅      |
-| 11 | DNS Propagation (15 resolvers) | ✅ |
-| 12 | HTTP Security Headers (A+..F) | ✅ |
-| 13 | Subdomain Finder (CT logs) | ✅ |
-| 14 | CDN Detector         | ✅      |
-| 15 | Bulk IP Checker      | 🟡      |
-| 16 | Developer API        | ✅ (API-Key Header) |
-| 17 | Scheduled Monitoring | 🟡      |
-
-## Folder Structure
-
-```
-netscope/
-├── web/                    # Next.js Frontend
-│   ├── app/                # App Router
-│   │   ├── (marketing)/    # Landing, Pricing, Docs
-│   │   ├── (tools)/        # SEO-Tool-Seiten
-│   │   │   ├── port-checker/
-│   │   │   ├── ip-lookup/
-│   │   │   ├── dns-lookup/
-│   │   │   ├── whois/
-│   │   │   ├── ssl-check/
-│   │   │   └── reachability/
-│   │   ├── dashboard/      # User IP + Monitoring
-│   │   └── api/            # Edge-Proxy zu Backend
-│   ├── components/
-│   │   ├── ui/             # shadcn/ui Primitives
-│   │   ├── tools/          # Tool-spezifische Komponenten
-│   │   └── map/            # Leaflet-Karte
-│   ├── lib/                # API-Client, Utils
-│   └── public/
-│
-├── api/                    # Spring Boot Backend
-│   ├── src/main/java/io/netscope/
-│   │   ├── NetScopeApplication.java
-│   │   ├── config/         # Security, Redis, CORS
-│   │   ├── common/         # Exceptions, DTOs, RateLimit
-│   │   ├── port/           # Port Checker Module
-│   │   ├── dns/            # DNS Module
-│   │   ├── ssl/            # SSL Module
-│   │   ├── ip/             # IP Geo / Proxy Detection
-│   │   ├── whois/          # RDAP Module
-│   │   ├── reach/          # Ping / TCP / Traceroute
-│   │   ├── monitor/        # Scheduled Monitoring
-│   │   └── scan/           # Persistenz aller Scans
-│   ├── src/main/resources/
-│   │   ├── application.yml
-│   │   └── db/migration/   # Flyway
-│   └── pom.xml
-│
-├── docs/                   # Architektur, API, Deploy
-├── docker-compose.yml      # Local dev: Postgres + Redis + Adminer
-└── README.md
-```
-
-## Quick Start (lokal)
+## Quick Start
 
 ```bash
-# 1. Infrastruktur
+# 1 — Infrastructure (Postgres + Redis + Adminer)
 docker compose up -d
 
-# 2. Backend
+# 2 — Backend
 cd api && mvn spring-boot:run
 # → http://localhost:8080/api/v1
 
-# 3. Frontend
+# 3 — Frontend
 cd web && npm install && npm run dev
 # → http://localhost:3000
 ```
 
-## API Endpoints (v1)
+### Production env vars (`web/.env`)
 
-| Method | Path                              | Beschreibung                     |
-| ------ | --------------------------------- | -------------------------------- |
-| POST   | `/api/v1/port/check`              | Einzelner Port                   |
-| POST   | `/api/v1/port/scan`               | Port-Range oder Common-Ports     |
-| GET    | `/api/v1/dns/{domain}?type=A,MX`  | DNS Records                      |
-| GET    | `/api/v1/ssl/{host}?port=443`     | SSL Certificate Info             |
-| GET    | `/api/v1/ip/{ip}`                 | Geo + ISP + ASN + Proxy-Flags    |
-| GET    | `/api/v1/ip/me`                   | User-IP Dashboard                |
-| GET    | `/api/v1/whois/{domain}`          | RDAP                             |
-| POST   | `/api/v1/reach/check`             | HTTP + TCP Reachability          |
-| POST   | `/api/v1/monitor`                 | Neuer Scheduled Monitor          |
-| GET    | `/api/v1/monitor/{id}/history`    | Uptime-Historie                  |
+```dotenv
+NEXT_PUBLIC_API_URL=https://api.traceronix.io
+NEXT_PUBLIC_VITALS_ENDPOINT=/api/vitals    # optional
+LOG_PATH=/var/log/traceronix               # default: ./logs
+RATE_LIMIT_PER_MIN=120                     # IP-based, in-memory fallback
+```
 
-Details: [docs/API.md](docs/API.md)
+---
 
-## Monetarisierung
+## Scripts
 
-- **Free**: 60 Requests/h, 1 Monitor, Public-Tools
-- **Pro** (9€/Monat): 10k Requests/Tag, 25 Monitore, 1-min-Interval, Email-Alerts
-- **Developer API** (29€/Monat): 100k Requests/Tag, REST + Webhooks, API-Key
-- **Business** (99€/Monat): 1M Requests, SLA 99.9%, Slack/PagerDuty
-- Ads nur auf Public-Tool-Seiten (Free-Tier) — Carbon Ads o.ä.
+```bash
+npm run dev           # Next.js dev server (Turbopack)
+npm run build         # Production build
+npm run start         # Production server
+npm run lint          # next lint + Tailwind class linting
+npm run typecheck     # tsc --noEmit
+npm run test          # Vitest with V8 coverage report
+npm run test:watch    # Vitest watch mode
+npm run test:e2e      # Playwright end-to-end suite
+npm run test:load:smoke    # k6 smoke (10 VUs, 1 min)
+npm run test:load:standard # k6 load (100 VUs, 5 min)
+npm run test:load:stress   # k6 stress (1000 VUs ramp, 10 min)
+npm run test:load:spike    # k6 spike (5000 VUs sudden burst)
+npm run perf:budget   # Bundle/Lighthouse budget gate
+```
+
+---
+
+## Quality Gates (CI)
+
+Every push runs:
+
+1. **`lint`**     — ESLint flat config + Next.js rules
+2. **`typecheck`** — Strict TypeScript across `app/`, `components/`, `lib/`
+3. **`test`**     — Vitest unit + component, ≥80 % coverage on critical helpers
+4. **`build`**    — Next.js production build (catches missing deps, env, types)
+
+Load tests run on **manual dispatch** in `.github/workflows/load-test.yml` —
+they hit a staging deployment, not production.
+
+---
+
+## Performance Targets
+
+| Metric                              | Budget          |
+| ----------------------------------- | --------------- |
+| First Contentful Paint (p75)        | ≤ 1 800 ms      |
+| Largest Contentful Paint (p75)      | ≤ 2 500 ms      |
+| Interaction to Next Paint (p75)     | ≤ 200 ms        |
+| Cumulative Layout Shift (p75)       | ≤ 0.1           |
+| Time to First Byte (p75)            | ≤ 600 ms        |
+| JS bundle (initial, gzipped)        | ≤ 180 KB        |
+| Server response p95 — public tools  | ≤ 1 200 ms      |
+| Server response p99 — public tools  | ≤ 3 000 ms      |
+| Error rate (5xx)                    | < 0.1 %         |
+| Throughput (sustained)              | ≥ 500 req/s     |
+
+Web Vitals sampled client-side and POSTed to `/api/vitals` for aggregation.
+
+---
 
 ## Security & Anti-Abuse
 
-- Rate-Limit via Redis+Bucket4j pro IP und API-Key
-- Captcha (hCaptcha) bei Free-Tier nach 10 Requests/Min
-- Blacklist für Scans gegen RFC1918, Loopback, Cloud-Metadata-IPs (169.254.169.254)
-- Eigenes ASN-Subnetz wird nicht gescannt
-- CORS streng (nur netscope.io Origin für Browser-Calls)
-- HTTPS-only, HSTS, CSP Header
+- **Headers (set in `next.config.ts`)** — CSP, HSTS preload, X-Frame-Options DENY,
+  X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP.
+  Self-audit by the included HTTP-Headers tool: target **A+**.
+- **Rate limiting** — Bucket4j on the backend per IP + per API-key. Frontend
+  middleware fallback when backend not reachable.
+- **Privacy** — HIBP k-anonymity (only first 5 SHA-1 chars sent); JWT decoded
+  client-side, never logged; no auth, no cookies beyond `NEXT_LOCALE`.
+- **Scan blacklist** — RFC 1918, loopback, link-local and cloud metadata IPs
+  (169.254.169.254) refused by the backend.
+- **CORS** — strict `traceronix.io` origin allow-list.
+- **Static assets** — middleware excludes file extensions so `/icon.png` and
+  others don't get rewritten through the locale prefix.
 
-## Deployment
+---
 
-Siehe [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+## Folder Structure
+
+```
+traceronix/
+├── api/                    # Spring Boot backend
+│   └── src/main/java/io/netscope/...    (kept namespace stable)
+├── web/                    # Next.js frontend
+│   ├── app/                # App Router routes (i18n via [locale])
+│   ├── components/         # UI components — every file ≤ 150 lines
+│   ├── lib/                # api-client, logger, helpers (modular)
+│   ├── messages/           # 11 locale bundles (595 strings each)
+│   ├── tests/              # Vitest unit + component + integration
+│   │   └── load/           # k6 scenarios (1000+ VU)
+│   ├── public/             # Static assets (icon, flags, etc.)
+│   ├── i18n/               # next-intl routing + request config
+│   └── middleware.ts       # access logging + rate-limit + locale routing
+├── scripts/                # One-shot helpers (explainer copy, etc.)
+├── docs/                   # Architecture & deployment notes
+├── .github/workflows/      # CI + manual load test
+└── README.md
+```
+
+---
+
+## Contributing
+
+1. Fork → branch off `master` → PR
+2. `npm run lint && npm run typecheck && npm run test` must pass
+3. Keep new files ≤ 150 lines — split when they grow
+4. Cross-module imports use the `@/` alias; siblings use `./`; **no `../`**
+5. Add a unit test for any new helper in `lib/`
+
+---
 
 ## License
 
-Proprietary (© 2026 NetScope)
+Proprietary © 2026 Traceronix.

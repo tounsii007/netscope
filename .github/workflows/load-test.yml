@@ -1,0 +1,74 @@
+name: Load Test
+
+# Manual trigger only. Load tests hit a real environment (staging by default)
+# and are too expensive to run on every commit. See README → "Quality Gates"
+# for what runs automatically per push.
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Which k6 scenario to run"
+        type: choice
+        required: true
+        default: load
+        options:
+          - smoke      # 10 VUs · 1 min · sanity
+          - load       # 100 VUs · 5 min · typical traffic
+          - stress     # 1 000 VUs ramp · 10 min · find the breaking point
+          - stress-same-endpoint   # 1 000 VUs all hammering /port/check
+          - spike      # 5 000 VUs sudden burst · 2 min · resilience under flood
+      target:
+        description: "Target base URL (must be staging, NOT production)"
+        type: string
+        required: true
+        default: "https://staging.traceronix.io"
+
+concurrency:
+  group: load-test-${{ inputs.scenario }}
+  cancel-in-progress: false   # never cancel a running load test mid-flight
+
+jobs:
+  k6:
+    name: k6 — ${{ inputs.scenario }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse to target production
+        run: |
+          if [[ "${{ inputs.target }}" == *"://traceronix.io"* ]]; then
+            echo "::error::Refusing to load-test production. Use the staging URL."
+            exit 1
+          fi
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run scenario
+        env:
+          BASE_URL: ${{ inputs.target }}
+        run: |
+          case "${{ inputs.scenario }}" in
+            smoke)               k6 run web/tests/load/01-smoke.js ;;
+            load)                k6 run web/tests/load/02-load.js ;;
+            stress)              k6 run web/tests/load/03-stress-1000.js ;;
+            stress-same-endpoint) k6 run web/tests/load/04-stress-1000-same.js ;;
+            spike)               k6 run web/tests/load/05-spike-5000.js ;;
+          esac
+
+      - name: Upload k6 summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-${{ inputs.scenario }}-${{ github.run_id }}
+          path: web/tests/load/results/
+          retention-days: 30

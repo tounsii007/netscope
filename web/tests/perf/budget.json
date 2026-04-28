@@ -1,0 +1,26 @@
+{
+  "$schema": "Performance budget enforced in CI by tests/perf/check-bundle-budget.mjs",
+  "description": "Hard ceilings on bundle and route-segment sizes. CI fails when any value is exceeded — bumping a budget should be a deliberate, reviewed decision, not a surprise.",
+
+  "totalJsKb":   { "max": 1500,
+                   "comment": "Sum of all JS chunks Next.js emits, gzipped." },
+  "firstLoadJsKb": { "max": 250,
+                     "comment": "Initial bundle a fresh visitor downloads on the home page (Next.js' 'First Load JS shared by all')." },
+  "perRouteFirstLoadJsKb": { "max": 350,
+                             "comment": "Tool pages — they include client-side state but should still be lean." },
+
+  "vitals": {
+    "FCP_ms_p75":  1800,
+    "LCP_ms_p75":  2500,
+    "INP_ms_p75":  200,
+    "CLS_p75":     0.1,
+    "TTFB_ms_p75": 600
+  },
+
+  "server": {
+    "p95_response_ms": 1200,
+    "p99_response_ms": 3000,
+    "error_rate_pct":  0.1,
+    "min_throughput_rps": 500
+  }
+}
