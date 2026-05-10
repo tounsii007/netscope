@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { api, type DnsResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { checkTargetGuard } from "@/lib/target-guard";
+import { DetailedRecordList } from "@/app/[locale]/dns-lookup/detailed-record-list";
 
 const TYPES = ["A", "AAAA", "MX", "TXT", "CNAME", "NS", "SOA", "CAA"];
 
@@ -101,23 +102,28 @@ export function DnsClient() {
       {data && (
         <div className="space-y-3" aria-live="polite">
           <div className="text-xs text-fg-muted">{tc("resolved_in", { ms: data.durationMs })}</div>
-          {Object.entries(data.records).map(([type, values]) => (
-            <ResultCard key={type}>
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="font-mono text-sm font-semibold text-brand">{type}</h3>
-                <span className="text-xs text-fg-muted">{tc("records_count", { count: values.length })}</span>
-              </div>
-              {values.length === 0 ? (
-                <p className="text-sm text-fg-subtle">{tc("no_records")}</p>
-              ) : (
-                <ul className="space-y-1 font-mono text-sm">
-                  {values.map((v, i) => (
-                    <li key={i} className="rounded bg-bg-elevated px-3 py-1.5 break-all">{v}</li>
-                  ))}
-                </ul>
-              )}
-            </ResultCard>
-          ))}
+          {Object.entries(data.records).map(([type, values]) => {
+            const detailed = data.recordsDetailed?.[type];
+            return (
+              <ResultCard key={type}>
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="font-mono text-sm font-semibold text-brand">{type}</h3>
+                  <span className="text-xs text-fg-muted">{tc("records_count", { count: values.length })}</span>
+                </div>
+                {values.length === 0 ? (
+                  <p className="text-sm text-fg-subtle">{tc("no_records")}</p>
+                ) : detailed && detailed.length === values.length ? (
+                  <DetailedRecordList type={type} entries={detailed} />
+                ) : (
+                  <ul className="space-y-1 font-mono text-sm">
+                    {values.map((v, i) => (
+                      <li key={i} className="rounded bg-bg-elevated px-3 py-1.5 break-all">{v}</li>
+                    ))}
+                  </ul>
+                )}
+              </ResultCard>
+            );
+          })}
         </div>
       )}
     </div>
