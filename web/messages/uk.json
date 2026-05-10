@@ -674,7 +674,12 @@
     "open_of": "{open} відкрито / {total} перевірено",
     "service": "Сервіс",
     "common_count": "{count} популярних портів",
-    "port_status": "Порт {port} — <s>{status}</s>"
+    "port_status": "Порт {port} — <s>{status}</s>",
+    "from_port": "Початковий порт",
+    "to_port": "Кінцевий порт",
+    "invalid_port": "Порт має бути в межах 1-65535.",
+    "invalid_range": "Початок ≤ кінець, обидва в межах 1-65535.",
+    "range_too_wide": "Діапазон занадто великий — скануйте не більше 1024 портів за раз."
   },
   "reachability": {
     "title": "Доступність",

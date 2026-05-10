@@ -674,7 +674,12 @@
     "open_of": "{open} aperte / {total} testate",
     "service": "Servizio",
     "common_count": "{count} porte comuni",
-    "port_status": "La porta {port} è <s>{status}</s>"
+    "port_status": "La porta {port} è <s>{status}</s>",
+    "from_port": "Porta iniziale",
+    "to_port": "Porta finale",
+    "invalid_port": "La porta deve essere compresa tra 1 e 65535.",
+    "invalid_range": "Inizio ≤ fine, entrambe tra 1 e 65535.",
+    "range_too_wide": "Intervallo troppo ampio — scansiona al massimo 1024 porte alla volta."
   },
   "reachability": {
     "title": "Raggiungibilità",

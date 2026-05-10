@@ -674,7 +674,12 @@
     "open_of": "{open} 开放 / {total} 已扫描",
     "service": "服务",
     "common_count": "{count} 个常用端口",
-    "port_status": "端口 {port} 状态：<s>{status}</s>"
+    "port_status": "端口 {port} 状态：<s>{status}</s>",
+    "from_port": "起始端口",
+    "to_port": "结束端口",
+    "invalid_port": "端口必须在 1 至 65535 之间。",
+    "invalid_range": "起始 ≤ 结束，且都在 1-65535 范围内。",
+    "range_too_wide": "范围过大 — 单次扫描最多 1024 个端口。"
   },
   "reachability": {
     "title": "可达性检测",

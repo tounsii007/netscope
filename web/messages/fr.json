@@ -674,7 +674,12 @@
     "open_of": "{open} ouverts / {total} testés",
     "service": "Service",
     "common_count": "{count} ports courants",
-    "port_status": "Le port {port} est <s>{status}</s>"
+    "port_status": "Le port {port} est <s>{status}</s>",
+    "from_port": "Port de début",
+    "to_port": "Port de fin",
+    "invalid_port": "Le port doit être compris entre 1 et 65535.",
+    "invalid_range": "Le début doit être ≤ la fin, les deux entre 1 et 65535.",
+    "range_too_wide": "Plage trop large — scannez au plus 1024 ports à la fois."
   },
   "reachability": {
     "title": "Joignabilité",

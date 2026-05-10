@@ -674,7 +674,12 @@
     "open_of": "{open} खुले / {total} जांचे गए",
     "service": "सेवा",
     "common_count": "{count} सामान्य पोर्ट",
-    "port_status": "पोर्ट {port} है <s>{status}</s>"
+    "port_status": "पोर्ट {port} है <s>{status}</s>",
+    "from_port": "प्रारंभिक पोर्ट",
+    "to_port": "अंतिम पोर्ट",
+    "invalid_port": "पोर्ट 1 से 65535 के बीच होना चाहिए।",
+    "invalid_range": "प्रारंभ ≤ अंत, दोनों 1-65535 के बीच।",
+    "range_too_wide": "रेंज बहुत बड़ी है — एक बार में अधिकतम 1024 पोर्ट स्कैन करें।"
   },
   "reachability": {
     "title": "पहुंचनीयता",

@@ -674,7 +674,12 @@
     "open_of": "{open} open / {total} scanned",
     "service": "Service",
     "common_count": "{count} common ports",
-    "port_status": "Port {port} is <s>{status}</s>"
+    "port_status": "Port {port} is <s>{status}</s>",
+    "from_port": "From port",
+    "to_port": "To port",
+    "invalid_port": "Port must be between 1 and 65535.",
+    "invalid_range": "Range start must be ≤ end, both within 1-65535.",
+    "range_too_wide": "Range too wide — please scan at most 1024 ports at a time."
   },
   "reachability": {
     "title": "Reachability",

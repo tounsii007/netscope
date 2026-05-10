@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
-import { Spinner } from "@/components/tool-shell";
+import { LoadingButton } from "@/components/tool-shell";
 import { ModeTabs, type Mode } from "@/app/[locale]/port-checker/mode-tabs";
 import { SinglePortResult } from "@/app/[locale]/port-checker/single-result";
 import { ScanResult } from "@/app/[locale]/port-checker/scan-result";
@@ -17,6 +17,11 @@ import { ScanResult } from "@/app/[locale]/port-checker/scan-result";
 export function PortCheckerClient() {
   const t = useTranslations("ports");
   const tc = useTranslations("common");
+  const tn = useTranslations("nav.tools");
+  const hostId = useId();
+  const portId = useId();
+  const fromId = useId();
+  const toId = useId();
 
   const [mode, setMode] = useState<Mode>("single");
   const [target, setTarget] = useState("google.com");
@@ -29,10 +34,24 @@ export function PortCheckerClient() {
   const [single, setSingle] = useState<PortCheckResult | null>(null);
   const [scan, setScan] = useState<PortScanResult | null>(null);
 
+  function validateBeforeRun(): string | null {
+    if (!target.trim()) return tc("input_required");
+    if (mode === "single" && (port < 1 || port > 65535)) {
+      return t("invalid_port");
+    }
+    if (mode === "range") {
+      if (fromPort < 1 || toPort > 65535 || fromPort > toPort) return t("invalid_range");
+      // Cap range size client-side so users don't fire 60 000 RPCs by accident.
+      if (toPort - fromPort > 1024) return t("range_too_wide");
+    }
+    return null;
+  }
+
   async function run(e: React.FormEvent) {
     e.preventDefault();
-    if (!target.trim()) {
-      setErr(tc("input_required"));
+    const v = validateBeforeRun();
+    if (v) {
+      setErr(v);
       setSingle(null);
       setScan(null);
       return;
@@ -58,41 +77,69 @@ export function PortCheckerClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card space-y-4">
+      <form onSubmit={run} noValidate className="card space-y-4" aria-label={tn("ports")}>
         <ModeTabs mode={mode} onChange={setMode} />
 
         <div className="grid gap-3 md:grid-cols-[2fr_1fr_auto]">
-          <input
-            className="input"
-            placeholder={t("placeholder_host")}
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-          />
-          {mode === "single" && (
+          <div>
+            <label htmlFor={hostId} className="sr-only">{tc("enter_host")}</label>
             <input
-              type="number"
-              min={1}
-              max={65535}
+              id={hostId}
               className="input"
-              value={port}
-              onChange={(e) => setPort(+e.target.value)}
-              required
+              placeholder={t("placeholder_host")}
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="url"
             />
+          </div>
+          {mode === "single" && (
+            <div>
+              <label htmlFor={portId} className="sr-only">Port</label>
+              <input
+                id={portId}
+                type="number"
+                min={1}
+                max={65535}
+                className="input"
+                value={port}
+                onChange={(e) => setPort(+e.target.value)}
+                required
+                inputMode="numeric"
+              />
+            </div>
           )}
           {mode === "range" && (
             <div className="flex gap-2">
-              <input
-                type="number"
-                className="input"
-                value={fromPort}
-                onChange={(e) => setFromPort(+e.target.value)}
-              />
-              <input
-                type="number"
-                className="input"
-                value={toPort}
-                onChange={(e) => setToPort(+e.target.value)}
-              />
+              <div className="flex-1">
+                <label htmlFor={fromId} className="sr-only">{t("from_port") || "From port"}</label>
+                <input
+                  id={fromId}
+                  type="number"
+                  min={1}
+                  max={65535}
+                  className="input"
+                  value={fromPort}
+                  onChange={(e) => setFromPort(+e.target.value)}
+                  inputMode="numeric"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor={toId} className="sr-only">{t("to_port") || "To port"}</label>
+                <input
+                  id={toId}
+                  type="number"
+                  min={1}
+                  max={65535}
+                  className="input"
+                  value={toPort}
+                  onChange={(e) => setToPort(+e.target.value)}
+                  inputMode="numeric"
+                />
+              </div>
             </div>
           )}
           {mode === "common" && (
@@ -100,16 +147,22 @@ export function PortCheckerClient() {
               {t("common_count", { count: 20 })}
             </div>
           )}
-          <button className="btn" disabled={loading}>
-            {loading ? <Spinner /> : tc("check")}
-          </button>
+          <LoadingButton loading={loading} loadingLabel={tc("loading")}>
+            {tc("check")}
+          </LoadingButton>
         </div>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger">{err}</div>}
+      {err && (
+        <div className="card border-danger/50 text-danger" role="alert">
+          {err}
+        </div>
+      )}
 
-      {single && <SinglePortResult result={single} />}
-      {scan && <ScanResult result={scan} />}
+      <div aria-live="polite">
+        {single && <SinglePortResult result={single} />}
+        {scan && <ScanResult result={scan} />}
+      </div>
     </div>
   );
 }

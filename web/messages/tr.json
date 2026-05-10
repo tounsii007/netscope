@@ -674,7 +674,12 @@
     "open_of": "{open} açık / {total} taranan",
     "service": "Servis",
     "common_count": "{count} yaygın port",
-    "port_status": "Port {port} <s>{status}</s>"
+    "port_status": "Port {port} <s>{status}</s>",
+    "from_port": "Başlangıç portu",
+    "to_port": "Bitiş portu",
+    "invalid_port": "Port 1 ile 65535 arasında olmalıdır.",
+    "invalid_range": "Başlangıç ≤ bitiş, ikisi de 1-65535 aralığında.",
+    "range_too_wide": "Aralık çok geniş — bir seferde en fazla 1024 port tarayın."
   },
   "reachability": {
     "title": "Erişilebilirlik",
