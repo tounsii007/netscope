@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
-import { ResultCard, Spinner } from "@/components/tool-shell";
+import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
 
 export function SslClient() {
   const t = useTranslations("ssl");
   const tc = useTranslations("common");
+  const tp = useTranslations("ports");
+  const tn = useTranslations("nav.tools");
+  const hostId = useId();
+  const portId = useId();
   const [host, setHost] = useState("github.com");
   const [port, setPort] = useState(443);
   const [loading, setLoading] = useState(false);
@@ -22,6 +26,11 @@ export function SslClient() {
       setData(null);
       return;
     }
+    if (port < 1 || port > 65535) {
+      setErr(tp("invalid_port"));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.ssl(host, port)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -32,18 +41,45 @@ export function SslClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card">
+      <form onSubmit={run} noValidate className="card" aria-label={tn("ssl")}>
         <div className="grid gap-3 md:grid-cols-[3fr_1fr_auto]">
-          <input className="input" value={host} onChange={(e) => setHost(e.target.value)} />
-          <input type="number" className="input" value={port} onChange={(e) => setPort(+e.target.value)} />
-          <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("inspect")}</button>
+          <div>
+            <label htmlFor={hostId} className="sr-only">{tc("enter_host")}</label>
+            <input
+              id={hostId}
+              className="input"
+              value={host}
+              onChange={(e) => setHost(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="url"
+            />
+          </div>
+          <div>
+            <label htmlFor={portId} className="sr-only">Port</label>
+            <input
+              id={portId}
+              type="number"
+              min={1}
+              max={65535}
+              className="input"
+              value={port}
+              onChange={(e) => setPort(+e.target.value)}
+              inputMode="numeric"
+            />
+          </div>
+          <LoadingButton loading={loading} loadingLabel={tc("loading")}>
+            {tc("inspect")}
+          </LoadingButton>
         </div>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger">{err}</div>}
+      {err && <div className="card border-danger/50 text-danger" role="alert">{err}</div>}
 
       {data && (
-        <div className="space-y-4">
+        <div className="space-y-4" aria-live="polite">
           <ResultCard className={healthy ? "" : "border-warn/50"}>
             <div className="flex items-start gap-3">
               {healthy

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { api, type IpResult } from "@/lib/api";
@@ -30,6 +30,8 @@ const IpMap = dynamic(() => import("@/components/ip-map"), { ssr: false });
 export function IpClient({ initial }: { initial?: IpResult }) {
   const t = useTranslations("ip");
   const tc = useTranslations("common");
+  const tn = useTranslations("nav.tools");
+  const inputId = useId();
   const params = useSearchParams();
   const prefill = params.get("host") ?? params.get("ip");
 
@@ -82,22 +84,27 @@ export function IpClient({ initial }: { initial?: IpResult }) {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
+      <form onSubmit={run} noValidate className="card flex flex-col gap-2 sm:flex-row" aria-label={tn("ip")}>
+        <label htmlFor={inputId} className="sr-only">{tc("enter_host")}</label>
         <input
+          id={inputId}
           className="input"
           value={ip}
           onChange={(e) => setIp(e.target.value)}
           onBlur={(e) => setIp(normaliseIp(e.target.value))}
           placeholder={t("placeholder")}
           autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
           spellCheck={false}
+          inputMode="url"
         />
         <LoadingButton loading={loading} loadingLabel={tc("loading")}>
           {tc("lookup")}
         </LoadingButton>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger">{err}</div>}
+      {err && <div className="card border-danger/50 text-danger" role="alert">{err}</div>}
 
       {data && (
         <>
