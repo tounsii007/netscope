@@ -1,14 +1,22 @@
 import { describe, it, expect } from "vitest";
 import en from "@/messages/en.json";
 import de from "@/messages/de.json";
+import es from "@/messages/es.json";
+import fr from "@/messages/fr.json";
 import hi from "@/messages/hi.json";
+// Italian bundle is imported as `itLocale` to avoid shadowing vitest's `it`.
+import itLocale from "@/messages/it.json";
+import pl from "@/messages/pl.json";
+import ru from "@/messages/ru.json";
+import tr from "@/messages/tr.json";
+import uk from "@/messages/uk.json";
 import zh from "@/messages/zh.json";
 
 /**
- * Locks the contract that all four locale bundles share an identical key
- * shape. If a developer adds a key in en.json without mirroring it to the
- * other three, this suite fails — preventing "MISSING_MESSAGE" runtime
- * errors in production for German / Hindi / Chinese users.
+ * Locks the contract that every locale bundle shares an identical key
+ * shape with en.json. If a developer adds a key in en.json without
+ * mirroring it to the other ten, this suite fails — preventing
+ * "MISSING_MESSAGE" runtime errors in production for non-English users.
  */
 
 type Json = Record<string, unknown>;
@@ -32,7 +40,14 @@ const enKeys = Object.keys(enFlat).sort();
 describe("i18n message bundles", () => {
   describe.each([
     ["de", de],
+    ["es", es],
+    ["fr", fr],
     ["hi", hi],
+    ["it", itLocale],
+    ["pl", pl],
+    ["ru", ru],
+    ["tr", tr],
+    ["uk", uk],
     ["zh", zh],
   ])("%s.json mirrors en.json", (locale, bundle) => {
     const flat = flatten(bundle as Json);
@@ -73,9 +88,10 @@ describe("i18n message bundles", () => {
     });
   });
 
-  it("has known critical keys present in all four bundles", () => {
+  it("has known critical keys present in every locale bundle", () => {
     const required = [
       "nav.switch_lang",
+      "nav.skip_to_content",
       "nav.tools.ports",
       "nav.tools.dns",
       "auth.signin_title",
@@ -84,7 +100,7 @@ describe("i18n message bundles", () => {
       "common.error",
       "ports.port_status",
     ];
-    for (const bundle of [en, de, hi, zh]) {
+    for (const bundle of [en, de, es, fr, hi, itLocale, pl, ru, tr, uk, zh]) {
       const flat = flatten(bundle as Json);
       for (const k of required) {
         expect(flat[k], `missing ${k}`).toBeTruthy();
