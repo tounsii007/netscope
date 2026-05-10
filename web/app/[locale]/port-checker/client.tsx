@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
 import { LoadingButton } from "@/components/tool-shell";
+import { checkTargetGuard } from "@/lib/target-guard";
 import { ModeTabs, type Mode } from "@/app/[locale]/port-checker/mode-tabs";
 import { SinglePortResult } from "@/app/[locale]/port-checker/single-result";
 import { ScanResult } from "@/app/[locale]/port-checker/scan-result";
@@ -17,6 +18,7 @@ import { ScanResult } from "@/app/[locale]/port-checker/scan-result";
 export function PortCheckerClient() {
   const t = useTranslations("ports");
   const tc = useTranslations("common");
+  const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
   const hostId = useId();
   const portId = useId();
@@ -36,6 +38,11 @@ export function PortCheckerClient() {
 
   function validateBeforeRun(): string | null {
     if (!target.trim()) return tc("input_required");
+    // Localhost / private / metadata targets are blocked here, before
+    // we hit the API. The backend re-runs the same check (TargetValidator)
+    // — this is purely defense-in-depth + better error UX.
+    const guard = checkTargetGuard(target);
+    if (!guard.ok) return tg(guard.reasonKey);
     if (mode === "single" && (port < 1 || port > 65535)) {
       return t("invalid_port");
     }

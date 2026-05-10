@@ -5,11 +5,13 @@ import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { checkTargetGuard } from "@/lib/target-guard";
 
 export function SslClient() {
   const t = useTranslations("ssl");
   const tc = useTranslations("common");
   const tp = useTranslations("ports");
+  const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
   const hostId = useId();
   const portId = useId();
@@ -23,6 +25,12 @@ export function SslClient() {
     e.preventDefault();
     if (!host.trim()) {
       setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    const guard = checkTargetGuard(host);
+    if (!guard.ok) {
+      setErr(tg(guard.reasonKey));
       setData(null);
       return;
     }

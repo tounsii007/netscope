@@ -4,11 +4,13 @@ import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type DnsResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
+import { checkTargetGuard } from "@/lib/target-guard";
 
 const TYPES = ["A", "AAAA", "MX", "TXT", "CNAME", "NS", "SOA", "CAA"];
 
 export function DnsClient() {
   const tc = useTranslations("common");
+  const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
   const inputId = useId();
   const [domain, setDomain] = useState("example.com");
@@ -21,6 +23,12 @@ export function DnsClient() {
     e.preventDefault();
     if (!domain.trim()) {
       setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    const guard = checkTargetGuard(domain);
+    if (!guard.ok) {
+      setErr(tg(guard.reasonKey));
       setData(null);
       return;
     }

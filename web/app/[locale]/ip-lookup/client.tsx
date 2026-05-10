@@ -12,6 +12,7 @@ import { LocationBanner } from "./location-banner";
 import { DetailGrid } from "./detail-grid";
 import { ThreatCard } from "./threat-card";
 import { normaliseIp } from "./ip-utils";
+import { checkTargetGuard } from "@/lib/target-guard";
 
 // The map is heavy (Leaflet + tiles) and never needed on first paint, so
 // we defer it client-side and skip SSR entirely.
@@ -30,6 +31,7 @@ const IpMap = dynamic(() => import("@/components/ip-map"), { ssr: false });
 export function IpClient({ initial }: { initial?: IpResult }) {
   const t = useTranslations("ip");
   const tc = useTranslations("common");
+  const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
   const inputId = useId();
   const params = useSearchParams();
@@ -44,6 +46,12 @@ export function IpClient({ initial }: { initial?: IpResult }) {
     const cleaned = normaliseIp(target);
     if (!cleaned) {
       setErr(tc("input_required"));
+      setData(null);
+      return;
+    }
+    const guard = checkTargetGuard(cleaned);
+    if (!guard.ok) {
+      setErr(tg(guard.reasonKey));
       setData(null);
       return;
     }
