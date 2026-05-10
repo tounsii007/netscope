@@ -27,8 +27,32 @@ export function DetailGrid({
   return (
     <ResultCard className="lg:col-span-2">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <Field label={t("field_ip")} value={data.ip} mono />
+        <Field
+          label={t("field_ip")}
+          value={
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span className="font-mono">{data.ip}</span>
+              {data.version && (
+                <span className="rounded border border-border bg-bg-elevated px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-fg-muted">
+                  IPv{data.version}
+                </span>
+              )}
+              {data.addressClass && (
+                <span className="rounded border border-border bg-bg-elevated px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-fg-muted">
+                  {t("class_label") || "Class"} {data.addressClass}
+                </span>
+              )}
+            </span>
+          }
+        />
         <Field label={t("field_hostname")} value={data.hostname} mono />
+        {data.reverseDns && data.reverseDns !== data.hostname && (
+          <Field
+            label={t("field_reverse_dns") || "Reverse DNS (PTR)"}
+            value={data.reverseDns}
+            mono
+          />
+        )}
         <Field
           label={t("field_country")}
           value={
