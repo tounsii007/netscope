@@ -84,7 +84,13 @@ function maybeGc() {
   }
 }
 
-function currentLimit(): number {
+/**
+ * Resolve the per-minute limit from `RATE_LIMIT_PER_MIN` once per call.
+ * Exported so middleware can show the same number it enforces in the
+ * `X-RateLimit-Limit` header — keeping the two in sync used to require
+ * a near-duplicate copy of this function.
+ */
+export function currentLimit(): number {
   const env = process.env.RATE_LIMIT_PER_MIN;
   if (!env) return DEFAULT_LIMIT;
   const n = Number(env);
