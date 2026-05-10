@@ -7,7 +7,42 @@ import Google from "next-auth/providers/google";
  * then exchange it at our backend /auth/exchange for a first-party JWT.
  * The JWT is kept server-side in the NextAuth session cookie — never exposed
  * to client JS.
+ *
+ * The exchange call is bounded by a 5-second hard timeout; if the backend
+ * is degraded we fall through to a session without `netscopeJwt` so the
+ * sign-in flow still completes (the user's UI clearly reflects the
+ * unauthenticated state and they can retry later instead of being stuck
+ * on a hanging callback page).
  */
+
+const EXCHANGE_TIMEOUT_MS = 5_000;
+
+async function exchangeForNetScopeJwt(provider: string, accessToken: string) {
+  const url = `${process.env.NETSCOPE_API_URL ?? "http://localhost:8080"}/api/v1/auth/exchange`;
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), EXCHANGE_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider, accessToken }),
+      signal: ac.signal,
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      console.error("NetScope exchange returned non-OK", { status: res.status });
+      return null;
+    }
+    return (await res.json()) as { token: string; workspace?: unknown; user?: unknown };
+  } catch (e) {
+    const reason = (e as Error)?.name === "AbortError" ? "timeout" : "network_error";
+    console.error("NetScope exchange failed", { reason });
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     GitHub({
@@ -23,27 +58,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, account }) {
-      if (account?.access_token) {
-        try {
-          const res = await fetch(
-            `${process.env.NETSCOPE_API_URL ?? "http://localhost:8080"}/api/v1/auth/exchange`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                provider: account.provider,
-                accessToken: account.access_token,
-              }),
-            },
-          );
-          if (res.ok) {
-            const data = await res.json();
-            token.netscopeJwt = data.token;
-            token.workspace = data.workspace;
-            token.user = data.user;
-          }
-        } catch (e) {
-          console.error("NetScope exchange failed", e);
+      if (account?.access_token && account.provider) {
+        const data = await exchangeForNetScopeJwt(account.provider, account.access_token);
+        if (data) {
+          token.netscopeJwt = data.token;
+          token.workspace = data.workspace;
+          token.user = data.user;
         }
       }
       return token;
