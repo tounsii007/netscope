@@ -375,6 +375,14 @@
     "status": "状态",
     "copyright": "© {year} Traceronix。"
   },
+  "guard": {
+    "blocked_localhost": "不允许使用 localhost 或回环地址，请输入公共主机名或 IP。",
+    "blocked_private": "私有网络地址 (RFC 1918) 无法通过公共工具进行诊断。",
+    "blocked_link_local": "公共诊断工具无法访问 link-local 地址。",
+    "blocked_metadata": "出于安全考虑，云服务元数据端点已被屏蔽。",
+    "blocked_reserved_tld": "此顶级域是保留域 (.local、.test 等)，永远不会公开解析。",
+    "invalid_target": "看起来不是有效的主机名或 IP。"
+  },
   "common": {
     "loading": "加载中…",
     "error": "出现错误，请重试。",

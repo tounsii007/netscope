@@ -375,6 +375,14 @@
     "status": "Durum",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost ve loopback adreslerine izin verilmiyor. Lütfen genel bir ana bilgisayar veya IP girin.",
+    "blocked_private": "Özel ağ adresleri (RFC 1918) genel bir araçtan teşhis edilemez.",
+    "blocked_link_local": "Link-local adreslere genel bir teşhis aracından erişilemez.",
+    "blocked_metadata": "Bulut sağlayıcı meta veri uç noktaları güvenlik nedeniyle engellendi.",
+    "blocked_reserved_tld": "Bu üst düzey alan adı ayrılmıştır (.local, .test vb.) ve hiçbir zaman genel olarak çözümlenmez.",
+    "invalid_target": "Bu geçerli bir ana bilgisayar adı veya IP'ye benzemiyor."
+  },
   "common": {
     "loading": "Yükleniyor…",
     "error": "Bir şeyler ters gitti, tekrar dene.",

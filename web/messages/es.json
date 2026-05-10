@@ -375,6 +375,14 @@
     "status": "Estado",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost y direcciones de bucle no están permitidas. Usa un nombre de host o IP pública.",
+    "blocked_private": "Las direcciones de red privadas (RFC 1918) no pueden diagnosticarse desde una herramienta pública.",
+    "blocked_link_local": "Las direcciones link-local no son accesibles desde una herramienta de diagnóstico pública.",
+    "blocked_metadata": "Los endpoints de metadatos en la nube están bloqueados por seguridad.",
+    "blocked_reserved_tld": "Este TLD está reservado (.local, .test, etc.) y nunca resuelve públicamente.",
+    "invalid_target": "Eso no parece un nombre de host o IP válido."
+  },
   "common": {
     "loading": "Cargando…",
     "error": "Algo salió mal. Vuelve a intentarlo.",

@@ -375,6 +375,14 @@
     "status": "स्थिति",
     "copyright": "© {year} Traceronix।"
   },
+  "guard": {
+    "blocked_localhost": "Localhost और loopback पते अनुमत नहीं हैं। कृपया सार्वजनिक होस्टनाम या IP डालें।",
+    "blocked_private": "निजी नेटवर्क पते (RFC 1918) सार्वजनिक टूल से जांचे नहीं जा सकते।",
+    "blocked_link_local": "Link-local पते सार्वजनिक डायग्नोस्टिक टूल से नहीं पहुंच पाते।",
+    "blocked_metadata": "क्लाउड मेटाडेटा एंडपॉइंट सुरक्षा कारणों से ब्लॉक किए गए हैं।",
+    "blocked_reserved_tld": "यह TLD आरक्षित है (.local, .test आदि) और सार्वजनिक रूप से कभी हल नहीं होता।",
+    "invalid_target": "यह वैध होस्टनाम या IP नहीं लगता।"
+  },
   "common": {
     "loading": "लोड हो रहा है…",
     "error": "कुछ गलत हुआ। कृपया पुनः प्रयास करें।",

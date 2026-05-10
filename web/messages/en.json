@@ -375,6 +375,14 @@
     "status": "Status",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost and loopback addresses are not allowed. Try a public hostname or IP.",
+    "blocked_private": "Private network addresses (RFC 1918) cannot be diagnosed from a public tool.",
+    "blocked_link_local": "Link-local addresses are not reachable from a public diagnostic tool.",
+    "blocked_metadata": "Cloud-provider metadata endpoints are blocked for safety.",
+    "blocked_reserved_tld": "This top-level domain is reserved (e.g. .local, .test) and never resolves publicly.",
+    "invalid_target": "That doesn't look like a valid hostname or IP."
+  },
   "common": {
     "loading": "Loading…",
     "error": "Something went wrong. Please try again.",

@@ -375,6 +375,14 @@
     "status": "Status",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost i adresy zwrotne są niedozwolone. Użyj publicznego hosta lub adresu IP.",
+    "blocked_private": "Prywatne adresy sieciowe (RFC 1918) nie mogą być diagnozowane przez publiczne narzędzie.",
+    "blocked_link_local": "Adresy link-local nie są osiągalne z poziomu publicznego narzędzia diagnostycznego.",
+    "blocked_metadata": "Endpointy metadanych chmury są zablokowane ze względów bezpieczeństwa.",
+    "blocked_reserved_tld": "Ten TLD jest zarezerwowany (.local, .test itd.) i nigdy nie rozwiązuje się publicznie.",
+    "invalid_target": "To nie wygląda na poprawny host ani IP."
+  },
   "common": {
     "loading": "Ładowanie…",
     "error": "Coś poszło nie tak. Spróbuj jeszcze raz.",

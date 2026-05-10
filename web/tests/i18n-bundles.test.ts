@@ -99,6 +99,14 @@ describe("i18n message bundles", () => {
       "not_found.back",
       "common.error",
       "ports.port_status",
+      // The target-guard rejection messages — every tool client surfaces
+      // these, so a missing key would 500 the entire form.
+      "guard.blocked_localhost",
+      "guard.blocked_private",
+      "guard.blocked_link_local",
+      "guard.blocked_metadata",
+      "guard.blocked_reserved_tld",
+      "guard.invalid_target",
     ];
     for (const bundle of [en, de, es, fr, hi, itLocale, pl, ru, tr, uk, zh]) {
       const flat = flatten(bundle as Json);
