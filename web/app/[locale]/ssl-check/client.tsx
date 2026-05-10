@@ -107,7 +107,35 @@ export function SslClient() {
                       {data.daysUntilExpiry}
                     </span>
                   } />
+                  {data.publicKeyAlgorithm && (
+                    <Field
+                      label={t("field_pubkey") || "Public key"}
+                      value={
+                        <span>
+                          {data.publicKeyAlgorithm}
+                          {data.publicKeyBits ? ` · ${data.publicKeyBits} bit` : ""}
+                          {data.publicKeyCurve ? ` · ${data.publicKeyCurve}` : ""}
+                        </span>
+                      }
+                    />
+                  )}
                 </div>
+                {(data.selfSigned || (data.warnings && data.warnings.length > 0)) && (
+                  <ul className="mt-3 space-y-1 rounded border border-warn/40 bg-warn/10 p-3 text-xs text-warn">
+                    {data.selfSigned && (
+                      <li className="flex items-center gap-2">
+                        <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {t("warn_self_signed") || "Certificate is self-signed."}
+                      </li>
+                    )}
+                    {data.warnings?.map((w, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </ResultCard>
@@ -126,7 +154,20 @@ export function SslClient() {
             <ol className="space-y-3">
               {data.chain.map((c, i) => (
                 <li key={i} className="rounded-lg border border-border bg-bg-elevated p-3 text-xs font-mono">
-                  <div className="text-fg-muted">#{i + 1} {i === 0 ? "(leaf)" : ""}</div>
+                  <div className="flex flex-wrap items-center gap-2 text-fg-muted">
+                    <span>#{i + 1} {i === 0 ? "(leaf)" : i === data.chain.length - 1 ? "(root)" : "(intermediate)"}</span>
+                    {c.publicKeyAlgorithm && (
+                      <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                        {c.publicKeyAlgorithm}
+                        {c.publicKeyBits ? ` ${c.publicKeyBits}` : ""}
+                      </span>
+                    )}
+                    {c.selfSigned && (
+                      <span className="rounded border border-warn/40 bg-warn/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warn">
+                        {t("warn_self_signed_short") || "self-signed"}
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-1 break-all">Subject: {c.subject}</div>
                   <div className="break-all">Issuer: {c.issuer}</div>
                   <div>Signature: {c.sigAlg}</div>

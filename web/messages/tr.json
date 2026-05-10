@@ -730,6 +730,9 @@
     "field_issuer": "Yayıncı",
     "field_expiry": "Son kullanmaya gün",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Açık anahtar",
+    "warn_self_signed": "Sertifika kendinden imzalı.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Derece",
     "chain": "Sertifika zinciri"
   },

@@ -730,6 +730,9 @@
     "field_issuer": "Aussteller",
     "field_expiry": "Tage bis Ablauf",
     "field_subject_alt": "Alternative Namen",
+    "field_pubkey": "Öffentlicher Schlüssel",
+    "warn_self_signed": "Zertifikat ist selbst signiert.",
+    "warn_self_signed_short": "selbst signiert",
     "grade": "Bewertung",
     "chain": "Zertifikatskette"
   },

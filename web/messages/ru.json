@@ -730,6 +730,9 @@
     "field_issuer": "Эмитент",
     "field_expiry": "Дней до истечения",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Открытый ключ",
+    "warn_self_signed": "Сертификат подписан самим собой.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Оценка",
     "chain": "Цепочка сертификатов"
   },

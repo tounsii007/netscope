@@ -730,6 +730,9 @@
     "field_issuer": "जारीकर्ता",
     "field_expiry": "समाप्ति तक दिन",
     "field_subject_alt": "वैकल्पिक विषय नाम",
+    "field_pubkey": "सार्वजनिक कुंजी",
+    "warn_self_signed": "सर्टिफिकेट स्वयं-हस्ताक्षरित है।",
+    "warn_self_signed_short": "self-signed",
     "grade": "ग्रेड",
     "chain": "सर्टिफिकेट चेन"
   },

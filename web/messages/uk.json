@@ -730,6 +730,9 @@
     "field_issuer": "Емітент",
     "field_expiry": "Днів до закінчення",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Відкритий ключ",
+    "warn_self_signed": "Сертифікат самопідписаний.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Оцінка",
     "chain": "Ланцюг сертифікатів"
   },

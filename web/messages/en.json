@@ -730,6 +730,9 @@
     "field_issuer": "Issuer",
     "field_expiry": "Days until expiry",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Public key",
+    "warn_self_signed": "Certificate is self-signed.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Grade",
     "chain": "Certificate chain"
   },

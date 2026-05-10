@@ -32,9 +32,21 @@ export type SslResult = {
   subject: string; issuer: string;
   validFrom: string; validTo: string;
   daysUntilExpiry: number; expired: boolean;
+  /** RSA / EC / etc. Drives the "key strength" badge in the UI. */
+  publicKeyAlgorithm?: string;
+  /** Modulus bit-length for RSA, field size for EC. */
+  publicKeyBits?: number;
+  /** Curve name for EC keys (e.g. "secp256r1"). */
+  publicKeyCurve?: string;
+  /** True when subject == issuer at the leaf — usually a red flag. */
+  selfSigned?: boolean;
+  /** Backend-detected issues (expiry soon, weak key, SHA-1 sig, …). */
+  warnings?: string[];
   sans: string[];
   chain: Array<{
     subject: string; issuer: string; validFrom: string; validTo: string;
     serial: string; sigAlg: string;
+    publicKeyAlgorithm?: string; publicKeyBits?: number;
+    publicKeyCurve?: string; selfSigned?: boolean;
   }>;
 };

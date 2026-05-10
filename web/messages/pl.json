@@ -730,6 +730,9 @@
     "field_issuer": "Wystawca",
     "field_expiry": "Dni do wygaśnięcia",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Klucz publiczny",
+    "warn_self_signed": "Certyfikat jest podpisany samodzielnie.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Ocena",
     "chain": "Łańcuch certyfikatów"
   },

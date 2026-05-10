@@ -730,6 +730,9 @@
     "field_issuer": "Emisor",
     "field_expiry": "Días hasta expiración",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Clave pública",
+    "warn_self_signed": "El certificado está autofirmado.",
+    "warn_self_signed_short": "autofirmado",
     "grade": "Calificación",
     "chain": "Cadena de certificados"
   },

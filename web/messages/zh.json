@@ -730,6 +730,9 @@
     "field_issuer": "颁发机构",
     "field_expiry": "剩余天数",
     "field_subject_alt": "备用主题名称",
+    "field_pubkey": "公钥",
+    "warn_self_signed": "证书为自签名。",
+    "warn_self_signed_short": "自签名",
     "grade": "评级",
     "chain": "证书链"
   },
