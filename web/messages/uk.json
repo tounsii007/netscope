@@ -567,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Перевірки заголовків безпеки",
-    "raw_headers": "Сирі заголовки відповіді"
+    "raw_headers": "Сирі заголовки відповіді",
+    "hsts_panel": "Політика HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Придатний для preload",
+    "csp_panel": "Аудит CSP",
+    "csp_directives": "Директиви",
+    "csp_wildcard": "Джерела з wildcard"
   },
   "ip": {
     "title": "Пошук IP",

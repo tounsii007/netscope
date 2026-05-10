@@ -567,7 +567,13 @@
     "score": "Skor {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Güvenlik başlığı kontrolleri",
-    "raw_headers": "Ham yanıt başlıkları"
+    "raw_headers": "Ham yanıt başlıkları",
+    "hsts_panel": "HSTS politikası",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload uygun",
+    "csp_panel": "CSP denetimi",
+    "csp_directives": "Direktifler",
+    "csp_wildcard": "Joker kaynaklar"
   },
   "ip": {
     "title": "IP araması",

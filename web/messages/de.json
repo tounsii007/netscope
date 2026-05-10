@@ -567,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Sicherheits-Header-Prüfungen",
-    "raw_headers": "Rohe Response-Header"
+    "raw_headers": "Rohe Response-Header",
+    "hsts_panel": "HSTS-Policy",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload-fähig",
+    "csp_panel": "CSP-Audit",
+    "csp_directives": "Direktiven",
+    "csp_wildcard": "Wildcard-Quellen"
   },
   "ip": {
     "title": "IP-Abfrage",

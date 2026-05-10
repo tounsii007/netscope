@@ -567,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Sprawdzenia nagłówków bezpieczeństwa",
-    "raw_headers": "Surowe nagłówki odpowiedzi"
+    "raw_headers": "Surowe nagłówki odpowiedzi",
+    "hsts_panel": "Polityka HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Kwalifikuje się do preload",
+    "csp_panel": "Audyt CSP",
+    "csp_directives": "Dyrektywy",
+    "csp_wildcard": "Źródła z wildcardami"
   },
   "ip": {
     "title": "Sprawdzanie IP",

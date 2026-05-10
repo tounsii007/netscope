@@ -567,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Security header checks",
-    "raw_headers": "Raw response headers"
+    "raw_headers": "Raw response headers",
+    "hsts_panel": "HSTS policy",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload-eligible",
+    "csp_panel": "CSP audit",
+    "csp_directives": "Directives",
+    "csp_wildcard": "Wildcard sources"
   },
   "ip": {
     "title": "IP Lookup",

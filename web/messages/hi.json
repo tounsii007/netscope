@@ -567,7 +567,13 @@
     "score": "स्कोर {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "सुरक्षा हेडर जांच",
-    "raw_headers": "कच्चे Response हेडर"
+    "raw_headers": "कच्चे Response हेडर",
+    "hsts_panel": "HSTS नीति",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload योग्य",
+    "csp_panel": "CSP ऑडिट",
+    "csp_directives": "निर्देश",
+    "csp_wildcard": "वाइल्डकार्ड स्रोत"
   },
   "ip": {
     "title": "IP लुकअप",

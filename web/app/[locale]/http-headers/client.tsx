@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type HeadersResult } from "@/lib/api";
-import { ResultCard, Spinner } from "@/components/tool-shell";
+import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { CheckCircle2, AlertCircle, XCircle } from "lucide-react";
+import { checkTargetGuard } from "@/lib/target-guard";
 
 const GRADE_COLOR: Record<string, string> = {
   "A+": "text-success", A: "text-success", B: "text-warn",
@@ -14,6 +15,7 @@ const GRADE_COLOR: Record<string, string> = {
 export function HeadersClient() {
   const t = useTranslations("headers");
   const tc = useTranslations("common");
+  const tg = useTranslations("guard");
   const [url, setUrl] = useState("https://github.com");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -26,6 +28,12 @@ export function HeadersClient() {
       setData(null);
       return;
     }
+    const guard = checkTargetGuard(url);
+    if (!guard.ok) {
+      setErr(tg(guard.reasonKey));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.headers(url)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -34,12 +42,25 @@ export function HeadersClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card flex flex-col gap-2 sm:flex-row">
-        <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder={tc("enter_url")} />
-        <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("analyze")}</button>
+      <form onSubmit={run} noValidate className="card flex flex-col gap-2 sm:flex-row">
+        <input
+          className="input"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder={tc("enter_url")}
+          aria-label={tc("enter_url")}
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="url"
+        />
+        <LoadingButton loading={loading} loadingLabel={tc("loading")}>
+          {tc("analyze")}
+        </LoadingButton>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger">{err}</div>}
+      {err && <div className="card border-danger/50 text-danger" role="alert">{err}</div>}
 
       {data && (
         <>
@@ -84,6 +105,60 @@ export function HeadersClient() {
             </ul>
           </ResultCard>
 
+          {data.hsts && (
+            <ResultCard>
+              <h3 className="mb-3 text-sm font-semibold">{t("hsts_panel") || "HSTS policy"}</h3>
+              <div className="grid gap-2 sm:grid-cols-2 text-sm">
+                <Stat
+                  label={t("hsts_max_age") || "max-age"}
+                  value={data.hsts.maxAge >= 0 ? formatMaxAge(data.hsts.maxAge) : "—"}
+                />
+                <Stat
+                  label="includeSubDomains"
+                  value={data.hsts.includeSubDomains ? "✓" : "✗"}
+                  ok={data.hsts.includeSubDomains}
+                />
+                <Stat
+                  label="preload"
+                  value={data.hsts.preload ? "✓" : "✗"}
+                  ok={data.hsts.preload}
+                />
+                <Stat
+                  label={t("hsts_preload_eligible") || "Preload-eligible"}
+                  value={data.hsts.preloadEligible ? "✓" : "✗"}
+                  ok={data.hsts.preloadEligible}
+                />
+              </div>
+            </ResultCard>
+          )}
+
+          {data.csp && (
+            <ResultCard>
+              <h3 className="mb-3 text-sm font-semibold">{t("csp_panel") || "CSP audit"}</h3>
+              <div className="grid gap-2 sm:grid-cols-2 text-sm">
+                <Stat
+                  label={t("csp_directives") || "Directives"}
+                  value={String(data.csp.directiveCount)}
+                />
+                <Stat
+                  label={"'unsafe-inline'"}
+                  value={data.csp.hasUnsafeInline ? "⚠ present" : "✓ absent"}
+                  ok={!data.csp.hasUnsafeInline}
+                />
+                <Stat
+                  label={"'unsafe-eval'"}
+                  value={data.csp.hasUnsafeEval ? "⚠ present" : "✓ absent"}
+                  ok={!data.csp.hasUnsafeEval}
+                />
+                <Stat
+                  label={t("csp_wildcard") || "Wildcard sources"}
+                  value={data.csp.hasWildcard ? "⚠ present" : "✓ absent"}
+                  ok={!data.csp.hasWildcard}
+                />
+              </div>
+            </ResultCard>
+          )}
+
           <ResultCard>
             <h3 className="mb-3 text-sm font-semibold">{t("raw_headers")}</h3>
             <pre className="max-h-80 overflow-auto rounded-lg bg-bg-elevated p-3 text-xs font-mono">
@@ -94,4 +169,30 @@ export function HeadersClient() {
       )}
     </div>
   );
+}
+
+function Stat({ label, value, ok }: { label: string; value: string; ok?: boolean }) {
+  const color =
+    ok === true ? "text-success" :
+    ok === false ? "text-warn" :
+    "text-fg";
+  return (
+    <div className="flex items-center justify-between rounded bg-bg-elevated px-3 py-2">
+      <span className="text-xs uppercase tracking-wide text-fg-muted">{label}</span>
+      <span className={`font-mono ${color}`}>{value}</span>
+    </div>
+  );
+}
+
+/**
+ * Render an HSTS max-age in human-readable form alongside the raw
+ * seconds count: "31536000 (1 year)".
+ */
+function formatMaxAge(seconds: number): string {
+  const human =
+    seconds >= 31_536_000 ? `${Math.round(seconds / 31_536_000)} year${seconds >= 63_072_000 ? "s" : ""}` :
+    seconds >= 86_400      ? `${Math.round(seconds / 86_400)} day${seconds >= 172_800 ? "s" : ""}` :
+    seconds >= 3_600       ? `${Math.round(seconds / 3_600)} h` :
+    `${seconds} s`;
+  return `${seconds} (${human})`;
 }

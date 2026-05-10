@@ -567,7 +567,13 @@
     "score": "评分 {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "安全头部检查项",
-    "raw_headers": "原始响应头"
+    "raw_headers": "原始响应头",
+    "hsts_panel": "HSTS 策略",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "可加入预加载列表",
+    "csp_panel": "CSP 审计",
+    "csp_directives": "指令",
+    "csp_wildcard": "通配符来源"
   },
   "ip": {
     "title": "IP 查询",

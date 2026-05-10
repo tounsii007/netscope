@@ -567,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Controlli degli header di sicurezza",
-    "raw_headers": "Header di risposta grezzi"
+    "raw_headers": "Header di risposta grezzi",
+    "hsts_panel": "Politica HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Idoneo al preload",
+    "csp_panel": "Audit CSP",
+    "csp_directives": "Direttive",
+    "csp_wildcard": "Sorgenti wildcard"
   },
   "ip": {
     "title": "Ricerca IP",
