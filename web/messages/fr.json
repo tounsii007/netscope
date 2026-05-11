@@ -10,6 +10,7 @@
     "switch_lang": "Changer de langue",
     "open_menu": "Ouvrir le menu",
     "close_menu": "Fermer le menu",
+    "skip_to_content": "Aller au contenu principal",
     "tools_menu": "Outils",
     "cat_dns": "DNS & domaine",
     "cat_network": "Réseau",
@@ -374,6 +375,14 @@
     "status": "Statut",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost et les adresses de bouclage sont interdites. Saisissez un nom d'hôte ou une IP publique.",
+    "blocked_private": "Les adresses de réseau privé (RFC 1918) ne peuvent pas être diagnostiquées par un outil public.",
+    "blocked_link_local": "Les adresses link-local ne sont pas joignables depuis un outil de diagnostic public.",
+    "blocked_metadata": "Les endpoints de métadonnées cloud sont bloqués par sécurité.",
+    "blocked_reserved_tld": "Ce TLD est réservé (.local, .test, etc.) et ne se résout pas publiquement.",
+    "invalid_target": "Cela ne ressemble pas à un nom d'hôte ou une IP valide."
+  },
   "common": {
     "loading": "Chargement…",
     "error": "Une erreur est survenue, réessaie.",
@@ -478,6 +487,7 @@
     "section_threat": "Menace / Privacy",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "Reverse DNS (PTR)",
     "field_isp": "FAI",
     "field_asn": "ASN",
     "field_country": "Pays",
@@ -490,6 +500,7 @@
     "field_device": "Appareil",
     "field_screen": "Écran",
     "field_lang": "Accept-Language",
+    "class_label": "Classe",
     "threat_tor": "TOR",
     "threat_hosting": "Hébergement",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Vérifications d'en-têtes de sécurité",
-    "raw_headers": "En-têtes de réponse bruts"
+    "raw_headers": "En-têtes de réponse bruts",
+    "hsts_panel": "Politique HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Éligible au preload",
+    "csp_panel": "Audit CSP",
+    "csp_directives": "Directives",
+    "csp_wildcard": "Sources wildcard"
   },
   "ip": {
     "title": "Recherche IP",
@@ -673,7 +690,12 @@
     "open_of": "{open} ouverts / {total} testés",
     "service": "Service",
     "common_count": "{count} ports courants",
-    "port_status": "Le port {port} est <s>{status}</s>"
+    "port_status": "Le port {port} est <s>{status}</s>",
+    "from_port": "Port de début",
+    "to_port": "Port de fin",
+    "invalid_port": "Le port doit être compris entre 1 et 65535.",
+    "invalid_range": "Le début doit être ≤ la fin, les deux entre 1 et 65535.",
+    "range_too_wide": "Plage trop large — scannez au plus 1024 ports à la fois."
   },
   "reachability": {
     "title": "Joignabilité",
@@ -714,6 +736,9 @@
     "field_issuer": "Émetteur",
     "field_expiry": "Jours avant expiration",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Clé publique",
+    "warn_self_signed": "Le certificat est auto-signé.",
+    "warn_self_signed_short": "auto-signé",
     "grade": "Note",
     "chain": "Chaîne de certificats"
   },

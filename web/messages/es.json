@@ -10,6 +10,7 @@
     "switch_lang": "Cambiar idioma",
     "open_menu": "Abrir menú",
     "close_menu": "Cerrar menú",
+    "skip_to_content": "Saltar al contenido principal",
     "tools_menu": "Herramientas",
     "cat_dns": "DNS y dominio",
     "cat_network": "Red",
@@ -374,6 +375,14 @@
     "status": "Estado",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost y direcciones de bucle no están permitidas. Usa un nombre de host o IP pública.",
+    "blocked_private": "Las direcciones de red privadas (RFC 1918) no pueden diagnosticarse desde una herramienta pública.",
+    "blocked_link_local": "Las direcciones link-local no son accesibles desde una herramienta de diagnóstico pública.",
+    "blocked_metadata": "Los endpoints de metadatos en la nube están bloqueados por seguridad.",
+    "blocked_reserved_tld": "Este TLD está reservado (.local, .test, etc.) y nunca resuelve públicamente.",
+    "invalid_target": "Eso no parece un nombre de host o IP válido."
+  },
   "common": {
     "loading": "Cargando…",
     "error": "Algo salió mal. Vuelve a intentarlo.",
@@ -478,6 +487,7 @@
     "section_threat": "Amenaza / Privacidad",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "DNS inverso (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "País",
@@ -490,6 +500,7 @@
     "field_device": "Dispositivo",
     "field_screen": "Pantalla",
     "field_lang": "Accept-Language",
+    "class_label": "Clase",
     "threat_tor": "TOR",
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Comprobaciones de cabeceras de seguridad",
-    "raw_headers": "Cabeceras de respuesta crudas"
+    "raw_headers": "Cabeceras de respuesta crudas",
+    "hsts_panel": "Política HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Apto para preload",
+    "csp_panel": "Auditoría CSP",
+    "csp_directives": "Directivas",
+    "csp_wildcard": "Orígenes con comodín"
   },
   "ip": {
     "title": "Búsqueda IP",
@@ -673,7 +690,12 @@
     "open_of": "{open} abiertos / {total} escaneados",
     "service": "Servicio",
     "common_count": "{count} puertos comunes",
-    "port_status": "El puerto {port} está <s>{status}</s>"
+    "port_status": "El puerto {port} está <s>{status}</s>",
+    "from_port": "Puerto inicial",
+    "to_port": "Puerto final",
+    "invalid_port": "El puerto debe estar entre 1 y 65535.",
+    "invalid_range": "Inicio ≤ fin, ambos entre 1 y 65535.",
+    "range_too_wide": "Rango demasiado amplio — escanea como máximo 1024 puertos a la vez."
   },
   "reachability": {
     "title": "Alcanzabilidad",
@@ -714,6 +736,9 @@
     "field_issuer": "Emisor",
     "field_expiry": "Días hasta expiración",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Clave pública",
+    "warn_self_signed": "El certificado está autofirmado.",
+    "warn_self_signed_short": "autofirmado",
     "grade": "Calificación",
     "chain": "Cadena de certificados"
   },

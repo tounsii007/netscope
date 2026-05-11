@@ -10,6 +10,7 @@
     "switch_lang": "Змінити мову",
     "open_menu": "Відкрити меню",
     "close_menu": "Закрити меню",
+    "skip_to_content": "Перейти до основного вмісту",
     "tools_menu": "Інструменти",
     "cat_dns": "DNS і домен",
     "cat_network": "Мережа",
@@ -374,6 +375,14 @@
     "status": "Статус",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost і адреси зворотного зв'язку не дозволені. Використовуйте публічний хост або IP.",
+    "blocked_private": "Приватні мережеві адреси (RFC 1918) не можна діагностувати з публічного інструмента.",
+    "blocked_link_local": "Link-local адреси недоступні з публічного діагностичного інструмента.",
+    "blocked_metadata": "Ендпоінти хмарних метаданих заблоковані з міркувань безпеки.",
+    "blocked_reserved_tld": "Цей TLD зарезервовано (.local, .test тощо) і він не вирішується публічно.",
+    "invalid_target": "Це не схоже на коректний хост чи IP."
+  },
   "common": {
     "loading": "Завантаження…",
     "error": "Щось пішло не так. Спробуй ще раз.",
@@ -478,6 +487,7 @@
     "section_threat": "Загроза / Приватність",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "Зворотний DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "Країна",
@@ -490,6 +500,7 @@
     "field_device": "Пристрій",
     "field_screen": "Екран",
     "field_lang": "Accept-Language",
+    "class_label": "Клас",
     "threat_tor": "TOR",
     "threat_hosting": "Хостинг",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Перевірки заголовків безпеки",
-    "raw_headers": "Сирі заголовки відповіді"
+    "raw_headers": "Сирі заголовки відповіді",
+    "hsts_panel": "Політика HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Придатний для preload",
+    "csp_panel": "Аудит CSP",
+    "csp_directives": "Директиви",
+    "csp_wildcard": "Джерела з wildcard"
   },
   "ip": {
     "title": "Пошук IP",
@@ -673,7 +690,12 @@
     "open_of": "{open} відкрито / {total} перевірено",
     "service": "Сервіс",
     "common_count": "{count} популярних портів",
-    "port_status": "Порт {port} — <s>{status}</s>"
+    "port_status": "Порт {port} — <s>{status}</s>",
+    "from_port": "Початковий порт",
+    "to_port": "Кінцевий порт",
+    "invalid_port": "Порт має бути в межах 1-65535.",
+    "invalid_range": "Початок ≤ кінець, обидва в межах 1-65535.",
+    "range_too_wide": "Діапазон занадто великий — скануйте не більше 1024 портів за раз."
   },
   "reachability": {
     "title": "Доступність",
@@ -714,6 +736,9 @@
     "field_issuer": "Емітент",
     "field_expiry": "Днів до закінчення",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Відкритий ключ",
+    "warn_self_signed": "Сертифікат самопідписаний.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Оцінка",
     "chain": "Ланцюг сертифікатів"
   },

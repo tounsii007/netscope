@@ -10,6 +10,7 @@
     "switch_lang": "Dili değiştir",
     "open_menu": "Menüyü aç",
     "close_menu": "Menüyü kapat",
+    "skip_to_content": "Ana içeriğe atla",
     "tools_menu": "Araçlar",
     "cat_dns": "DNS ve domain",
     "cat_network": "Ağ",
@@ -374,6 +375,14 @@
     "status": "Durum",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost ve loopback adreslerine izin verilmiyor. Lütfen genel bir ana bilgisayar veya IP girin.",
+    "blocked_private": "Özel ağ adresleri (RFC 1918) genel bir araçtan teşhis edilemez.",
+    "blocked_link_local": "Link-local adreslere genel bir teşhis aracından erişilemez.",
+    "blocked_metadata": "Bulut sağlayıcı meta veri uç noktaları güvenlik nedeniyle engellendi.",
+    "blocked_reserved_tld": "Bu üst düzey alan adı ayrılmıştır (.local, .test vb.) ve hiçbir zaman genel olarak çözümlenmez.",
+    "invalid_target": "Bu geçerli bir ana bilgisayar adı veya IP'ye benzemiyor."
+  },
   "common": {
     "loading": "Yükleniyor…",
     "error": "Bir şeyler ters gitti, tekrar dene.",
@@ -478,6 +487,7 @@
     "section_threat": "Tehdit / Gizlilik",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "Ters DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "Ülke",
@@ -490,6 +500,7 @@
     "field_device": "Cihaz",
     "field_screen": "Ekran",
     "field_lang": "Accept-Language",
+    "class_label": "Sınıf",
     "threat_tor": "TOR",
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Skor {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Güvenlik başlığı kontrolleri",
-    "raw_headers": "Ham yanıt başlıkları"
+    "raw_headers": "Ham yanıt başlıkları",
+    "hsts_panel": "HSTS politikası",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload uygun",
+    "csp_panel": "CSP denetimi",
+    "csp_directives": "Direktifler",
+    "csp_wildcard": "Joker kaynaklar"
   },
   "ip": {
     "title": "IP araması",
@@ -673,7 +690,12 @@
     "open_of": "{open} açık / {total} taranan",
     "service": "Servis",
     "common_count": "{count} yaygın port",
-    "port_status": "Port {port} <s>{status}</s>"
+    "port_status": "Port {port} <s>{status}</s>",
+    "from_port": "Başlangıç portu",
+    "to_port": "Bitiş portu",
+    "invalid_port": "Port 1 ile 65535 arasında olmalıdır.",
+    "invalid_range": "Başlangıç ≤ bitiş, ikisi de 1-65535 aralığında.",
+    "range_too_wide": "Aralık çok geniş — bir seferde en fazla 1024 port tarayın."
   },
   "reachability": {
     "title": "Erişilebilirlik",
@@ -714,6 +736,9 @@
     "field_issuer": "Yayıncı",
     "field_expiry": "Son kullanmaya gün",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Açık anahtar",
+    "warn_self_signed": "Sertifika kendinden imzalı.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Derece",
     "chain": "Sertifika zinciri"
   },

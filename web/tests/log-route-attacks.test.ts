@@ -110,13 +110,54 @@ describe("POST /api/log — adversarial", () => {
 
   /* ─── payload bombing ────────────────────────────────────────────────── */
 
-  it("accepts a 10KB message without truncation (logger must handle)", async () => {
+  it("rejects payloads larger than 16KB with 413", async () => {
+    // The route caps the *whole body* at 16 KB. A 20 KB body should
+    // get a 413 before we ever touch the logger.
+    const huge = "M".repeat(20_000);
+    const res = await POST(makeReq({ level: "error", message: huge }));
+    expect(res.status).toBe(413);
+    expect(errorMock).not.toHaveBeenCalled();
+  });
+
+  it("truncates a 10KB message to MAX_MSG_LEN (8KB) before logging", async () => {
     const tenK = "M".repeat(10_000);
     const res = await POST(makeReq({ level: "error", message: tenK }));
     expect(res.status).toBe(200);
     const [msg] = errorMock.mock.calls[0];
-    // Route does not truncate the message — that's the logger's job
-    expect((msg as string).length).toBe(10_000);
+    // Route now caps the message to keep daily-rotate files healthy.
+    expect((msg as string).length).toBe(8_000);
+  });
+
+  it("truncates oversized string-shaped meta values to 4KB and tags them", async () => {
+    const fiveK = "S".repeat(5_000);
+    const res = await POST(makeReq({
+      level: "error",
+      message: "trace",
+      meta: { stack: fiveK, kind: "TypeError" },
+    }));
+    expect(res.status).toBe(200);
+    const [, meta] = errorMock.mock.calls[0];
+    expect((meta.stack as string).length).toBeGreaterThanOrEqual(4_000);
+    expect((meta.stack as string).length).toBeLessThan(5_000);
+    expect(meta.stack).toMatch(/\[truncated\]$/);
+    // Short fields are passed through untouched.
+    expect(meta.kind).toBe("TypeError");
+  });
+
+  it("rejects payloads larger than 16KB via the content-length header (no body read)", async () => {
+    const req = new Request("http://localhost/api/log", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "content-length": "20000",
+      },
+      // We don't actually need a 20 KB body — the header alone should
+      // be enough to short-circuit.
+      body: JSON.stringify({ level: "error", message: "tiny" }),
+    }) as unknown as Parameters<typeof POST>[0];
+    const res = await POST(req);
+    expect(res.status).toBe(413);
+    expect(errorMock).not.toHaveBeenCalled();
   });
 
   it("survives deeply-nested meta object without RangeError", async () => {
@@ -128,17 +169,19 @@ describe("POST /api/log — adversarial", () => {
     expect(res.status).toBe(200);
   });
 
-  it("does not leak server-side secrets via error response (500 has empty body shape)", async () => {
-    // Send malformed JSON to trigger the catch-all 500 path
+  it("does not leak server-side secrets via error response (400 body has stable shape)", async () => {
+    // Send malformed JSON to trigger the parse-error path. After the
+    // body-size hardening the route now returns 400 (Bad Request) for
+    // syntactically invalid input rather than the catch-all 500.
     const req = new Request("http://localhost/api/log", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: "{not json",
     }) as unknown as Parameters<typeof POST>[0];
     const res = await POST(req);
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
     const body = await (res as unknown as Response).json();
-    expect(body).toEqual({ ok: false });   // no stack, no internal info
+    expect(body).toEqual({ ok: false, reason: "invalid json" });   // no stack, no internal info
   });
 
   /* ─── concurrency safety ─────────────────────────────────────────────── */

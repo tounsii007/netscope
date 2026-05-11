@@ -58,6 +58,15 @@ export const handlers = [
       error: null,
     }],
   })),
+
+  /* ── client-side logging beacons ────────────────────────────────────── */
+  // Unit tests aren't validating the log/vitals payloads themselves; we
+  // just need MSW to acknowledge the requests so `onUnhandledRequest:
+  // "error"` doesn't fail any test that triggers an error boundary or
+  // emits a Web Vitals beacon (the error boundary now POSTs to /api/log
+  // for production observability — see app/[locale]/error.tsx).
+  http.post("*/api/log",    () => HttpResponse.json({ ok: true })),
+  http.post("*/api/vitals", () => HttpResponse.json({ ok: true, recorded: 0 })),
 ];
 
 export const server = setupServer(...handlers);

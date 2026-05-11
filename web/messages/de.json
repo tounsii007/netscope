@@ -10,6 +10,7 @@
     "switch_lang": "Sprache wechseln",
     "open_menu": "Menü öffnen",
     "close_menu": "Menü schließen",
+    "skip_to_content": "Zum Hauptinhalt springen",
     "tools_menu": "Werkzeuge",
     "cat_dns": "DNS & Domain",
     "cat_network": "Netzwerk",
@@ -374,6 +375,14 @@
     "status": "Status",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost- und Loopback-Adressen sind nicht erlaubt. Bitte einen öffentlichen Hostnamen oder eine IP verwenden.",
+    "blocked_private": "Private Netzwerkadressen (RFC 1918) können von diesem öffentlichen Tool nicht geprüft werden.",
+    "blocked_link_local": "Link-local-Adressen sind aus dem öffentlichen Tool heraus nicht erreichbar.",
+    "blocked_metadata": "Cloud-Metadaten-Endpunkte sind aus Sicherheitsgründen blockiert.",
+    "blocked_reserved_tld": "Diese Top-Level-Domain ist reserviert (z. B. .local, .test) und wird öffentlich nicht aufgelöst.",
+    "invalid_target": "Das sieht nicht nach einem gültigen Hostnamen oder einer IP aus."
+  },
   "common": {
     "loading": "Lädt…",
     "error": "Ein Fehler ist aufgetreten. Bitte versuche es erneut.",
@@ -478,6 +487,7 @@
     "section_threat": "Bedrohung / Datenschutz",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "Reverse-DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "Land",
@@ -490,6 +500,7 @@
     "field_device": "Gerät",
     "field_screen": "Bildschirm",
     "field_lang": "Akzeptierte Sprachen",
+    "class_label": "Klasse",
     "threat_tor": "TOR",
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Sicherheits-Header-Prüfungen",
-    "raw_headers": "Rohe Response-Header"
+    "raw_headers": "Rohe Response-Header",
+    "hsts_panel": "HSTS-Policy",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload-fähig",
+    "csp_panel": "CSP-Audit",
+    "csp_directives": "Direktiven",
+    "csp_wildcard": "Wildcard-Quellen"
   },
   "ip": {
     "title": "IP-Abfrage",
@@ -673,7 +690,12 @@
     "open_of": "{open} offen / {total} geprüft",
     "service": "Dienst",
     "common_count": "{count} gängige Ports",
-    "port_status": "Port {port} ist <s>{status}</s>"
+    "port_status": "Port {port} ist <s>{status}</s>",
+    "from_port": "Von Port",
+    "to_port": "Bis Port",
+    "invalid_port": "Port muss zwischen 1 und 65535 liegen.",
+    "invalid_range": "Bereichsanfang muss ≤ Ende sein, beides im Bereich 1-65535.",
+    "range_too_wide": "Bereich zu groß — bitte maximal 1024 Ports gleichzeitig scannen."
   },
   "reachability": {
     "title": "Erreichbarkeit",
@@ -714,6 +736,9 @@
     "field_issuer": "Aussteller",
     "field_expiry": "Tage bis Ablauf",
     "field_subject_alt": "Alternative Namen",
+    "field_pubkey": "Öffentlicher Schlüssel",
+    "warn_self_signed": "Zertifikat ist selbst signiert.",
+    "warn_self_signed_short": "selbst signiert",
     "grade": "Bewertung",
     "chain": "Zertifikatskette"
   },

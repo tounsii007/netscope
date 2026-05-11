@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
-import { ResultCard, Spinner } from "@/components/tool-shell";
+import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { checkTargetGuard } from "@/lib/target-guard";
 
 export function SslClient() {
   const t = useTranslations("ssl");
   const tc = useTranslations("common");
+  const tp = useTranslations("ports");
+  const tg = useTranslations("guard");
+  const tn = useTranslations("nav.tools");
+  const hostId = useId();
+  const portId = useId();
   const [host, setHost] = useState("github.com");
   const [port, setPort] = useState(443);
   const [loading, setLoading] = useState(false);
@@ -22,6 +28,17 @@ export function SslClient() {
       setData(null);
       return;
     }
+    const guard = checkTargetGuard(host);
+    if (!guard.ok) {
+      setErr(tg(guard.reasonKey));
+      setData(null);
+      return;
+    }
+    if (port < 1 || port > 65535) {
+      setErr(tp("invalid_port"));
+      setData(null);
+      return;
+    }
     setErr(null); setLoading(true); setData(null);
     try { setData(await api.ssl(host, port)); }
     catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -32,18 +49,45 @@ export function SslClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} className="card">
+      <form onSubmit={run} noValidate className="card" aria-label={tn("ssl")}>
         <div className="grid gap-3 md:grid-cols-[3fr_1fr_auto]">
-          <input className="input" value={host} onChange={(e) => setHost(e.target.value)} />
-          <input type="number" className="input" value={port} onChange={(e) => setPort(+e.target.value)} />
-          <button className="btn" disabled={loading}>{loading ? <Spinner /> : tc("inspect")}</button>
+          <div>
+            <label htmlFor={hostId} className="sr-only">{tc("enter_host")}</label>
+            <input
+              id={hostId}
+              className="input"
+              value={host}
+              onChange={(e) => setHost(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="url"
+            />
+          </div>
+          <div>
+            <label htmlFor={portId} className="sr-only">Port</label>
+            <input
+              id={portId}
+              type="number"
+              min={1}
+              max={65535}
+              className="input"
+              value={port}
+              onChange={(e) => setPort(+e.target.value)}
+              inputMode="numeric"
+            />
+          </div>
+          <LoadingButton loading={loading} loadingLabel={tc("loading")}>
+            {tc("inspect")}
+          </LoadingButton>
         </div>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger">{err}</div>}
+      {err && <div className="card border-danger/50 text-danger" role="alert">{err}</div>}
 
       {data && (
-        <div className="space-y-4">
+        <div className="space-y-4" aria-live="polite">
           <ResultCard className={healthy ? "" : "border-warn/50"}>
             <div className="flex items-start gap-3">
               {healthy
@@ -63,7 +107,35 @@ export function SslClient() {
                       {data.daysUntilExpiry}
                     </span>
                   } />
+                  {data.publicKeyAlgorithm && (
+                    <Field
+                      label={t("field_pubkey") || "Public key"}
+                      value={
+                        <span>
+                          {data.publicKeyAlgorithm}
+                          {data.publicKeyBits ? ` · ${data.publicKeyBits} bit` : ""}
+                          {data.publicKeyCurve ? ` · ${data.publicKeyCurve}` : ""}
+                        </span>
+                      }
+                    />
+                  )}
                 </div>
+                {(data.selfSigned || (data.warnings && data.warnings.length > 0)) && (
+                  <ul className="mt-3 space-y-1 rounded border border-warn/40 bg-warn/10 p-3 text-xs text-warn">
+                    {data.selfSigned && (
+                      <li className="flex items-center gap-2">
+                        <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {t("warn_self_signed") || "Certificate is self-signed."}
+                      </li>
+                    )}
+                    {data.warnings?.map((w, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </ResultCard>
@@ -82,7 +154,20 @@ export function SslClient() {
             <ol className="space-y-3">
               {data.chain.map((c, i) => (
                 <li key={i} className="rounded-lg border border-border bg-bg-elevated p-3 text-xs font-mono">
-                  <div className="text-fg-muted">#{i + 1} {i === 0 ? "(leaf)" : ""}</div>
+                  <div className="flex flex-wrap items-center gap-2 text-fg-muted">
+                    <span>#{i + 1} {i === 0 ? "(leaf)" : i === data.chain.length - 1 ? "(root)" : "(intermediate)"}</span>
+                    {c.publicKeyAlgorithm && (
+                      <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                        {c.publicKeyAlgorithm}
+                        {c.publicKeyBits ? ` ${c.publicKeyBits}` : ""}
+                      </span>
+                    )}
+                    {c.selfSigned && (
+                      <span className="rounded border border-warn/40 bg-warn/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warn">
+                        {t("warn_self_signed_short") || "self-signed"}
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-1 break-all">Subject: {c.subject}</div>
                   <div className="break-all">Issuer: {c.issuer}</div>
                   <div>Signature: {c.sigAlg}</div>

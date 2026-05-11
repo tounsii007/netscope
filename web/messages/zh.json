@@ -10,6 +10,7 @@
     "switch_lang": "切换语言",
     "open_menu": "打开菜单",
     "close_menu": "关闭菜单",
+    "skip_to_content": "跳到主要内容",
     "tools_menu": "工具",
     "cat_dns": "DNS 与域名",
     "cat_network": "网络",
@@ -374,6 +375,14 @@
     "status": "状态",
     "copyright": "© {year} Traceronix。"
   },
+  "guard": {
+    "blocked_localhost": "不允许使用 localhost 或回环地址，请输入公共主机名或 IP。",
+    "blocked_private": "私有网络地址 (RFC 1918) 无法通过公共工具进行诊断。",
+    "blocked_link_local": "公共诊断工具无法访问 link-local 地址。",
+    "blocked_metadata": "出于安全考虑，云服务元数据端点已被屏蔽。",
+    "blocked_reserved_tld": "此顶级域是保留域 (.local、.test 等)，永远不会公开解析。",
+    "invalid_target": "看起来不是有效的主机名或 IP。"
+  },
   "common": {
     "loading": "加载中…",
     "error": "出现错误，请重试。",
@@ -478,6 +487,7 @@
     "section_threat": "威胁 / 隐私",
     "field_ip": "IP",
     "field_hostname": "主机名",
+    "field_reverse_dns": "反向 DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "国家",
@@ -490,6 +500,7 @@
     "field_device": "设备",
     "field_screen": "屏幕",
     "field_lang": "Accept-Language",
+    "class_label": "类",
     "threat_tor": "TOR",
     "threat_hosting": "托管",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "评分 {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "安全头部检查项",
-    "raw_headers": "原始响应头"
+    "raw_headers": "原始响应头",
+    "hsts_panel": "HSTS 策略",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "可加入预加载列表",
+    "csp_panel": "CSP 审计",
+    "csp_directives": "指令",
+    "csp_wildcard": "通配符来源"
   },
   "ip": {
     "title": "IP 查询",
@@ -673,7 +690,12 @@
     "open_of": "{open} 开放 / {total} 已扫描",
     "service": "服务",
     "common_count": "{count} 个常用端口",
-    "port_status": "端口 {port} 状态：<s>{status}</s>"
+    "port_status": "端口 {port} 状态：<s>{status}</s>",
+    "from_port": "起始端口",
+    "to_port": "结束端口",
+    "invalid_port": "端口必须在 1 至 65535 之间。",
+    "invalid_range": "起始 ≤ 结束，且都在 1-65535 范围内。",
+    "range_too_wide": "范围过大 — 单次扫描最多 1024 个端口。"
   },
   "reachability": {
     "title": "可达性检测",
@@ -714,6 +736,9 @@
     "field_issuer": "颁发机构",
     "field_expiry": "剩余天数",
     "field_subject_alt": "备用主题名称",
+    "field_pubkey": "公钥",
+    "warn_self_signed": "证书为自签名。",
+    "warn_self_signed_short": "自签名",
     "grade": "评级",
     "chain": "证书链"
   },

@@ -8,6 +8,12 @@ export type IpResult = {
   city?: string; region?: string; country?: string;
   org?: string; asn?: string; isp?: string;
   timezone?: string; lat?: number; lon?: number;
+  /** 4 or 6 — driven by the backend's InetAddress shape, not regex. */
+  version?: 4 | 6;
+  /** Educational A/B/C/D/E classification for IPv4 results. */
+  addressClass?: string;
+  /** Reverse-DNS / PTR record. Bounded server-side at 1.5 s. */
+  reverseDns?: string;
   threat?: {
     tor: boolean; hosting: boolean; vpn: boolean; proxy: boolean;
     residential: boolean; riskScore: number;

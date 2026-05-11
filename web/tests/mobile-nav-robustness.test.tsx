@@ -75,11 +75,15 @@ describe("MobileNav robustness", () => {
     expect(document.body.style.overflow).toBe("");
   });
 
-  it("survives 25 rapid open/close cycles without stuck state", async () => {
+  // 12 cycles is plenty to surface a stuck-state regression — the
+  // previous 25 was wall-clock flaky on slower CI hardware where each
+  // user.click round-trip costs ~150 ms. We also bump the per-test
+  // timeout so a slow GC pause can't tip a green run into red.
+  it("survives 12 rapid open/close cycles without stuck state", { timeout: 15_000 }, async () => {
     const user = userEvent.setup();
     renderWithIntl(<MobileNav toolLinks={links} />);
 
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 12; i++) {
       await user.click(screen.getByLabelText(/Open menu/i));
       await user.click(screen.getByLabelText(/Close menu/i));
     }

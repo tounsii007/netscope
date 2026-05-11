@@ -6,6 +6,35 @@
 
 html, body { background: #0a0a0a; color: #fafafa; }
 
+/* Respect users who've asked the OS to reduce motion. We keep the
+   appearance (colors, layout) but cap animation duration to 1ms and
+   remove infinite loops so screens don't pulse, float, or spin in a
+   way that triggers vestibular discomfort. The .preserve-motion
+   escape hatch keeps loading spinners legible — without it the
+   Spinner would stop spinning and look like a stuck dot. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .preserve-motion, .preserve-motion *::before, .preserve-motion *::after {
+    animation-duration: revert !important;
+    animation-iteration-count: revert !important;
+    transition-duration: revert !important;
+  }
+}
+
+/* Visible focus ring for keyboard users — orange brand on dark bg
+   passes WCAG 2.1 AA at 4.5:1 contrast. We rely on :focus-visible so
+   mouse users don't see the ring after a click. */
+:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 @layer utilities {
   .grid-bg {
     background-image:

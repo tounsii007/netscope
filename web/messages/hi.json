@@ -10,6 +10,7 @@
     "switch_lang": "भाषा बदलें",
     "open_menu": "मेनू खोलें",
     "close_menu": "मेनू बंद करें",
+    "skip_to_content": "मुख्य सामग्री पर जाएं",
     "tools_menu": "टूल्स",
     "cat_dns": "DNS और डोमेन",
     "cat_network": "नेटवर्क",
@@ -374,6 +375,14 @@
     "status": "स्थिति",
     "copyright": "© {year} Traceronix।"
   },
+  "guard": {
+    "blocked_localhost": "Localhost और loopback पते अनुमत नहीं हैं। कृपया सार्वजनिक होस्टनाम या IP डालें।",
+    "blocked_private": "निजी नेटवर्क पते (RFC 1918) सार्वजनिक टूल से जांचे नहीं जा सकते।",
+    "blocked_link_local": "Link-local पते सार्वजनिक डायग्नोस्टिक टूल से नहीं पहुंच पाते।",
+    "blocked_metadata": "क्लाउड मेटाडेटा एंडपॉइंट सुरक्षा कारणों से ब्लॉक किए गए हैं।",
+    "blocked_reserved_tld": "यह TLD आरक्षित है (.local, .test आदि) और सार्वजनिक रूप से कभी हल नहीं होता।",
+    "invalid_target": "यह वैध होस्टनाम या IP नहीं लगता।"
+  },
   "common": {
     "loading": "लोड हो रहा है…",
     "error": "कुछ गलत हुआ। कृपया पुनः प्रयास करें।",
@@ -478,6 +487,7 @@
     "section_threat": "खतरा / गोपनीयता",
     "field_ip": "IP",
     "field_hostname": "होस्टनेम",
+    "field_reverse_dns": "रिवर्स DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "देश",
@@ -490,6 +500,7 @@
     "field_device": "डिवाइस",
     "field_screen": "स्क्रीन",
     "field_lang": "स्वीकृत भाषाएं",
+    "class_label": "श्रेणी",
     "threat_tor": "TOR",
     "threat_hosting": "होस्टिंग",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "स्कोर {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "सुरक्षा हेडर जांच",
-    "raw_headers": "कच्चे Response हेडर"
+    "raw_headers": "कच्चे Response हेडर",
+    "hsts_panel": "HSTS नीति",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload योग्य",
+    "csp_panel": "CSP ऑडिट",
+    "csp_directives": "निर्देश",
+    "csp_wildcard": "वाइल्डकार्ड स्रोत"
   },
   "ip": {
     "title": "IP लुकअप",
@@ -673,7 +690,12 @@
     "open_of": "{open} खुले / {total} जांचे गए",
     "service": "सेवा",
     "common_count": "{count} सामान्य पोर्ट",
-    "port_status": "पोर्ट {port} है <s>{status}</s>"
+    "port_status": "पोर्ट {port} है <s>{status}</s>",
+    "from_port": "प्रारंभिक पोर्ट",
+    "to_port": "अंतिम पोर्ट",
+    "invalid_port": "पोर्ट 1 से 65535 के बीच होना चाहिए।",
+    "invalid_range": "प्रारंभ ≤ अंत, दोनों 1-65535 के बीच।",
+    "range_too_wide": "रेंज बहुत बड़ी है — एक बार में अधिकतम 1024 पोर्ट स्कैन करें।"
   },
   "reachability": {
     "title": "पहुंचनीयता",
@@ -714,6 +736,9 @@
     "field_issuer": "जारीकर्ता",
     "field_expiry": "समाप्ति तक दिन",
     "field_subject_alt": "वैकल्पिक विषय नाम",
+    "field_pubkey": "सार्वजनिक कुंजी",
+    "warn_self_signed": "सर्टिफिकेट स्वयं-हस्ताक्षरित है।",
+    "warn_self_signed_short": "self-signed",
     "grade": "ग्रेड",
     "chain": "सर्टिफिकेट चेन"
   },

@@ -40,11 +40,20 @@ export function ResultCard({ children, className }: { children: React.ReactNode;
  */
 export function Spinner({ size = 4, className = "" }: { size?: 3 | 4 | 5 | 6; className?: string }) {
   const dim = size === 3 ? "h-3 w-3" : size === 5 ? "h-5 w-5" : size === 6 ? "h-6 w-6" : "h-4 w-4";
+  // `aria-hidden` because the spinner is purely decorative — the loading
+  // state is announced via the parent's `aria-busy` (LoadingButton, form,
+  // etc.). Combining role="status" with aria-hidden is a common a11y
+  // anti-pattern: screen readers either ignore the status (because hidden)
+  // or surface it twice (once for the role, once for aria-busy). We keep
+  // the visual spin and let the ancestor handle the announcement.
+  //
+  // `preserve-motion` exempts the spinner from the prefers-reduced-motion
+  // override in globals.css so it keeps spinning even for users who've
+  // asked to reduce motion — a frozen spinner reads as "broken".
   return (
     <span
-      role="status"
       aria-hidden="true"
-      className={`inline-block animate-spin rounded-full border-2 border-current border-t-transparent ${dim} ${className}`}
+      className={`preserve-motion inline-block animate-spin rounded-full border-2 border-current border-t-transparent ${dim} ${className}`}
     />
   );
 }

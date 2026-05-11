@@ -1,7 +1,7 @@
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { type NextRequest, NextResponse } from "next/server";
-import { rateLimit } from "./lib/rate-limit";
+import { rateLimit, currentLimit } from "./lib/rate-limit";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -22,15 +22,22 @@ export default function middleware(req: NextRequest) {
   // ─── 1. Rate limit ────────────────────────────────────────────────
   // Skip rate limiting for /api/vitals (telemetry from real users) so a
   // monitoring storm can't lock the user out of the UI.
+  //
+  // IMPORTANT: rateLimit() *increments* the bucket, so call it ONCE per
+  // request and reuse the result for both the 429 path and the trailing
+  // X-RateLimit-* headers on the success path. Calling it twice would
+  // double-count and effectively halve the configured budget.
   const path = req.nextUrl.pathname;
+  const limit = currentLimit();
+  let rl: ReturnType<typeof rateLimit> | null = null;
   if (!path.startsWith("/api/vitals")) {
-    const rl = rateLimit(ip);
+    rl = rateLimit(ip, limit);
     if (!rl.allowed) {
       return new NextResponse("Too Many Requests", {
         status: 429,
         headers: {
           "Retry-After":             String(rl.retryAfterSec),
-          "X-RateLimit-Limit":       String(currentLimit()),
+          "X-RateLimit-Limit":       String(limit),
           "X-RateLimit-Remaining":   "0",
           "X-RateLimit-Reset":       String(Math.ceil(rl.resetMs / 1000)),
         },
@@ -43,10 +50,11 @@ export default function middleware(req: NextRequest) {
   if (res instanceof NextResponse) {
     res.headers.set("x-pathname", path);
     // Surface remaining quota to the client so clients can self-throttle.
-    const rl = rateLimit(ip);
-    res.headers.set("X-RateLimit-Limit",     String(currentLimit()));
-    res.headers.set("X-RateLimit-Remaining", String(rl.remaining));
-    res.headers.set("X-RateLimit-Reset",     String(Math.ceil(rl.resetMs / 1000)));
+    if (rl) {
+      res.headers.set("X-RateLimit-Limit",     String(limit));
+      res.headers.set("X-RateLimit-Remaining", String(rl.remaining));
+      res.headers.set("X-RateLimit-Reset",     String(Math.ceil(rl.resetMs / 1000)));
+    }
   }
 
   // ─── 3. Access log (non-static only) ──────────────────────────────
@@ -81,13 +89,6 @@ function clientIp(req: NextRequest): string {
     req.headers.get("x-real-ip") ??
     "unknown"
   );
-}
-
-function currentLimit(): number {
-  const env = process.env.RATE_LIMIT_PER_MIN;
-  if (!env) return 120;
-  const n = Number(env);
-  return Number.isFinite(n) && n > 0 ? n : 120;
 }
 
 export const config = {

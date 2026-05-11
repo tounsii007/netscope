@@ -11,6 +11,25 @@ export type HeadersResult = {
     header: string; present: boolean; good: boolean;
     value: string; weight: number; detail: string;
   }>;
+  /**
+   * Parsed Strict-Transport-Security policy. Emitted only when the
+   * server actually sent the header — absence of the field means the
+   * server has no HSTS policy at all.
+   */
+  hsts?: {
+    maxAge: number;
+    includeSubDomains: boolean;
+    preload: boolean;
+    /** Mozilla preload-list rule of thumb: max-age ≥ 1 year, both flags set. */
+    preloadEligible: boolean;
+  };
+  /** Quick CSP audit. Emitted only when CSP is present. */
+  csp?: {
+    directiveCount: number;
+    hasUnsafeInline: boolean;
+    hasUnsafeEval: boolean;
+    hasWildcard: boolean;
+  };
   rawHeaders: Record<string, string>;
 };
 

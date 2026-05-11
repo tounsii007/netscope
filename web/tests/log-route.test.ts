@@ -90,13 +90,13 @@ describe("POST /api/log", () => {
     expect(meta.ua.length).toBeLessThanOrEqual(200);
   });
 
-  it("returns 500 on malformed JSON body", async () => {
+  it("returns 400 on malformed JSON body", async () => {
     const req = new Request("http://localhost/api/log", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: "{not-json",
     }) as unknown as Parameters<typeof POST>[0];
     const res = await POST(req);
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
   });
 });

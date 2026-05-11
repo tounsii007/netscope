@@ -10,6 +10,7 @@
     "switch_lang": "Сменить язык",
     "open_menu": "Открыть меню",
     "close_menu": "Закрыть меню",
+    "skip_to_content": "Перейти к основному содержимому",
     "tools_menu": "Инструменты",
     "cat_dns": "DNS и домен",
     "cat_network": "Сеть",
@@ -374,6 +375,14 @@
     "status": "Статус",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost и адреса обратной связи не разрешены. Используйте публичный хост или IP.",
+    "blocked_private": "Частные сетевые адреса (RFC 1918) нельзя диагностировать из публичного инструмента.",
+    "blocked_link_local": "Link-local адреса недоступны из публичного диагностического инструмента.",
+    "blocked_metadata": "Эндпоинты облачных метаданных заблокированы из соображений безопасности.",
+    "blocked_reserved_tld": "Этот TLD зарезервирован (.local, .test и т. д.) и не разрешается публично.",
+    "invalid_target": "Это не похоже на корректный хост или IP."
+  },
   "common": {
     "loading": "Загрузка…",
     "error": "Что-то пошло не так. Попробуй ещё раз.",
@@ -478,6 +487,7 @@
     "section_threat": "Угроза / Приватность",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "Обратный DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "Страна",
@@ -490,6 +500,7 @@
     "field_device": "Устройство",
     "field_screen": "Экран",
     "field_lang": "Accept-Language",
+    "class_label": "Класс",
     "threat_tor": "TOR",
     "threat_hosting": "Хостинг",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Проверки заголовков безопасности",
-    "raw_headers": "Сырые заголовки ответа"
+    "raw_headers": "Сырые заголовки ответа",
+    "hsts_panel": "Политика HSTS",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Годен для preload",
+    "csp_panel": "Аудит CSP",
+    "csp_directives": "Директивы",
+    "csp_wildcard": "Источники с wildcard"
   },
   "ip": {
     "title": "Поиск IP",
@@ -673,7 +690,12 @@
     "open_of": "{open} открыто / {total} проверено",
     "service": "Сервис",
     "common_count": "{count} популярных портов",
-    "port_status": "Порт {port} — <s>{status}</s>"
+    "port_status": "Порт {port} — <s>{status}</s>",
+    "from_port": "Начальный порт",
+    "to_port": "Конечный порт",
+    "invalid_port": "Порт должен быть в диапазоне 1-65535.",
+    "invalid_range": "Начало ≤ конец, оба значения в пределах 1-65535.",
+    "range_too_wide": "Диапазон слишком велик — сканируйте не более 1024 портов за раз."
   },
   "reachability": {
     "title": "Доступность",
@@ -714,6 +736,9 @@
     "field_issuer": "Эмитент",
     "field_expiry": "Дней до истечения",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Открытый ключ",
+    "warn_self_signed": "Сертификат подписан самим собой.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Оценка",
     "chain": "Цепочка сертификатов"
   },

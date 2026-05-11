@@ -10,6 +10,7 @@
     "switch_lang": "Switch language",
     "open_menu": "Open menu",
     "close_menu": "Close menu",
+    "skip_to_content": "Skip to main content",
     "tools_menu": "Tools",
     "cat_dns": "DNS & Domain",
     "cat_network": "Network",
@@ -374,6 +375,14 @@
     "status": "Status",
     "copyright": "© {year} Traceronix."
   },
+  "guard": {
+    "blocked_localhost": "Localhost and loopback addresses are not allowed. Try a public hostname or IP.",
+    "blocked_private": "Private network addresses (RFC 1918) cannot be diagnosed from a public tool.",
+    "blocked_link_local": "Link-local addresses are not reachable from a public diagnostic tool.",
+    "blocked_metadata": "Cloud-provider metadata endpoints are blocked for safety.",
+    "blocked_reserved_tld": "This top-level domain is reserved (e.g. .local, .test) and never resolves publicly.",
+    "invalid_target": "That doesn't look like a valid hostname or IP."
+  },
   "common": {
     "loading": "Loading…",
     "error": "Something went wrong. Please try again.",
@@ -478,6 +487,7 @@
     "section_threat": "Threat / Privacy",
     "field_ip": "IP",
     "field_hostname": "Hostname",
+    "field_reverse_dns": "Reverse DNS (PTR)",
     "field_isp": "ISP",
     "field_asn": "ASN",
     "field_country": "Country",
@@ -490,6 +500,7 @@
     "field_device": "Device",
     "field_screen": "Screen",
     "field_lang": "Accept-Language",
+    "class_label": "Class",
     "threat_tor": "TOR",
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
@@ -556,7 +567,13 @@
     "score": "Score {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Security header checks",
-    "raw_headers": "Raw response headers"
+    "raw_headers": "Raw response headers",
+    "hsts_panel": "HSTS policy",
+    "hsts_max_age": "max-age",
+    "hsts_preload_eligible": "Preload-eligible",
+    "csp_panel": "CSP audit",
+    "csp_directives": "Directives",
+    "csp_wildcard": "Wildcard sources"
   },
   "ip": {
     "title": "IP Lookup",
@@ -673,7 +690,12 @@
     "open_of": "{open} open / {total} scanned",
     "service": "Service",
     "common_count": "{count} common ports",
-    "port_status": "Port {port} is <s>{status}</s>"
+    "port_status": "Port {port} is <s>{status}</s>",
+    "from_port": "From port",
+    "to_port": "To port",
+    "invalid_port": "Port must be between 1 and 65535.",
+    "invalid_range": "Range start must be ≤ end, both within 1-65535.",
+    "range_too_wide": "Range too wide — please scan at most 1024 ports at a time."
   },
   "reachability": {
     "title": "Reachability",
@@ -714,6 +736,9 @@
     "field_issuer": "Issuer",
     "field_expiry": "Days until expiry",
     "field_subject_alt": "Subject Alt Names",
+    "field_pubkey": "Public key",
+    "warn_self_signed": "Certificate is self-signed.",
+    "warn_self_signed_short": "self-signed",
     "grade": "Grade",
     "chain": "Certificate chain"
   },

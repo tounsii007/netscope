@@ -84,7 +84,7 @@ describe("NotFound page", () => {
   it("renders translated content in Hindi", async () => {
     const { getByText } = await renderNotFound("hi");
     // hi.json's "title" — kept loose to survive minor wording polish
-    expect(getByText(messages.hi.not_found && (messages.hi.not_found as Record<string, string>).title)).toBeInTheDocument();
+    expect(getByText((messages.hi.not_found as Record<string, string>).title)).toBeInTheDocument();
   });
 
   it("renders translated content in Chinese", async () => {

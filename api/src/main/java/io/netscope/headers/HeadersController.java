@@ -77,11 +77,68 @@ public class HeadersController {
             out.put("server", headers.getOrDefault("server", null));
             out.put("poweredBy", headers.getOrDefault("x-powered-by", null));
             out.put("checks", checks);
+            // Parsed HSTS sub-policy: max-age, includeSubDomains, preload.
+            // Lets the UI show "max-age=31536000 · includeSubDomains · preload"
+            // instead of leaving the user to read the raw header string.
+            String hstsRaw = headers.get("strict-transport-security");
+            if (hstsRaw != null) out.put("hsts", parseHsts(hstsRaw));
+            // CSP sub-summary: list directive count and presence of the
+            // most foot-gun-y unsafe-* keywords. The user can audit the
+            // full policy in the raw headers panel below.
+            String cspRaw = headers.get("content-security-policy");
+            if (cspRaw != null) out.put("csp", parseCsp(cspRaw));
             out.put("rawHeaders", headers);
             return out;
         } catch (Exception e) {
             throw ApiException.badRequest("fetch failed: " + e.getMessage());
         }
+    }
+
+    /**
+     * Parse an HSTS header into its three flags. Inputs we expect to
+     * handle correctly:
+     *   • "max-age=31536000"
+     *   • "max-age=31536000; includeSubDomains"
+     *   • "max-age=31536000; includeSubDomains; preload"
+     *   • "max-age=0"  → effectively disabled, clients should drop policy
+     */
+    private static Map<String, Object> parseHsts(String raw) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        long maxAge = -1;
+        boolean includeSubDomains = false;
+        boolean preload = false;
+        for (String piece : raw.toLowerCase().split(";")) {
+            String p = piece.trim();
+            if (p.startsWith("max-age=")) {
+                try { maxAge = Long.parseLong(p.substring(8).trim()); } catch (NumberFormatException ignored) {}
+            } else if (p.equals("includesubdomains")) {
+                includeSubDomains = true;
+            } else if (p.equals("preload")) {
+                preload = true;
+            }
+        }
+        m.put("maxAge", maxAge);
+        m.put("includeSubDomains", includeSubDomains);
+        m.put("preload", preload);
+        // Common Mozilla HSTS-preload-eligibility check: max-age >= 1 year
+        // and both flags present.
+        m.put("preloadEligible", maxAge >= 31536000 && includeSubDomains && preload);
+        return m;
+    }
+
+    /**
+     * Quick CSP audit. We don't try to fully parse the policy — that's
+     * the headers-deep tool's job — but we surface the directive count
+     * and whether any of the high-risk unsafe-* keywords appear.
+     */
+    private static Map<String, Object> parseCsp(String raw) {
+        String lower = raw.toLowerCase();
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("directiveCount", raw.split(";").length);
+        m.put("hasUnsafeInline", lower.contains("'unsafe-inline'"));
+        m.put("hasUnsafeEval", lower.contains("'unsafe-eval'"));
+        m.put("hasWildcard", lower.contains(" *") || lower.contains("default-src *"));
+        return m;
     }
 
     private String grade(int pct) {
