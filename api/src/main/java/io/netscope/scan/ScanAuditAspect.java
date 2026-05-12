@@ -1,28 +1,24 @@
 package io.netscope.scan;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netscope.common.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 @Aspect
 @Component
 public class ScanAuditAspect {
 
-    private final ScanRepository repo;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ScanAuditWriter writer;
 
-    public ScanAuditAspect(ScanRepository repo) { this.repo = repo; }
+    public ScanAuditAspect(ScanAuditWriter writer) { this.writer = writer; }
 
     @Around("@annotation(io.netscope.scan.ScanAudit)")
     public Object audit(ProceedingJoinPoint pjp) throws Throwable {
@@ -31,20 +27,24 @@ public class ScanAuditAspect {
         long duration = System.currentTimeMillis() - start;
         try {
             ScanAudit annotation = ((MethodSignature) pjp.getSignature()).getMethod().getAnnotation(ScanAudit.class);
-            persist(annotation.tool(), extractTarget(pjp), result, (int) duration);
+            // Resolve the client IP EAGERLY on the request thread.
+            // RequestContextHolder is thread-local; by the time the
+            // async writer runs, the servlet request scope is gone.
+            String ip = currentClientIp();
+            writer.persist(annotation.tool(), extractTarget(pjp), ip, result, (int) duration);
         } catch (Exception ignored) { /* audit must never break the request */ }
         return result;
     }
 
-    @Async
-    void persist(String tool, String target, Object result, int durationMs) {
+    private static String currentClientIp() {
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> asMap = mapper.convertValue(result, Map.class);
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest req = attr.getRequest();
-            repo.save(new Scan(tool, target, ClientIpResolver.clientIp(req), asMap, durationMs));
-        } catch (Exception ignored) {}
+            return ClientIpResolver.clientIp(req);
+        } catch (IllegalStateException e) {
+            // Not in a request context (e.g. scheduled job). Audit row will be IP-less.
+            return null;
+        }
     }
 
     private String extractTarget(ProceedingJoinPoint pjp) {
