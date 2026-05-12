@@ -2,6 +2,7 @@ package io.netscope.monitor;
 
 import io.netscope.auth.ApiKeyContext;
 import io.netscope.common.ApiException;
+import io.netscope.common.TargetValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.springframework.data.domain.Page;
@@ -19,23 +20,48 @@ import java.util.UUID;
 public class MonitorController {
 
     public record MonitorRequest(
-        @NotBlank String name,
+        @NotBlank @Size(max = 128) String name,
         @Pattern(regexp = "http|tcp|ping") String type,
-        @NotBlank String target,
+        // Hostnames + URLs both fit easily in 253 chars (RFC 1035 limit).
+        // Without a cap the user could fill the row with megabyte strings
+        // and the scheduler would still tick them on every interval.
+        @NotBlank @Size(max = 253) String target,
         @Min(1) @Max(65535) Integer port,
         @Min(60) @Max(86400) Integer intervalSec,
-        @Email String alertEmail
+        @Email @Size(max = 320) String alertEmail
     ) {}
 
     private final MonitorRepository monitors;
     private final MonitorCheckRepository checks;
+    private final TargetValidator validator;
 
-    public MonitorController(MonitorRepository m, MonitorCheckRepository c) {
-        this.monitors = m; this.checks = c;
+    public MonitorController(MonitorRepository m, MonitorCheckRepository c, TargetValidator v) {
+        this.monitors = m; this.checks = c; this.validator = v;
     }
 
     @PostMapping
     public Monitor create(@Valid @RequestBody MonitorRequest req) {
+        // Fail-fast: reject targets that resolve to internal/private
+        // address space at create time, not just at check time. Without
+        // this gate, an OWNER could fill the monitors table with bogus
+        // entries that the scheduler then sweeps every interval — UX
+        // is bad (user thinks they configured a real monitor) AND it's
+        // a small SSRF-recon primitive (the scheduler will keep trying
+        // internal IPs and surface their reachability in the dashboard).
+        // For "http" type we strip a leading scheme to validate the host.
+        String hostOnly = req.target();
+        int scheme = hostOnly.indexOf("://");
+        if (scheme >= 0) hostOnly = hostOnly.substring(scheme + 3);
+        int slash = hostOnly.indexOf('/');
+        if (slash >= 0) hostOnly = hostOnly.substring(0, slash);
+        int colon = hostOnly.indexOf(':');
+        if (colon >= 0) hostOnly = hostOnly.substring(0, colon);
+        try {
+            validator.resolveAndValidate(hostOnly);
+        } catch (ApiException e) {
+            throw ApiException.badRequest("target rejected: " + e.getMessage());
+        }
+
         UUID owner = ApiKeyContext.get().getId();
         Monitor m = new Monitor();
         m.setApiKeyId(owner);
