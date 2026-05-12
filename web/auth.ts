@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import { logger } from "@/lib/logger";
 
 /**
  * NextAuth v5 config. We use OAuth providers purely to get an access token,
@@ -13,6 +14,11 @@ import Google from "next-auth/providers/google";
  * sign-in flow still completes (the user's UI clearly reflects the
  * unauthenticated state and they can retry later instead of being stuck
  * on a hanging callback page).
+ *
+ * Failures route through the Winston logger so they land in the same
+ * daily-rotate files as the rest of the server-side log surface.
+ * Reasons are logged as enums (timeout / non_ok / network_error) so
+ * upstream URLs aren't leaked into log messages.
  */
 
 const EXCHANGE_TIMEOUT_MS = 5_000;
@@ -30,13 +36,13 @@ async function exchangeForNetScopeJwt(provider: string, accessToken: string) {
       cache: "no-store",
     });
     if (!res.ok) {
-      console.error("NetScope exchange returned non-OK", { status: res.status });
+      logger.error("netscope.auth.exchange_failed", { reason: "non_ok", status: res.status, provider });
       return null;
     }
     return (await res.json()) as { token: string; workspace?: unknown; user?: unknown };
   } catch (e) {
     const reason = (e as Error)?.name === "AbortError" ? "timeout" : "network_error";
-    console.error("NetScope exchange failed", { reason });
+    logger.error("netscope.auth.exchange_failed", { reason, provider });
     return null;
   } finally {
     clearTimeout(timer);
