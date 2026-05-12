@@ -60,4 +60,34 @@ class DnsControllerReservedTldTest {
             // controller didn't gate "example.com".
         }
     }
+
+    /**
+     * Underscore-prefixed labels are part of the wider DNS namespace
+     * (DKIM, DMARC, ACME, SRV, DS lookups) even though RFC 1035 forbids
+     * underscore in hostnames. The controller's input regex must accept
+     * underscore so these tool-relevant queries reach the lookup path
+     * instead of getting a 400 at the syntax gate.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "_dmarc.example.com",
+        "selector1._domainkey.example.com",
+        "_acme-challenge.example.com",
+        "_sip._tcp.example.com",
+        "_dnssec.example.com"
+    })
+    void acceptsUnderscorePrefixedDnsLabels(String domain) {
+        // Should reach the lookup path; "invalid domain" 400 indicates
+        // the regex still rejects underscore. Network failures are fine
+        // here — we only care that the syntax gate doesn't block it.
+        try {
+            controller.lookup(domain, "TXT");
+        } catch (ApiException e) {
+            assert !"invalid domain".equals(e.getMessage())
+                : domain + " should not be rejected as 'invalid domain' — underscore is required for DKIM/DMARC/ACME";
+        } catch (Exception e) {
+            // Anything else (network error, dnsjava complaint, etc.) is
+            // acceptable; we only assert the syntax gate doesn't trip.
+        }
+    }
 }

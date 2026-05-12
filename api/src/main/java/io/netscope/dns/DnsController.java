@@ -30,7 +30,12 @@ public class DnsController {
             @PathVariable String domain,
             @RequestParam(defaultValue = "A,AAAA,MX,TXT,NS") String type) {
 
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        // Underscore is allowed because DKIM selectors (selector1._domainkey.example.com),
+        // DMARC (_dmarc.example.com), ACME HTTP-01 (_acme-challenge.example.com),
+        // SRV records (_sip._tcp.example.com), and DNSSEC DS lookups all use
+        // underscore-prefixed labels. RFC 1035 forbids underscore in *hostnames*,
+        // but DNS query names are a strictly larger set.
+        if (!domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 
