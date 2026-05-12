@@ -8,6 +8,7 @@ import io.netscope.workspace.WorkspaceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +24,17 @@ public class StatusPageController {
     public record CreateRequest(
         @NotBlank UUID workspaceId,
         @NotBlank @Pattern(regexp = "^[a-z0-9-]{3,64}$") String slug,
-        @NotBlank String name,
-        String description
+        @NotBlank @Size(max = 200) String name,
+        @Size(max = 2_000) String description
     ) {}
 
     public record IncidentRequest(
-        @NotBlank String title,
-        @NotBlank String body,
+        @NotBlank @Size(max = 200) String title,
+        // Incidents are rendered on the public /status-pages/public/{slug}
+        // endpoint which returns all recent incidents inline. Without a
+        // cap an OWNER could push megabytes of body into a single row
+        // and the public response would amplify into bandwidth abuse.
+        @NotBlank @Size(max = 10_000) String body,
         @NotBlank String status,
         @NotBlank String impact
     ) {}
