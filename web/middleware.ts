@@ -65,7 +65,15 @@ export default function middleware(req: NextRequest) {
   }
 
   // ─── 3. Access log (non-static only) ──────────────────────────────
-  const ms = Date.now() - start;
+  // mwMs is the time spent in middleware only — rate-limit decision,
+  // intl routing, header rewriting. It is NOT the total response
+  // time: the actual route handler runs AFTER middleware returns,
+  // and its duration is invisible from here. End-to-end timing
+  // belongs in the route handlers themselves or in an instrumentation
+  // hook (next.config.ts → instrumentation.ts). Renaming the field
+  // from "ms" makes the boundary explicit so dashboards don't
+  // misread it as request latency.
+  const mwMs = Date.now() - start;
   const status = res instanceof NextResponse ? res.status : 200;
   const isStatic =
     path.startsWith("/_next/") ||
@@ -80,7 +88,7 @@ export default function middleware(req: NextRequest) {
         method: req.method,
         path,
         status,
-        ms,
+        mwMs,
         ip,
         ua: req.headers.get("user-agent")?.slice(0, 120) ?? "-",
       })
