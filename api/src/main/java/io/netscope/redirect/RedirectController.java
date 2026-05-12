@@ -40,7 +40,11 @@ public class RedirectController {
 
     @GetMapping
     public Map<String, Object> trace(@RequestParam String url) {
-        if (!url.startsWith("http")) url = "https://" + url;
+        // startsWith("http") matched the bare prefix and let "httpfoo://..."
+        // through; require an explicit scheme.
+        if (!(url.startsWith("http://") || url.startsWith("https://"))) {
+            url = "https://" + url;
+        }
         URI current;
         try { current = URI.create(url); } catch (Exception e) { throw ApiException.badRequest("invalid url"); }
 
