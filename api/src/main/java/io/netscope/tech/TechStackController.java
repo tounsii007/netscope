@@ -2,6 +2,7 @@ package io.netscope.tech;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.SafeHttpClient;
+import io.netscope.common.TargetValidator;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -85,10 +86,20 @@ public class TechStackController {
     );
 
     private final SafeHttpClient http;
-    public TechStackController(SafeHttpClient http) { this.http = http; }
+    private final TargetValidator validator;
+    public TechStackController(SafeHttpClient http, TargetValidator v) {
+        this.http = http; this.validator = v;
+    }
 
     @GetMapping("/{host}")
     public Map<String, Object> detect(@PathVariable String host) {
+        // Belt-and-braces SSRF check: SafeHttpClient.send already
+        // re-validates per hop, but doing it here first means the
+        // tech-stack controller follows the same shape as every other
+        // host-taking controller (cdn/headers/robots/ssl/etc.) — easier
+        // for reviewers to spot a missing call, and gives a faster 403
+        // for bad input that wouldn't have reached the HTTP path.
+        validator.resolveAndValidate(host);
         String url = "https://" + host + "/";
         try {
             HttpResponse<String> res = http.send(
