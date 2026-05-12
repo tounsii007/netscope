@@ -61,29 +61,40 @@ public class JwtService {
                     + (secret == null ? "null" : secret.length()) + ")");
         }
 
-        boolean isProd = isProductionProfile();
         boolean isWeak = KNOWN_WEAK_SECRETS.contains(secret);
+        boolean isDevLike = isDevOrTestProfile();
 
-        if (isWeak && isProd) {
-            // Hard fail in production — refuse to boot with a placeholder secret.
+        // Only the explicit dev/test profile tolerates a placeholder
+        // secret. Production, staging, "live", and ANY UNNAMED profile
+        // refuse to boot. Earlier this keyed on isProd, but a deploy
+        // that forgot SPRING_PROFILES_ACTIVE=prod (or used "staging"
+        // / "live" / "preview") would silently accept the well-known
+        // placeholder. Invert: secure-by-default.
+        if (isWeak && !isDevLike) {
             throw new IllegalStateException(
                 "netscope.jwt.secret is set to a known placeholder value. "
                 + "Set the JWT_SECRET environment variable to a strong random secret "
-                + "(e.g. `openssl rand -base64 48`).");
+                + "(e.g. `openssl rand -base64 48`). To run locally with the "
+                + "placeholder, set spring.profiles.active=dev or test.");
         }
         if (isWeak) {
-            // In dev/test we warn loudly so it's impossible to miss in logs.
             log.warn("⚠ JWT secret is a known placeholder value. This is acceptable for "
-                + "local development ONLY. Production deploys must set JWT_SECRET to a "
-                + "strong random value (e.g. `openssl rand -base64 48`).");
+                + "local development ONLY (profile={}). Production / staging deploys "
+                + "must set JWT_SECRET.", String.join(",", env.getActiveProfiles()));
         }
 
         keySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
 
-    private boolean isProductionProfile() {
+    /**
+     * True iff the active profile set explicitly includes "dev" or
+     * "test". An empty profile list, "prod", "staging", "live",
+     * "preview", or any custom name all return false — and therefore
+     * the placeholder-secret check trips.
+     */
+    private boolean isDevOrTestProfile() {
         for (String p : env.getActiveProfiles()) {
-            if ("prod".equalsIgnoreCase(p) || "production".equalsIgnoreCase(p)) return true;
+            if ("dev".equalsIgnoreCase(p) || "test".equalsIgnoreCase(p)) return true;
         }
         return false;
     }
