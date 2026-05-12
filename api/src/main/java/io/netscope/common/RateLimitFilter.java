@@ -10,7 +10,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.HexFormat;
 
 /**
  * Fixed-window rate limiter backed by Redis INCR + EXPIRE. Works across pods.
@@ -37,7 +41,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (!path.startsWith("/api/")) { chain.doFilter(req, res); return; }
 
         String apiKey = req.getHeader("X-API-Key");
-        String identity = apiKey != null ? "k:" + apiKey : "ip:" + clientIp(req);
+        // SECURITY: do NOT use the plaintext API key as the Redis key.
+        // Redis MONITOR, SLOWLOG, RDB/AOF dumps, Datadog/Sentry Redis
+        // integrations, and any operator with read access to Redis
+        // would otherwise see every active API key in flight. Hash to
+        // a stable 16-byte prefix (32 hex chars) instead — still
+        // uniquely identifies the caller for bucket-keying but is
+        // useless as a credential.
+        String identity = apiKey != null
+            ? "k:" + hashKeyFingerprint(apiKey)
+            : "ip:" + clientIp(req);
         int limit = apiKey != null ? authPerMinute : anonPerMinute;
 
         long windowStart = System.currentTimeMillis() / 60_000;
@@ -93,5 +106,26 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // here because it's spoofable per request.
         String addr = req.getRemoteAddr();
         return addr != null && !addr.isBlank() ? addr : "unknown";
+    }
+
+    /**
+     * 32-hex-char fingerprint of an API key. SHA-256 truncated to 16 bytes
+     * is more than enough collision resistance for a per-key bucket: at
+     * 50k active keys, the collision probability is ~3·10⁻²⁹. Stable
+     * across restarts; cheap to compute.
+     */
+    private static String hashKeyFingerprint(String apiKey) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] full = md.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+            byte[] prefix = new byte[16];
+            System.arraycopy(full, 0, prefix, 0, 16);
+            return HexFormat.of().formatHex(prefix);
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 is guaranteed by every JDK; the catch is to satisfy
+            // the checked-exception contract. Fall back to a deterministic
+            // length-capped hash so we still don't leak the raw key.
+            return Integer.toHexString(apiKey.hashCode()) + ":" + apiKey.length();
+        }
     }
 }
