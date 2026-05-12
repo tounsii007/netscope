@@ -23,6 +23,28 @@ const config: NextConfig = {
     ];
   },
   async headers() {
+    // Content-Security-Policy notes:
+    //
+    //   script-src / style-src include 'unsafe-inline' because Next.js
+    //   injects inline bootstrap scripts (hydration, runtime config)
+    //   and Tailwind injects inline <style> tags. A proper fix
+    //   requires a per-request nonce generated in middleware and
+    //   threaded through `headers().get('x-nonce')` in every layout
+    //   plus every `<Script>` and Tailwind output — tracked separately
+    //   as a larger refactor.
+    //
+    //   What we can tighten without a downstream rewrite:
+    //
+    //     • frame-src 'none' — make the implicit "no iframes" explicit
+    //       (frame-ancestors blocks being framed; frame-src blocks
+    //       embedding others). Useful audit signal even though
+    //       default-src would catch missing iframes anyway.
+    //     • upgrade-insecure-requests stays — silently rewrites any
+    //       http:// asset URL the page somehow renders to https://
+    //
+    //   require-trusted-types-for is NOT enabled until Next.js
+    //   officially supports it — adding it now would break SSR
+    //   hydration on browsers that enforce it (Chromium-based).
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
@@ -30,6 +52,7 @@ const config: NextConfig = {
       "font-src 'self' fonts.gstatic.com",
       "img-src 'self' data: blob: *.openstreetmap.org *.cartocdn.com tile.openstreetmap.org basemaps.cartocdn.com flagcdn.com",
       "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080") + " api.pwnedpasswords.com",
+      "frame-src 'none'",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
