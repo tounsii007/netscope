@@ -73,8 +73,14 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   let res: Response;
   try {
+    // Strip any caller-supplied signal from baseOpts — composeSignal()
+    // already wired it into t.ctrl via addEventListener relay, and
+    // keeping it on baseOpts would re-trip the same realm-mismatch
+    // error on the retry path below.
+    const { signal: _ignored, ...initWithoutSignal } = init ?? {};
+    void _ignored;
     const baseOpts: RequestInit = {
-      ...init,
+      ...initWithoutSignal,
       headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
       cache: "no-store",
     };
