@@ -119,7 +119,18 @@ func do(method, path string, body any, out any) error {
 		return err
 	}
 	defer resp.Body.Close()
-	b, _ := io.ReadAll(resp.Body)
+	// Cap the body at 16 MB so a misbehaving / hostile upstream
+	// can't OOM the CLI by streaming an unbounded response.
+	// Matches the SubdomainController MAX_RESPONSE_BYTES on the
+	// server side; nothing this CLI talks to should legitimately
+	// return more than a few hundred KB.
+	const maxBody = 16 << 20
+	b, _ := io.ReadAll(io.LimitReader(resp.Body, maxBody))
+	// Drain any remainder so the underlying connection can be
+	// returned to the keep-alive pool. Without this, the connection
+	// is closed when the response body is closed, defeating the
+	// pool. Cheap; only meaningful when the cap was hit.
+	_, _ = io.Copy(io.Discard, resp.Body)
 	if resp.StatusCode >= 400 {
 		return errors.New(string(b))
 	}
