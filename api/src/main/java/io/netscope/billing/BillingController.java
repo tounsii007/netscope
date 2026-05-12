@@ -89,7 +89,15 @@ public class BillingController {
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
-            throw ApiException.badRequest("Stripe checkout failed: " + e.getMessage());
+            // Stripe SDK exception messages include the priceId,
+            // customer email, internal Stripe IDs, request-id correlation
+            // tokens, and account country — reflecting them through the
+            // 400 leaks operator state to anyone who can trigger the
+            // failure. Log the full cause server-side with a correlation
+            // ID and return a stable, opaque message to the client.
+            String correlationId = UUID.randomUUID().toString();
+            log.error("Stripe checkout failed (correlation={})", correlationId, e);
+            throw ApiException.badRequest("Stripe checkout failed (ref: " + correlationId + ")");
         }
     }
 
@@ -110,7 +118,9 @@ public class BillingController {
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
-            throw ApiException.badRequest("Stripe portal failed: " + e.getMessage());
+            String correlationId = UUID.randomUUID().toString();
+            log.error("Stripe portal failed (correlation={})", correlationId, e);
+            throw ApiException.badRequest("Stripe portal failed (ref: " + correlationId + ")");
         }
     }
 
