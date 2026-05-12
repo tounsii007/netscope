@@ -49,7 +49,24 @@ export function rateLimit(ip: string, limit = currentLimit()): {
 
   if (!b || now - b.windowStart >= WINDOW_MS) {
     b = { count: 1, windowStart: now };
-    if (buckets.size < MAX_BUCKETS) buckets.set(ip, b);
+    if (buckets.size >= MAX_BUCKETS) {
+      // Bucket cap reached — the previous code silently dropped the
+      // new bucket and returned allowed:true forever. Net effect: a
+      // DDoS that introduces many distinct IPs would turn OFF rate
+      // limiting precisely when attack volume is highest, since each
+      // new IP created a never-persisted bucket and got a free pass
+      // on every request.
+      //
+      // Mitigation: evict one bucket (O(1) — Map insertion order is
+      // approximately oldest-first, so this is approximately LRU) so
+      // the new IP gets a real slot. This degrades fairness under
+      // genuine high-cardinality bursts but preserves the rate
+      // limit, which is the more important property. The regular
+      // maybeGc() at the top of this call already reclaims expired
+      // buckets, so calling forceGc here is redundant under load.
+      evictOne();
+    }
+    buckets.set(ip, b);
     return {
       allowed: true,
       remaining: limit - 1,
@@ -68,6 +85,14 @@ export function rateLimit(ip: string, limit = currentLimit()): {
     resetMs,
     retryAfterSec,
   };
+}
+
+/** Evict any one bucket — Map iteration order is insertion order, so
+ *  this is approximately oldest-first. Cheap and good enough for the
+ *  overflow path; we don't need true LRU here. */
+function evictOne() {
+  const firstKey = buckets.keys().next().value;
+  if (firstKey !== undefined) buckets.delete(firstKey);
 }
 
 /**
