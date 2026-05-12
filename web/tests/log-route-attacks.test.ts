@@ -77,24 +77,42 @@ describe("POST /api/log — adversarial", () => {
 
   /* ─── header sanitisation ────────────────────────────────────────────── */
 
-  it("only takes the FIRST IP from a multi-hop XFF chain", async () => {
+  it("prefers cf-connecting-ip over the spoofable XFF", async () => {
+    // F44: raw x-forwarded-for is no longer trusted. The route now
+    // mirrors middleware's trust order; cf-connecting-ip wins.
     const res = await POST(makeReq(
       { level: "error", message: "x" },
-      { "x-forwarded-for": "203.0.113.1, 10.0.0.5, 10.0.0.6" },
+      {
+        "cf-connecting-ip": "203.0.113.1",
+        "x-forwarded-for": "1.2.3.4, 10.0.0.5, 10.0.0.6",   // spoofed
+      },
     ));
     expect(res.status).toBe(200);
     const [, meta] = errorMock.mock.calls[0];
     expect(meta.ip).toBe("203.0.113.1");
   });
 
-  it("trims whitespace around the first XFF entry", async () => {
+  it("uses x-vercel-forwarded-for when cf-connecting-ip is absent", async () => {
     const res = await POST(makeReq(
       { level: "error", message: "x" },
-      { "x-forwarded-for": "   203.0.113.42   ,  10.0.0.5" },
+      { "x-vercel-forwarded-for": "   203.0.113.42   ,  10.0.0.5" },
     ));
     expect(res.status).toBe(200);
     const [, meta] = errorMock.mock.calls[0];
     expect(meta.ip).toBe("203.0.113.42");
+  });
+
+  it("ignores raw x-forwarded-for (spoofable) by default", async () => {
+    // Adversarial: an attacker sending only XFF can no longer
+    // pollute the structured log with arbitrary strings — falls
+    // back to "unknown".
+    const res = await POST(makeReq(
+      { level: "error", message: "x" },
+      { "x-forwarded-for": "1.2.3.4" },
+    ));
+    expect(res.status).toBe(200);
+    const [, meta] = errorMock.mock.calls[0];
+    expect(meta.ip).toBe("unknown");
   });
 
   it("truncates a very long User-Agent (DoS via 1MB UA header)", async () => {
@@ -211,17 +229,17 @@ describe("POST /api/log — adversarial", () => {
 
   /* ─── safety against XFF spoofing of bare IP ─────────────────────────── */
 
-  it("does not validate XFF as a real IP (logger sees raw header value)", async () => {
-    // The route trusts whatever's in XFF[0]. Document this: it's the deployer's
-    // responsibility to strip/replace XFF at the load balancer.
+  it("does not let a malicious x-forwarded-for poison the log line", async () => {
+    // F44: route ignores raw XFF entirely. The "<script>" string
+    // never reaches the logger meta.
     const res = await POST(makeReq(
       { level: "error", message: "x" },
       { "x-forwarded-for": "<script>alert(1)</script>" },
     ));
     expect(res.status).toBe(200);
     const [, meta] = errorMock.mock.calls[0];
-    // We don't sanitise — the logger/console formatter must handle it
-    expect(meta.ip).toBe("<script>alert(1)</script>");
+    expect(meta.ip).toBe("unknown");
+    expect(meta.ip).not.toContain("<script>");
   });
 
   it("rejects warn-level message that's just whitespace string", async () => {

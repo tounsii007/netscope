@@ -52,7 +52,11 @@ export async function POST(req: NextRequest) {
     const enriched = {
       ...truncateMeta(meta && typeof meta === "object" ? meta : {}),
       source: "browser",
-      ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      // Use the same trusted-IP resolution order as middleware (F32).
+      // Raw x-forwarded-for is spoofable; prefer platform-validated
+      // headers and fall back to "unknown" rather than letting an
+      // attacker pollute the audit log with arbitrary strings.
+      ip: clientIpForLog(req),
       ua: req.headers.get("user-agent")?.slice(0, 200),
     };
 
@@ -82,4 +86,30 @@ function truncateMeta(meta: Record<string, unknown>): Record<string, unknown> {
     }
   }
   return out;
+}
+
+/**
+ * Resolve the client IP for the error-boundary log entry. Mirrors
+ * the trust order in middleware.ts (F32) — platform-validated
+ * headers first, raw X-Forwarded-For only when explicitly opted
+ * into via NETSCOPE_TRUST_XFF=1. Without this, an attacker can
+ * pollute the structured log stream by spamming /api/log with
+ * arbitrary X-Forwarded-For values; the route is exempt from the
+ * edge rate limiter (F4) so the abuse path is open.
+ */
+function clientIpForLog(req: NextRequest): string {
+  const cf = req.headers.get("cf-connecting-ip");
+  if (cf) return cf;
+  const vercel = req.headers.get("x-vercel-forwarded-for");
+  if (vercel) {
+    const first = vercel.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp;
+  if (process.env.NETSCOPE_TRUST_XFF === "1") {
+    const xff = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (xff) return xff;
+  }
+  return "unknown";
 }
