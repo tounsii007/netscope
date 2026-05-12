@@ -71,11 +71,18 @@ public class TargetValidator {
             throw ApiException.badRequest("invalid hostname or IP");
         }
         try {
-            InetAddress addr = InetAddress.getByName(trimmed);
-            if (isBlocked(addr)) {
-                throw ApiException.forbidden("target is a reserved or internal address");
+            // SSRF hardening: a hostname can have multiple A/AAAA records
+            // and getByName() returns only the first. A split-horizon DNS
+            // ("first A → 8.8.8.8, second A → 127.0.0.1") could leak
+            // through if we only checked the first. Iterate ALL resolved
+            // addresses; reject the request if any one is blocked.
+            InetAddress[] all = InetAddress.getAllByName(trimmed);
+            for (InetAddress a : all) {
+                if (isBlocked(a)) {
+                    throw ApiException.forbidden("target is a reserved or internal address");
+                }
             }
-            return addr;
+            return all[0];
         } catch (UnknownHostException e) {
             throw ApiException.badRequest("could not resolve: " + trimmed);
         }
@@ -87,10 +94,20 @@ public class TargetValidator {
             || addr.isMulticastAddress()) {
             return true;
         }
+        byte[] raw = addr.getAddress();
         // IPv6 ULA (fc00::/7, RFC 4193) — Java's isSiteLocalAddress only
         // catches the legacy fec0::/10 range, so handle ULA explicitly.
-        byte[] raw = addr.getAddress();
         if (raw.length == 16 && (raw[0] & 0xfe) == 0xfc) return true;
+        // IPv4-only checks below — kept in sync with IpAddressGuard.isBlocked()
+        // and web/lib/target-guard.ts. All three must agree on block categories.
+        if (raw.length == 4) {
+            int a = raw[0] & 0xff;
+            int b = raw[1] & 0xff;
+            // 100.64.0.0/10 — Carrier-grade NAT (RFC 6598).
+            if (a == 100 && b >= 64 && b <= 127) return true;
+            // 240.0.0.0/4 — reserved for future use (RFC 1112 §4).
+            if (a >= 240) return true;
+        }
         return CLOUD_METADATA_BYTES.contains(new ByteBuf(raw));
     }
 

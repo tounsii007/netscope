@@ -100,17 +100,62 @@ class TargetValidatorSsrfTest {
 
     /* ─── unique-local & site-local IPv6 ─────────────────────────────────── */
 
-    @Test
+    @ParameterizedTest
     @DisplayName("blocks unique-local IPv6 (fc00::/7)")
-    void blocks_unique_local_ipv6() throws Exception {
-        // ULA range — RFC 4193, the IPv6 equivalent of RFC 1918
-        InetAddress addr = InetAddress.getByName("fd12:3456::1");
-        boolean blocked = v.isBlocked(addr);
-        // Document gap (Java's isSiteLocalAddress is IPv4-only — IPv6 ULA
-        // requires explicit handling)
-        if (!blocked) {
-            System.err.println("⚠ TargetValidator allows ULA IPv6 fd12:3456::1 — consider blocking fc00::/7.");
-        }
+    @ValueSource(strings = {
+        "fc00::1",
+        "fcff:ffff::1",
+        "fd00::1",
+        "fd12:3456::1",
+        "fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+    })
+    void blocks_unique_local_ipv6(String addr) throws Exception {
+        // ULA range — RFC 4193, the IPv6 equivalent of RFC 1918.
+        // Java's isSiteLocalAddress is IPv4-only, so TargetValidator
+        // handles fc00::/7 explicitly. Assert, don't just warn.
+        assertThat(v.isBlocked(InetAddress.getByName(addr))).isTrue();
+    }
+
+    /* ─── CGNAT (RFC 6598) ─────────────────────────────────────────────── */
+
+    @ParameterizedTest
+    @DisplayName("blocks CGNAT 100.64.0.0/10 (RFC 6598)")
+    @ValueSource(strings = {
+        "100.64.0.1",
+        "100.64.255.254",
+        "100.100.100.1",
+        "100.127.255.254"
+    })
+    void blocks_cgnat(String addr) throws Exception {
+        // CGNAT is internal ISP transport — never globally routable.
+        // Without this block, an attacker could send /api/v1/headers a
+        // URL whose host resolves into 100.64/10 and reach the carrier's
+        // internal network.
+        assertThat(v.isBlocked(InetAddress.getByName(addr))).isTrue();
+    }
+
+    @Test void allows_addresses_below_cgnat_range() throws Exception {
+        // 100.63.255.254 is the address immediately below 100.64.0.0/10.
+        // Must NOT be blocked — 100.0.0.0/9 has public hosts.
+        assertThat(v.isBlocked(InetAddress.getByName("100.63.255.254"))).isFalse();
+    }
+
+    @Test void allows_addresses_above_cgnat_range() throws Exception {
+        // 100.128.0.1 is above the CGNAT range — public host space.
+        assertThat(v.isBlocked(InetAddress.getByName("100.128.0.1"))).isFalse();
+    }
+
+    /* ─── 240.0.0.0/4 reserved-future-use ──────────────────────────────── */
+
+    @ParameterizedTest
+    @DisplayName("blocks reserved-future-use 240.0.0.0/4 (RFC 1112 §4)")
+    @ValueSource(strings = {
+        "240.0.0.1",
+        "250.1.2.3",
+        "254.255.255.254"
+    })
+    void blocks_reserved_future_use(String addr) throws Exception {
+        assertThat(v.isBlocked(InetAddress.getByName(addr))).isTrue();
     }
 
     /* ─── multicast / broadcast ──────────────────────────────────────────── */
