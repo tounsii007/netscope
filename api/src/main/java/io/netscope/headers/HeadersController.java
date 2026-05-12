@@ -1,6 +1,7 @@
 package io.netscope.headers;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,7 @@ public class HeadersController {
 
     @GetMapping
     public Map<String, Object> inspect(@RequestParam String url) {
-        if (!url.startsWith("http")) url = "https://" + url;
+        url = HttpUrlNormaliser.ensureHttpScheme(url);
         URI uri;
         try { uri = URI.create(url); } catch (Exception e) { throw ApiException.badRequest("invalid url"); }
 

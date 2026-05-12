@@ -1,5 +1,6 @@
 package io.netscope.pageinsight;
 
+import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class PageFetcher {
     public record Fetched(int status, String body, Map<String, List<String>> headers, URI url) {}
 
     public Fetched fetch(String url) throws Exception {
-        if (!url.startsWith("http")) url = "https://" + url;
+        url = HttpUrlNormaliser.ensureHttpScheme(url);
         URI uri = URI.create(url);
         HttpResponse<String> res = http.send(
             HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(12))

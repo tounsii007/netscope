@@ -1,5 +1,6 @@
 package io.netscope.monitor;
 
+import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
 import io.netscope.common.TargetValidator;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class MonitorScheduler {
     }
 
     private void httpCheck(Monitor m, long start) throws Exception {
-        String url = m.getTarget().startsWith("http") ? m.getTarget() : "https://" + m.getTarget();
+        String url = HttpUrlNormaliser.ensureHttpScheme(m.getTarget());
         HttpResponse<Void> res = http.send(
             HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10))
                 .header("User-Agent", "NetScope-Monitor/1.0").GET().build(),

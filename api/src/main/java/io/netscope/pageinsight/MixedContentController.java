@@ -1,6 +1,7 @@
 package io.netscope.pageinsight;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.HttpUrlNormaliser;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -25,8 +26,8 @@ public class MixedContentController {
 
     @GetMapping
     public Map<String, Object> scan(@RequestParam String url) {
-        if (!url.startsWith("http")) url = "https://" + url;
-        if (!url.startsWith("https://")) throw ApiException.badRequest("target must be https://");
+        url = HttpUrlNormaliser.ensureHttpScheme(url);
+        if (!url.toLowerCase().startsWith("https://")) throw ApiException.badRequest("target must be https://");
 
         try {
             PageFetcher.Fetched f = fetcher.fetch(url);

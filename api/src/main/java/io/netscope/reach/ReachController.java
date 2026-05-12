@@ -1,5 +1,6 @@
 package io.netscope.reach;
 
+import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
 import io.netscope.common.TargetValidator;
 import jakarta.validation.constraints.NotBlank;
@@ -50,7 +51,7 @@ public class ReachController {
     }
 
     private Map<String, Object> httpCheck(String target) {
-        String url = target.startsWith("http") ? target : "https://" + target;
+        String url = HttpUrlNormaliser.ensureHttpScheme(target);
         long start = System.currentTimeMillis();
         try {
             HttpResponse<Void> res = http.send(
