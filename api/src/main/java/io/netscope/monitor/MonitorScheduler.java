@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,14 +44,35 @@ public class MonitorScheduler {
         this.validator = validator; this.redis = redis;
     }
 
+    /** Page size for the scheduler walk. 500 keeps each iteration's
+     *  memory footprint bounded but processes the whole table within a
+     *  few ticks even at 100k+ rows. */
+    private static final int SCHED_PAGE_SIZE = 500;
+
     @Scheduled(fixedDelay = 30_000)
     public void tick() {
-        for (Monitor m : monitors.findByEnabledTrue()) {
-            String lockKey = "mon:lock:" + m.getId();
-            Boolean acquired = redis.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(m.getIntervalSec() - 5));
-            if (Boolean.TRUE.equals(acquired)) {
-                exec.submit(() -> runCheck(m));
+        // Page through enabled monitors instead of loading the whole
+        // table into memory. Previously findByEnabledTrue() materialised
+        // every enabled row as a List on every 30 s tick — at 100k
+        // monitors that's multi-MB allocations + serialised lock-
+        // acquire loop inside one virtual thread. Per-monitor lock-
+        // acquire short-circuits monitors that aren't due yet (the
+        // setIfAbsent TTL is the interval), so visiting in fixed
+        // pages doesn't slow the schedule materially.
+        int page = 0;
+        while (true) {
+            var pageable = org.springframework.data.domain.PageRequest.of(page, SCHED_PAGE_SIZE);
+            List<Monitor> batch = monitors.findEnabledPage(pageable);
+            if (batch.isEmpty()) break;
+            for (Monitor m : batch) {
+                String lockKey = "mon:lock:" + m.getId();
+                Boolean acquired = redis.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(m.getIntervalSec() - 5));
+                if (Boolean.TRUE.equals(acquired)) {
+                    exec.submit(() -> runCheck(m));
+                }
             }
+            if (batch.size() < SCHED_PAGE_SIZE) break;
+            page++;
         }
     }
 
