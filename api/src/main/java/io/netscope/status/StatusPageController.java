@@ -87,11 +87,20 @@ public class StatusPageController {
         StatusPage p = pages.findBySlug(slug).orElseThrow(() -> ApiException.notFound("status page not found"));
         if (!p.isPublicAccess()) throw ApiException.forbidden("status page is private");
 
-        List<StatusPageIncident> recent = incidents.findByPage(p.getId()).stream()
-            .limit(20).toList();
+        // Public endpoint — no auth required. Push the LIMIT into the DB
+        // so we don't pull a year of incidents into Java just to keep
+        // 20. Previously: a year of weekly incidents pulled 50+ rows
+        // and serialised them all into the public response, MBs per
+        // anonymous viewer per cache miss.
+        List<StatusPageIncident> recent = incidents.findRecentByPage(
+            p.getId(), PageRequest.of(0, 20));
 
         List<Map<String, Object>> monitorStates = new ArrayList<>();
-        monitors.findByApiKeyId(null); // noop — in a real impl we'd have a StatusPageMonitors join table
+        // (Future) — wire monitors through a StatusPageMonitors join table.
+        // Previously this line called `monitors.findByApiKeyId(null)` with
+        // a "noop" comment, but that issued a real `WHERE api_key_id IS NULL`
+        // query on every public hit and would leak any legacy null-keyed
+        // rows. Removed entirely until the join table exists.
         // Summarize global uptime from last 24h for each monitor linked to this page
         // (for brevity we assume all workspace monitors are on the page)
 

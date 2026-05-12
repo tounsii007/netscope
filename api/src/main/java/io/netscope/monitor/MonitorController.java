@@ -80,7 +80,12 @@ public class MonitorController {
 
     @GetMapping("/{id}/history")
     public Page<MonitorCheck> history(@PathVariable UUID id,
-                                      @RequestParam(defaultValue = "24") int hours,
+                                      // 720 h = 30 days; the UI never shows
+                                      // more than that. Without a cap an
+                                      // authenticated user can pass an
+                                      // arbitrary value and force a full
+                                      // table scan of monitor_check.
+                                      @RequestParam(defaultValue = "24") @Min(1) @Max(720) int hours,
                                       @RequestParam(defaultValue = "0") @Min(0) int page,
                                       @RequestParam(defaultValue = "100") @Min(1) @Max(1000) int size) {
         // Atomic owner check — no timing gap to distinguish 403 from 404.
