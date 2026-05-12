@@ -115,6 +115,56 @@ class IpAddressGuardTest {
             .isInstanceOf(ApiException.class);
     }
 
+    /* ── CGNAT (RFC 6598) ────────────────────────────────────────────── */
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "100.64.0.1",       // first address in the range
+        "100.64.255.254",
+        "100.100.100.1",    // middle of the range
+        "100.127.255.254"   // last address in the range
+    })
+    void rejectsCgnat(String ip) {
+        // The client-side guard rejects these via the same range check; the
+        // server must agree, otherwise a curl-direct caller can bypass the
+        // UI block by sending the request unmodified to /api/v1/ip/{addr}.
+        assertThatThrownBy(() -> IpAddressGuard.parseAndGuard(ip))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining("reserved or internal");
+    }
+
+    /* ── 240.0.0.0/4 reserved ────────────────────────────────────────── */
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "240.0.0.1",        // first address in the range
+        "250.1.2.3",
+        "254.255.255.254"   // last usable before broadcast
+    })
+    void rejectsReservedFutureUse(String ip) {
+        // RFC 1112 §4 — reserved for future use. Never globally routable;
+        // some kernels drop it outright.
+        assertThatThrownBy(() -> IpAddressGuard.parseAndGuard(ip))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining("reserved or internal");
+    }
+
+    /* ── CGNAT boundary — 100.0.0.0 .. 100.63.255.255 must still pass ── */
+
+    @Test void publicIpJustBelowCgnatPasses() {
+        // 100.63.255.254 is the address immediately below the 100.64/10
+        // block. Must still be treated as a public address — lots of
+        // legitimate hosts live in 100.0.0.0/9.
+        InetAddress a = IpAddressGuard.parseAndGuard("100.63.255.254");
+        assertThat(a.getHostAddress()).isEqualTo("100.63.255.254");
+    }
+
+    @Test void publicIpJustAboveCgnatPasses() {
+        // 100.128.0.1 sits just above the CGNAT range. Public host space.
+        InetAddress a = IpAddressGuard.parseAndGuard("100.128.0.1");
+        assertThat(a.getHostAddress()).isEqualTo("100.128.0.1");
+    }
+
     /* ── Garbage input ───────────────────────────────────────────────── */
 
     @ParameterizedTest
