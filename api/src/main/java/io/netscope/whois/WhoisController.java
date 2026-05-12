@@ -2,6 +2,8 @@ package io.netscope.whois;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netscope.common.ApiException;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.*;
@@ -79,16 +81,29 @@ public class WhoisController {
             out.put("nameservers", extractNs(j));
             out.put("events", extractEvents(j));
             out.put("registrar", extractRegistrar(j));
-            out.put("raw", j);
+            // Strip registrant / admin / tech contact PII from the raw
+            // body before returning. Many registries (.de / .co.uk / .ca
+            // / some .com when the registrar lacks a privacy proxy)
+            // include vcards with name, email, phone, and postal address
+            // of the domain owner. Echoing those is doxxing-as-a-service
+            // and a GDPR/CCPA exposure for the operator.
+            //
+            // We keep registrar + abuse contacts (those ARE meant to be
+            // public per ICANN) and drop everything else.
+            out.put("raw", redactRegistrantPii(j));
             return out;
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
-            // Don't echo raw exception messages to the client — they may
-            // leak stack frames or internal state. Use a stable user-facing
-            // string and log the cause server-side via GlobalExceptionHandler.
-            throw ApiException.badRequest("RDAP lookup failed for " + domain
-                + " — the domain may not be registered or its registry's RDAP service is unavailable");
+            // Don't echo raw exception messages OR the user-supplied
+            // domain back to the client. The domain passed our strict
+            // regex so XSS is impossible today, but defense-in-depth
+            // says: don't put user input into error messages at all.
+            // The user knows what they typed; the server doesn't need
+            // to remind them.
+            throw ApiException.badRequest(
+                "RDAP lookup failed — the domain may not be registered "
+                + "or its registry's RDAP service is unavailable");
         }
     }
 
@@ -112,6 +127,43 @@ public class WhoisController {
             for (JsonNode e : ev) out.put(e.path("eventAction").asText(), e.path("eventDate").asText());
         }
         return out;
+    }
+
+    /**
+     * Return a copy of the RDAP body with every contact whose roles do
+     * NOT include "registrar" or "abuse" stripped. The whitelist is
+     * intentionally narrow: a sloppy registry that adds tech / admin
+     * contacts to the public response will get those dropped here.
+     *
+     * Roles per RFC 9083 §10.2.4: "registrant", "technical",
+     * "administrative", "abuse", "billing", "registrar", "reseller",
+     * "sponsor", "proxy", "notifications", "noc". Only the first three
+     * carry PII routinely; we whitelist registrar + abuse so the user
+     * still sees who to contact for the domain.
+     */
+    static JsonNode redactRegistrantPii(JsonNode raw) {
+        if (raw == null || !raw.isObject()) return raw;
+        ObjectNode body = (ObjectNode) raw.deepCopy();
+        JsonNode entities = body.path("entities");
+        if (!entities.isArray()) return body;
+
+        ArrayNode kept = body.arrayNode();
+        for (JsonNode e : entities) {
+            JsonNode roles = e.path("roles");
+            boolean publicContact = false;
+            if (roles.isArray()) {
+                for (JsonNode r : roles) {
+                    String role = r.asText();
+                    if ("registrar".equals(role) || "abuse".equals(role)) {
+                        publicContact = true;
+                        break;
+                    }
+                }
+            }
+            if (publicContact) kept.add(e);
+        }
+        body.set("entities", kept);
+        return body;
     }
 
     private String extractRegistrar(JsonNode j) {
