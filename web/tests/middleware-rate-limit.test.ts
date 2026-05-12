@@ -67,4 +67,22 @@ describe("middleware — rateLimit single-call invariant", () => {
 
     expect(calls.length).toBe(0);
   });
+
+  it("skips rateLimit entirely for /api/log", async () => {
+    // The error-boundary endpoint must remain reachable even when the
+    // caller's bucket is exhausted — otherwise a buggy page that
+    // generates an error storm gets 429'd at the worst possible moment.
+    // /api/log enforces its own 16 KB body cap so the exemption doesn't
+    // turn it into a DoS vector.
+    const { default: middleware } = await import("@/middleware");
+    const { NextRequest } = await import("next/server");
+    const req = new NextRequest("https://example.test/api/log", {
+      method: "POST",
+      headers: { "x-forwarded-for": "9.10.11.12" },
+    });
+
+    middleware(req);
+
+    expect(calls.length).toBe(0);
+  });
 });

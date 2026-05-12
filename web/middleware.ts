@@ -20,8 +20,14 @@ export default function middleware(req: NextRequest) {
   const ip = clientIp(req);
 
   // ─── 1. Rate limit ────────────────────────────────────────────────
-  // Skip rate limiting for /api/vitals (telemetry from real users) so a
-  // monitoring storm can't lock the user out of the UI.
+  // Exempt the two telemetry endpoints:
+  //   • /api/vitals — user web-vitals must always land regardless of
+  //     burst, otherwise a monitoring storm locks real users out
+  //   • /api/log    — error-boundary reports must always land — a buggy
+  //     page generating an error storm is precisely the moment we want
+  //     the reports to reach us, not 429
+  // Both endpoints enforce their own per-call body + count caps so they
+  // can't be abused as a DoS vector despite the rate-limit exemption.
   //
   // IMPORTANT: rateLimit() *increments* the bucket, so call it ONCE per
   // request and reuse the result for both the 429 path and the trailing
@@ -29,8 +35,9 @@ export default function middleware(req: NextRequest) {
   // double-count and effectively halve the configured budget.
   const path = req.nextUrl.pathname;
   const limit = currentLimit();
+  const isTelemetry = path.startsWith("/api/vitals") || path.startsWith("/api/log");
   let rl: ReturnType<typeof rateLimit> | null = null;
-  if (!path.startsWith("/api/vitals")) {
+  if (!isTelemetry) {
     rl = rateLimit(ip, limit);
     if (!rl.allowed) {
       return new NextResponse("Too Many Requests", {
