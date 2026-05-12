@@ -98,12 +98,56 @@ export default function middleware(req: NextRequest) {
   return res;
 }
 
+/**
+ * Resolve the client's IP for the per-IP rate-limit bucket.
+ *
+ * On Vercel and Cloudflare-fronted deployments the platform replaces
+ * the X-Forwarded-For with its own validated value before the request
+ * reaches our middleware, AND publishes the validated source in
+ * a dedicated header (`cf-connecting-ip` for Cloudflare,
+ * `x-vercel-forwarded-for` for Vercel). Those headers cannot be
+ * spoofed from outside — they're added by the platform.
+ *
+ * RAW X-Forwarded-For from an arbitrary client IS spoofable per
+ * request, so using it as the rate-limit key lets an attacker
+ * trivially bypass the limit with:
+ *
+ *     for i in {1..10000}; do
+ *       curl -H "X-Forwarded-For: $RANDOM.$RANDOM.$RANDOM.$RANDOM" ...
+ *     done
+ *
+ * Preference order:
+ *   1. cf-connecting-ip   (Cloudflare-validated)
+ *   2. x-vercel-forwarded-for (Vercel-validated; first hop)
+ *   3. x-real-ip          (set by ingress / nginx if configured)
+ *   4. x-forwarded-for first hop — only if NEXTSCOPE_TRUST_XFF=1
+ *      (deployments behind a custom validating proxy can opt in)
+ *   5. "unknown"          (fallback — uses a shared bucket)
+ *
+ * When option 5 is reached, every anonymous request shares one
+ * bucket. That's still safer than the previous spoofable scheme.
+ */
 function clientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+  const cf = req.headers.get("cf-connecting-ip");
+  if (cf && cf.length > 0) return cf;
+
+  const vercel = req.headers.get("x-vercel-forwarded-for");
+  if (vercel) {
+    const first = vercel.split(",")[0]?.trim();
+    if (first) return first;
+  }
+
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp && realIp.length > 0) return realIp;
+
+  // Opt-in trust of raw XFF — only enable when behind a proxy that
+  // strips spoofed values before the request reaches us.
+  if (process.env.NETSCOPE_TRUST_XFF === "1") {
+    const xff = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (xff) return xff;
+  }
+
+  return "unknown";
 }
 
 export const config = {

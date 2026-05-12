@@ -45,6 +45,26 @@ describe("middleware — rateLimit single-call invariant", () => {
   it("calls rateLimit exactly once for a non-vitals request", async () => {
     const { default: middleware } = await import("@/middleware");
     const { NextRequest } = await import("next/server");
+    // Use cf-connecting-ip — added by Cloudflare and not spoofable
+    // from outside. The middleware now prefers it over raw XFF.
+    const req = new NextRequest("https://example.test/en/dns-lookup", {
+      headers: { "cf-connecting-ip": "1.2.3.4" },
+    });
+
+    middleware(req);
+
+    expect(calls.length).toBe(1);
+    expect(calls[0].ip).toBe("1.2.3.4");
+  });
+
+  it("ignores raw x-forwarded-for (spoofable) by default", async () => {
+    // Adversarial test: ensure setting only x-forwarded-for does NOT
+    // change the rate-limit bucket key. The previous implementation
+    // would happily bucket each random XFF value separately, letting
+    // an attacker bypass the limit. We expect "unknown" — every
+    // request falls into the shared anonymous bucket.
+    const { default: middleware } = await import("@/middleware");
+    const { NextRequest } = await import("next/server");
     const req = new NextRequest("https://example.test/en/dns-lookup", {
       headers: { "x-forwarded-for": "1.2.3.4" },
     });
@@ -52,7 +72,7 @@ describe("middleware — rateLimit single-call invariant", () => {
     middleware(req);
 
     expect(calls.length).toBe(1);
-    expect(calls[0].ip).toBe("1.2.3.4");
+    expect(calls[0].ip).toBe("unknown");
   });
 
   it("skips rateLimit entirely for /api/vitals", async () => {
