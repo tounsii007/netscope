@@ -26,11 +26,22 @@ export function exportTxt(data: SubdomainsResult) {
 /**
  * CSV with header row. Every field is quoted defensively so future
  * sources that include commas or quotes inside a subdomain don't break
- * downstream parsers (Excel, pandas, etc.).
+ * downstream parsers (Excel, pandas, etc.). Cells that LOOK like a
+ * spreadsheet formula (start with =, +, -, @, tab, CR) are prefixed
+ * with a single quote so Excel / LibreOffice / Google Sheets treat
+ * them as text instead of evaluating them. Subdomain data comes from
+ * a third-party crt.sh source — an attacker who can register a
+ * malicious-looking subdomain can otherwise smuggle a HYPERLINK()
+ * formula that exfiltrates other cells when the operator opens the
+ * downloaded CSV.
  */
 export function exportCsv(data: SubdomainsResult) {
-  const escape = (v: string | number) =>
-    `"${String(v).replace(/"/g, '""')}"`;
+  const FORMULA_PREFIX = /^[=+\-@\t\r]/;
+  const escape = (v: string | number) => {
+    let s = String(v);
+    if (FORMULA_PREFIX.test(s)) s = "'" + s;
+    return `"${s.replace(/"/g, '""')}"`;
+  };
   const header = ["index", "subdomain", "parent_domain", "source"]
     .map(escape)
     .join(",");
