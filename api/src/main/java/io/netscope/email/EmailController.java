@@ -2,6 +2,7 @@ package io.netscope.email;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.TargetValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,10 +21,21 @@ import java.util.*;
  * Validates an email address in three layers: syntax (RFC 5322 via Jakarta),
  * MX records (dnsjava), and optional SMTP RCPT handshake (without sending a
  * message). Disposable providers flagged from an embedded list.
+ *
+ * SECURITY: The MX target comes from a domain's MX record — that's user-
+ * influenced data. An attacker controlling the target domain can publish
+ * an MX pointing at 127.0.0.1 / 169.254.169.254 / their internal SMTP
+ * relay, then call /verify on a probe-enabled request to make the
+ * backend talk SMTP to the chosen host. We route mxHost through
+ * TargetValidator to reject internal addresses before connecting, and
+ * sanitise the email local-part to block CRLF SMTP-command injection.
  */
 @RestController
 @RequestMapping("/api/v1/email")
 public class EmailController {
+
+    private final TargetValidator validator;
+    public EmailController(TargetValidator validator) { this.validator = validator; }
 
     public record VerifyRequest(@NotBlank @Email String email, Boolean smtpProbe) {}
 
@@ -108,9 +120,36 @@ public class EmailController {
     private Map<String, Object> smtpProbe(String mxHost, String email) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("mx", mxHost);
+        // CRLF in the email would inject extra SMTP commands ("RCPT TO:<a\r\n
+        // DATA\r\n..."). Reject the whole probe. Also reject `<` and `>` so
+        // the angle brackets in the framing aren't doubled. The Jakarta
+        // @Email validator already disallows these characters for valid
+        // addresses; this is defense-in-depth in case validation changes.
+        if (email.indexOf('\r') >= 0 || email.indexOf('\n') >= 0
+                || email.indexOf('<') >= 0 || email.indexOf('>') >= 0) {
+            out.put("accepted", false);
+            out.put("error", "email contains illegal characters");
+            return out;
+        }
+        // SSRF guard: mxHost is whatever the target domain's MX record
+        // resolved to. Reject any MX that resolves into internal/private
+        // address space before we open a connection. Strip a trailing
+        // dot (FQDN form returned by dnsjava: "mail.example.com.").
+        String mxNormalised = mxHost.endsWith(".") ? mxHost.substring(0, mxHost.length() - 1) : mxHost;
+        InetAddress mxAddr;
+        try {
+            mxAddr = validator.resolveAndValidate(mxNormalised);
+        } catch (ApiException e) {
+            out.put("accepted", false);
+            out.put("error", "mx blocked: " + e.getMessage());
+            return out;
+        }
         long deadline = System.currentTimeMillis() + SMTP_PROBE_TOTAL_MS;
         try (Socket s = new Socket()) {
-            s.connect(new InetSocketAddress(InetAddress.getByName(mxHost), 25), 5000);
+            // Connect by the validated InetAddress — not the hostname —
+            // so a DNS-rebinding flip between validate-time and
+            // connect-time can't redirect the socket onto a private IP.
+            s.connect(new InetSocketAddress(mxAddr, 25), 5000);
             s.setSoTimeout(SMTP_READ_TIMEOUT_MS);
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
             BufferedWriter w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), StandardCharsets.UTF_8));
