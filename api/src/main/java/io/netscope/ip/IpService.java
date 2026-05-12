@@ -35,6 +35,10 @@ public class IpService {
 
     private final Set<String> torExits = ConcurrentHashMap.newKeySet();
     private volatile long torExitsLoadedAt = 0;
+    /** Set to true while a refresh is in flight; prevents thundering-herd
+     *  refresh attempts when many requests arrive at the TTL boundary. */
+    private final java.util.concurrent.atomic.AtomicBoolean torRefreshInFlight =
+        new java.util.concurrent.atomic.AtomicBoolean(false);
 
     public IpService(StringRedisTemplate redis) { this.redis = redis; }
 
@@ -175,18 +179,50 @@ public class IpService {
         out.put("threat", flags);
     }
 
-    private synchronized void loadTorList() {
+    /**
+     * Trigger a Tor exit-list refresh if the cached list is stale.
+     * Non-blocking: the actual HTTP fetch runs on a separate thread,
+     * so a slow refresh never holds up the IP lookup that triggered
+     * it. The current request continues using whatever entries were
+     * already cached. Once the refresh lands, subsequent lookups see
+     * the updated set.
+     *
+     * Thundering-herd guard: AtomicBoolean ensures only one refresh
+     * is in flight at a time. Without it, every concurrent request
+     * arriving at the 1-hour TTL boundary would each kick off its
+     * own HTTP fetch.
+     *
+     * On the very first call after startup `torExits` is empty and
+     * we still return immediately — proxy-flag enrichment treats an
+     * empty set as "tor: false". Conservative bias; we'd rather
+     * under-flag than block on a startup network round-trip.
+     */
+    private void loadTorList() {
         if (System.currentTimeMillis() - torExitsLoadedAt < 3600_000) return;
-        try {
-            HttpResponse<String> res = http.send(
-                HttpRequest.newBuilder(URI.create(torListUrl)).timeout(Duration.ofSeconds(10)).build(),
-                HttpResponse.BodyHandlers.ofString());
-            torExits.clear();
-            for (String line : res.body().split("\n")) {
-                if (!line.isBlank()) torExits.add(line.trim());
+        if (!torRefreshInFlight.compareAndSet(false, true)) return;
+
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                HttpResponse<String> res = http.send(
+                    HttpRequest.newBuilder(URI.create(torListUrl)).timeout(Duration.ofSeconds(10)).build(),
+                    HttpResponse.BodyHandlers.ofString());
+                Set<String> fresh = ConcurrentHashMap.newKeySet();
+                for (String line : res.body().split("\n")) {
+                    if (!line.isBlank()) fresh.add(line.trim());
+                }
+                // Atomic swap: clear-then-add could leave a window where
+                // a concurrent reader sees no entries. addAll-then-retainAll
+                // is the closest we can do without copy-on-write semantics.
+                torExits.addAll(fresh);
+                torExits.retainAll(fresh);
+                torExitsLoadedAt = System.currentTimeMillis();
+            } catch (Exception ignored) {
+                // Swallow — keep the old cached list; we'll try again
+                // on the next request after the TTL window.
+            } finally {
+                torRefreshInFlight.set(false);
             }
-            torExitsLoadedAt = System.currentTimeMillis();
-        } catch (Exception ignored) {}
+        });
     }
 
 }
