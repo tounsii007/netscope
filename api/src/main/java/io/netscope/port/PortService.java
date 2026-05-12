@@ -55,9 +55,6 @@ public class PortService {
 
     public PortDtos.PortScanResult scan(PortDtos.PortScanRequest req) {
         List<Integer> ports = resolvePorts(req);
-        if (ports.size() > 1024) {
-            throw ApiException.badRequest("max 1024 ports per scan");
-        }
         InetAddress addr = validator.resolveAndValidate(req.target());
         long start = System.currentTimeMillis();
 
@@ -77,18 +74,45 @@ public class PortService {
             results.size(), open, System.currentTimeMillis() - start, results);
     }
 
+    /** Max ports a single scan request may target. Bounded so a caller
+     *  can't fire 65 535 socket connects in one HTTP request. */
+    static final int MAX_PORTS_PER_SCAN = 1024;
+
     private List<Integer> resolvePorts(PortDtos.PortScanRequest req) {
         if (Boolean.TRUE.equals(req.commonOnly())) {
             return Arrays.stream(COMMON_PORTS).boxed().toList();
         }
         if (req.ports() != null && !req.ports().isEmpty()) {
-            return req.ports();
+            // Validate every element: reject nulls (would NPE inside the
+            // executor task), reject out-of-range values (would just
+            // throw IAE per task and waste threads), and dedupe so
+            // duplicates don't inflate the budget or double-bill the
+            // scan cap. TreeSet keeps the natural numeric order for
+            // a stable, predictable result list.
+            TreeSet<Integer> seen = new TreeSet<>();
+            for (Integer p : req.ports()) {
+                if (p == null) {
+                    throw ApiException.badRequest("ports list contains null");
+                }
+                if (p < 1 || p > 65535) {
+                    throw ApiException.badRequest("port " + p + " is out of 1..65535 range");
+                }
+                seen.add(p);
+            }
+            if (seen.size() > MAX_PORTS_PER_SCAN) {
+                throw ApiException.badRequest("max " + MAX_PORTS_PER_SCAN + " ports per scan");
+            }
+            return new ArrayList<>(seen);
         }
         if (req.fromPort() != null && req.toPort() != null) {
             if (req.fromPort() < 1 || req.toPort() > 65535 || req.fromPort() > req.toPort()) {
                 throw ApiException.badRequest("invalid port range");
             }
-            List<Integer> out = new ArrayList<>();
+            int size = req.toPort() - req.fromPort() + 1;
+            if (size > MAX_PORTS_PER_SCAN) {
+                throw ApiException.badRequest("max " + MAX_PORTS_PER_SCAN + " ports per scan");
+            }
+            List<Integer> out = new ArrayList<>(size);
             for (int p = req.fromPort(); p <= req.toPort(); p++) out.add(p);
             return out;
         }
