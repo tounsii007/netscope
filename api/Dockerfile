@@ -9,6 +9,18 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY --from=build /src/target/*.jar app.jar
+# Run as a non-root, unprivileged UID. The Spring Boot JAR doesn't
+# need root for anything (the JVM binds the unprivileged port 8080
+# above). Without this, a successful in-JVM RCE inherits root —
+# making container-escape primitives trivially abusable.
+# UID 10001 is chosen to be well above any host-system service UIDs.
+# Group 0 (root) is the OpenShift / Kubernetes RunAsAny default;
+# files owned by it are readable by the random UID Kubernetes
+# assigns when SecurityContext.runAsUser is left empty.
+RUN useradd --system --uid 10001 --gid 0 netscope && \
+    chown -R 10001:0 /app && \
+    chmod -R g=u /app
+USER 10001
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
     CMD curl -fsS http://localhost:8080/actuator/health || exit 1
