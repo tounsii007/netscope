@@ -141,10 +141,34 @@ public class WebhookController {
     }
 
     @GetMapping
-    public List<Webhook> list(@RequestParam UUID workspaceId) {
+    public List<Map<String, Object>> list(@RequestParam UUID workspaceId) {
         workspaces.requireAccess(workspaceId);
+        // CRITICAL: previously did .peek(w -> w.setSecret("[redacted]"))
+        // on the loaded entities. With Spring Boot's default
+        // spring.jpa.open-in-view=true the persistence context stays
+        // open until response render, so any flush triggered between
+        // here and serialisation writes "[redacted]" back to
+        // webhooks.secret — silent destruction of the HMAC signing key
+        // for every webhook the user listed. Project secrets are
+        // unrecoverable from the DB at that point.
+        //
+        // Return DTO maps instead; the entities themselves stay
+        // untouched and unsaveable from this code path.
         return webhooks.findByWorkspaceId(workspaceId).stream()
-            .peek(w -> w.setSecret("[redacted]"))
+            .map(w -> {
+                Map<String, Object> dto = new LinkedHashMap<>();
+                dto.put("id", w.getId());
+                dto.put("workspaceId", w.getWorkspaceId());
+                dto.put("url", w.getUrl());
+                dto.put("events", w.getEvents());
+                dto.put("active", w.isActive());
+                dto.put("createdAt", w.getCreatedAt());
+                // Never echo the real secret; the user already saw it
+                // exactly once at creation time. Use a literal marker
+                // string instead of redacting the entity.
+                dto.put("secret", "[redacted]");
+                return dto;
+            })
             .toList();
     }
 

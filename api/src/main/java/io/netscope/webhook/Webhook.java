@@ -30,6 +30,9 @@ public class Webhook {
     public List<String> getEvents() { return events; } public void setEvents(List<String> e) { this.events = e; }
     public String getKind() { return kind; } public void setKind(String k) { this.kind = k; }
     public boolean isActive() { return active; } public void setActive(boolean a) { this.active = a; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getLastSuccessAt() { return lastSuccessAt; }
     public void setLastSuccessAt(Instant t) { this.lastSuccessAt = t; }
+    public Instant getLastFailureAt() { return lastFailureAt; }
     public void setLastFailureAt(Instant t) { this.lastFailureAt = t; }
 }
