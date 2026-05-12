@@ -6,14 +6,20 @@ import { logger } from "@/lib/logger";
 /**
  * NextAuth v5 config. We use OAuth providers purely to get an access token,
  * then exchange it at our backend /auth/exchange for a first-party JWT.
- * The JWT is kept server-side in the NextAuth session cookie — never exposed
- * to client JS.
  *
- * The exchange call is bounded by a 5-second hard timeout; if the backend
- * is degraded we fall through to a session without `netscopeJwt` so the
- * sign-in flow still completes (the user's UI clearly reflects the
- * unauthenticated state and they can retry later instead of being stuck
- * on a hanging callback page).
+ * IMPORTANT: the NetScope JWT is stored on the NextAuth JWT cookie
+ * (HttpOnly, server-only) — it MUST NOT be returned from the session()
+ * callback. The session object is what useSession()/auth() expose to
+ * client components, so anything added there is reachable from browser
+ * JS (a stored-XSS would lift it). Server-side callers that need the
+ * upstream JWT use {@link getNetscopeJwt()} below which reads it from
+ * the JWT directly via getToken().
+ *
+ * The exchange call is bounded by a 5-second hard timeout; if the
+ * backend is degraded we fall through to a session without the JWT so
+ * the sign-in flow still completes (the user's UI clearly reflects the
+ * unauthenticated state and they can retry later instead of being
+ * stuck on a hanging callback page).
  *
  * Failures route through the Winston logger so they land in the same
  * daily-rotate files as the rest of the server-side log surface.
@@ -75,12 +81,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      // DO NOT copy token.netscopeJwt into the returned session.
+      // This object is exposed to client components via useSession().
+      // The upstream JWT lives only on the NextAuth JWT cookie
+      // (HttpOnly) and is reachable server-side via getNetscopeJwt().
       return {
         ...session,
-        netscopeJwt: token.netscopeJwt as string | undefined,
         workspace: token.workspace,
         user: { ...session.user, ...(token.user as object | undefined) },
       };
     },
   },
 });
+
+/**
+ * Server-only helper to read the upstream NetScope JWT from the
+ * NextAuth JWT cookie. Returns undefined for unauthenticated callers
+ * or when the exchange step failed at sign-in time.
+ *
+ * Callers MUST be on the server (Server Components, Route Handlers,
+ * Server Actions). Using this from a client component would import
+ * "next-auth/jwt" into the browser bundle and break.
+ */
+export async function getNetscopeJwt(): Promise<string | undefined> {
+  // Import lazily so the dependency stays out of any accidental
+  // client-bundle path.
+  const { getToken } = await import("next-auth/jwt");
+  const { cookies, headers } = await import("next/headers");
+  // next-auth/jwt's getToken wants a NextRequest-shaped object.
+  // We build a minimal one from the current request's headers + cookies.
+  const reqHeaders = await headers();
+  const cookieJar = await cookies();
+  const fakeReq = {
+    headers: { get: (k: string) => reqHeaders.get(k) },
+    cookies: { get: (k: string) => ({ value: cookieJar.get(k)?.value }) },
+  } as unknown as Parameters<typeof getToken>[0]["req"];
+  const token = await getToken({ req: fakeReq, secret: process.env.AUTH_SECRET });
+  const jwt = token?.netscopeJwt;
+  return typeof jwt === "string" ? jwt : undefined;
+}
