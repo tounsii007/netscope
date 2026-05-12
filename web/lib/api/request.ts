@@ -11,8 +11,10 @@
  *   • Surfaces backend error messages through `Error.message` so client
  *     UIs can show them as-is.
  *   • Hard timeout (default 30 s) so a misbehaving upstream can't pin
- *     a tab spinner forever. Caller-supplied AbortSignals are composed
- *     so a UI cancel still wins over the timeout.
+ *     a tab spinner forever. The timeout is wired into the actual
+ *     fetch AbortSignal so the underlying connection is torn down,
+ *     not just the awaiting Promise; combined with any caller-supplied
+ *     signal via AbortSignal.any() so either source wins.
  */
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -30,35 +32,84 @@ export class ApiError extends Error {
 
 const TIMEOUT_SENTINEL = Symbol("api-request-timeout");
 
+/**
+ * Create an AbortController paired with a setTimeout that fires
+ * `abort(TimeoutError)` after `timeoutMs`. Also relays an
+ * already-aborted caller signal so a UI cancel tears the fetch down
+ * immediately. Returns null when AbortController isn't usable in the
+ * current realm (very old runtimes); callers fall back to Promise.race
+ * for timing semantics in that case.
+ */
+function makeTimeoutController(
+  timeoutMs: number,
+  caller: AbortSignal | null | undefined,
+): { ctrl: AbortController; cancel: () => void } | null {
+  let ctrl: AbortController;
+  try { ctrl = new AbortController(); } catch { return null; }
+  const timer = setTimeout(
+    () => ctrl.abort(new DOMException("Request timed out", "TimeoutError")),
+    timeoutMs,
+  );
+  if (caller) {
+    if (caller.aborted) ctrl.abort(caller.reason);
+    else caller.addEventListener("abort", () => ctrl.abort(caller.reason), { once: true });
+  }
+  return { ctrl, cancel: () => clearTimeout(timer) };
+}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  // Two-layer timeout:
+  //   1. Promise.race against a sentinel — the source of truth for *when*
+  //      we surface the timeout. Works even when fetch's signal realm
+  //      doesn't match ours (jsdom + undici under Vitest).
+  //   2. AbortController whose signal is passed to fetch — best effort
+  //      tear-down of the underlying connection so production sockets
+  //      don't leak. Falls back to no-signal fetch if the realm mismatches.
+  const t = makeTimeoutController(DEFAULT_TIMEOUT_MS, init?.signal ?? null);
+  let raceTimer: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<typeof TIMEOUT_SENTINEL>((resolve) => {
-    timer = setTimeout(() => resolve(TIMEOUT_SENTINEL), DEFAULT_TIMEOUT_MS);
+    raceTimer = setTimeout(() => resolve(TIMEOUT_SENTINEL), DEFAULT_TIMEOUT_MS);
   });
 
   let res: Response;
   try {
-    // Pass init.signal through verbatim so caller-driven cancellation
-    // still aborts at the network layer. The timeout itself is handled
-    // by Promise.race — this avoids cross-realm AbortSignal mismatches
-    // in jsdom + MSW test environments while still bounding latency.
-    const fetchPromise = fetch(`${BASE}${path}`, {
+    const baseOpts: RequestInit = {
       ...init,
       headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
       cache: "no-store",
+    };
+    const fetchPromise = fetch(
+      `${BASE}${path}`,
+      t ? { ...baseOpts, signal: t.ctrl.signal } : baseOpts,
+    ).catch((err) => {
+      // Cross-realm signal rejected by fetch's RequestInit validator
+      // (jsdom AbortSignal vs undici expected AbortSignal). Retry
+      // without signal — Promise.race above still bounds the wait.
+      const msg = String((err as Error)?.message ?? err);
+      if (t && /AbortSignal|RequestInit/.test(msg) && !t.ctrl.signal.aborted) {
+        return fetch(`${BASE}${path}`, baseOpts);
+      }
+      throw err;
     });
+
     const winner = await Promise.race([fetchPromise, timeoutPromise]);
     if (winner === TIMEOUT_SENTINEL) {
+      // Tear down the underlying fetch where possible — best effort.
+      try { t?.ctrl.abort(new DOMException("Request timed out", "TimeoutError")); } catch { /* ignore */ }
       throw new ApiError("Request timed out", 0);
     }
     res = winner as Response;
   } catch (err) {
     if (err instanceof ApiError) throw err;
     const e = err as Error & { name?: string };
+    if (e?.name === "TimeoutError" || (e?.name === "AbortError" && !init?.signal?.aborted)) {
+      throw new ApiError("Request timed out", 0);
+    }
     if (e?.name === "AbortError") throw err; // caller cancelled — propagate verbatim
     throw new ApiError(networkErrorMessage(err), 0, err);
   } finally {
-    if (timer) clearTimeout(timer);
+    t?.cancel();
+    if (raceTimer) clearTimeout(raceTimer);
   }
 
   if (!res.ok) {
