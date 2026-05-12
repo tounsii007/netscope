@@ -48,9 +48,12 @@ describe("POST /api/log", () => {
   });
 
   it("forwards an error-level message to logger.error with enriched meta", async () => {
+    // F44: raw x-forwarded-for is no longer trusted. Use the
+    // platform-validated cf-connecting-ip header which the route's
+    // clientIpForLog() honours.
     const res = await POST(makeReq(
       { level: "error", message: "TypeError: x is not a function", meta: { url: "/foo" } },
-      { "x-forwarded-for": "8.8.8.8, 10.0.0.1", "user-agent": "Mozilla/5.0" },
+      { "cf-connecting-ip": "8.8.8.8", "user-agent": "Mozilla/5.0" },
     ));
     expect(res.status).toBe(200);
     expect(errorMock).toHaveBeenCalledTimes(1);
@@ -60,7 +63,7 @@ describe("POST /api/log", () => {
     expect(meta).toMatchObject({
       url: "/foo",
       source: "browser",
-      ip:     "8.8.8.8",       // first XFF entry, trimmed
+      ip:     "8.8.8.8",
       ua:     "Mozilla/5.0",
     });
   });
