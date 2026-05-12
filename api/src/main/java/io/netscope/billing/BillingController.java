@@ -77,7 +77,17 @@ public class BillingController {
             else b.setCustomerEmail(user.getEmail());
 
             Session s = Session.create(b.build());
+            // Map.of(...) rejects null values with NPE. Stripe's Session
+            // .getUrl() is documented nullable (a misconfigured price ID
+            // or hosted-checkout setting can produce a session without a
+            // redirect URL). Surface a clean 400 instead of a useless
+            // 500 with correlationId.
+            if (s.getUrl() == null) {
+                throw ApiException.badRequest("Stripe did not return a checkout URL — verify the price ID is published");
+            }
             return Map.of("url", s.getUrl());
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             throw ApiException.badRequest("Stripe checkout failed: " + e.getMessage());
         }
@@ -93,7 +103,12 @@ public class BillingController {
                     .setCustomer(w.getStripeCustomerId())
                     .setReturnUrl(returnUrl)
                     .build());
+            if (s.getUrl() == null) {
+                throw ApiException.badRequest("Stripe did not return a portal URL");
+            }
             return Map.of("url", s.getUrl());
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
             throw ApiException.badRequest("Stripe portal failed: " + e.getMessage());
         }
