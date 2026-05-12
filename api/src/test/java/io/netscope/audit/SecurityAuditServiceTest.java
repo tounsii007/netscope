@@ -24,34 +24,43 @@ class SecurityAuditServiceTest {
     private final RecordingRepo repo = new RecordingRepo();
     private final SecurityAuditService svc = new SecurityAuditService(repo);
 
-    /* ─── XFF extraction ─────────────────────────────────────────────────── */
+    /* ─── client IP resolution ───────────────────────────────────────────── */
 
-    @Test void persists_event_with_first_xff_hop() {
+    @Test void ignores_raw_xff_header_and_uses_remoteAddr() {
+        // Pre-fix this test was titled "persists_event_with_first_xff_hop"
+        // and the implementation read XFF[0] verbatim — spoofable per-request.
+        // Now we trust Tomcat's RemoteIpValve (which writes the validated
+        // value to remoteAddr) and IGNORE the raw header entirely.
         MockHttpServletRequest req = new MockHttpServletRequest();
-        req.addHeader("X-Forwarded-For", "203.0.113.1, 10.0.0.5, 10.0.0.6");
+        req.setRemoteAddr("198.51.100.42");
+        req.addHeader("X-Forwarded-For", "1.2.3.4, 10.0.0.5");   // spoofed
 
-        UUID apiKey = UUID.randomUUID();
-        svc.record("AUTH_FAIL", SecurityAuditService.Severity.ALERT, req, apiKey,
+        svc.record("AUTH_FAIL", SecurityAuditService.Severity.ALERT, req, UUID.randomUUID(),
             Map.of("reason", "bad signature"));
 
         assertThat(repo.events).hasSize(1);
+        assertThat(repo.events.get(0).getClientIp())
+            .as("client IP must be the validated remoteAddr, not the spoofed XFF")
+            .isEqualTo("198.51.100.42");
     }
 
-    @Test void falls_back_to_remoteAddr_when_no_xff() {
+    @Test void uses_remoteAddr_when_no_xff_header() {
         MockHttpServletRequest req = new MockHttpServletRequest();
         req.setRemoteAddr("198.51.100.42");
 
         svc.record("RATE_LIMIT", SecurityAuditService.Severity.WARN, req, null, Map.of());
         assertThat(repo.events).hasSize(1);
+        assertThat(repo.events.get(0).getClientIp()).isEqualTo("198.51.100.42");
     }
 
-    @Test void treats_blank_xff_header_as_missing() {
+    @Test void blank_xff_header_does_not_override_remoteAddr() {
         MockHttpServletRequest req = new MockHttpServletRequest();
         req.addHeader("X-Forwarded-For", "   ");
         req.setRemoteAddr("198.51.100.99");
 
         svc.record("SSRF_BLOCK", SecurityAuditService.Severity.ALERT, req, null, Map.of());
         assertThat(repo.events).hasSize(1);
+        assertThat(repo.events.get(0).getClientIp()).isEqualTo("198.51.100.99");
     }
 
     @Test void tolerates_null_request_object() {

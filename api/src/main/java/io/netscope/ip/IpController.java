@@ -1,5 +1,6 @@
 package io.netscope.ip;
 
+import io.netscope.common.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 import ua_parser.Client;
@@ -57,8 +58,6 @@ public class IpController {
     }
 
     private String clientIp(HttpServletRequest req) {
-        String fwd = req.getHeader("X-Forwarded-For");
-        if (fwd != null && !fwd.isBlank()) return fwd.split(",")[0].trim();
-        return req.getRemoteAddr();
+        return ClientIpResolver.clientIp(req);
     }
 }

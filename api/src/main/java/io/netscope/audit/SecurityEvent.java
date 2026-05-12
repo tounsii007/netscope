@@ -27,4 +27,13 @@ public class SecurityEvent {
         this.eventType = eventType; this.severity = severity;
         this.clientIp = clientIp; this.apiKeyId = apiKeyId; this.details = details;
     }
+
+    // Read-only accessors used by tests + admin dashboards.
+    public Long getId() { return id; }
+    public String getEventType() { return eventType; }
+    public String getSeverity() { return severity; }
+    public String getClientIp() { return clientIp; }
+    public UUID getApiKeyId() { return apiKeyId; }
+    public Map<String, Object> getDetails() { return details; }
+    public Instant getCreatedAt() { return createdAt; }
 }

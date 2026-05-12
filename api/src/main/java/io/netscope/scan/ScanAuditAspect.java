@@ -1,6 +1,7 @@
 package io.netscope.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netscope.common.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -42,10 +43,7 @@ public class ScanAuditAspect {
             Map<String, Object> asMap = mapper.convertValue(result, Map.class);
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest req = attr.getRequest();
-            String ip = req.getHeader("X-Forwarded-For");
-            if (ip == null || ip.isBlank()) ip = req.getRemoteAddr();
-            else ip = ip.split(",")[0].trim();
-            repo.save(new Scan(tool, target, ip, asMap, durationMs));
+            repo.save(new Scan(tool, target, ClientIpResolver.clientIp(req), asMap, durationMs));
         } catch (Exception ignored) {}
     }
 

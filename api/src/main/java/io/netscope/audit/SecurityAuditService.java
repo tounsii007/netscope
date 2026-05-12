@@ -1,5 +1,6 @@
 package io.netscope.audit;
 
+import io.netscope.common.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Async;
@@ -20,15 +21,8 @@ public class SecurityAuditService {
     @Async
     public void record(String type, Severity sev, HttpServletRequest req, UUID apiKey, Map<String, Object> details) {
         try {
-            repo.save(new SecurityEvent(type, sev.name(), clientIp(req), apiKey, details));
+            repo.save(new SecurityEvent(type, sev.name(), ClientIpResolver.clientIp(req), apiKey, details));
         } catch (Exception ignored) { /* never break the request */ }
-    }
-
-    private String clientIp(HttpServletRequest req) {
-        if (req == null) return null;
-        String fwd = req.getHeader("X-Forwarded-For");
-        if (fwd != null && !fwd.isBlank()) return fwd.split(",")[0].trim();
-        return req.getRemoteAddr();
     }
 }
 

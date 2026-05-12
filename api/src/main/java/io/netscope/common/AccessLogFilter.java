@@ -59,9 +59,7 @@ public class AccessLogFilter extends OncePerRequestFilter {
     }
 
     private static String clientIp(HttpServletRequest req) {
-        String fwd = req.getHeader("X-Forwarded-For");
-        if (fwd != null && !fwd.isBlank()) return fwd.split(",")[0].trim();
-        return req.getRemoteAddr();
+        return ClientIpResolver.clientIp(req);
     }
 
     /** Collapse whitespace in User-Agent to keep log lines single-line */
