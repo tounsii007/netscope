@@ -1,6 +1,7 @@
 package io.netscope.dns;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.BoundedDns;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -46,7 +47,7 @@ public class DnssecController {
 
     private List<Map<String, Object>> queryDs(String domain) {
         try {
-            Record[] recs = new Lookup(domain, Type.DS).run();
+            Record[] recs = BoundedDns.run(domain, Type.DS);
             if (recs == null) return List.of();
             List<Map<String, Object>> out = new ArrayList<>();
             for (Record r : recs) if (r instanceof DSRecord ds) {
@@ -59,7 +60,7 @@ public class DnssecController {
 
     private List<Map<String, Object>> queryDnskey(String domain) {
         try {
-            Record[] recs = new Lookup(domain, Type.DNSKEY).run();
+            Record[] recs = BoundedDns.run(domain, Type.DNSKEY);
             if (recs == null) return List.of();
             List<Map<String, Object>> out = new ArrayList<>();
             for (Record r : recs) if (r instanceof DNSKEYRecord k) {
@@ -73,11 +74,12 @@ public class DnssecController {
 
     private boolean hasRrsig(String domain) {
         try {
-            Lookup l = new Lookup(domain, Type.A);
+            // EDNS DO flag is required for the resolver to return RRSIGs;
+            // we route through BoundedDns(custom-resolver) so the lookup
+            // still has the 3 s cap.
             SimpleResolver r = new SimpleResolver("1.1.1.1");
             r.setEDNS(0, 4096, ExtendedFlags.DO, List.of());
-            l.setResolver(r);
-            Record[] recs = l.run();
+            Record[] recs = BoundedDns.run(domain, Type.A, r);
             if (recs == null) return false;
             for (Record rec : recs) if (rec instanceof RRSIGRecord) return true;
             return false;

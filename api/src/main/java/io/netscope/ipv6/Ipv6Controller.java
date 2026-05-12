@@ -1,6 +1,7 @@
 package io.netscope.ipv6;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.BoundedDns;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -58,7 +59,7 @@ public class Ipv6Controller {
 
     private List<String> records(String host, int type) {
         try {
-            Record[] recs = new Lookup(host, type).run();
+            Record[] recs = BoundedDns.run(host, type);
             if (recs == null) return List.of();
             List<String> out = new ArrayList<>();
             for (Record r : recs) {
@@ -71,7 +72,7 @@ public class Ipv6Controller {
 
     private List<String> mxTargets(String domain) {
         try {
-            Record[] recs = new Lookup(domain, Type.MX).run();
+            Record[] recs = BoundedDns.run(domain, Type.MX);
             if (recs == null) return List.of();
             List<String> out = new ArrayList<>();
             for (Record r : recs) if (r instanceof MXRecord m) out.add(m.getTarget().toString(true));

@@ -48,15 +48,40 @@ public final class BoundedDns {
 
     /** Run a DNS lookup with a custom timeout (capped at {@link #MAX_TIMEOUT}). */
     public static Record[] run(String name, int type, Duration timeout) {
+        return runInternal(name, type, timeout, null);
+    }
+
+    /**
+     * Run a DNS lookup against an explicit resolver (e.g. for DNSSEC
+     * queries that need EDNS DO flag set, or PropagationController
+     * fanning out to several public resolvers). The caller's resolver
+     * is used as-is; we still wrap the call in a {@link CompletableFuture}
+     * barrier with {@link #DEFAULT_TIMEOUT} so a tarpit can't pin a
+     * thread.
+     */
+    public static Record[] run(String name, int type, Resolver resolver) {
+        return runInternal(name, type, DEFAULT_TIMEOUT, resolver);
+    }
+
+    private static Record[] runInternal(String name, int type, Duration timeout, Resolver caller) {
         Duration effective = timeout.compareTo(MAX_TIMEOUT) > 0 ? MAX_TIMEOUT : timeout;
         long timeoutMs = effective.toMillis();
 
         CompletableFuture<Record[]> f = CompletableFuture.supplyAsync(() -> {
             try {
                 Lookup lookup = new Lookup(name, type);
-                // Build a resolver with the same per-query timeout. Belt + braces.
-                Resolver resolver = new SimpleResolver();
-                resolver.setTimeout(effective);
+                Resolver resolver = caller;
+                if (resolver == null) {
+                    // Build a default resolver with the same per-query timeout. Belt + braces.
+                    resolver = new SimpleResolver();
+                    resolver.setTimeout(effective);
+                } else {
+                    // Respect the caller's resolver but ensure its per-query
+                    // timeout is no looser than ours — otherwise a slow
+                    // resolver inside a fast outer cap would still race
+                    // against orTimeout and waste the thread.
+                    resolver.setTimeout(effective);
+                }
                 lookup.setResolver(resolver);
                 return lookup.run();
             } catch (Exception e) {

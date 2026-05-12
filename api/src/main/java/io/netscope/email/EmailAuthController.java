@@ -1,6 +1,7 @@
 package io.netscope.email;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.BoundedDns;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -98,7 +99,7 @@ public class EmailAuthController {
 
     private List<String> txt(String host) {
         try {
-            Record[] recs = new Lookup(host, Type.TXT).run();
+            Record[] recs = BoundedDns.run(host, Type.TXT);
             if (recs == null) return List.of();
             List<String> out = new ArrayList<>();
             for (Record r : recs) if (r instanceof TXTRecord t)
