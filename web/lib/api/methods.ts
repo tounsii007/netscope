@@ -16,18 +16,26 @@ import type {
  */
 export const api = {
   // — Ports / reach —
-  portCheck: (target: string, port: number) =>
+  // Every method accepts a trailing optional { signal } so the caller can
+  // hold an AbortController ref and cancel a previous in-flight request
+  // when the user re-submits. Without this, fast re-submits can land
+  // out-of-order — a slow earlier response overwrites the correct later
+  // state. The signal is plumbed through request() into fetch.
+  portCheck: (target: string, port: number, opts: { signal?: AbortSignal } = {}) =>
     request<PortCheckResult>(`/api/v1/port/check`, {
       method: "POST",
       body: JSON.stringify({ target, port, protocol: "tcp" }),
+      signal: opts.signal,
     }),
   portScan: (
     target: string,
-    opts: { ports?: number[]; fromPort?: number; toPort?: number; commonOnly?: boolean }
+    scan: { ports?: number[]; fromPort?: number; toPort?: number; commonOnly?: boolean },
+    opts: { signal?: AbortSignal } = {}
   ) =>
     request<PortScanResult>(`/api/v1/port/scan`, {
       method: "POST",
-      body: JSON.stringify({ target, ...opts }),
+      body: JSON.stringify({ target, ...scan }),
+      signal: opts.signal,
     }),
   reach: (target: string, port?: number) =>
     request<ReachResult>(`/api/v1/reach/check`, {

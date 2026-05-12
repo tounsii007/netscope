@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
 import { LoadingButton } from "@/components/tool-shell";
@@ -36,6 +36,14 @@ export function PortCheckerClient() {
   const [single, setSingle] = useState<PortCheckResult | null>(null);
   const [scan, setScan] = useState<PortScanResult | null>(null);
 
+  // Tracks the in-flight scan so a fresh submit can cancel a slow one.
+  // Without this, a user typing then hitting enter, editing, hitting
+  // enter again can land the older response after the newer one and
+  // overwrite the correct state.
+  const inFlight = useRef<AbortController | null>(null);
+  // Cancel any in-flight scan when the component unmounts (e.g. nav).
+  useEffect(() => () => inFlight.current?.abort(), []);
+
   function validateBeforeRun(): string | null {
     if (!target.trim()) return tc("input_required");
     // Localhost / private / metadata targets are blocked here, before
@@ -63,22 +71,33 @@ export function PortCheckerClient() {
       setScan(null);
       return;
     }
+    // Cancel any previous in-flight scan so its (now-stale) response
+    // can't overwrite the result of THIS submit.
+    inFlight.current?.abort();
+    const ac = new AbortController();
+    inFlight.current = ac;
+
     setErr(null);
     setLoading(true);
     setSingle(null);
     setScan(null);
     try {
       if (mode === "single") {
-        setSingle(await api.portCheck(target, port));
+        setSingle(await api.portCheck(target, port, { signal: ac.signal }));
       } else if (mode === "common") {
-        setScan(await api.portScan(target, { commonOnly: true }));
+        setScan(await api.portScan(target, { commonOnly: true }, { signal: ac.signal }));
       } else {
-        setScan(await api.portScan(target, { fromPort, toPort }));
+        setScan(await api.portScan(target, { fromPort, toPort }, { signal: ac.signal }));
       }
     } catch (e) {
+      // AbortError means a fresher submit superseded this one — silent.
+      if ((e as Error)?.name === "AbortError") return;
       setErr(e instanceof Error ? e.message : "Error");
     } finally {
-      setLoading(false);
+      if (inFlight.current === ac) {
+        inFlight.current = null;
+        setLoading(false);
+      }
     }
   }
 
