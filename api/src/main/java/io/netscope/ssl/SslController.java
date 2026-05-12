@@ -31,23 +31,32 @@ public class SslController {
     public Map<String, Object> inspect(
             @PathVariable String host,
             @RequestParam(defaultValue = "443") int port) {
-        validator.resolveAndValidate(host);
+        // SSRF + DNS-rebinding defense: resolve once, then connect by the
+        // validated InetAddress. Without this, new InetSocketAddress(host,
+        // port) would do a SECOND DNS lookup at connect time — and a low-
+        // TTL attacker resolver could return a public IP first (passes
+        // validate) and 127.0.0.1 second (the socket then targets the
+        // loopback service and the TLS chain leaks back to the user).
+        java.net.InetAddress addr = validator.resolveAndValidate(host);
         return cache.get("ssl", host + ":" + port, Map.class, Duration.ofMinutes(15), () -> {
             try {
-                return doInspect(host, port);
+                return doInspect(host, addr, port);
             } catch (Exception e) {
                 throw ApiException.badRequest("SSL error: " + e.getMessage());
             }
         });
     }
 
-    private Map<String, Object> doInspect(String host, int port) throws Exception {
+    private Map<String, Object> doInspect(String host, java.net.InetAddress addr, int port) throws Exception {
         SSLContext ctx = SSLContext.getInstance("TLS");
         ctx.init(null, null, null);
         SSLSocketFactory factory = ctx.getSocketFactory();
 
         try (SSLSocket socket = (SSLSocket) factory.createSocket()) {
-            socket.connect(new InetSocketAddress(host, port), 5000);
+            // Use the InetAddress (validated) for the connection, but keep
+            // the original hostname as the SNI value so the server returns
+            // the correct virtual-host certificate.
+            socket.connect(new InetSocketAddress(addr, port), 5000);
             socket.setSoTimeout(5000);
             SSLParameters params = socket.getSSLParameters();
             params.setServerNames(List.of(new SNIHostName(host)));
