@@ -51,8 +51,21 @@ export class NetScope {
     if (this.apiKey) headers.set("X-API-Key", this.apiKey);
     if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
 
+    // Only retry idempotent methods. POST/PUT/PATCH/DELETE may have
+    // succeeded server-side before the LB returned 502, and retrying
+    // them creates duplicate writes — most damaging on /billing/checkout
+    // (potential double-charge) and /monitor (orphan rows with auto-
+    // incremented names). Callers can override the safety net by
+    // setting an `Idempotency-Key` header — when present we retry
+    // regardless of method because the server can deduplicate.
+    const method = (init.method ?? "GET").toUpperCase();
+    const isIdempotent = method === "GET" || method === "HEAD" || method === "OPTIONS";
+    const hasIdempotencyKey = headers.has("Idempotency-Key");
+    const retryAllowed = isIdempotent || hasIdempotencyKey;
+    const maxAttempts = retryAllowed ? this.retries : 0;
+
     let lastErr: unknown;
-    for (let attempt = 0; attempt <= this.retries; attempt++) {
+    for (let attempt = 0; attempt <= maxAttempts; attempt++) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), this.timeoutMs);
       try {
@@ -61,7 +74,7 @@ export class NetScope {
         if (res.ok) return (await res.json()) as T;
 
         const body = await safeJson(res);
-        const shouldRetry = (res.status === 429 || res.status >= 500) && attempt < this.retries;
+        const shouldRetry = (res.status === 429 || res.status >= 500) && attempt < maxAttempts;
         if (!shouldRetry) {
           throw new NetScopeError(res.status, (body as { message?: string })?.message ?? res.statusText, body);
         }
@@ -70,7 +83,7 @@ export class NetScope {
         clearTimeout(timer);
         lastErr = e;
         if (e instanceof NetScopeError) throw e;
-        if (attempt === this.retries) throw e;
+        if (attempt === maxAttempts) throw e;
         await delay(backoff(attempt));
       }
     }
