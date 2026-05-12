@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangle } from "lucide-react";
 import { api, type SubdomainsResult } from "@/lib/api";
@@ -64,6 +64,13 @@ export function SubdomainsClient() {
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
   }, [data]);
 
+  // Subdomain enumeration hits crt.sh / CertSpotter, both routinely
+  // taking 5-30 s. User pattern is to edit + re-submit fast; without
+  // an AbortController, a slow EARLIER response can land AFTER a
+  // faster later one and overwrite correct state with stale data.
+  const inFlight = useRef<AbortController | null>(null);
+  useEffect(() => () => inFlight.current?.abort(), []);
+
   async function run(e: React.FormEvent) {
     e.preventDefault();
     const target = normalisedDomain;
@@ -73,16 +80,24 @@ export function SubdomainsClient() {
       setFilter("");
       return;
     }
+    inFlight.current?.abort();
+    const ac = new AbortController();
+    inFlight.current = ac;
+
     setErr(null);
     setLoading(true);
     setData(null);
     setFilter("");
     try {
-      setData(await api.subdomains(target));
+      setData(await api.subdomains(target, { signal: ac.signal }));
     } catch (e) {
+      if ((e as Error)?.name === "AbortError") return;
       setErr(e instanceof Error ? e.message : "Error");
     } finally {
-      setLoading(false);
+      if (inFlight.current === ac) {
+        inFlight.current = null;
+        setLoading(false);
+      }
     }
   }
 
