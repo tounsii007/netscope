@@ -2,7 +2,6 @@ package io.netscope.auth;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -16,7 +15,16 @@ import static org.mockito.Mockito.*;
 class ApiKeyServiceTest {
 
     @Mock ApiKeyRepository repo;
-    @InjectMocks ApiKeyService service;
+    // F26 added ApiKeyTouchService. Use a real instance (with the
+    // mocked repo) instead of @Mock — Mockito's bytecode mocker
+    // doesn't support Java 26 class files yet, so a real bean is
+    // simpler and the touch() side effect is irrelevant to the
+    // resolve() assertions here.
+    private ApiKeyService service;
+    @org.junit.jupiter.api.BeforeEach
+    void wireService() {
+        service = new ApiKeyService(repo, new ApiKeyTouchService(repo));
+    }
 
     @Test void rejectsNullAndBlank() {
         assertThat(service.resolve(null)).isEmpty();
