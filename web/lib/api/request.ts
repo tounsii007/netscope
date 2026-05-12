@@ -113,10 +113,27 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(body.message ?? `HTTP ${res.status}`, res.status);
+    // Try every common error-shape field name in turn — Spring's
+    // GlobalExceptionHandler returns {message,error,timestamp} but
+    // intermediate proxies (Cloudflare, nginx) inject different
+    // shapes (.detail, .error, plain text). Falling back to the
+    // statusText preserves SOMETHING readable.
+    const body = await res.json().catch(() => ({} as Record<string, unknown>));
+    const msg = (body as { message?: string; error?: string; detail?: string }).message
+             ?? (body as { error?: string }).error
+             ?? (body as { detail?: string }).detail
+             ?? `HTTP ${res.status} ${res.statusText}`.trim();
+    throw new ApiError(msg, res.status);
   }
-  return res.json() as Promise<T>;
+  // Wrap the success-path JSON parse so a 200 with non-JSON body
+  // (e.g. CDN maintenance HTML surfaced as 200) surfaces as ApiError
+  // — without this, the JSON parse error rejection would bubble up
+  // as a generic TypeError that the UI can't show nicely.
+  try {
+    return await (res.json() as Promise<T>);
+  } catch (err) {
+    throw new ApiError("Server returned invalid JSON", res.status, err);
+  }
 }
 
 function networkErrorMessage(err: unknown): string {
