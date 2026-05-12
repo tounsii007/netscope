@@ -74,12 +74,28 @@ describe("checkTargetGuard — IPv6 loopback / link-local / ULA", () => {
     ["::",               "blocked_localhost"],
     ["fe80::1",          "blocked_link_local"],
     ["fe80::abcd:1234",  "blocked_link_local"],
+    ["feb0::1",          "blocked_link_local"],   // upper end of fe80::/10
+    ["febf:1234::1",     "blocked_link_local"],   // mid-zone link-local
     ["fc00::1",          "blocked_private"],
+    ["fcff:ffff::1",     "blocked_private"],      // upper end of fc__
     ["fd00::ff",         "blocked_private"],
+    ["fd12:3456:7890::1","blocked_private"],
     ["::ffff:127.0.0.1", "blocked_localhost"],   // IPv4-mapped loopback
     ["::ffff:10.0.0.1",  "blocked_private"],
   ])("classifies %s as %s", (input, reason) => {
     expect(reasonOf(input)).toBe(reason);
+  });
+
+  // Regression: the previous regex (`^fe[89ab][0-9a-f]{0,2}:`) would
+  // accept `fe8:` or `feb:` as link-local even though those are not
+  // valid IPv6 hextets. Tightening the regex to require exactly 4 hex
+  // chars before the colon should NOT regress for legitimate link-local
+  // addresses — every valid form is 4 chars.
+  it("does not falsely match IPv6-shaped strings with a short prefix", () => {
+    // "fe8:" is syntactically invalid (only 3 chars in the leading
+    // hextet). The old regex matched it; the new regex correctly
+    // rejects it. Falls through to the generic public-host path.
+    expect(reasonOf("fe8:1::1")).toBe("ok");
   });
 });
 

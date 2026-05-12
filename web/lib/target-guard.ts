@@ -158,10 +158,16 @@ function classifyIpv6(s: string): GuardResult | null {
   // Quick literal checks for the most common cases. We deliberately don't
   // try to be a full IPv6 parser — just catch the obvious blockers.
   if (s === "::" || s === "::1") return { ok: false, reasonKey: "blocked_localhost" };
-  // Link-local fe80::/10 — first hextet starts with "fe8"/"fe9"/"fea"/"feb".
-  if (/^fe[89ab][0-9a-f]{0,2}:/i.test(s)) return { ok: false, reasonKey: "blocked_link_local" };
-  // ULA fc00::/7 — first hextet starts with "fc" or "fd" (any second byte).
-  if (/^f[cd][0-9a-f]{0,2}:/i.test(s)) return { ok: false, reasonKey: "blocked_private" };
+  // Link-local fe80::/10 — first 10 bits must be 1111 1110 10, which
+  // in hex means the leading hextet is fe80..febf. Valid forms of the
+  // first hextet are always exactly 4 hex chars (the leading "f" prevents
+  // leading-zero compression), so the regex is `fe` + nibble in [89ab]
+  // + 1 more hex nibble + colon-or-end. The previous version used
+  // `[0-9a-f]{0,2}` which accepted invalid 3-char prefixes like "fe8:".
+  if (/^fe[89ab][0-9a-f](?::|$)/i.test(s)) return { ok: false, reasonKey: "blocked_link_local" };
+  // ULA fc00::/7 — first 7 bits are 1111 110, leading hextet fc__ or
+  // fd__. Same shape rule: 4-char hextet then colon-or-end.
+  if (/^f[cd][0-9a-f]{2}(?::|$)/i.test(s)) return { ok: false, reasonKey: "blocked_private" };
   // IPv4-mapped IPv6 ("::ffff:127.0.0.1") — recurse into the v4 path.
   const mapped = s.match(/^::(?:ffff:)?((?:\d{1,3}\.){3}\d{1,3})$/i);
   if (mapped) {
