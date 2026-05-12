@@ -111,6 +111,20 @@ public class JwtService {
         try {
             String[] parts = token.split("\\.");
             if (parts.length != 3) return null;
+            // Reject any token whose header doesn't declare HS256.
+            // Today the HMAC compare below catches `{"alg":"none"}` tokens
+            // anyway (the empty signature byte array won't match the
+            // expected HMAC), but an explicit allow-list is cheap
+            // defense-in-depth: when the codebase later adds a second
+            // algorithm branch (RS256 migration noted in the class
+            // javadoc), the missing whitelist becomes the classic
+            // algorithm-confusion vulnerability. Lock it down now.
+            @SuppressWarnings("unchecked")
+            Map<String, Object> header = mapper.readValue(
+                Base64.getUrlDecoder().decode(parts[0]), Map.class);
+            if (!"HS256".equals(header.get("alg"))) return null;
+            if (!"JWT".equals(header.get("typ"))) return null;
+
             String signingInput = parts[0] + "." + parts[1];
             byte[] expected = hmac(signingInput);
             byte[] got = Base64.getUrlDecoder().decode(parts[2]);
