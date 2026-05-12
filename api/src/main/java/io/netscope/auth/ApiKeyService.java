@@ -1,11 +1,9 @@
 package io.netscope.auth;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
 
@@ -13,7 +11,12 @@ import java.util.Optional;
 public class ApiKeyService {
 
     private final ApiKeyRepository repo;
-    public ApiKeyService(ApiKeyRepository repo) { this.repo = repo; }
+    private final ApiKeyTouchService touchService;
+
+    public ApiKeyService(ApiKeyRepository repo, ApiKeyTouchService touchService) {
+        this.repo = repo;
+        this.touchService = touchService;
+    }
 
     public Optional<ApiKey> resolve(String key) {
         if (key == null || key.isBlank() || key.length() < 16 || key.length() > 128) {
@@ -29,14 +32,12 @@ public class ApiKeyService {
                 found.get().getKeyHash().getBytes(StandardCharsets.UTF_8))) {
             return Optional.empty();
         }
-        found.ifPresent(this::touch);
+        // Route through the separate proxied bean so @Async actually
+        // takes effect. Calling this.touch() previously was a
+        // self-invocation that bypassed the proxy and ran the DB
+        // write synchronously in the auth critical path.
+        found.ifPresent(touchService::touch);
         return found;
-    }
-
-    @Async
-    public void touch(ApiKey key) {
-        key.setLastUsedAt(Instant.now());
-        repo.save(key);
     }
 
     public static String sha256(String input) {
