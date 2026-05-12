@@ -59,7 +59,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Trivy scan
-        uses: aquasecurity/trivy-action@master
+        # Pinned to a release tag rather than @master so a compromise
+        # of trivy-action / a malicious PR merged to its main branch
+        # can't suddenly run with this job's GITHUB_TOKEN context.
+        # Bump deliberately via Dependabot (config in
+        # .github/dependabot.yml — recommend enabling if not already).
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: netscope-api:${{ github.sha }}
           exit-code: "1"
