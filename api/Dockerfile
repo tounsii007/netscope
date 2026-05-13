@@ -17,7 +17,7 @@ COPY --from=build /src/target/*.jar app.jar
 # Group 0 (root) is the OpenShift / Kubernetes RunAsAny default;
 # files owned by it are readable by the random UID Kubernetes
 # assigns when SecurityContext.runAsUser is left empty.
-RUN useradd --system --uid 10001 --gid 0 netscope && \
+RUN useradd --uid 10001 --gid 0 --no-create-home --shell /usr/sbin/nologin netscope && \
     chown -R 10001:0 /app && \
     chmod -R g=u /app
 USER 10001
