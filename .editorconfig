@@ -1,0 +1,32 @@
+# EditorConfig — keeps formatting consistent across IDEs.
+# https://editorconfig.org
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Java / Maven: project follows the standard 4-space convention.
+[*.{java,xml}]
+indent_size = 4
+
+# Markdown lines often need trailing whitespace to express hard breaks —
+# don't strip it.
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefiles and shell scripts must use tabs / preserve LF.
+[Makefile]
+indent_style = tab
+
+[*.{sh,bash}]
+end_of_line = lf
+
+# Windows-only batch files keep CRLF so cmd.exe handles them cleanly.
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
