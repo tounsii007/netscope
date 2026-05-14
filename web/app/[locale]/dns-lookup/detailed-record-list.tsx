@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { DnsRecordDetail } from "@/lib/api";
 
 /**
@@ -24,6 +25,8 @@ export function DetailedRecordList({
   type: string;
   entries: DnsRecordDetail[];
 }) {
+  const t = useTranslations("dns");
+
   if (type === "MX") {
     const sorted = [...entries].sort(
       (a, b) => (a.preference ?? 0) - (b.preference ?? 0)
@@ -52,14 +55,14 @@ export function DetailedRecordList({
         {entries.map((e, i) => (
           <li key={i} className="rounded bg-bg-elevated p-3">
             <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2">
-              <SoaRow label="Primary NS" value={e.primaryNs} mono />
-              <SoaRow label="Admin"      value={e.adminEmail} mono />
-              <SoaRow label="Serial"     value={e.serial?.toString()} mono />
-              <SoaRow label="Refresh"    value={humanSeconds(e.refresh)} />
-              <SoaRow label="Retry"      value={humanSeconds(e.retry)} />
-              <SoaRow label="Expire"     value={humanSeconds(e.expire)} />
-              <SoaRow label="Minimum"    value={humanSeconds(e.minimum)} />
-              <SoaRow label="TTL"        value={humanSeconds(e.ttl)} />
+              <SoaRow label={t("soa_primary_ns")} value={e.primaryNs} mono />
+              <SoaRow label={t("soa_admin")}      value={e.adminEmail} mono />
+              <SoaRow label={t("soa_serial")}     value={e.serial?.toString()} mono />
+              <SoaRow label={t("soa_refresh")}    value={humanSeconds(e.refresh)} />
+              <SoaRow label={t("soa_retry")}      value={humanSeconds(e.retry)} />
+              <SoaRow label={t("soa_expire")}     value={humanSeconds(e.expire)} />
+              <SoaRow label={t("soa_minimum")}    value={humanSeconds(e.minimum)} />
+              <SoaRow label={t("soa_ttl")}        value={humanSeconds(e.ttl)} />
             </div>
           </li>
         ))}
