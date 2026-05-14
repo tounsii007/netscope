@@ -24,7 +24,6 @@
     "perf:budget": "node tests/perf/check-bundle-budget.mjs"
   },
   "dependencies": {
-    "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "leaflet": "1.9.4",
     "lucide-react": "0.577.0",
@@ -34,7 +33,6 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-leaflet": "^5.0.0",
-    "recharts": "2.15.0",
     "tailwind-merge": "2.6.0",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"

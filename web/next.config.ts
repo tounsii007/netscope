@@ -8,11 +8,11 @@ const config: NextConfig = {
   // Hide the "x-powered-by: Next.js" header — small attack-surface win
   // and one fewer fingerprintable signal on every response.
   poweredByHeader: false,
-  // Tree-shake icon and chart imports so we ship only the components
+  // Tree-shake icon and map imports so we ship only the components
   // each page actually renders. `next-intl` is also pulled in via the
   // plugin and benefits from the same treatment.
   experimental: {
-    optimizePackageImports: ["lucide-react", "recharts", "react-leaflet", "next-intl"],
+    optimizePackageImports: ["lucide-react", "react-leaflet", "next-intl"],
   },
   async rewrites() {
     return [
