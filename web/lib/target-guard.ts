@@ -32,6 +32,7 @@ export type GuardReasonKey =
 
 const LOOPBACK_NAMES = new Set([
   "localhost",
+  "localhost.localdomain", // Linux /etc/hosts default alias for 127.0.0.1
   "ip6-localhost",
   "ip6-loopback",
   "broadcasthost",
@@ -105,7 +106,10 @@ export function checkTargetGuard(raw: string): GuardResult {
   // Cloud metadata
   if (METADATA_IPS.has(s)) return { ok: false, reasonKey: "blocked_metadata" };
 
-  // IPv4 numeric checks
+  // IPv4 numeric checks — covers dotted-quad plus all the legacy encodings
+  // (decimal/hex single-int, short-form like "127.1", mixed-base octets)
+  // that `inet_aton(3)` and `InetAddress.getByName()` decode back to a real
+  // IPv4 address. Naive dotted-only validation is a classic SSRF bypass.
   const v4 = parseIpv4(s);
   if (v4) return classifyIpv4(v4);
 
@@ -130,12 +134,87 @@ export function guardErrorKey(r: GuardResult): string | null {
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
+/**
+ * Parse an IPv4 address in any encoding `inet_aton(3)` accepts:
+ *
+ *   • Dotted-quad with decimal octets:   127.0.0.1
+ *   • Per-octet hex (0x prefix):          0x7f.0.0.1, 0x7f.0x0.0x0.0x1
+ *   • Per-octet octal (leading 0):        0177.0.0.1
+ *   • Short forms (1–3 dots):             127.1, 127.0.1
+ *   • Pure 32-bit integer:                2130706433
+ *   • Pure 32-bit hex:                    0x7f000001
+ *
+ * Naive dotted-only validation here used to be an SSRF bypass: `2130706433`
+ * decodes back to 127.0.0.1 in any libc/JDK resolver, so the FE could
+ * accept it while the backend still happily resolved it.
+ *
+ * Returns the normalised four octets, or null if the input doesn't look
+ * like any of the above.
+ */
 function parseIpv4(s: string): [number, number, number, number] | null {
-  const m = s.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (!m) return null;
-  const o = m.slice(1, 5).map((x) => Number(x));
-  for (const n of o) if (n < 0 || n > 255) return null;
-  return [o[0], o[1], o[2], o[3]];
+  if (!s || /\s/.test(s)) return null;
+  const parts = s.split(".");
+  if (parts.length === 0 || parts.length > 4) return null;
+
+  const nums: number[] = [];
+  for (const p of parts) {
+    if (p === "") return null;
+    let n: number;
+    if (/^0x[0-9a-f]+$/i.test(p)) {
+      // Hex
+      n = parseInt(p.slice(2), 16);
+    } else if (/^0[0-7]+$/.test(p)) {
+      // Octal (leading zero, all digits ≤ 7)
+      n = parseInt(p, 8);
+    } else if (/^[0-9]+$/.test(p)) {
+      // Decimal — also matches single "0"
+      n = parseInt(p, 10);
+    } else {
+      return null;
+    }
+    if (!Number.isFinite(n) || n < 0) return null;
+    nums.push(n);
+  }
+
+  // Combine according to inet_aton semantics:
+  //   a            → a is a 32-bit value
+  //   a.b          → a is octet 0, b is the low 24 bits
+  //   a.b.c        → a, b are octets 0 and 1, c is the low 16 bits
+  //   a.b.c.d      → standard dotted-quad, every part must be ≤ 255
+  // We multiply instead of shifting because `224 << 24` overflows
+  // JS's 32-bit signed-int bitwise space and yields a negative number.
+  let raw: number;
+  switch (nums.length) {
+    case 1:
+      raw = nums[0];
+      break;
+    case 2:
+      if (nums[0] > 0xff || nums[1] > 0xffffff) return null;
+      raw = nums[0] * 0x1000000 + nums[1];
+      break;
+    case 3:
+      if (nums[0] > 0xff || nums[1] > 0xff || nums[2] > 0xffff) return null;
+      raw = nums[0] * 0x1000000 + nums[1] * 0x10000 + nums[2];
+      break;
+    case 4:
+      if (nums.some((n) => n > 0xff)) return null;
+      raw =
+        nums[0] * 0x1000000 +
+        nums[1] * 0x10000 +
+        nums[2] * 0x100 +
+        nums[3];
+      break;
+    default:
+      return null;
+  }
+  if (!Number.isFinite(raw) || raw < 0 || raw > 0xffffffff) return null;
+  // Unsigned-right-shift keeps the top bit out of the sign.
+  return [
+    Math.floor(raw / 0x1000000) & 0xff,
+    Math.floor(raw / 0x10000) & 0xff,
+    Math.floor(raw / 0x100) & 0xff,
+    raw & 0xff,
+  ];
 }
 
 function classifyIpv4([a, b, , ]: [number, number, number, number]): GuardResult {
@@ -154,25 +233,103 @@ function classifyIpv4([a, b, , ]: [number, number, number, number]): GuardResult
   return { ok: true };
 }
 
-function classifyIpv6(s: string): GuardResult | null {
-  // Quick literal checks for the most common cases. We deliberately don't
-  // try to be a full IPv6 parser — just catch the obvious blockers.
-  if (s === "::" || s === "::1") return { ok: false, reasonKey: "blocked_localhost" };
-  // Link-local fe80::/10 — first 10 bits must be 1111 1110 10, which
-  // in hex means the leading hextet is fe80..febf. Valid forms of the
-  // first hextet are always exactly 4 hex chars (the leading "f" prevents
-  // leading-zero compression), so the regex is `fe` + nibble in [89ab]
-  // + 1 more hex nibble + colon-or-end. The previous version used
-  // `[0-9a-f]{0,2}` which accepted invalid 3-char prefixes like "fe8:".
-  if (/^fe[89ab][0-9a-f](?::|$)/i.test(s)) return { ok: false, reasonKey: "blocked_link_local" };
-  // ULA fc00::/7 — first 7 bits are 1111 110, leading hextet fc__ or
-  // fd__. Same shape rule: 4-char hextet then colon-or-end.
-  if (/^f[cd][0-9a-f]{2}(?::|$)/i.test(s)) return { ok: false, reasonKey: "blocked_private" };
-  // IPv4-mapped IPv6 ("::ffff:127.0.0.1") — recurse into the v4 path.
-  const mapped = s.match(/^::(?:ffff:)?((?:\d{1,3}\.){3}\d{1,3})$/i);
-  if (mapped) {
-    const v4 = parseIpv4(mapped[1]);
-    if (v4) return classifyIpv4(v4);
+/**
+ * Expand an IPv6 address to its canonical eight-hextet form (lowercase,
+ * each hextet zero-padded to 4 chars). Handles "::" compression, IPv4
+ * tail (e.g. "::ffff:127.0.0.1"), and the zone identifier suffix
+ * ("%eth0"). Returns null if the input isn't a syntactically plausible
+ * IPv6 address.
+ *
+ * The previous guard only matched a handful of literal forms (`::1`,
+ * `::`) and missed the full-form spellings every attacker tries first:
+ * `0:0:0:0:0:0:0:1`, `0000:…:0001`, `0::1`. Expanding to canonical first
+ * lets us match the whole class with one substring comparison.
+ */
+function expandIpv6(input: string): string | null {
+  // Drop zone identifier, e.g. "fe80::1%eth0" → "fe80::1".
+  const pct = input.indexOf("%");
+  let s = pct >= 0 ? input.slice(0, pct) : input;
+  if (!s.includes(":")) return null;
+
+  // IPv4 tail (mapped/compat): "::ffff:127.0.0.1" → splice in two extra
+  // hextets from the decoded 32-bit address.
+  const tailMatch = s.match(/^(.*:)((?:\d{1,3}\.){3}\d{1,3})$/);
+  if (tailMatch) {
+    const v4 = parseIpv4(tailMatch[2]);
+    if (!v4) return null;
+    const hi = ((v4[0] << 8) | v4[1]).toString(16);
+    const lo = ((v4[2] << 8) | v4[3]).toString(16);
+    s = tailMatch[1] + hi + ":" + lo;
   }
+
+  // Split on "::" at most once. "::" expands to fill the address.
+  const dblColonCount = (s.match(/::/g) || []).length;
+  if (dblColonCount > 1) return null;
+
+  let head: string[], tail: string[];
+  if (dblColonCount === 1) {
+    const [h, t] = s.split("::");
+    head = h ? h.split(":") : [];
+    tail = t ? t.split(":") : [];
+    const fill = 8 - head.length - tail.length;
+    if (fill < 0) return null;
+    head = head.concat(Array(fill).fill("0"), tail);
+  } else {
+    head = s.split(":");
+  }
+
+  if (head.length !== 8) return null;
+
+  const padded: string[] = [];
+  for (const hextet of head) {
+    if (!/^[0-9a-f]{1,4}$/i.test(hextet)) return null;
+    padded.push(hextet.toLowerCase().padStart(4, "0"));
+  }
+  return padded.join(":");
+}
+
+function classifyIpv6(s: string): GuardResult | null {
+  const expanded = expandIpv6(s);
+  if (!expanded) return null;
+  const hextets = expanded.split(":");
+
+  // Loopback "::1" — every hextet zero except the last which is "0001".
+  if (
+    hextets.slice(0, 7).every((h) => h === "0000") &&
+    (hextets[7] === "0001" || hextets[7] === "0000")
+  ) {
+    return { ok: false, reasonKey: "blocked_localhost" };
+  }
+
+  // Link-local fe80::/10 — first 10 bits 1111 1110 10. In a 4-char hextet
+  // that's "fe80".."febf".
+  const first = parseInt(hextets[0], 16);
+  if (first >= 0xfe80 && first <= 0xfebf) {
+    return { ok: false, reasonKey: "blocked_link_local" };
+  }
+
+  // ULA fc00::/7 — leading hextet fc00..fdff.
+  if (first >= 0xfc00 && first <= 0xfdff) {
+    return { ok: false, reasonKey: "blocked_private" };
+  }
+
+  // IPv4-mapped/-compatible into the v4 ranges already classified.
+  // Indicators: high six hextets all zero, or zero plus "ffff".
+  const allZeroPrefix = hextets.slice(0, 6).every((h) => h === "0000");
+  const mappedPrefix =
+    hextets.slice(0, 5).every((h) => h === "0000") && hextets[5] === "ffff";
+  if (allZeroPrefix || mappedPrefix) {
+    const high = parseInt(hextets[6], 16);
+    const low = parseInt(hextets[7], 16);
+    const v4: [number, number, number, number] = [
+      (high >>> 8) & 0xff,
+      high & 0xff,
+      (low >>> 8) & 0xff,
+      low & 0xff,
+    ];
+    const verdict = classifyIpv4(v4);
+    if (!verdict.ok) return verdict;
+  }
+
   return null;
 }
