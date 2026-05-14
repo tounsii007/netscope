@@ -364,10 +364,6 @@
       "desc": "Your IP, location, ISP, browser, OS.",
       "meta_title": "My IP Dashboard",
       "meta_description": "Your IP, location, ISP, browser, OS, screen, timezone — all in one view."
-    },
-    "monitoring": {
-      "title": "Monitoring",
-      "desc": "Scheduled uptime checks and alerts."
     }
   },
   "footer": {

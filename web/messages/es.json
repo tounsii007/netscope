@@ -364,10 +364,6 @@
       "desc": "Tu IP, ubicación, ISP, navegador, OS.",
       "meta_title": "Dashboard de Mi IP",
       "meta_description": "Tu IP, ubicación, ISP, navegador, OS, pantalla, zona horaria — todo de un vistazo."
-    },
-    "monitoring": {
-      "title": "Monitoreo",
-      "desc": "Comprobaciones de disponibilidad programadas y alertas."
     }
   },
   "footer": {

@@ -364,10 +364,6 @@
       "desc": "Il tuo IP, posizione, ISP, browser, OS.",
       "meta_title": "Dashboard del mio IP",
       "meta_description": "Il tuo IP, posizione, ISP, browser, OS, schermo, fuso orario — tutto in una vista."
-    },
-    "monitoring": {
-      "title": "Monitoraggio",
-      "desc": "Controlli di uptime programmati e avvisi."
     }
   },
   "footer": {

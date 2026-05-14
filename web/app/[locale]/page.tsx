@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Network, Globe, Lock, Search, Activity, Server, Shield, Radar,
+import { Network, Globe, Lock, Search, Activity, Server, Radar,
   Globe2, ShieldCheck, GitBranch, Cloud, KeyRound, Mail, ShieldAlert, ShieldX,
   ArrowRightLeft, Layers, Cookie, Image as ImageIcon, FileSearch,
   Wifi, Route, Unlock, ShieldEllipsis } from "lucide-react";
@@ -31,7 +31,6 @@ const toolKeys = [
   { href: "/bgp",             icon: Route },
   { href: "/mixed-content",   icon: Unlock },
   { href: "/dashboard",       icon: Activity },
-  { href: "/monitoring",      icon: Shield },
 ] as const;
 
 export default function Home() {
