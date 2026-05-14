@@ -312,7 +312,7 @@
       }
     },
     "robots": {
-      "title": "Robots & Sitemap",
+      "title": "रोबोट और साइटमैप",
       "desc": "robots.txt पार्स करें और sitemap वैलिडेट करें।",
       "meta_title": "Robots.txt और साइटमैप वैलिडेटर",
       "meta_description": "किसी भी होस्ट के लिए robots.txt नियमों और साइटमैप XML को पार्स और सत्यापित करें।",
@@ -590,6 +590,8 @@
     "field_coords": "निर्देशांक",
     "field_org": "संगठन",
     "field_user_agent": "आपका User-Agent",
+    "field_reverse_dns": "रिवर्स DNS (PTR)",
+    "class_label": "श्रेणी",
     "multi_title": "विभिन्न प्रदाताओं की तुलना",
     "multi_subtitle": "एक ही IP को कई जियोलोकेशन APIs से समानांतर में पूछा जाता है — अंतर डेटा-स्रोतों के अंतर को दर्शाते हैं।",
     "multi_loading": "प्रदाता समानांतर में पूछे जा रहे हैं…",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "IPv6 वाले नेमसर्वर ({with}/{total})",
     "row_mx": "IPv6 वाले MX ({with}/{total})",
-    "warnings": "चेतावनियां"
+    "warnings": "चेतावनियां",
+    "nxdomain_title": "डोमेन नहीं मिला",
+    "nxdomain_message": "{domain} के लिए कोई भी DNS रिकॉर्ड हल नहीं हो सका। संभवतः यह डोमेन मौजूद नहीं है।",
+    "nxdomain_hint_typo": "डोमेन नाम की वर्तनी में टाइपिंग त्रुटियों की जाँच करें।",
+    "nxdomain_hint_scheme": "http:// या https:// उपसर्ग हटा दें — केवल डोमेन दर्ज करें।",
+    "nxdomain_hint_resolver": "पुनः प्रयास करें — सार्वजनिक DNS रिज़ॉल्वर कभी-कभी असंगत उत्तर दे सकते हैं।"
   },
   "jwt": {
     "title": "JWT डिकोडर",
@@ -715,7 +722,7 @@
     "location": "गंतव्य"
   },
   "robots": {
-    "title": "Robots & Sitemap",
+    "title": "रोबोट और साइटमैप",
     "subtitle": "robots.txt पार्स करें और संदर्भित Sitemap वैलिडेट करें।",
     "robots_txt": "robots.txt",
     "sitemaps": "Sitemap",
@@ -738,7 +745,7 @@
     "field_subject_alt": "वैकल्पिक विषय नाम",
     "field_pubkey": "सार्वजनिक कुंजी",
     "warn_self_signed": "सर्टिफिकेट स्वयं-हस्ताक्षरित है।",
-    "warn_self_signed_short": "self-signed",
+    "warn_self_signed_short": "स्व-हस्ताक्षरित",
     "grade": "ग्रेड",
     "chain": "सर्टिफिकेट चेन"
   },

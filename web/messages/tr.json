@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Teknoloji yığını",
       "desc": "Framework, CMS, analytics, hosting tespit et.",
       "meta_title": "Tech Stack tespit edici — Bu site neyle yapılmış?",
       "meta_description": "Genel yanıt verilerinden framework, CMS, analytics, e-ticaret, hosting ve kütüphaneleri tespit et.",
@@ -348,7 +348,7 @@
       }
     },
     "mixed-content": {
-      "title": "Mixed Content",
+      "title": "Karışık içerik",
       "desc": "HTTPS sayfalarında http:// kaynaklarını bul.",
       "meta_title": "Mixed Content tarayıcı",
       "meta_description": "HTTPS sayfalarında tarayıcıların engellediği veya uyardığı güvensiz http:// kaynaklarını bul.",
@@ -505,7 +505,7 @@
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Residential"
+    "threat_residential": "Konut"
   },
   "dns": {
     "title": "DNS araması",
@@ -577,7 +577,7 @@
   },
   "ip": {
     "title": "IP araması",
-    "subtitle": "Coğrafi konum, ASN, ISP ve threat intelligence.",
+    "subtitle": "Coğrafi konum, ASN, ISP ve tehdit istihbaratı.",
     "placeholder": "IPv4 veya IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -589,7 +589,9 @@
     "field_asn": "ASN",
     "field_coords": "Koordinatlar",
     "field_org": "Organizasyon",
-    "field_user_agent": "Senin User-Agent",
+    "field_user_agent": "User-Agent bilginiz",
+    "field_reverse_dns": "Ters DNS (PTR)",
+    "class_label": "Sınıf",
     "multi_title": "Sağlayıcılar arası karşılaştırma",
     "multi_subtitle": "Aynı IP birden fazla coğrafi konum API'sine paralel sorulur — ayrılıklar veri kaynağı farklarını ortaya çıkarır.",
     "multi_loading": "Sağlayıcılar paralel sorgulanıyor…",
@@ -611,13 +613,13 @@
     "multi_languages": "Diller",
     "multi_eu": "AB üyesi",
     "multi_open_raw": "Ham yanıtı aç",
-    "threat_title": "Threat intelligence",
+    "threat_title": "Tehdit istihbaratı",
     "risk_score": "risk skoru",
     "threat_tor": "TOR çıkışı",
-    "threat_hosting": "Hosting / DC",
+    "threat_hosting": "Hosting / Veri merkezi",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Residential"
+    "threat_residential": "Konut"
   },
   "ipv6": {
     "title": "IPv6 hazırlık",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "IPv6'lı name server'lar ({with}/{total})",
     "row_mx": "IPv6'lı MX ({with}/{total})",
-    "warnings": "Uyarılar"
+    "warnings": "Uyarılar",
+    "nxdomain_title": "Alan adı bulunamadı",
+    "nxdomain_message": "{domain} için hiçbir DNS kaydı çözümlenemedi. Alan adı muhtemelen mevcut değil.",
+    "nxdomain_hint_typo": "Alan adının yazımında yazım hatası olup olmadığını kontrol edin.",
+    "nxdomain_hint_scheme": "http:// veya https:// önekini kaldırın — yalnızca alan adını girin.",
+    "nxdomain_hint_resolver": "Tekrar deneyin — genel DNS resolver'ları zaman zaman tutarsız yanıtlar verebilir."
   },
   "jwt": {
     "title": "JWT decoder",
@@ -735,10 +742,10 @@
     "field_valid_to": "Geçerli son",
     "field_issuer": "Yayıncı",
     "field_expiry": "Son kullanmaya gün",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Alternatif adlar (SAN)",
     "field_pubkey": "Açık anahtar",
     "warn_self_signed": "Sertifika kendinden imzalı.",
-    "warn_self_signed_short": "self-signed",
+    "warn_self_signed_short": "kendinden imzalı",
     "grade": "Derece",
     "chain": "Sertifika zinciri"
   },

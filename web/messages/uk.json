@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Технологічний стек",
       "desc": "Виявляй фреймворки, CMS, аналітику, хостинг.",
       "meta_title": "Детектор Tech Stack — На чому побудований цей сайт?",
       "meta_description": "Виявляй фреймворки, CMS, аналітику, e-commerce, хостинг і бібліотеки з публічних даних відповіді.",
@@ -291,7 +291,7 @@
       "title": "Cookie / GDPR",
       "desc": "Прапорці cookies + виявлення сторонніх трекерів.",
       "meta_title": "Аналізатор Cookie і GDPR",
-      "meta_description": "Інспектуй прапорці Set-Cookie та сторонні трекери, що завантажуються на будь-якій сторінці. Score ризику GDPR.",
+      "meta_description": "Перевіряйте прапорці Set-Cookie та сторонні трекери, що завантажуються на будь-якій сторінці. Оцінка ризику GDPR.",
       "explainer": {
         "purpose": "Аналізатор Cookie і GDPR завантажує URL і перераховує кожен встановлений cookie, включаючи прапорці безпеки (Secure, HttpOnly, SameSite, Max-Age) плюс виявлені сторонні трекери. Допомагає з GDPR-compliance і аудитами приватності.",
         "how_it_works": "Browser-like fetch збирає кожен Set-Cookie заголовок відповіді.\nСторонні домени мапляться на курований список трекерів / реклами / аналітики.\nВідсутні прапорці безпеки репортяться з причиною їх важливості.",
@@ -348,7 +348,7 @@
       }
     },
     "mixed-content": {
-      "title": "Mixed Content",
+      "title": "Змішаний контент",
       "desc": "Знайди http:// ресурси на HTTPS-сторінках.",
       "meta_title": "Сканер Mixed Content",
       "meta_description": "Знайди небезпечні http:// ресурси на твоїх HTTPS-сторінках, які браузери блокують або попереджають про них.",
@@ -563,8 +563,8 @@
   },
   "headers": {
     "title": "HTTP-заголовки безпеки",
-    "subtitle": "Аналізуй заголовки відповіді та оцінюй security-постуру від A+ до F.",
-    "score": "Score {score}/100",
+    "subtitle": "Аналізуй заголовки відповіді та оцінюй рівень безпеки від A+ до F.",
+    "score": "Оцінка {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Перевірки заголовків безпеки",
     "raw_headers": "Сирі заголовки відповіді",
@@ -577,7 +577,7 @@
   },
   "ip": {
     "title": "Пошук IP",
-    "subtitle": "Геолокація, ASN, ISP і threat intelligence.",
+    "subtitle": "Геолокація, ASN, ISP і аналіз загроз.",
     "placeholder": "IPv4 або IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -590,6 +590,8 @@
     "field_coords": "Координати",
     "field_org": "Організація",
     "field_user_agent": "Твій User-Agent",
+    "field_reverse_dns": "Зворотний DNS (PTR)",
+    "class_label": "Клас",
     "multi_title": "Порівняння між провайдерами",
     "multi_subtitle": "Один і той самий IP опитаний паралельно у кількох API геолокації — розбіжності розкривають відмінності джерел даних.",
     "multi_loading": "Опит провайдерів паралельно…",
@@ -611,10 +613,10 @@
     "multi_languages": "Мови",
     "multi_eu": "Член ЄС",
     "multi_open_raw": "Відкрити сиру відповідь",
-    "threat_title": "Threat intelligence",
-    "risk_score": "score ризику",
+    "threat_title": "Аналіз загроз",
+    "risk_score": "оцінка ризику",
     "threat_tor": "TOR-вихід",
-    "threat_hosting": "Хостинг / DC",
+    "threat_hosting": "Хостинг / ЦОД",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
     "threat_residential": "Резидентний"
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Сервери імен з IPv6 ({with}/{total})",
     "row_mx": "MX з IPv6 ({with}/{total})",
-    "warnings": "Попередження"
+    "warnings": "Попередження",
+    "nxdomain_title": "Домен не знайдено",
+    "nxdomain_message": "Не вдалося розв'язати жодного DNS-запису для {domain}. Швидше за все, домен не існує.",
+    "nxdomain_hint_typo": "Перевір написання імені домену на наявність опечаток.",
+    "nxdomain_hint_scheme": "Видали префікс http:// або https:// — введи лише домен.",
+    "nxdomain_hint_resolver": "Спробуй ще раз — публічні DNS-резолвери іноді повертають суперечливі відповіді."
   },
   "jwt": {
     "title": "Декодер JWT",
@@ -735,10 +742,10 @@
     "field_valid_to": "Валідний до",
     "field_issuer": "Емітент",
     "field_expiry": "Днів до закінчення",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Альтернативні імена (SAN)",
     "field_pubkey": "Відкритий ключ",
     "warn_self_signed": "Сертифікат самопідписаний.",
-    "warn_self_signed_short": "self-signed",
+    "warn_self_signed_short": "самопідписаний",
     "grade": "Оцінка",
     "chain": "Ланцюг сертифікатів"
   },

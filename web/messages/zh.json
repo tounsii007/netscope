@@ -590,6 +590,8 @@
     "field_coords": "坐标",
     "field_org": "组织",
     "field_user_agent": "您的 User-Agent",
+    "field_reverse_dns": "反向 DNS (PTR)",
+    "class_label": "类别",
     "multi_title": "多提供商对比",
     "multi_subtitle": "同一 IP 同时向多个地理定位 API 查询 — 差异反映数据源差异。",
     "multi_loading": "正在并行查询各提供商…",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "支持 IPv6 的域名服务器 ({with}/{total})",
     "row_mx": "支持 IPv6 的 MX ({with}/{total})",
-    "warnings": "警告"
+    "warnings": "警告",
+    "nxdomain_title": "域名未找到",
+    "nxdomain_message": "无法解析 {domain} 的任何 DNS 记录。该域名可能不存在。",
+    "nxdomain_hint_typo": "请仔细检查域名拼写是否有错误。",
+    "nxdomain_hint_scheme": "请删除 http:// 或 https:// 前缀 — 仅输入域名。",
+    "nxdomain_hint_resolver": "请重试 — 公共 DNS 解析器有时会返回不一致的结果。"
   },
   "jwt": {
     "title": "JWT 解码器",

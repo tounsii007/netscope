@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Stack tecnologico",
       "desc": "Rileva framework, CMS, analytics, hosting.",
       "meta_title": "Rilevatore di Tech Stack — Con cosa è costruito questo sito?",
       "meta_description": "Rileva framework, CMS, analytics, e-commerce, hosting e librerie dai dati di risposta pubblici.",
@@ -348,7 +348,7 @@
       }
     },
     "mixed-content": {
-      "title": "Mixed Content",
+      "title": "Contenuto misto",
       "desc": "Trova risorse http:// su pagine HTTPS.",
       "meta_title": "Scanner Mixed Content",
       "meta_description": "Trova risorse http:// non sicure sulle tue pagine HTTPS che i browser bloccano o segnalano.",
@@ -460,7 +460,7 @@
   "cdn": {
     "title": "Rilevatore CDN",
     "subtitle": "Identifica il CDN o WAF davanti a qualsiasi host.",
-    "powered_by": "Powered by",
+    "powered_by": "Fornito da",
     "no_cdn": "Nessun CDN rilevato tramite header.",
     "server_label": "server",
     "detection_signals": "Segnali di rilevamento"
@@ -564,7 +564,7 @@
   "headers": {
     "title": "Header di sicurezza HTTP",
     "subtitle": "Analizza gli header di risposta e valuta la postura di sicurezza da A+ a F.",
-    "score": "Score {score}/100",
+    "score": "Punteggio {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Controlli degli header di sicurezza",
     "raw_headers": "Header di risposta grezzi",
@@ -577,7 +577,7 @@
   },
   "ip": {
     "title": "Ricerca IP",
-    "subtitle": "Geolocalizzazione, ASN, ISP e threat intelligence.",
+    "subtitle": "Geolocalizzazione, ASN, ISP e intelligence sulle minacce.",
     "placeholder": "IPv4 o IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -590,6 +590,8 @@
     "field_coords": "Coordinate",
     "field_org": "Organizzazione",
     "field_user_agent": "Il tuo User-Agent",
+    "field_reverse_dns": "DNS inverso (PTR)",
+    "class_label": "Classe",
     "multi_title": "Confronta tra provider",
     "multi_subtitle": "Lo stesso IP interrogato in parallelo verso più API di geolocalizzazione — le divergenze rivelano differenze tra le fonti dati.",
     "multi_loading": "Interrogazione provider in parallelo…",
@@ -611,8 +613,8 @@
     "multi_languages": "Lingue",
     "multi_eu": "Membro UE",
     "multi_open_raw": "Apri risposta grezza",
-    "threat_title": "Threat intelligence",
-    "risk_score": "score di rischio",
+    "threat_title": "Intelligence sulle minacce",
+    "risk_score": "punteggio di rischio",
     "threat_tor": "Uscita TOR",
     "threat_hosting": "Hosting / DC",
     "threat_vpn": "VPN",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Name server con IPv6 ({with}/{total})",
     "row_mx": "MX con IPv6 ({with}/{total})",
-    "warnings": "Avvisi"
+    "warnings": "Avvisi",
+    "nxdomain_title": "Dominio non trovato",
+    "nxdomain_message": "Non è stato possibile risolvere alcun record DNS per {domain}. Probabilmente il dominio non esiste.",
+    "nxdomain_hint_typo": "Controlla la presenza di errori di battitura nel nome di dominio.",
+    "nxdomain_hint_scheme": "Rimuovi qualsiasi prefisso http:// o https:// — inserisci solo il dominio.",
+    "nxdomain_hint_resolver": "Riprova — i resolver DNS pubblici possono talvolta restituire risposte incoerenti."
   },
   "jwt": {
     "title": "Decoder JWT",
@@ -735,7 +742,7 @@
     "field_valid_to": "Valido fino a",
     "field_issuer": "Emittente",
     "field_expiry": "Giorni alla scadenza",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Nomi alternativi (SAN)",
     "field_pubkey": "Chiave pubblica",
     "warn_self_signed": "Il certificato è autofirmato.",
     "warn_self_signed_short": "autofirmato",

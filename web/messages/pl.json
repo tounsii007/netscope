@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Stos technologiczny",
       "desc": "Wykryj frameworki, CMS, analytics, hosting.",
       "meta_title": "Detektor Tech Stack — Z czego zbudowana jest ta strona?",
       "meta_description": "Wykryj frameworki, CMS, analytics, e-commerce, hosting i biblioteki z publicznych danych odpowiedzi.",
@@ -348,7 +348,7 @@
       }
     },
     "mixed-content": {
-      "title": "Mixed Content",
+      "title": "Treść mieszana",
       "desc": "Znajdź zasoby http:// na stronach HTTPS.",
       "meta_title": "Skaner Mixed Content",
       "meta_description": "Znajdź niezabezpieczone zasoby http:// na swoich stronach HTTPS, które przeglądarki blokują lub o nich ostrzegają.",
@@ -366,7 +366,7 @@
       "meta_description": "Twój IP, lokalizacja, ISP, przeglądarka, OS, ekran, strefa czasowa — wszystko w jednym widoku."
     },
     "monitoring": {
-      "title": "Monitoring",
+      "title": "Monitorowanie",
       "desc": "Zaplanowane sprawdzenia dostępności i alerty."
     }
   },
@@ -564,7 +564,7 @@
   "headers": {
     "title": "Nagłówki bezpieczeństwa HTTP",
     "subtitle": "Analizuj nagłówki odpowiedzi i oceń postawę bezpieczeństwa od A+ do F.",
-    "score": "Score {score}/100",
+    "score": "Wynik {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Sprawdzenia nagłówków bezpieczeństwa",
     "raw_headers": "Surowe nagłówki odpowiedzi",
@@ -577,7 +577,7 @@
   },
   "ip": {
     "title": "Sprawdzanie IP",
-    "subtitle": "Geolokalizacja, ASN, ISP i threat intelligence.",
+    "subtitle": "Geolokalizacja, ASN, ISP i analiza zagrożeń.",
     "placeholder": "IPv4 lub IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -590,6 +590,8 @@
     "field_coords": "Współrzędne",
     "field_org": "Organizacja",
     "field_user_agent": "Twój User-Agent",
+    "field_reverse_dns": "Odwrotny DNS (PTR)",
+    "class_label": "Klasa",
     "multi_title": "Porównaj między dostawcami",
     "multi_subtitle": "Ten sam IP odpytany równolegle wobec wielu API geolokalizacyjnych — rozbieżności ujawniają różnice między źródłami danych.",
     "multi_loading": "Odpytywanie dostawców równolegle…",
@@ -611,8 +613,8 @@
     "multi_languages": "Języki",
     "multi_eu": "Członek UE",
     "multi_open_raw": "Otwórz surową odpowiedź",
-    "threat_title": "Threat intelligence",
-    "risk_score": "score ryzyka",
+    "threat_title": "Analiza zagrożeń",
+    "risk_score": "wynik ryzyka",
     "threat_tor": "Wyjście TOR",
     "threat_hosting": "Hosting / DC",
     "threat_vpn": "VPN",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Serwery nazw z IPv6 ({with}/{total})",
     "row_mx": "MX z IPv6 ({with}/{total})",
-    "warnings": "Ostrzeżenia"
+    "warnings": "Ostrzeżenia",
+    "nxdomain_title": "Nie znaleziono domeny",
+    "nxdomain_message": "Nie udało się rozwiązać żadnych rekordów DNS dla {domain}. Domena prawdopodobnie nie istnieje.",
+    "nxdomain_hint_typo": "Sprawdź pisownię nazwy domeny pod kątem literówek.",
+    "nxdomain_hint_scheme": "Usuń prefiks http:// lub https:// — wprowadź tylko domenę.",
+    "nxdomain_hint_resolver": "Spróbuj ponownie — publiczne resolvery DNS mogą czasami zwracać niespójne odpowiedzi."
   },
   "jwt": {
     "title": "Dekoder JWT",
@@ -735,10 +742,10 @@
     "field_valid_to": "Ważny do",
     "field_issuer": "Wystawca",
     "field_expiry": "Dni do wygaśnięcia",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Nazwy alternatywne (SAN)",
     "field_pubkey": "Klucz publiczny",
     "warn_self_signed": "Certyfikat jest podpisany samodzielnie.",
-    "warn_self_signed_short": "self-signed",
+    "warn_self_signed_short": "samopodpisany",
     "grade": "Ocena",
     "chain": "Łańcuch certyfikatów"
   },

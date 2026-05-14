@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Stack tecnológico",
       "desc": "Detecta frameworks, CMS, analytics, hosting.",
       "meta_title": "Detector de Tech Stack — ¿Con qué está construido este sitio?",
       "meta_description": "Detecta frameworks, CMS, analytics, e-commerce, hosting y librerías desde datos de respuesta públicos.",
@@ -564,7 +564,7 @@
   "headers": {
     "title": "Cabeceras de seguridad HTTP",
     "subtitle": "Analizar cabeceras de respuesta y calificar la postura de seguridad de A+ a F.",
-    "score": "Score {score}/100",
+    "score": "Puntuación {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Comprobaciones de cabeceras de seguridad",
     "raw_headers": "Cabeceras de respuesta crudas",
@@ -577,7 +577,7 @@
   },
   "ip": {
     "title": "Búsqueda IP",
-    "subtitle": "Geolocalización, ASN, ISP y threat intelligence.",
+    "subtitle": "Geolocalización, ASN, ISP e inteligencia de amenazas.",
     "placeholder": "IPv4 o IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -590,6 +590,8 @@
     "field_coords": "Coordenadas",
     "field_org": "Organización",
     "field_user_agent": "Tu User-Agent",
+    "field_reverse_dns": "DNS inverso (PTR)",
+    "class_label": "Clase",
     "multi_title": "Comparar entre proveedores",
     "multi_subtitle": "La misma IP consultada en paralelo contra múltiples APIs de geolocalización — las divergencias revelan diferencias entre fuentes de datos.",
     "multi_loading": "Consultando proveedores en paralelo…",
@@ -611,10 +613,10 @@
     "multi_languages": "Idiomas",
     "multi_eu": "Miembro UE",
     "multi_open_raw": "Abrir respuesta cruda",
-    "threat_title": "Threat intelligence",
-    "risk_score": "score de riesgo",
+    "threat_title": "Inteligencia de amenazas",
+    "risk_score": "puntuación de riesgo",
     "threat_tor": "Salida TOR",
-    "threat_hosting": "Hosting / DC",
+    "threat_hosting": "Hosting / CPD",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
     "threat_residential": "Residencial"
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Servidores de nombres con IPv6 ({with}/{total})",
     "row_mx": "MX con IPv6 ({with}/{total})",
-    "warnings": "Advertencias"
+    "warnings": "Advertencias",
+    "nxdomain_title": "Dominio no encontrado",
+    "nxdomain_message": "No se han podido resolver registros DNS para {domain}. Probablemente el dominio no existe.",
+    "nxdomain_hint_typo": "Verifica la ortografía del nombre de dominio.",
+    "nxdomain_hint_scheme": "Elimina cualquier prefijo http:// o https:// — introduce solo el dominio.",
+    "nxdomain_hint_resolver": "Inténtalo de nuevo — los resolutores DNS públicos a veces devuelven respuestas inconsistentes."
   },
   "jwt": {
     "title": "Decodificador JWT",
@@ -735,7 +742,7 @@
     "field_valid_to": "Válido hasta",
     "field_issuer": "Emisor",
     "field_expiry": "Días hasta expiración",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Nombres alternativos (SAN)",
     "field_pubkey": "Clave pública",
     "warn_self_signed": "El certificado está autofirmado.",
     "warn_self_signed_short": "autofirmado",

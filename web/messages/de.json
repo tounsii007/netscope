@@ -564,7 +564,7 @@
   "headers": {
     "title": "HTTP-Sicherheits-Header",
     "subtitle": "Response-Header analysieren und von A+ bis F bewerten.",
-    "score": "Score {score}/100",
+    "score": "Bewertung {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Sicherheits-Header-Prüfungen",
     "raw_headers": "Rohe Response-Header",
@@ -590,6 +590,8 @@
     "field_coords": "Koordinaten",
     "field_org": "Organisation",
     "field_user_agent": "Dein User-Agent",
+    "field_reverse_dns": "Reverse-DNS (PTR)",
+    "class_label": "Klasse",
     "multi_title": "Vergleich verschiedener Anbieter",
     "multi_subtitle": "Dieselbe IP, parallel von mehreren Geolocation-APIs abgefragt — Abweichungen zeigen Unterschiede in den Datenquellen.",
     "multi_loading": "Anbieter werden parallel abgefragt…",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Nameserver mit IPv6 ({with}/{total})",
     "row_mx": "MX mit IPv6 ({with}/{total})",
-    "warnings": "Hinweise"
+    "warnings": "Hinweise",
+    "nxdomain_title": "Domain nicht gefunden",
+    "nxdomain_message": "Für {domain} konnten keine DNS-Einträge aufgelöst werden. Die Domain existiert wahrscheinlich nicht.",
+    "nxdomain_hint_typo": "Domainnamen auf Tippfehler prüfen.",
+    "nxdomain_hint_scheme": "Präfixe http:// oder https:// entfernen — nur die Domain eingeben.",
+    "nxdomain_hint_resolver": "Erneut versuchen — öffentliche DNS-Resolver liefern gelegentlich inkonsistente Antworten."
   },
   "jwt": {
     "title": "JWT-Decoder",
@@ -759,7 +766,7 @@
     "depth_label": "Tiefe {depth} Ebenen unter der Hauptdomain",
     "copy_all": "Alle kopieren",
     "export": "Exportieren",
-    "lookup_action": "Lookup →"
+    "lookup_action": "Abfragen →"
   },
   "tech": {
     "title": "Tech-Stack-Erkennung",

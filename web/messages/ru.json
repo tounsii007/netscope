@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Технологический стек",
       "desc": "Определи фреймворки, CMS, аналитику, хостинг.",
       "meta_title": "Детектор Tech Stack — На чём построен этот сайт?",
       "meta_description": "Определи фреймворки, CMS, аналитику, e-commerce, хостинг и библиотеки из публичных данных ответа.",
@@ -291,7 +291,7 @@
       "title": "Cookie / GDPR",
       "desc": "Флаги cookies + обнаружение сторонних трекеров.",
       "meta_title": "Анализатор Cookie и GDPR",
-      "meta_description": "Инспектируй флаги Set-Cookie и сторонние трекеры, загружаемые на любой странице. Score риска GDPR.",
+      "meta_description": "Проверяйте флаги Set-Cookie и сторонние трекеры, загружаемые на любой странице. Оценка риска GDPR.",
       "explainer": {
         "purpose": "Анализатор Cookie и GDPR загружает URL и перечисляет каждый установленный cookie, включая флаги безопасности (Secure, HttpOnly, SameSite, Max-Age) плюс обнаруженные сторонние трекеры. Помогает с GDPR-compliance и аудитами приватности.",
         "how_it_works": "Браузеро-подобный fetch собирает каждый Set-Cookie заголовок ответа.\nСторонние домены сопоставляются с курируемым списком трекеров / рекламы / аналитики.\nОтсутствующие флаги безопасности репортятся с причиной их важности.",
@@ -348,7 +348,7 @@
       }
     },
     "mixed-content": {
-      "title": "Mixed Content",
+      "title": "Смешанный контент",
       "desc": "Найди http:// ресурсы на HTTPS-страницах.",
       "meta_title": "Сканер Mixed Content",
       "meta_description": "Найди небезопасные http:// ресурсы на твоих HTTPS-страницах, которые браузеры блокируют или предупреждают о них.",
@@ -563,8 +563,8 @@
   },
   "headers": {
     "title": "HTTP-заголовки безопасности",
-    "subtitle": "Анализируй заголовки ответа и оценивай security-постуру от A+ до F.",
-    "score": "Score {score}/100",
+    "subtitle": "Анализируй заголовки ответа и оценивай уровень безопасности от A+ до F.",
+    "score": "Оценка {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Проверки заголовков безопасности",
     "raw_headers": "Сырые заголовки ответа",
@@ -577,7 +577,7 @@
   },
   "ip": {
     "title": "Поиск IP",
-    "subtitle": "Геолокация, ASN, ISP и threat intelligence.",
+    "subtitle": "Геолокация, ASN, ISP и анализ угроз.",
     "placeholder": "IPv4 или IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -590,6 +590,8 @@
     "field_coords": "Координаты",
     "field_org": "Организация",
     "field_user_agent": "Твой User-Agent",
+    "field_reverse_dns": "Обратный DNS (PTR)",
+    "class_label": "Класс",
     "multi_title": "Сравнение между провайдерами",
     "multi_subtitle": "Один и тот же IP опрошен параллельно у нескольких API геолокации — расхождения раскрывают различия источников данных.",
     "multi_loading": "Опрос провайдеров параллельно…",
@@ -611,10 +613,10 @@
     "multi_languages": "Языки",
     "multi_eu": "Член ЕС",
     "multi_open_raw": "Открыть сырой ответ",
-    "threat_title": "Threat intelligence",
-    "risk_score": "score риска",
+    "threat_title": "Анализ угроз",
+    "risk_score": "оценка риска",
     "threat_tor": "TOR-выход",
-    "threat_hosting": "Хостинг / DC",
+    "threat_hosting": "Хостинг / ЦОД",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
     "threat_residential": "Резидентный"
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Серверы имён с IPv6 ({with}/{total})",
     "row_mx": "MX с IPv6 ({with}/{total})",
-    "warnings": "Предупреждения"
+    "warnings": "Предупреждения",
+    "nxdomain_title": "Домен не найден",
+    "nxdomain_message": "Не удалось разрешить ни одной DNS-записи для {domain}. Скорее всего, домен не существует.",
+    "nxdomain_hint_typo": "Проверь написание имени домена на наличие опечаток.",
+    "nxdomain_hint_scheme": "Убери префикс http:// или https:// — введи только домен.",
+    "nxdomain_hint_resolver": "Попробуй снова — публичные DNS-резолверы иногда возвращают противоречивые ответы."
   },
   "jwt": {
     "title": "Декодер JWT",
@@ -735,10 +742,10 @@
     "field_valid_to": "Валиден до",
     "field_issuer": "Эмитент",
     "field_expiry": "Дней до истечения",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Альтернативные имена (SAN)",
     "field_pubkey": "Открытый ключ",
     "warn_self_signed": "Сертификат подписан самим собой.",
-    "warn_self_signed_short": "self-signed",
+    "warn_self_signed_short": "самоподписанный",
     "grade": "Оценка",
     "chain": "Цепочка сертификатов"
   },

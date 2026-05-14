@@ -132,7 +132,7 @@
       }
     },
     "tech-stack": {
-      "title": "Tech Stack",
+      "title": "Stack technique",
       "desc": "Détecte frameworks, CMS, analytics, hébergement.",
       "meta_title": "Détecteur de Tech Stack — Avec quoi ce site est-il construit ?",
       "meta_description": "Détecte frameworks, CMS, analytics, e-commerce, hébergement et bibliothèques depuis les données de réponse publiques.",
@@ -366,7 +366,7 @@
       "meta_description": "Ton IP, localisation, FAI, navigateur, OS, écran, fuseau horaire — tout en un coup d'œil."
     },
     "monitoring": {
-      "title": "Monitoring",
+      "title": "Surveillance",
       "desc": "Vérifications de disponibilité programmées et alertes."
     }
   },
@@ -484,10 +484,10 @@
     "section_connection": "Connexion",
     "section_location": "Localisation",
     "section_client": "Client",
-    "section_threat": "Menace / Privacy",
+    "section_threat": "Menace / Confidentialité",
     "field_ip": "IP",
     "field_hostname": "Hostname",
-    "field_reverse_dns": "Reverse DNS (PTR)",
+    "field_reverse_dns": "DNS inverse (PTR)",
     "field_isp": "FAI",
     "field_asn": "ASN",
     "field_country": "Pays",
@@ -564,7 +564,7 @@
   "headers": {
     "title": "En-têtes de sécurité HTTP",
     "subtitle": "Analyser les en-têtes de réponse et noter la posture sécurité de A+ à F.",
-    "score": "Score {score}/100",
+    "score": "Note {score}/100",
     "http_status": "HTTP {status}",
     "security_checks": "Vérifications d'en-têtes de sécurité",
     "raw_headers": "En-têtes de réponse bruts",
@@ -573,11 +573,11 @@
     "hsts_preload_eligible": "Éligible au preload",
     "csp_panel": "Audit CSP",
     "csp_directives": "Directives",
-    "csp_wildcard": "Sources wildcard"
+    "csp_wildcard": "Sources génériques"
   },
   "ip": {
     "title": "Recherche IP",
-    "subtitle": "Géolocalisation, ASN, FAI et threat intelligence.",
+    "subtitle": "Géolocalisation, ASN, FAI et renseignement sur les menaces.",
     "placeholder": "IPv4 ou IPv6",
     "field_ip": "IP",
     "field_hostname": "Hostname",
@@ -590,6 +590,8 @@
     "field_coords": "Coordonnées",
     "field_org": "Organisation",
     "field_user_agent": "Ton User-Agent",
+    "field_reverse_dns": "DNS inverse (PTR)",
+    "class_label": "Classe",
     "multi_title": "Comparer entre fournisseurs",
     "multi_subtitle": "La même IP interrogée en parallèle contre plusieurs APIs de géolocalisation — les divergences révèlent les différences de sources de données.",
     "multi_loading": "Interrogation des fournisseurs en parallèle…",
@@ -611,7 +613,7 @@
     "multi_languages": "Langues",
     "multi_eu": "Membre UE",
     "multi_open_raw": "Ouvrir la réponse brute",
-    "threat_title": "Threat intelligence",
+    "threat_title": "Renseignement sur les menaces",
     "risk_score": "score de risque",
     "threat_tor": "Sortie TOR",
     "threat_hosting": "Hébergement / DC",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Serveurs de noms avec IPv6 ({with}/{total})",
     "row_mx": "MX avec IPv6 ({with}/{total})",
-    "warnings": "Avertissements"
+    "warnings": "Avertissements",
+    "nxdomain_title": "Domaine introuvable",
+    "nxdomain_message": "Aucun enregistrement DNS n'a pu être résolu pour {domain}. Le domaine n'existe probablement pas.",
+    "nxdomain_hint_typo": "Vérifie l'orthographe du nom de domaine.",
+    "nxdomain_hint_scheme": "Retire tout préfixe http:// ou https:// et saisis uniquement le domaine.",
+    "nxdomain_hint_resolver": "Réessaie — les résolveurs DNS publics peuvent parfois renvoyer des réponses incohérentes."
   },
   "jwt": {
     "title": "Décodeur JWT",
@@ -735,7 +742,7 @@
     "field_valid_to": "Valide jusqu'à",
     "field_issuer": "Émetteur",
     "field_expiry": "Jours avant expiration",
-    "field_subject_alt": "Subject Alt Names",
+    "field_subject_alt": "Noms alternatifs (SAN)",
     "field_pubkey": "Clé publique",
     "warn_self_signed": "Le certificat est auto-signé.",
     "warn_self_signed_short": "auto-signé",

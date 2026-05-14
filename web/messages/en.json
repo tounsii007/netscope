@@ -590,6 +590,8 @@
     "field_coords": "Coordinates",
     "field_org": "Organization",
     "field_user_agent": "Your User-Agent",
+    "field_reverse_dns": "Reverse DNS (PTR)",
+    "class_label": "Class",
     "multi_title": "Compare across providers",
     "multi_subtitle": "Same IP queried in parallel against multiple geolocation APIs — divergences reveal data-source differences.",
     "multi_loading": "Querying providers in parallel…",
@@ -629,7 +631,12 @@
     "row_www_aaaa": "www (AAAA)",
     "row_ns": "Nameservers with IPv6 ({with}/{total})",
     "row_mx": "MX with IPv6 ({with}/{total})",
-    "warnings": "Warnings"
+    "warnings": "Warnings",
+    "nxdomain_title": "Domain not found",
+    "nxdomain_message": "We couldn't resolve any DNS records for {domain}. The domain likely doesn't exist.",
+    "nxdomain_hint_typo": "Double-check the spelling of the domain name.",
+    "nxdomain_hint_scheme": "Remove any http:// or https:// prefix and enter only the domain.",
+    "nxdomain_hint_resolver": "Try again — public DNS resolvers can occasionally return inconsistent answers."
   },
   "jwt": {
     "title": "JWT Decoder",
