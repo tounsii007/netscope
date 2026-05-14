@@ -68,6 +68,10 @@ const config: NextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+      // Block legacy Flash/Acrobat cross-domain policy lookups so
+      // crossdomain.xml on the origin can't be hijacked for old
+      // SOP-circumvention. "none" disables them entirely.
+      { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
     ];
     return [
       // Security headers apply to every route.
