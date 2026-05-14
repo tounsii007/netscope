@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations, getFormatter } from "next-intl/server";
 
 interface PublicStatus {
   name: string; description?: string; logo?: string; brandColor?: string;
@@ -21,10 +22,11 @@ async function fetchStatus(slug: string): Promise<PublicStatus | null> {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  const t = await getTranslations("status");
   const data = await fetchStatus(slug);
   return {
-    title: data ? `${data.name} status` : "Status page",
-    description: data?.description ?? "Public status page",
+    title: data ? t("meta_title_with_name", { name: data.name }) : t("meta_title_fallback"),
+    description: data?.description ?? t("meta_description_fallback"),
   };
 }
 
@@ -37,6 +39,8 @@ const STATUS_COLOR: Record<string, string> = {
 
 export default async function StatusPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const t = await getTranslations("status");
+  const format = await getFormatter();
   const data = await fetchStatus(slug);
   if (!data) notFound();
 
@@ -57,22 +61,26 @@ export default async function StatusPage({ params }: { params: Promise<{ slug: s
       <div className={`card mb-8 flex items-center gap-3 border-l-4 ${operational ? "border-success" : "border-danger"}`}>
         <span className={`h-3 w-3 animate-pulse-glow rounded-full ${STATUS_COLOR[data.overallStatus] ?? "bg-warn"}`} />
         <span className="text-lg font-medium">
-          {operational ? "All systems operational" : `Currently degraded (${data.overallStatus})`}
+          {operational
+            ? t("overall_operational")
+            : t("overall_degraded", { status: data.overallStatus })}
         </span>
       </div>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase text-fg-muted">Services</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase text-fg-muted">{t("section_services")}</h2>
         <div className="space-y-2">
           {data.monitors.length === 0 && (
-            <div className="card text-sm text-fg-muted">No public services configured.</div>
+            <div className="card text-sm text-fg-muted">{t("no_services")}</div>
           )}
           {data.monitors.map((m) => (
             <div key={m.name} className="card flex items-center justify-between">
               <span>{m.name}</span>
               <span className={m.up ? "text-success" : "text-danger"}>
-                {m.up ? "Operational" : "Down"}
-                <span className="ml-2 text-xs text-fg-muted">{m.uptime24h.toFixed(2)}% 24h</span>
+                {m.up ? t("monitor_operational") : t("monitor_down")}
+                <span className="ml-2 text-xs text-fg-muted">
+                  {t("uptime_24h", { value: m.uptime24h.toFixed(2) })}
+                </span>
               </span>
             </div>
           ))}
@@ -80,9 +88,9 @@ export default async function StatusPage({ params }: { params: Promise<{ slug: s
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase text-fg-muted">Incident history</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase text-fg-muted">{t("section_incidents")}</h2>
         {data.incidents.length === 0 ? (
-          <div className="card text-sm text-fg-muted">No incidents reported.</div>
+          <div className="card text-sm text-fg-muted">{t("no_incidents")}</div>
         ) : (
           <ol className="space-y-3">
             {data.incidents.map((i) => (
@@ -90,10 +98,12 @@ export default async function StatusPage({ params }: { params: Promise<{ slug: s
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="font-semibold">{i.title}</h3>
-                    <time className="text-xs text-fg-muted">{new Date(i.startedAt).toLocaleString()}</time>
+                    <time className="text-xs text-fg-muted">
+                      {format.dateTime(new Date(i.startedAt), { dateStyle: "medium", timeStyle: "short" })}
+                    </time>
                   </div>
                   <span className={`badge ${i.status === "RESOLVED" ? "bg-success/15 text-success" : "bg-warn/15 text-warn"}`}>
-                    {i.status}
+                    {i.status === "RESOLVED" ? t("incident_resolved") : i.status}
                   </span>
                 </div>
                 {i.body && <p className="mt-2 text-sm text-fg-muted whitespace-pre-wrap">{i.body}</p>}

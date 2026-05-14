@@ -795,5 +795,20 @@
     "how_title": "Як працює",
     "when_title": "Коли використовувати",
     "limits_title": "Обмеження"
+  },
+  "status": {
+    "meta_title_fallback": "Сторінка статусу",
+    "meta_title_with_name": "Статус {name}",
+    "meta_description_fallback": "Публічна сторінка статусу",
+    "overall_operational": "Усі системи працюють",
+    "overall_degraded": "Зараз деградація ({status})",
+    "section_services": "Сервіси",
+    "no_services": "Публічні сервіси не налаштовані.",
+    "monitor_operational": "Працює",
+    "monitor_down": "Недоступний",
+    "uptime_24h": "{value}% 24 год",
+    "section_incidents": "Історія інцидентів",
+    "no_incidents": "Інциденти не зареєстровані.",
+    "incident_resolved": "Розв'язано"
   }
 }

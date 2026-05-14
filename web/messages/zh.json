@@ -795,5 +795,20 @@
     "how_title": "工作原理",
     "when_title": "何时使用",
     "limits_title": "限制"
+  },
+  "status": {
+    "meta_title_fallback": "状态页面",
+    "meta_title_with_name": "{name} 状态",
+    "meta_description_fallback": "公共状态页面",
+    "overall_operational": "所有系统正常运行",
+    "overall_degraded": "当前服务降级 ({status})",
+    "section_services": "服务",
+    "no_services": "未配置公共服务。",
+    "monitor_operational": "正常",
+    "monitor_down": "故障",
+    "uptime_24h": "{value}% 24小时",
+    "section_incidents": "事件历史",
+    "no_incidents": "未报告任何事件。",
+    "incident_resolved": "已解决"
   }
 }

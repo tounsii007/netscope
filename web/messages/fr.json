@@ -795,5 +795,20 @@
     "how_title": "Comment ça marche",
     "when_title": "Quand l'utiliser",
     "limits_title": "Limites"
+  },
+  "status": {
+    "meta_title_fallback": "Page de statut",
+    "meta_title_with_name": "Statut de {name}",
+    "meta_description_fallback": "Page de statut publique",
+    "overall_operational": "Tous les systèmes opérationnels",
+    "overall_degraded": "Actuellement dégradé ({status})",
+    "section_services": "Services",
+    "no_services": "Aucun service public configuré.",
+    "monitor_operational": "Opérationnel",
+    "monitor_down": "Hors service",
+    "uptime_24h": "{value} % 24 h",
+    "section_incidents": "Historique des incidents",
+    "no_incidents": "Aucun incident signalé.",
+    "incident_resolved": "Résolu"
   }
 }

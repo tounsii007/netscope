@@ -795,5 +795,20 @@
     "how_title": "Nasıl çalışır",
     "when_title": "Ne zaman kullanılır",
     "limits_title": "Sınırlamalar"
+  },
+  "status": {
+    "meta_title_fallback": "Durum sayfası",
+    "meta_title_with_name": "{name} durumu",
+    "meta_description_fallback": "Genel durum sayfası",
+    "overall_operational": "Tüm sistemler çalışıyor",
+    "overall_degraded": "Şu anda performans düşük ({status})",
+    "section_services": "Servisler",
+    "no_services": "Yapılandırılmış genel servis yok.",
+    "monitor_operational": "Çalışıyor",
+    "monitor_down": "Kapalı",
+    "uptime_24h": "%{value} 24 sa",
+    "section_incidents": "Olay geçmişi",
+    "no_incidents": "Bildirilen olay yok.",
+    "incident_resolved": "Çözüldü"
   }
 }

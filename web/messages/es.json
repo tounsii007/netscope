@@ -795,5 +795,20 @@
     "how_title": "Cómo funciona",
     "when_title": "Cuándo usarla",
     "limits_title": "Límites"
+  },
+  "status": {
+    "meta_title_fallback": "Página de estado",
+    "meta_title_with_name": "Estado de {name}",
+    "meta_description_fallback": "Página de estado pública",
+    "overall_operational": "Todos los sistemas operativos",
+    "overall_degraded": "Actualmente degradado ({status})",
+    "section_services": "Servicios",
+    "no_services": "No hay servicios públicos configurados.",
+    "monitor_operational": "Operativo",
+    "monitor_down": "Caído",
+    "uptime_24h": "{value} % 24 h",
+    "section_incidents": "Historial de incidentes",
+    "no_incidents": "No se han reportado incidentes.",
+    "incident_resolved": "Resuelto"
   }
 }

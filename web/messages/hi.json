@@ -795,5 +795,20 @@
     "how_title": "यह कैसे काम करता है",
     "when_title": "कब उपयोग करें",
     "limits_title": "सीमाएँ"
+  },
+  "status": {
+    "meta_title_fallback": "स्थिति पृष्ठ",
+    "meta_title_with_name": "{name} स्थिति",
+    "meta_description_fallback": "सार्वजनिक स्थिति पृष्ठ",
+    "overall_operational": "सभी सिस्टम चालू हैं",
+    "overall_degraded": "वर्तमान में बाधित ({status})",
+    "section_services": "सेवाएँ",
+    "no_services": "कोई सार्वजनिक सेवा कॉन्फ़िगर नहीं की गई है।",
+    "monitor_operational": "चालू",
+    "monitor_down": "बंद",
+    "uptime_24h": "{value}% 24घं",
+    "section_incidents": "घटना इतिहास",
+    "no_incidents": "कोई घटना दर्ज नहीं की गई है।",
+    "incident_resolved": "हल किया गया"
   }
 }

@@ -795,5 +795,20 @@
     "how_title": "Как работает",
     "when_title": "Когда использовать",
     "limits_title": "Ограничения"
+  },
+  "status": {
+    "meta_title_fallback": "Страница статуса",
+    "meta_title_with_name": "Статус {name}",
+    "meta_description_fallback": "Публичная страница статуса",
+    "overall_operational": "Все системы работают",
+    "overall_degraded": "Сейчас деградация ({status})",
+    "section_services": "Сервисы",
+    "no_services": "Публичные сервисы не настроены.",
+    "monitor_operational": "Работает",
+    "monitor_down": "Недоступен",
+    "uptime_24h": "{value}% 24 ч",
+    "section_incidents": "История инцидентов",
+    "no_incidents": "Инцидентов не зарегистрировано.",
+    "incident_resolved": "Решено"
   }
 }

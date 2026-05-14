@@ -795,5 +795,20 @@
     "how_title": "So funktioniert es",
     "when_title": "Wann nutzen",
     "limits_title": "Grenzen"
+  },
+  "status": {
+    "meta_title_fallback": "Status-Seite",
+    "meta_title_with_name": "{name} – Status",
+    "meta_description_fallback": "Öffentliche Status-Seite",
+    "overall_operational": "Alle Systeme betriebsbereit",
+    "overall_degraded": "Aktuell eingeschränkt ({status})",
+    "section_services": "Dienste",
+    "no_services": "Keine öffentlichen Dienste konfiguriert.",
+    "monitor_operational": "Betriebsbereit",
+    "monitor_down": "Ausfall",
+    "uptime_24h": "{value} % 24 h",
+    "section_incidents": "Störungshistorie",
+    "no_incidents": "Keine Störungen gemeldet.",
+    "incident_resolved": "Behoben"
   }
 }
