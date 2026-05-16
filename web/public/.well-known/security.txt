@@ -1,0 +1,12 @@
+# https://datatracker.ietf.org/doc/html/rfc9116
+# Public security contact for Netscope. Mirrors /SECURITY.md in the
+# repo so researchers without access to the GitHub repo can still
+# find a disclosure path from production.
+
+Contact: mailto:security@netscope.io
+Contact: https://github.com/tounsii007/netscope/security/advisories/new
+Expires: 2027-05-17T00:00:00.000Z
+Policy: https://github.com/tounsii007/netscope/blob/main/SECURITY.md
+Acknowledgments: https://github.com/tounsii007/netscope/blob/main/SECURITY.md#hall-of-fame
+Preferred-Languages: en, de
+Canonical: https://netscope.io/.well-known/security.txt
