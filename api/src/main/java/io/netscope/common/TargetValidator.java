@@ -98,6 +98,16 @@ public class TargetValidator {
         // IPv6 ULA (fc00::/7, RFC 4193) — Java's isSiteLocalAddress only
         // catches the legacy fec0::/10 range, so handle ULA explicitly.
         if (raw.length == 16 && (raw[0] & 0xfe) == 0xfc) return true;
+        // IPv4-compatible IPv6 (the deprecated ::a.b.c.d form, RFC 4291
+        // §2.5.5.1). Java DOES NOT report isLoopback/isLinkLocal/etc.
+        // true for this form even when the embedded v4 is loopback —
+        // ::127.0.0.1 silently slipped past the block list before
+        // this check landed. Decode the embedded v4 and classify it.
+        if (raw.length == 16 && isAllZero(raw, 0, 12)) {
+            byte[] v4 = new byte[]{ raw[12], raw[13], raw[14], raw[15] };
+            try { if (isBlocked(InetAddress.getByAddress(v4))) return true; }
+            catch (UnknownHostException ignored) { /* impossible — 4-byte array */ }
+        }
         // IPv4-only checks below — kept in sync with IpAddressGuard.isBlocked()
         // and web/lib/target-guard.ts. All three must agree on block categories.
         if (raw.length == 4) {
@@ -109,6 +119,11 @@ public class TargetValidator {
             if (a >= 240) return true;
         }
         return CLOUD_METADATA_BYTES.contains(new ByteBuf(raw));
+    }
+
+    private static boolean isAllZero(byte[] arr, int off, int len) {
+        for (int i = off; i < off + len; i++) if (arr[i] != 0) return false;
+        return true;
     }
 
     private boolean isIpLiteral(String s) {
