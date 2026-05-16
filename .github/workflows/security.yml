@@ -65,12 +65,33 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: TruffleHog OSS secret scan
+      # On pull_request events we want a diff scan (base = target branch,
+      # head = PR tip). On a push to main, BASE = HEAD which TruffleHog
+      # refuses with "BASE and HEAD commits are the same"; in that case
+      # we feed it the commit BEFORE the push (github.event.before) so
+      # the scan covers just the new commits. Schedule + manual runs
+      # fall through to a full repo scan (no base/head inputs).
+      - name: TruffleHog OSS secret scan (PR diff)
+        if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --only-verified
+      - name: TruffleHog OSS secret scan (push diff)
+        if: github.event_name == 'push'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.before }}
+          head: ${{ github.event.after }}
+          extra_args: --only-verified
+      - name: TruffleHog OSS secret scan (full repo)
+        if: github.event_name != 'pull_request' && github.event_name != 'push'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
           extra_args: --only-verified
 
   # ─── Dependency vulnerability scan ─────────────────────────────────────

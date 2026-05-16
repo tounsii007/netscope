@@ -55,6 +55,12 @@ jobs:
         with:
           context: ./api
           push: false
+          # load: true puts the built image into the local Docker
+          # daemon so the next step (Trivy scan) can find it. Without
+          # this, BuildKit builds into its own cache only and Trivy
+          # fails with "unable to find the specified image
+          # netscope-api:<sha> in [docker, containerd, podman, remote]".
+          load: true
           tags: netscope-api:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
