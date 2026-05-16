@@ -39,6 +39,12 @@
             BOM catches up (Spring Boot 3.5.13+).
         -->
         <netty.version>4.1.133.Final</netty.version>
+        <!--
+            Spring Boot 3.5.12 BOM pins tomcat-embed 10.1.52, which
+            carries CRITICAL CVE-2026-29145 (authentication bypass).
+            Fixed in 10.1.53. Override until the BOM catches up.
+        -->
+        <tomcat.version>10.1.53</tomcat.version>
     </properties>
 
     <dependencies>
