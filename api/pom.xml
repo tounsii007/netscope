@@ -31,6 +31,14 @@
         <java.version>21</java.version>
         <!-- Bumped to 42.7.11 to clear GHSA-98qh-xjc8-98pq + GHSA-hq9p-pm7w-8p54 -->
         <postgresql.version>42.7.11</postgresql.version>
+        <!--
+            Spring Boot 3.5.12's BOM still ships Netty 4.1.131, which
+            Trivy flags via CVE-2026-42583 (HIGH, fixed in 4.1.133).
+            Override the property Spring Boot's BOM uses so the runtime
+            JAR carries the fixed version. Drop this override once the
+            BOM catches up (Spring Boot 3.5.13+).
+        -->
+        <netty.version>4.1.133.Final</netty.version>
     </properties>
 
     <dependencies>
