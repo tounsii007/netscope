@@ -1,45 +1,70 @@
 name: Security
 
 on:
-  schedule: [{ cron: "0 6 * * 1" }]
-  push: { branches: [main] }
+  schedule:
+    - cron: "0 6 * * 1"
+  push:
+    branches:
+      - main
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   codeql:
     runs-on: ubuntu-latest
-    permissions: { actions: read, contents: read, security-events: write }
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     strategy:
+      fail-fast: false
       matrix:
-        language: [java, javascript-typescript]
+        language:
+          - java
+          - javascript-typescript
     steps:
       - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
-        with: { languages: ${{ matrix.language }} }
-      - uses: actions/setup-java@v4
+
+      - name: Setup Java (for the Java matrix slice only)
         if: matrix.language == 'java'
-        with: { distribution: temurin, java-version: "21" }
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
       - name: Build Java
         if: matrix.language == 'java'
         run: cd api && mvn -B -DskipTests package
-      - uses: github/codeql-action/analyze@v3
+
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/analyze@v3
 
   secret-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   osv:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The path "google/osv-scanner-action/osv-scanner-action@v1" was
-      # garbage — that subdirectory doesn't exist. The action lives at
-      # the repo root, so the reference is just google/osv-scanner-action
-      # plus a valid tag (vN.M.K — v2 series is current).
+      # Repo path is google/osv-scanner-action (no duplicated subdir);
+      # tags are v2.x.y. PR #16 fixed the duplicated path; this rewrite
+      # also explodes the inline mappings the old file used so YAML
+      # parser quirks can be ruled out as the cause of the persistent
+      # "0s workflow file issue" failure on main.
       - uses: google/osv-scanner-action@v2.3.8
         with:
           scan-args: |-
