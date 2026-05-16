@@ -117,10 +117,10 @@ jobs:
             -o /usr/local/bin/osv-scanner
           chmod +x /usr/local/bin/osv-scanner
           osv-scanner --version
-      - name: Scan dependencies (report-only)
-        # `|| true` makes this report-only for now: the repo has a known
-        # backlog of upstream CVEs the v2 scanner reports (80 known,
-        # 6 Critical / 21 High at last check) — failing on every push
-        # would mean the gate is permanently red. Drop the `|| true`
-        # once that backlog is cleared.
-        run: osv-scanner --recursive ./ || true
+      - name: Scan dependencies
+        # Strict mode (no `|| true`): a new vulnerable dependency turns
+        # CI red. The previous backlog of 80 CVEs was cleared by
+        # bumping Spring Boot to 3.5.12 and PostgreSQL to 42.7.11
+        # (which pulls in fixed Tomcat / Logback / Jackson / Netty /
+        # commons-* transitively).
+        run: osv-scanner --recursive ./

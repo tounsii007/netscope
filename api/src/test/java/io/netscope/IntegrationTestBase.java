@@ -38,6 +38,12 @@ public abstract class IntegrationTestBase {
         r.add("spring.datasource.password", POSTGRES::getPassword);
         r.add("spring.data.redis.host", REDIS::getHost);
         r.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
-        r.add("netscope.rate-limit.anonymous-per-minute", () -> "1000");
+        // Rate limit comes from application-test.yml (default 1000/min)
+        // so other ITs don't trip the limiter; tests that want a
+        // tighter limit (RateLimitIT) override via @TestPropertySource
+        // or their own @DynamicPropertySource. Don't re-add the
+        // property here — a @DynamicPropertySource always wins over
+        // @TestPropertySource in Spring's environment, which would
+        // make tighter-limit overrides ineffective.
     }
 }

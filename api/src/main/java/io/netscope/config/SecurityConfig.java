@@ -60,7 +60,16 @@ public class SecurityConfig {
                 .contentSecurityPolicy(c -> c.policyDirectives(
                     "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"))
                 .httpStrictTransportSecurity(hsts -> hsts
-                    .includeSubDomains(true).preload(true).maxAgeInSeconds(31536000))
+                    .includeSubDomains(true).preload(true).maxAgeInSeconds(31536000)
+                    // Spring Security's default HstsHeaderWriter only emits
+                    // the header on requests it considers secure (HTTPS at
+                    // the servlet layer). Production runs behind a TLS-
+                    // terminating proxy (Cloudflare / Vercel) so the
+                    // servlet sees HTTP, and HSTS would never go out
+                    // without this override. AnyRequest matcher is the
+                    // right pick: the proxy already enforces TLS, our
+                    // job is to ship the header so browsers remember.
+                    .requestMatcher(req -> true))
                 .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
                 .permissionsPolicyHeader(p -> p.policy(
                     "accelerometer=(), camera=(), geolocation=(), gyroscope=(), "
