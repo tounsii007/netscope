@@ -1,0 +1,49 @@
+# CODEOWNERS — required reviewers per path
+#
+# GitHub uses this file to auto-request reviewers on every PR that
+# touches the listed paths. The first matching pattern wins, so put
+# more specific paths first.
+#
+# Syntax: <pattern> <owner1> [<owner2> ...]
+#   Owners may be @user, @org/team, or email addresses.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for anything not matched below.
+*                                       @tounsii007
+
+# Security-critical paths — every change here gets the maintainer
+# plus (when applicable) a security reviewer.
+/SECURITY.md                            @tounsii007
+/.github/SECURITY.md                    @tounsii007
+/api/src/main/java/io/netscope/common/TargetValidator.java   @tounsii007
+/api/src/main/java/io/netscope/ip/IpAddressGuard.java        @tounsii007
+/api/src/main/java/io/netscope/config/SecurityConfig.java    @tounsii007
+/api/src/main/java/io/netscope/common/RateLimitFilter.java   @tounsii007
+/api/src/main/java/io/netscope/auth/                          @tounsii007
+/web/lib/target-guard.ts                @tounsii007
+/web/lib/normalise-host.ts              @tounsii007
+/web/lib/rate-limit.ts                  @tounsii007
+/web/middleware.ts                      @tounsii007
+/web/next.config.ts                     @tounsii007
+
+# Tests that lock the security contracts. Don't relax these without
+# explicit sign-off.
+/web/tests/target-guard-adversarial.test.ts          @tounsii007
+/web/tests/normalise-host-adversarial.test.ts        @tounsii007
+/api/src/test/java/io/netscope/common/TargetValidatorSsrfTest.java         @tounsii007
+/api/src/test/java/io/netscope/common/TargetValidatorAdditionalSsrfTest.java @tounsii007
+/api/src/test/java/io/netscope/ip/IpAddressGuardTest.java                  @tounsii007
+
+# CI workflows: a misconfigured workflow can leak secrets or
+# silently disable the gates above.
+/.github/workflows/                     @tounsii007
+/.github/dependabot.yml                 @tounsii007
+/.github/CODEOWNERS                     @tounsii007
+
+# Production deployment / infra.
+/deploy/                                @tounsii007
+/api/Dockerfile                         @tounsii007
+/docker-compose.yml                     @tounsii007
+
+# Translation bundles — touch one, touch all eleven.
+/web/messages/                          @tounsii007
