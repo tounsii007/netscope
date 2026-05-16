@@ -124,6 +124,20 @@ public class IpService {
         }
     }
 
+    /**
+     * Look up GeoIP via ipinfo.io. Exceptions deliberately propagate so
+     * Resilience4j's @CircuitBreaker can:
+     *   1. count them toward the failure-rate threshold and trip the
+     *      breaker after enough consecutive failures, and
+     *   2. route them to {@link #fetchFallback}, which returns a uniform
+     *      "degraded" response shape the caller already handles.
+     *
+     * Previously this method swallowed every exception and returned a
+     * Map with an "error" key. That hid all failures from the breaker
+     * (it never opened) AND created a second response shape the rest of
+     * the pipeline never expected — F-grade bug masked as defensive
+     * programming.
+     */
     @CircuitBreaker(name = "ipinfo", fallbackMethod = "fetchFallback")
     public Map<String, Object> fetchFromIpinfo(String ip) {
         try {
@@ -154,10 +168,15 @@ public class IpService {
             }
             return out;
         } catch (Exception e) {
-            Map<String, Object> out = new LinkedHashMap<>();
-            out.put("ip", ip);
-            out.put("error", "geoip lookup failed: " + e.getMessage());
-            return out;
+            // Re-throw as RuntimeException so Resilience4j's @CircuitBreaker
+            // sees the failure: it counts toward the breaker's failure-rate
+            // threshold AND routes through fetchFallback for the user-visible
+            // response. The previous catch returned a Map locally, which
+            // hid every error from the breaker (it never opened in
+            // practice) and produced a second "error" response shape the
+            // pipeline didn't expect. Method signature stays unchanged so
+            // every caller continues to compile.
+            throw new RuntimeException("geoip lookup failed: " + e.getMessage(), e);
         }
     }
 
