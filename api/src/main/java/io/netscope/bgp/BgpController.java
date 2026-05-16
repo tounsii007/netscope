@@ -94,7 +94,15 @@ public class BgpController {
         }
     }
 
-    private JsonNode ripe(String endpoint, String resource) throws Exception {
+    /**
+     * Hits one of RIPE Stat's data endpoints. {@code protected} (not
+     * private) so unit tests can subclass {@link BgpController} and
+     * override this with a stub that throws — that's how the input-guard
+     * tests verify the controller wraps network failures in
+     * {@link ApiException} without depending on stat.ripe.net being
+     * reachable from the CI runner.
+     */
+    protected JsonNode ripe(String endpoint, String resource) throws Exception {
         String body = rest().get()
             .uri("https://stat.ripe.net/data/{e}/data.json?resource={r}&sourceapp=netscope",
                 endpoint, resource)
