@@ -5,9 +5,17 @@ RUN mvn -B dependency:go-offline
 COPY src ./src
 RUN mvn -B -DskipTests package
 
-FROM eclipse-temurin:21-jre
+# Ubuntu 24.04 (noble) base — newer packages than the default jammy
+# variant, which clears most of the OS-level CVEs Trivy was surfacing.
+# `apt-get upgrade` afterwards pulls any security updates that landed
+# between the image's last rebuild and this build.
+FROM eclipse-temurin:21-jre-noble
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && apt-get install -y --no-install-recommends curl \
+ && apt-get autoremove -y \
+ && rm -rf /var/lib/apt/lists/*
 COPY --from=build /src/target/*.jar app.jar
 # Run as a non-root, unprivileged UID. The Spring Boot JAR doesn't
 # need root for anything (the JVM binds the unprivileged port 8080

@@ -17,6 +17,17 @@ netscope:
   tor:
     exit-list-url: http://localhost:0/none
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose every actuator endpoint in the test profile so the
+        # SecurityHeadersIT.sensitiveActuatorEndpointsDenied test can
+        # actually reach env / heapdump / mappings and observe Spring
+        # Security returning 401. Production stays with the
+        # health,prometheus allow-list in main/application.yml.
+        include: "*"
+
 logging:
   level:
     org.testcontainers: WARN

@@ -1,7 +1,6 @@
 package io.netscope;
 
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -10,6 +9,14 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Override the default 1000/min anonymous limit from application-test.yml
+ * down to 5 so a short burst actually trips the limiter. This works now
+ * because IntegrationTestBase no longer pins the property via
+ * @DynamicPropertySource — dynamic sources beat @TestPropertySource in
+ * Spring's environment, and the parent's override had been silently
+ * shadowing this value before.
+ */
 @TestPropertySource(properties = "netscope.rate-limit.anonymous-per-minute=5")
 class RateLimitIT extends IntegrationTestBase {
 
@@ -29,17 +36,6 @@ class RateLimitIT extends IntegrationTestBase {
         assertThat(over429).isZero();
     }
 
-    /**
-     * Disabled: 20 sequential GETs against /api/v1/dns/cloudflare.com
-     * yield zero 429 responses even with the 5/min override set above.
-     * Likely the rate-limit filter is not on the path the test hits
-     * (the request handler probably 5xxs out of the per-IP DNS lookup
-     * before the limiter increments its bucket, or the @TestPropertySource
-     * override isn't propagating into the Bucket4j config). Pre-
-     * existing CI red, not introduced by the current PR series — file
-     * a targeted issue.
-     */
-    @Disabled("TODO: rate-limit filter doesn't engage for /api/v1/dns/ in test profile")
     @Test void apiEndpointsAreRateLimited() {
         redis.getConnectionFactory().getConnection().serverCommands().flushAll();
 
