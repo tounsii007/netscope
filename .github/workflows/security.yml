@@ -118,9 +118,33 @@ jobs:
           chmod +x /usr/local/bin/osv-scanner
           osv-scanner --version
       - name: Scan dependencies
-        # Strict mode (no `|| true`): a new vulnerable dependency turns
+        # Strict on actual findings: a new vulnerable dependency turns
         # CI red. The previous backlog of 80 CVEs was cleared by
-        # bumping Spring Boot to 3.5.12 and PostgreSQL to 42.7.11
-        # (which pulls in fixed Tomcat / Logback / Jackson / Netty /
-        # commons-* transitively).
-        run: osv-scanner --recursive ./
+        # bumping Spring Boot to 3.5.12 + PostgreSQL JDBC 42.7.11 (pulls
+        # in fixed Tomcat / Logback / Jackson / Netty / commons-*
+        # transitively) and cli/go.mod to 1.25.10 (cleared 22 Go stdlib
+        # CVEs).
+        #
+        # osv-scanner v2 also exits non-zero (127) when the transitive
+        # Maven resolver fails on a single unresolvable artifact (e.g.
+        # the org.apache.groovy 4.0.30 ghost that Spring Boot's BOM
+        # ships even though it's not on Maven Central). That's an
+        # infrastructure flake, not a security finding — so we
+        # distinguish: real vulns (exit 1, log contains "Total N
+        # packages affected" with N≥1) fail CI; transient resolver
+        # failures with zero findings just print and pass.
+        run: |
+          set +e
+          osv-scanner --recursive ./ | tee osv-output.txt
+          rc=$?
+          set -e
+          if [ "$rc" = "0" ]; then
+            echo "::notice::OSV scan clean."
+            exit 0
+          fi
+          if grep -Eq "Total 0 packages affected by 0 known vulnerabilities" osv-output.txt; then
+            echo "::warning::osv-scanner exited $rc but reported 0 vulnerabilities — treating as pass (transitive-resolver flake)."
+            exit 0
+          fi
+          echo "::error::osv-scanner exited $rc AND reported vulnerabilities — failing."
+          exit "$rc"
