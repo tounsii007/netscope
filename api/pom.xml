@@ -8,16 +8,15 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <!--
-            Bumped 3.4.1 → 3.5.12 to clear the dependency CVE backlog
-            OSV-Scanner had been surfacing on every CI run: the 3.5
-            series manages newer Tomcat (10.1.54+), Logback (1.5.25+),
-            Jackson (2.18.6+), Netty (4.1.133+), Apache Commons and
-            Spring Security itself with the relevant GHSAs fixed.
-            3.5 is wire-compatible with 3.4 for our usage (web, JPA,
-            Redis, validation, actuator, AOP, security, OAuth2 RS) —
-            no application code changes were needed.
+            Bumped 3.4.1 → 3.5.14 to clear the dependency CVE backlog
+            OSV/Trivy had been surfacing. 3.5.14 specifically also
+            ships fixed Spring Boot itself (CVE-2026-40973 — arbitrary
+            code execution via predictable resource IDs). The 3.5
+            series stays wire-compatible with 3.4 for our usage (web,
+            JPA, Redis, validation, actuator, AOP, security, OAuth2
+            RS) — no application code changes needed.
         -->
-        <version>3.5.12</version>
+        <version>3.5.14</version>
         <relativePath/>
     </parent>
 
@@ -40,11 +39,12 @@
         -->
         <netty.version>4.1.133.Final</netty.version>
         <!--
-            Spring Boot 3.5.12 BOM pins tomcat-embed 10.1.52, which
-            carries CRITICAL CVE-2026-29145 (authentication bypass).
-            Fixed in 10.1.53. Override until the BOM catches up.
+            Spring Boot 3.5.14 BOM still pins Tomcat below 10.1.54.
+            10.1.54 brings the fixes for CVE-2026-29145 (auth bypass,
+            CRITICAL), CVE-2026-34483 + CVE-2026-34487 (info disclosure,
+            HIGH). Override until the BOM catches up.
         -->
-        <tomcat.version>10.1.53</tomcat.version>
+        <tomcat.version>10.1.54</tomcat.version>
     </properties>
 
     <dependencies>
