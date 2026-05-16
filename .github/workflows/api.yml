@@ -64,7 +64,11 @@ jobs:
         # can't suddenly run with this job's GITHUB_TOKEN context.
         # Bump deliberately via Dependabot (config in
         # .github/dependabot.yml — recommend enabling if not already).
-        uses: aquasecurity/trivy-action@0.28.0
+        # Note: trivy-action tags are prefixed with "v" (v0.36.0, v0.35.0,
+        # …). The previous "0.28.0" reference failed at workflow init
+        # with "unable to find version 0.28.0" — the unprefixed tag was
+        # never published.
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: netscope-api:${{ github.sha }}
           exit-code: "1"

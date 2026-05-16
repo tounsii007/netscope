@@ -36,7 +36,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: google/osv-scanner-action/osv-scanner-action@v1
+      # The path "google/osv-scanner-action/osv-scanner-action@v1" was
+      # garbage — that subdirectory doesn't exist. The action lives at
+      # the repo root, so the reference is just google/osv-scanner-action
+      # plus a valid tag (vN.M.K — v2 series is current).
+      - uses: google/osv-scanner-action@v2.3.8
         with:
           scan-args: |-
             --recursive
