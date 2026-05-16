@@ -12,7 +12,19 @@ permissions:
   contents: read
 
 jobs:
+  # ─── CodeQL ────────────────────────────────────────────────────────────
+  # Disabled on this private repo: CodeQL upload requires GitHub
+  # Code Scanning, which on private repos is gated behind GitHub
+  # Advanced Security (a paid subscription). The job ran successfully
+  # at the analysis step but always failed on the SARIF upload with:
+  #
+  #   "Code scanning is not enabled for this repository. Please enable
+  #    code scanning in the repository settings."
+  #
+  # To turn back on: enable GHAS in Settings → Security & analysis →
+  # Code scanning, then remove the `if: false` below.
   codeql:
+    if: false
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -26,47 +38,53 @@ jobs:
           - javascript-typescript
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Java (for the Java matrix slice only)
         if: matrix.language == 'java'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-
       - name: Build Java
         if: matrix.language == 'java'
         run: cd api && mvn -B -DskipTests package
-
       - name: Run CodeQL analysis
         uses: github/codeql-action/analyze@v3
 
+  # ─── Secret scan ───────────────────────────────────────────────────────
+  # Replaced gitleaks/gitleaks-action@v2 (which now requires a paid
+  # licence for private orgs, failing with "Resource not accessible by
+  # integration") with TruffleHog's free OSS scan action. Both look for
+  # committed credentials but TruffleHog is the maintained free option.
   secret-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  osv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # Repo path is google/osv-scanner-action (no duplicated subdir);
-      # tags are v2.x.y. PR #16 fixed the duplicated path; this rewrite
-      # also explodes the inline mappings the old file used so YAML
-      # parser quirks can be ruled out as the cause of the persistent
-      # "0s workflow file issue" failure on main.
-      - uses: google/osv-scanner-action@v2.3.8
+      - name: TruffleHog OSS secret scan
+        uses: trufflesecurity/trufflehog@main
         with:
-          scan-args: |-
-            --recursive
-            ./
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+  # ─── Dependency vulnerability scan ─────────────────────────────────────
+  # google/osv-scanner-action@v2.x dropped its action.yml runs: stanza
+  # in favour of reusable workflows — see the project's README.
+  # Calling the reusable workflow at the job level instead of `uses:` in
+  # a step is the modern, supported invocation.
+  osv:
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    with:
+      scan-args: |-
+        --recursive
+        ./
