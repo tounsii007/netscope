@@ -9,7 +9,7 @@ RUN mvn -B -DskipTests package
 # variant, which clears most of the OS-level CVEs Trivy was surfacing.
 # `apt-get upgrade` afterwards pulls any security updates that landed
 # between the image's last rebuild and this build.
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:25-jre-noble
 WORKDIR /app
 RUN apt-get update \
  && apt-get upgrade -y \
