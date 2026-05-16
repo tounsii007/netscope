@@ -30,6 +30,16 @@ public class IpService {
     @Value("${netscope.geoip.ipinfo-token:}")
     private String ipinfoToken;
 
+    /**
+     * Base URL for the ipinfo.io GeoIP API. Configurable so integration
+     * tests can point this at a WireMock instance instead of the real
+     * external service — without that override, {@code @CircuitBreaker}
+     * tests on CI runners with internet access can't actually
+     * exercise the failure path.
+     */
+    @Value("${netscope.geoip.ipinfo-base-url:https://ipinfo.io}")
+    private String ipinfoBaseUrl;
+
     @Value("${netscope.tor.exit-list-url}")
     private String torListUrl;
 
@@ -117,7 +127,7 @@ public class IpService {
     @CircuitBreaker(name = "ipinfo", fallbackMethod = "fetchFallback")
     public Map<String, Object> fetchFromIpinfo(String ip) {
         try {
-            String url = "https://ipinfo.io/" + ip + "/json"
+            String url = ipinfoBaseUrl + "/" + ip + "/json"
                 + (ipinfoToken.isBlank() ? "" : "?token=" + ipinfoToken);
             String body = rest.get().uri(url).retrieve().body(String.class);
             JsonNode j = mapper.readTree(body);
