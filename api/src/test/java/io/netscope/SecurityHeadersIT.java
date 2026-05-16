@@ -25,9 +25,13 @@ class SecurityHeadersIT extends IntegrationTestBase {
     }
 
     @Test void sensitiveActuatorEndpointsDenied() {
-        RestAssured.given().port(port).when().get("/actuator/env").then().statusCode(401);
-        RestAssured.given().port(port).when().get("/actuator/heapdump").then().statusCode(401);
-        RestAssured.given().port(port).when().get("/actuator/mappings").then().statusCode(401);
+        // SecurityConfig uses denyAll() for non-health actuator
+        // endpoints, which Spring Security maps to 403 (Forbidden), not
+        // 401 (Unauthorized). 401 means "send credentials" — but here
+        // every credential is rejected, hence 403.
+        RestAssured.given().port(port).when().get("/actuator/env").then().statusCode(403);
+        RestAssured.given().port(port).when().get("/actuator/heapdump").then().statusCode(403);
+        RestAssured.given().port(port).when().get("/actuator/mappings").then().statusCode(403);
     }
 
     @Test void privateEndpointRequiresApiKey() {
