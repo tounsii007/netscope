@@ -7,7 +7,10 @@ spring:
 
 netscope:
   cors:
-    allowed-origins: "*"
+    # CorsConfig rejects '*' (audit/F87 — no wildcard origins). Use an
+    # explicit localhost so integration tests can boot the security
+    # filter chain without tripping the wildcard validator.
+    allowed-origins: http://localhost:3000
   rate-limit:
     anonymous-per-minute: 1000
     authenticated-per-minute: 10000

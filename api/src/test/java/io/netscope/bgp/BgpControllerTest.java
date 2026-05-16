@@ -1,5 +1,6 @@
 package io.netscope.bgp;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.netscope.common.ApiException;
 import org.junit.jupiter.api.Test;
 
@@ -12,10 +13,21 @@ import static org.assertj.core.api.Assertions.*;
  * with WireMock — this suite covers the cheap, fast input guards that
  * defend against malformed or malicious URL parameters before any
  * outbound request is made.
+ *
+ * We subclass BgpController and override {@link BgpController#ripe} so
+ * the "valid input → network call → wrapped failure" tests don't depend
+ * on stat.ripe.net being unreachable from the test environment. On CI
+ * runners with internet access the real endpoint actually answers, and
+ * the previous tests then failed because they expected a throwable that
+ * never came.
  */
 class BgpControllerTest {
 
-    private final BgpController ctrl = new BgpController();
+    private final BgpController ctrl = new BgpController() {
+        @Override protected JsonNode ripe(String endpoint, String resource) {
+            throw new RuntimeException("test: simulated upstream failure");
+        }
+    };
 
     /* ─── /api/v1/bgp/ip/{ip} ────────────────────────────────────────────── */
 

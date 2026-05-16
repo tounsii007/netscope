@@ -5,6 +5,8 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.netscope.IntegrationTestBase;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Map;
 
@@ -16,15 +18,27 @@ import static java.time.Duration.ofSeconds;
 
 class IpServiceCircuitBreakerTest extends IntegrationTestBase {
 
-    static WireMockServer wm;
+    /**
+     * WireMock is started in a static initializer (not @BeforeAll) so the
+     * dynamic port is known before Spring's context wiring runs — that's
+     * what lets @DynamicPropertySource below splice the URL into the
+     * IpService bean. If we started it inside @BeforeAll, the Spring
+     * context would already be cached with the production URL.
+     */
+    static final WireMockServer wm;
+    static {
+        wm = new WireMockServer(options().dynamicPort());
+        wm.start();
+    }
+
+    @DynamicPropertySource
+    static void wireMockProperties(DynamicPropertyRegistry registry) {
+        registry.add("netscope.geoip.ipinfo-base-url", wm::baseUrl);
+    }
 
     @Autowired IpService ipService;
     @Autowired CircuitBreakerRegistry cbRegistry;
 
-    @BeforeAll static void startWireMock() {
-        wm = new WireMockServer(options().dynamicPort());
-        wm.start();
-    }
     @AfterAll static void stop() { wm.stop(); }
 
     @BeforeEach void reset() {
