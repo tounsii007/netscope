@@ -364,10 +364,6 @@
       "desc": "Senin IP'n, konum, ISP, tarayıcı, OS.",
       "meta_title": "IP'm dashboard'u",
       "meta_description": "Senin IP'n, konum, ISP, tarayıcı, OS, ekran, saat dilimi — tek bir görünümde."
-    },
-    "monitoring": {
-      "title": "İzleme",
-      "desc": "Zamanlanmış uptime kontrolleri ve uyarılar."
     }
   },
   "footer": {

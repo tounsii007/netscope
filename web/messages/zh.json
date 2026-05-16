@@ -364,10 +364,6 @@
       "desc": "您的 IP、位置、ISP、浏览器、操作系统。",
       "meta_title": "我的 IP 仪表盘",
       "meta_description": "您的 IP、位置、ISP、浏览器、操作系统、屏幕、时区 — 一览无余。"
-    },
-    "monitoring": {
-      "title": "监控",
-      "desc": "计划正常运行时间检查和警报。"
     }
   },
   "footer": {

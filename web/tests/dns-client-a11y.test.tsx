@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { renderWithIntl, screen } from "./test-utils";
+import { renderWithIntl, renderWithLocale, screen } from "./test-utils";
 import { DnsClient } from "@/app/[locale]/dns-lookup/client";
 
 /**
@@ -38,9 +38,22 @@ describe("DnsClient — accessibility surface", () => {
     expect(caa).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("renders the type-toggle group with an accessible name", () => {
+  it("renders the type-toggle group with a localised accessible name (EN)", () => {
+    // After the a11y fix, the aria-label is sourced from
+    // dns.record_types so screen-reader users hear the label in their
+    // own language. English bundle has "Record types".
     renderWithIntl(<DnsClient />);
-    const group = screen.getByRole("group", { name: /dns record types/i });
+    const group = screen.getByRole("group", { name: /record types/i });
+    expect(group).toBeInTheDocument();
+  });
+
+  it("renders the type-toggle group with a localised accessible name (DE)", () => {
+    // Regression guard: switching the user's locale must change the
+    // screen-reader-announced group name accordingly. Before the fix
+    // this was hardcoded English ("DNS record types") in all locales.
+    renderWithLocale(<DnsClient />, "de");
+    // German bundle: dns.record_types = "Eintragstypen"
+    const group = screen.getByRole("group", { name: /eintragstypen/i });
     expect(group).toBeInTheDocument();
   });
 

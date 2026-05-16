@@ -35,12 +35,22 @@ export function normaliseHost(raw: string): string {
     }
   }
 
-  // Manual stripping for inputs WITHOUT a scheme.
-  // Drop everything after the first '/', '?' or '#'.
+  // Manual stripping — runs in both code paths because URL() can leave
+  // bracketed IPv6 in u.hostname (e.g. "[::1]"), and bare-hostname inputs
+  // never went through URL() at all.
   s = s.split(/[/?#]/)[0];
-  // Drop port suffix (":8080").
-  const colonIdx = s.indexOf(":");
-  if (colonIdx > 0) s = s.slice(0, colonIdx);
+  // Bracketed IPv6: strip "[" and "]" and skip the port-stripping branch
+  // below — without this guard, indexOf(":") finds the first hextet colon
+  // and mangles "[::1]" into "[". Port is already gone via u.hostname.
+  if (s.startsWith("[")) {
+    const close = s.indexOf("]");
+    if (close > 0) s = s.slice(1, close);
+  } else {
+    // Drop port suffix (":8080"). IPv6 always uses bracket form here, so
+    // any colon at this point belongs to a port, not to an address.
+    const colonIdx = s.indexOf(":");
+    if (colonIdx > 0) s = s.slice(0, colonIdx);
+  }
   // Drop userinfo prefix ("user@").
   const atIdx = s.indexOf("@");
   if (atIdx >= 0) s = s.slice(atIdx + 1);

@@ -8,11 +8,11 @@ const config: NextConfig = {
   // Hide the "x-powered-by: Next.js" header — small attack-surface win
   // and one fewer fingerprintable signal on every response.
   poweredByHeader: false,
-  // Tree-shake icon and chart imports so we ship only the components
+  // Tree-shake icon and map imports so we ship only the components
   // each page actually renders. `next-intl` is also pulled in via the
   // plugin and benefits from the same treatment.
   experimental: {
-    optimizePackageImports: ["lucide-react", "recharts", "react-leaflet", "next-intl"],
+    optimizePackageImports: ["lucide-react", "react-leaflet", "next-intl"],
   },
   async rewrites() {
     return [
@@ -68,6 +68,10 @@ const config: NextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+      // Block legacy Flash/Acrobat cross-domain policy lookups so
+      // crossdomain.xml on the origin can't be hijacked for old
+      // SOP-circumvention. "none" disables them entirely.
+      { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
     ];
     return [
       // Security headers apply to every route.

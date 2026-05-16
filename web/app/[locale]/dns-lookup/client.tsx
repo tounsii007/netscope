@@ -13,6 +13,7 @@ export function DnsClient() {
   const tc = useTranslations("common");
   const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
+  const td = useTranslations("dns");
   const inputId = useId();
   const [domain, setDomain] = useState("example.com");
   const [selected, setSelected] = useState(new Set(["A", "AAAA", "MX", "TXT", "NS"]));
@@ -71,7 +72,7 @@ export function DnsClient() {
             {tc("lookup")}
           </LoadingButton>
         </div>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="DNS record types">
+        <div className="flex flex-wrap gap-2" role="group" aria-label={td("record_types")}>
           {TYPES.map((tp) => {
             const active = selected.has(tp);
             return (

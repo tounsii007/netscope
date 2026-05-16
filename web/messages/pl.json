@@ -364,10 +364,6 @@
       "desc": "Twój IP, lokalizacja, ISP, przeglądarka, OS.",
       "meta_title": "Dashboard Moje IP",
       "meta_description": "Twój IP, lokalizacja, ISP, przeglądarka, OS, ekran, strefa czasowa — wszystko w jednym widoku."
-    },
-    "monitoring": {
-      "title": "Monitorowanie",
-      "desc": "Zaplanowane sprawdzenia dostępności i alerty."
     }
   },
   "footer": {

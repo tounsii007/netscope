@@ -364,10 +364,6 @@
       "desc": "Ton IP, localisation, FAI, navigateur, OS.",
       "meta_title": "Dashboard Mon IP",
       "meta_description": "Ton IP, localisation, FAI, navigateur, OS, écran, fuseau horaire — tout en un coup d'œil."
-    },
-    "monitoring": {
-      "title": "Surveillance",
-      "desc": "Vérifications de disponibilité programmées et alertes."
     }
   },
   "footer": {

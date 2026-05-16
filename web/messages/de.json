@@ -364,10 +364,6 @@
       "desc": "Deine IP, Standort, ISP, Browser, Betriebssystem.",
       "meta_title": "Mein IP-Dashboard",
       "meta_description": "Deine IP, Standort, ISP, Browser, OS, Bildschirm, Zeitzone — alles auf einen Blick."
-    },
-    "monitoring": {
-      "title": "Monitoring",
-      "desc": "Geplante Verfügbarkeitsprüfungen und Benachrichtigungen."
     }
   },
   "footer": {

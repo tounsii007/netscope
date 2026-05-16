@@ -1,6 +1,6 @@
 # Traceronix — Network Diagnostics & IP Intelligence Platform
 
-Production-ready SaaS for developers, DevOps and security engineers. **24 network
+Production-ready SaaS for developers, DevOps and security engineers. **25 network
 diagnostic tools** in one fast, free, no-login web app — from Port Checker and
 DNS Propagation across 15+ global resolvers to JWT decoding, BGP/ASN routing
 inspection, IPv6 readiness scoring, multi-source IP geolocation comparison and
@@ -19,7 +19,6 @@ much more.
 | Frontend     | Next.js 15 (App Router) · React 19 · TypeScript · TailwindCSS    |
 | i18n         | next-intl 4 — 11 locales (EN-US, DE, FR, ES, IT, PL, RU, UK, TR, HI, ZH) |
 | Maps         | react-leaflet + OpenStreetMap                                    |
-| Charts       | Recharts                                                         |
 | Backend      | Spring Boot 3.4 · Java 21 · Maven                                |
 | Database     | PostgreSQL 16 (Flyway migrations)                                |
 | Cache / RL   | Redis 7 (result cache + Bucket4j rate limiter)                   |
@@ -32,7 +31,7 @@ much more.
 
 ---
 
-## Tools (24)
+## Tools (25)
 
 ### DNS & Domain
 DNS Lookup · DNS Propagation (15+ resolvers) · DNSSEC Validator · WHOIS/RDAP · Subdomain Finder (CT logs)
