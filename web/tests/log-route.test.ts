@@ -102,4 +102,16 @@ describe("POST /api/log", () => {
     const res = await POST(req);
     expect(res.status).toBe(400);
   });
+
+  it("emits Cache-Control: no-store on the success path", async () => {
+    const res = await POST(makeReq({ level: "error", message: "boom" }));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toMatch(/no-store/i);
+  });
+
+  it("emits Cache-Control: no-store on a 400 (missing message)", async () => {
+    const res = await POST(makeReq({ level: "error" }));
+    expect(res.status).toBe(400);
+    expect(res.headers.get("cache-control")).toMatch(/no-store/i);
+  });
 });

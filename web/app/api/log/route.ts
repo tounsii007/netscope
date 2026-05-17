@@ -11,6 +11,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 
 const ALLOWED_LEVELS = new Set(["error", "warn"]);
+/**
+ * Every response sets Cache-Control: no-store so a misbehaving CDN
+ * never caches a 200 / 400 / 413 envelope and starves us of real
+ * error reports from later browsers behind the same edge node. The
+ * route is exempt from the edge rate limiter (see middleware.ts) so
+ * the cache header is the only safety against the same response
+ * being reused unintentionally.
+ */
+const NO_STORE = { "Cache-Control": "no-store" } as const;
 /** Max byte length of the JSON body we'll parse. A 16 KB cap is generous
  *  for an error-boundary report (browsers cap stack traces well under
  *  that) but small enough that an attacker can't DoS the log channel
@@ -26,27 +35,27 @@ export async function POST(req: NextRequest) {
   try {
     const len = Number(req.headers.get("content-length") ?? "0");
     if (Number.isFinite(len) && len > MAX_BYTES) {
-      return NextResponse.json({ ok: false, reason: "payload too large" }, { status: 413 });
+      return NextResponse.json({ ok: false, reason: "payload too large" }, { status: 413, headers: NO_STORE });
     }
 
     const raw = await req.text();
     if (raw.length > MAX_BYTES) {
-      return NextResponse.json({ ok: false, reason: "payload too large" }, { status: 413 });
+      return NextResponse.json({ ok: false, reason: "payload too large" }, { status: 413, headers: NO_STORE });
     }
 
     let body: { level?: string; message?: string; meta?: Record<string, unknown> };
     try {
       body = JSON.parse(raw);
     } catch {
-      return NextResponse.json({ ok: false, reason: "invalid json" }, { status: 400 });
+      return NextResponse.json({ ok: false, reason: "invalid json" }, { status: 400, headers: NO_STORE });
     }
     const { level = "error", message, meta = {} } = body;
 
     if (!message || typeof message !== "string") {
-      return NextResponse.json({ ok: false, reason: "missing message" }, { status: 400 });
+      return NextResponse.json({ ok: false, reason: "missing message" }, { status: 400, headers: NO_STORE });
     }
     if (!ALLOWED_LEVELS.has(level)) {
-      return NextResponse.json({ ok: false, reason: "level not accepted" }, { status: 400 });
+      return NextResponse.json({ ok: false, reason: "level not accepted" }, { status: 400, headers: NO_STORE });
     }
 
     const enriched = {
@@ -64,9 +73,9 @@ export async function POST(req: NextRequest) {
     if (level === "warn") logger.warn(trimmed, enriched);
     else logger.error(trimmed, enriched);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, { headers: NO_STORE });
   } catch {
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json({ ok: false }, { status: 500, headers: NO_STORE });
   }
 }
 
