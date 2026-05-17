@@ -37,7 +37,7 @@ jobs:
         with: { distribution: temurin, java-version: "21", cache: maven }
       - name: Mutation testing
         run: mvn -B test org.pitest:pitest-maven:mutationCoverage
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: pitest-report

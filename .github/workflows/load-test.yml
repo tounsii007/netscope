@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload k6 summary
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: k6-${{ inputs.scenario }}-${{ github.run_id }}
           path: web/tests/load/results/
