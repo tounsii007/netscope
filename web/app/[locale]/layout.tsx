@@ -55,6 +55,35 @@ export default async function LocaleLayout({ children, params }: Props) {
   const t = await getTranslations({ locale, namespace: "nav" });
   return (
     <html lang={locale} dir={dir} className={`dark ${inter.variable} ${mono.variable}`}>
+      <head>
+        {/*
+          Preconnect to the four cross-origin asset hosts we hit from
+          almost every page so the browser parallelises DNS + TCP +
+          TLS setup with the HTML response, shaving ~100-300 ms off
+          the first byte of each subresource.
+
+          • flagcdn.com         — country flag PNGs (every locale switch
+                                  + every IP / WHOIS result)
+          • basemaps.cartocdn.com / *.basemaps.cartocdn.com — map tiles
+                                  (the IP-lookup map dynamically lazy-
+                                  loads these on demand)
+          • tile.openstreetmap.org — OSM tile fallback
+          • api.pwnedpasswords.com  — Have-I-Been-Pwned k-anonymity
+                                       endpoint used by the password-leak tool
+
+          We deliberately do NOT use dns-prefetch here because preconnect
+          subsumes it on every browser shipped after 2020. dns-prefetch
+          would add a redundant DNS query when preconnect is already
+          warming the same connection. `crossOrigin="anonymous"` matches
+          the CORS mode the images/JSON are actually fetched with — a
+          mismatched mode would force the browser to open a second
+          connection and waste the preconnect entirely.
+        */}
+        <link rel="preconnect" href="https://flagcdn.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://basemaps.cartocdn.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://tile.openstreetmap.org" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.pwnedpasswords.com" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-screen bg-bg font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           {/* Skip-to-content link — invisible until focused. Lets keyboard
