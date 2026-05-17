@@ -11,6 +11,7 @@
     "open_menu": "Menü öffnen",
     "close_menu": "Menü schließen",
     "skip_to_content": "Zum Hauptinhalt springen",
+    "primary_nav_label": "Hauptnavigation",
     "tools_menu": "Werkzeuge",
     "cat_dns": "DNS & Domain",
     "cat_network": "Netzwerk",
@@ -369,6 +370,8 @@
   "footer": {
     "tagline": "Professionelle Netzwerkdiagnose.",
     "status": "Status",
+    "security_policy": "Sicherheit",
+    "aria_label": "Fußzeile",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

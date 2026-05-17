@@ -58,20 +58,102 @@ const config: NextConfig = {
       "form-action 'self'",
       "object-src 'none'",
       "upgrade-insecure-requests",
+      // Route violation reports to /api/csp-report (same-origin
+      // POST, logged via the structured logger). report-uri is the
+      // legacy directive but Firefox/Safari still only honour it;
+      // report-to ('csp-endpoint') below is the modern equivalent
+      // paired with the Reporting-Endpoints header.
+      "report-uri /api/csp-report",
+      "report-to csp-endpoint",
     ].join("; ");
+    // Permissions-Policy: deny by default for every interface we
+    // never use. The opt-in pattern is safer than the deny-known-bad
+    // approach — if Chrome ships a new sensor permission tomorrow it
+    // is automatically allowed unless we list it here. The keys below
+    // cover the full set Chrome 122+ understands and Firefox honours
+    // a subset. Browsers ignore unknown keys, so adding extras is
+    // forward-compatible.
+    const permissionsPolicy = [
+      "accelerometer=()",
+      "ambient-light-sensor=()",
+      "attribution-reporting=()",
+      "autoplay=()",
+      "battery=()",
+      "browsing-topics=()",
+      "camera=()",
+      "ch-ua-form-factors=()",
+      "clipboard-read=()",
+      "clipboard-write=(self)",
+      "cross-origin-isolated=()",
+      "display-capture=()",
+      "encrypted-media=()",
+      "execution-while-not-rendered=()",
+      "execution-while-out-of-viewport=()",
+      "fullscreen=(self)",
+      "gamepad=()",
+      "geolocation=()",
+      "gyroscope=()",
+      "hid=()",
+      "identity-credentials-get=()",
+      "idle-detection=()",
+      "interest-cohort=()",
+      "keyboard-map=()",
+      "local-fonts=()",
+      "magnetometer=()",
+      "microphone=()",
+      "midi=()",
+      "navigation-override=()",
+      "otp-credentials=()",
+      "payment=()",
+      "picture-in-picture=()",
+      "publickey-credentials-create=(self)",
+      "publickey-credentials-get=(self)",
+      "screen-wake-lock=()",
+      "serial=()",
+      "speaker-selection=()",
+      "storage-access=()",
+      "sync-xhr=()",
+      "unload=()",
+      "usb=()",
+      "web-share=()",
+      "window-management=()",
+      "xr-spatial-tracking=()",
+    ].join(", ");
+    // Reporting-Endpoints lets browsers POST CSP violations (and
+    // future report types: deprecation, intervention, crash) to a
+    // structured endpoint instead of just dumping them in the
+    // console. /api/csp-report is rate-limit-exempt at the edge but
+    // caps body size internally so it can't be abused as a DoS sink.
+    const reportingEndpoints = `csp-endpoint="/api/csp-report"`;
     const securityHeaders = [
       { key: "Content-Security-Policy", value: csp },
+      { key: "Reporting-Endpoints", value: reportingEndpoints },
       { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
       { key: "X-Frame-Options", value: "DENY" },
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "no-referrer" },
-      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+      { key: "Permissions-Policy", value: permissionsPolicy },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+      // credentialless (not require-corp) because we embed third-party
+      // map tile + flag CDNs that don't send Cross-Origin-Resource-Policy.
+      // credentialless still gives us crossOriginIsolated + SharedArrayBuffer
+      // capabilities while letting public-asset subresources load
+      // without cookies/credentials.
+      { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+      // Hints the browser to allocate this origin its own agent
+      // cluster (process isolation). Cheap to set, costs us nothing
+      // and gates a class of Spectre-style cross-origin leaks.
+      { key: "Origin-Agent-Cluster", value: "?1" },
       // Block legacy Flash/Acrobat cross-domain policy lookups so
       // crossdomain.xml on the origin can't be hijacked for old
       // SOP-circumvention. "none" disables them entirely.
       { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+      // Disable DNS prefetching globally. We don't link to external
+      // hosts at hover; the few off-origin assets (map tiles, flag
+      // CDN) load on demand, not via <a> hover heuristics. Off saves
+      // privacy and removes a sidechannel.
+      { key: "X-DNS-Prefetch-Control", value: "off" },
     ];
     return [
       // Security headers apply to every route.

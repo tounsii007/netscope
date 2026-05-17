@@ -30,6 +30,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Value("${netscope.rate-limit.authenticated-per-minute}")
     private int authPerMinute;
 
+    /**
+     * Tighter anti-credential-stuffing limit on /api/v1/auth/**.
+     *
+     * Falls on top of the global anonymous limit: an attacker
+     * spraying 30 login attempts a minute would still trip the
+     * global bucket eventually, but this dedicated tier kicks in
+     * much sooner — typically 10 attempts/min from one IP.
+     *
+     * Defaults to 10 if unset so a deployment that forgets to
+     * configure the value still gets the protection.
+     */
+    @Value("${netscope.rate-limit.auth-endpoint-per-minute:10}")
+    private int authEndpointPerMinute;
+
     private final StringRedisTemplate redis;
 
     public RateLimitFilter(StringRedisTemplate redis) { this.redis = redis; }
@@ -53,9 +67,43 @@ public class RateLimitFilter extends OncePerRequestFilter {
             : "ip:" + clientIp(req);
         int limit = apiKey != null ? authPerMinute : anonPerMinute;
 
-        long windowStart = System.currentTimeMillis() / 60_000;
+        long nowMs = System.currentTimeMillis();
+        long windowStart = nowMs / 60_000;
+        // Unix-epoch seconds at the start of the NEXT window. Browsers
+        // and clients use this for X-RateLimit-Reset to schedule retry
+        // without sticking to a polled "Retry-After: 60" countdown.
+        long resetEpochSec = (windowStart + 1L) * 60L;
         String redisKey = "rl:" + identity + ":" + windowStart;
 
+        // ─── Auth-endpoint tier (anti-credential-stuffing) ────────────
+        // Anonymous calls to /api/v1/auth/** are extra-budgeted: they
+        // pass BOTH the dedicated auth-tier bucket AND the global
+        // anonymous bucket. API-key callers skip the auth tier — a
+        // legitimate scripted client that holds a key has already
+        // proven its identity.
+        boolean isAuthEndpoint = apiKey == null && path.startsWith("/api/v1/auth/");
+        if (isAuthEndpoint) {
+            String authKey = "rl:auth:" + clientIp(req) + ":" + windowStart;
+            Long authCount;
+            try {
+                authCount = redis.opsForValue().increment(authKey);
+                if (authCount != null && authCount == 1L) {
+                    redis.expire(authKey, Duration.ofSeconds(70));
+                }
+            } catch (Exception e) {
+                // fail-open: if Redis is down we never block auth — a
+                // wedged Redis must not lock people out of their account
+                chain.doFilter(req, res);
+                return;
+            }
+            if (authCount != null && authCount > authEndpointPerMinute) {
+                writeTooManyRequests(res, authEndpointPerMinute, resetEpochSec,
+                    "auth endpoint rate limit exceeded");
+                return;
+            }
+        }
+
+        // ─── Global tier ──────────────────────────────────────────────
         Long count;
         try {
             count = redis.opsForValue().increment(redisKey);
@@ -71,15 +119,35 @@ public class RateLimitFilter extends OncePerRequestFilter {
         long remaining = Math.max(0, limit - (count == null ? 0 : count));
         res.setHeader("X-RateLimit-Limit", String.valueOf(limit));
         res.setHeader("X-RateLimit-Remaining", String.valueOf(remaining));
+        res.setHeader("X-RateLimit-Reset", String.valueOf(resetEpochSec));
 
         if (count != null && count > limit) {
-            res.setStatus(429);
-            res.setHeader("Retry-After", "60");
-            res.setContentType("application/json");
-            res.getWriter().write("{\"error\":\"Too Many Requests\",\"message\":\"rate limit exceeded\"}");
+            writeTooManyRequests(res, limit, resetEpochSec, "rate limit exceeded");
             return;
         }
         chain.doFilter(req, res);
+    }
+
+    /**
+     * Centralised 429 emitter so both tiers respond consistently:
+     * status 429, Retry-After in seconds (legacy clients), and the
+     * full X-RateLimit-* triplet (modern clients). The body is a
+     * tiny JSON object so SPA error handlers can branch on `error`
+     * without parsing free-text.
+     */
+    private static void writeTooManyRequests(
+            HttpServletResponse res, int limit, long resetEpochSec, String reason)
+            throws IOException {
+        long retryAfterSec = Math.max(1L,
+            resetEpochSec - (System.currentTimeMillis() / 1000L));
+        res.setStatus(429);
+        res.setHeader("Retry-After", String.valueOf(retryAfterSec));
+        res.setHeader("X-RateLimit-Limit", String.valueOf(limit));
+        res.setHeader("X-RateLimit-Remaining", "0");
+        res.setHeader("X-RateLimit-Reset", String.valueOf(resetEpochSec));
+        res.setContentType("application/json");
+        res.getWriter().write(
+            "{\"error\":\"Too Many Requests\",\"message\":\"" + reason + "\"}");
     }
 
     /**

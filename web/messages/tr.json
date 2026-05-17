@@ -11,6 +11,7 @@
     "open_menu": "Menüyü aç",
     "close_menu": "Menüyü kapat",
     "skip_to_content": "Ana içeriğe atla",
+    "primary_nav_label": "Ana gezinme",
     "tools_menu": "Araçlar",
     "cat_dns": "DNS ve domain",
     "cat_network": "Ağ",
@@ -369,6 +370,8 @@
   "footer": {
     "tagline": "Profesyonel ağ tanılaması.",
     "status": "Durum",
+    "security_policy": "Güvenlik",
+    "aria_label": "Alt bilgi",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

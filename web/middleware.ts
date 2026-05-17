@@ -20,13 +20,17 @@ export default function middleware(req: NextRequest) {
   const ip = clientIp(req);
 
   // ─── 1. Rate limit ────────────────────────────────────────────────
-  // Exempt the two telemetry endpoints:
+  // Exempt the three telemetry endpoints:
   //   • /api/vitals — user web-vitals must always land regardless of
   //     burst, otherwise a monitoring storm locks real users out
   //   • /api/log    — error-boundary reports must always land — a buggy
   //     page generating an error storm is precisely the moment we want
   //     the reports to reach us, not 429
-  // Both endpoints enforce their own per-call body + count caps so they
+  //   • /api/csp-report — CSP violation reports must always land. If
+  //     someone is actively probing the page for XSS holes, that is
+  //     precisely when the violation stream should reach us; 429'ing
+  //     it would silence the IDS.
+  // All three enforce their own per-call body + count caps so they
   // can't be abused as a DoS vector despite the rate-limit exemption.
   //
   // IMPORTANT: rateLimit() *increments* the bucket, so call it ONCE per
@@ -35,7 +39,10 @@ export default function middleware(req: NextRequest) {
   // double-count and effectively halve the configured budget.
   const path = req.nextUrl.pathname;
   const limit = currentLimit();
-  const isTelemetry = path.startsWith("/api/vitals") || path.startsWith("/api/log");
+  const isTelemetry =
+    path.startsWith("/api/vitals") ||
+    path.startsWith("/api/log") ||
+    path.startsWith("/api/csp-report");
   let rl: ReturnType<typeof rateLimit> | null = null;
   if (!isTelemetry) {
     rl = rateLimit(ip, limit);

@@ -99,6 +99,12 @@ netscope:
   rate-limit:
     anonymous-per-minute: 30
     authenticated-per-minute: 600
+    # Anti-credential-stuffing tier: tighter per-IP cap that ONLY
+    # applies to /api/v1/auth/** when no X-API-Key is presented.
+    # Stacks with the global anonymous bucket — both must pass.
+    # 10/min is enough for a real user mistyping + recovering;
+    # an attacker spraying credential lists trips this quickly.
+    auth-endpoint-per-minute: 10
   geoip:
     mmdb-path: ${GEOIP_DB_PATH:}
     ipinfo-token: ${IPINFO_TOKEN:}

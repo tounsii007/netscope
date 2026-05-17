@@ -11,6 +11,7 @@
     "open_menu": "打开菜单",
     "close_menu": "关闭菜单",
     "skip_to_content": "跳到主要内容",
+    "primary_nav_label": "主导航",
     "tools_menu": "工具",
     "cat_dns": "DNS 与域名",
     "cat_network": "网络",
@@ -369,6 +370,8 @@
   "footer": {
     "tagline": "专业网络诊断服务。",
     "status": "状态",
+    "security_policy": "安全",
+    "aria_label": "页脚",
     "copyright": "© {year} Traceronix。"
   },
   "guard": {

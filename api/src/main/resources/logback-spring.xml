@@ -15,12 +15,25 @@
   <springProperty name="LOG_LEVEL" source="logging.level.root"  defaultValue="INFO"/>
 
   <!-- ─── Patterns ──────────────────────────────────────────────────── -->
+  <!--
+    %X{requestId} renders the per-request correlation id stamped by
+    RequestIdFilter into MDC; the colon-dash default value emits a
+    single dash when the field is absent (boot-time logs, scheduler
+    threads, the access log before the filter ran). Keeping the
+    column present in every line keeps awk-style log mining honest.
+
+    NOTE: the literal default token cannot be written inline in this
+    comment because XML 1.0 forbids the two-dash sequence inside a
+    comment body (SAX 1003: "The string is not permitted within
+    comments"). See the pattern strings below for the actual
+    `%X{requestId:` plus default plus closing brace usage.
+  -->
   <property name="CONSOLE_PATTERN"
-            value="%d{HH:mm:ss.SSS} %highlight(%-5level) %cyan(%logger{40}) %msg%n%ex{5}"/>
+            value="%d{HH:mm:ss.SSS} %highlight(%-5level) [%X{requestId:--}] %cyan(%logger{40}) %msg%n%ex{5}"/>
   <property name="FILE_PATTERN"
-            value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n%ex{full}"/>
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId:--}] %-5level %logger{50} - %msg%n%ex{full}"/>
   <property name="ACCESS_PATTERN"
-            value="%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n"/>
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId:--}] %msg%n"/>
 
   <!-- ═══════════════════════════════════════════════════════════════════
        CONSOLE  (coloured — active in all profiles)
@@ -159,8 +172,13 @@
       <totalSizeCap>2GB</totalSizeCap>
     </rollingPolicy>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <!-- Compact single-line access log — no duplicate date in message -->
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n</pattern>
+      <!--
+        Compact single-line access log including the request id from
+        MDC so a 500'd response can be cross-referenced from the
+        ACCESS line straight to the matching SERVER / ERROR entries
+        by `grep <id>` alone.
+      -->
+      <pattern>${ACCESS_PATTERN}</pattern>
       <charset>UTF-8</charset>
     </encoder>
   </appender>

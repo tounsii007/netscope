@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { cn } from "@/lib/cn";
 
 export function ToolShell({
@@ -6,14 +7,27 @@ export function ToolShell({
   title: string; subtitle: string; icon: React.ReactNode;
   children: React.ReactNode; className?: string;
 }) {
+  // Link the <section> landmark to its <h1> via aria-labelledby. A
+  // section with no accessible name reads as just "region" in the
+  // screen-reader landmark list — useless when a user is trying to
+  // jump between sections. Pulling the heading text in by id gives
+  // each tool a distinct entry ("DNS Lookup region", "Port Checker
+  // region", ...) without duplicating the string.
+  //
+  // useId() returns a stable cross-render id that matches between
+  // SSR and hydration; safe in the server component, safe in client.
+  const titleId = useId();
   return (
-    <section className={cn("space-y-6 animate-slide-up", className)}>
+    <section
+      aria-labelledby={titleId}
+      className={cn("space-y-6 animate-slide-up", className)}
+    >
       <header className="flex items-start gap-4">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
+        <div aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
           {icon}
         </div>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <h1 id={titleId} className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="text-sm text-fg-muted">{subtitle}</p>
         </div>
       </header>

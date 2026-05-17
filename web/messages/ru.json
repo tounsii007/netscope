@@ -11,6 +11,7 @@
     "open_menu": "Открыть меню",
     "close_menu": "Закрыть меню",
     "skip_to_content": "Перейти к основному содержимому",
+    "primary_nav_label": "Основная навигация",
     "tools_menu": "Инструменты",
     "cat_dns": "DNS и домен",
     "cat_network": "Сеть",
@@ -369,6 +370,8 @@
   "footer": {
     "tagline": "Профессиональная сетевая диагностика.",
     "status": "Статус",
+    "security_policy": "Безопасность",
+    "aria_label": "Подвал",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

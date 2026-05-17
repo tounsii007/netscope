@@ -11,6 +11,7 @@
     "open_menu": "Otwórz menu",
     "close_menu": "Zamknij menu",
     "skip_to_content": "Przejdź do treści głównej",
+    "primary_nav_label": "Nawigacja główna",
     "tools_menu": "Narzędzia",
     "cat_dns": "DNS i domena",
     "cat_network": "Sieć",
@@ -369,6 +370,8 @@
   "footer": {
     "tagline": "Profesjonalna diagnostyka sieci.",
     "status": "Status",
+    "security_policy": "Bezpieczeństwo",
+    "aria_label": "Stopka",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

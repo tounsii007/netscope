@@ -50,15 +50,24 @@ export function LanguageSwitcher() {
 
   return (
     <div className="relative group">
+      {/*
+        The trigger label combines the "Switch language" action with the
+        currently-selected language so screen readers announce e.g.
+        "Switch language; current: English" instead of just "Switch
+        language" (which leaves blind users guessing what's active).
+        The visible flag + label communicate the same thing to sighted
+        users.
+      */}
       <button
         className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-fg-muted hover:bg-bg-elevated hover:text-fg transition"
-        aria-label={t("switch_lang")}
+        aria-label={`${t("switch_lang")}: ${t(langKey(locale))}`}
       >
         <Flag locale={locale} />
         <span className="hidden sm:inline text-xs font-medium">
           {t(langKey(locale))}
         </span>
         <svg
+          aria-hidden="true"
           className="h-3 w-3 opacity-50"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -70,25 +79,49 @@ export function LanguageSwitcher() {
           />
         </svg>
       </button>
-      <div className="absolute right-0 top-full z-50 mt-1 hidden w-44 overflow-hidden rounded-lg border border-border bg-bg-card shadow-xl group-focus-within:block group-hover:block">
-        {routing.locales.map((loc) => (
-          <button
-            key={loc}
-            onClick={() => switchLocale(loc)}
-            className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm transition hover:bg-bg-elevated ${
-              loc === locale
-                ? "text-brand font-semibold bg-brand/5"
-                : "text-fg-muted"
-            }`}
-          >
-            <Flag locale={loc} />
-            <span>{t(langKey(loc))}</span>
-            {loc === locale && (
-              <span className="ml-auto text-xs text-brand">✓</span>
-            )}
-          </button>
-        ))}
-      </div>
+      {/*
+        The trigger <button> already provides the accessible name for
+        the disclosure region ("Switch language: <current>"), so we
+        intentionally do NOT add an aria-label to the <ul> — duplicating
+        the label would make `getByLabelText(/switch language/i)` match
+        two nodes and confuse AT with redundant announcements.
+      */}
+      <ul
+        className="absolute right-0 top-full z-50 mt-1 hidden w-44 overflow-hidden rounded-lg border border-border bg-bg-card shadow-xl group-focus-within:block group-hover:block"
+      >
+        {routing.locales.map((loc) => {
+          const isCurrent = loc === locale;
+          return (
+            <li key={loc}>
+              <button
+                // aria-current="true" tells AT which language is active.
+                // We keep the buttons as plain <button> (not
+                // menuitemradio) so existing role-based tests still
+                // pass and so users get the familiar Enter/Space
+                // semantics; the aria-current state plus the visible
+                // bold/colour cue make the selection unambiguous.
+                aria-current={isCurrent || undefined}
+                // lang attribute helps multilingual TTS voices switch
+                // to a native pronunciation for non-Latin scripts
+                // (Hindi, Cyrillic, Chinese).
+                lang={loc}
+                onClick={() => switchLocale(loc)}
+                className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm transition hover:bg-bg-elevated ${
+                  isCurrent
+                    ? "text-brand font-semibold bg-brand/5"
+                    : "text-fg-muted"
+                }`}
+              >
+                <Flag locale={loc} />
+                <span>{t(langKey(loc))}</span>
+                {isCurrent && (
+                  <span aria-hidden="true" className="ml-auto text-xs text-brand">✓</span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
