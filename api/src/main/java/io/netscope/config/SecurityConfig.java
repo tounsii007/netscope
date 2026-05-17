@@ -121,6 +121,14 @@ public class SecurityConfig {
                         res.setHeader("Pragma", "no-cache");
                     }
                 })
+                // X-Permitted-Cross-Domain-Policies: none.
+                // Mirrors the frontend (next.config.ts) — disables
+                // legacy Flash/Acrobat `crossdomain.xml` lookups so an
+                // attacker can't hijack a stale crossdomain.xml on
+                // this host to bypass SOP via the Flash plugin's
+                // historical loopholes. Cheap, header-only, no
+                // runtime cost.
+                .addHeaderWriter((req, res) -> res.setHeader("X-Permitted-Cross-Domain-Policies", "none"))
             );
         return http.build();
     }

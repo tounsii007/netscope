@@ -27,7 +27,22 @@ class SecurityHeadersIT extends IntegrationTestBase {
                 .header("Cross-Origin-Opener-Policy", equalTo("same-origin"))
                 .header("Cross-Origin-Resource-Policy", equalTo("same-origin"))
                 .header("Cross-Origin-Embedder-Policy", equalTo("credentialless"))
-                .header("Origin-Agent-Cluster", equalTo("?1"));
+                .header("Origin-Agent-Cluster", equalTo("?1"))
+                // Iter I addition — blocks legacy Flash/Acrobat
+                // crossdomain.xml SOP-circumvention. Mirrors the FE.
+                .header("X-Permitted-Cross-Domain-Policies", equalTo("none"));
+    }
+
+    @Test void apiResponsesEchoCorrelationRequestId() {
+        // Iter F lock: the RequestIdFilter must stamp X-Request-Id on
+        // every API response — without it, a 500 cannot be cross-
+        // referenced from a support ticket to the matching log entry.
+        // The exact value is non-deterministic (16 hex chars), so we
+        // just assert the header is present and non-empty.
+        RestAssured.given().port(port)
+            .when().get("/api/v1/_does-not-exist")
+            .then()
+                .header("X-Request-Id", org.hamcrest.Matchers.matchesPattern("^[A-Za-z0-9_.\\-]{8,64}$"));
     }
 
     @Test void apiResponsesAreUncacheable() {
