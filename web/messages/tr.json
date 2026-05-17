@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Profesyonel ağ tanılaması.",
     "status": "Durum",
+    "security_policy": "Güvenlik",
+    "aria_label": "Alt bilgi",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

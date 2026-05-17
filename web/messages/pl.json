@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Profesjonalna diagnostyka sieci.",
     "status": "Status",
+    "security_policy": "Bezpieczeństwo",
+    "aria_label": "Stopka",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

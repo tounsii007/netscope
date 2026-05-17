@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Профессиональная сетевая диагностика.",
     "status": "Статус",
+    "security_policy": "Безопасность",
+    "aria_label": "Подвал",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Професійна мережева діагностика.",
     "status": "Статус",
+    "security_policy": "Безпека",
+    "aria_label": "Підвал",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

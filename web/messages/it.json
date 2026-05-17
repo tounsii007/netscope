@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Diagnostica di rete professionale.",
     "status": "Stato",
+    "security_policy": "Sicurezza",
+    "aria_label": "Piè di pagina",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

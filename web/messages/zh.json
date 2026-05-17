@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "专业网络诊断服务。",
     "status": "状态",
+    "security_policy": "安全",
+    "aria_label": "页脚",
     "copyright": "© {year} Traceronix。"
   },
   "guard": {

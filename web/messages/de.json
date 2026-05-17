@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Professionelle Netzwerkdiagnose.",
     "status": "Status",
+    "security_policy": "Sicherheit",
+    "aria_label": "Fußzeile",
     "copyright": "© {year} Traceronix."
   },
   "guard": {

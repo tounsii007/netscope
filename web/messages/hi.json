@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "पेशेवर नेटवर्क डायग्नोस्टिक्स।",
     "status": "स्थिति",
+    "security_policy": "सुरक्षा",
+    "aria_label": "फ़ुटर",
     "copyright": "© {year} Traceronix।"
   },
   "guard": {

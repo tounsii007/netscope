@@ -370,6 +370,8 @@
   "footer": {
     "tagline": "Diagnostic réseau professionnel.",
     "status": "Statut",
+    "security_policy": "Sécurité",
+    "aria_label": "Pied de page",
     "copyright": "© {year} Traceronix."
   },
   "guard": {
