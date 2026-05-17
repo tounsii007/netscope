@@ -16,11 +16,17 @@
 
   <!-- ─── Patterns ──────────────────────────────────────────────────── -->
   <!--
-    %X{requestId:--} renders the per-request correlation id stamped by
-    RequestIdFilter into MDC; the `:-` fallback emits "-" when the
-    field is absent (boot-time logs, scheduler threads, the access
-    log before the filter ran). Keeping the column present in every
-    line keeps `awk '{print $4}'` style log mining honest.
+    %X{requestId} renders the per-request correlation id stamped by
+    RequestIdFilter into MDC; the colon-dash default value emits a
+    single dash when the field is absent (boot-time logs, scheduler
+    threads, the access log before the filter ran). Keeping the
+    column present in every line keeps awk-style log mining honest.
+
+    NOTE: the literal default token cannot be written inline in this
+    comment because XML 1.0 forbids the two-dash sequence inside a
+    comment body (SAX 1003: "The string is not permitted within
+    comments"). See the pattern strings below for the actual
+    `%X{requestId:` plus default plus closing brace usage.
   -->
   <property name="CONSOLE_PATTERN"
             value="%d{HH:mm:ss.SSS} %highlight(%-5level) [%X{requestId:--}] %cyan(%logger{40}) %msg%n%ex{5}"/>

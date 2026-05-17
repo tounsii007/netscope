@@ -19,12 +19,15 @@ export function Hero404({
         className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-bg-elevated px-3 py-1 text-xs text-fg-muted hover:text-fg transition"
       >
         {/*
-          eslint-disable-next-line @next/next/no-img-element
-
           404 hero is below-the-fold by definition (the visitor only
           sees it after a routing miss). `loading="lazy"` + async
           decoding keeps it out of the initial paint critical path.
+
+          The eslint-disable directive MUST sit on its own single-line
+          comment below this block — multi-line prose between the
+          directive and the <img> gets parsed as part of the rule name.
         */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icon.png"
           alt=""
