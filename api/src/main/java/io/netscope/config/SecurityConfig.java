@@ -2,6 +2,7 @@ package io.netscope.config;
 
 import io.netscope.auth.ApiKeyFilter;
 import io.netscope.common.RateLimitFilter;
+import io.netscope.common.RequestIdFilter;
 import io.netscope.user.SessionFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
@@ -33,7 +34,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, ApiKeyFilter apiKeyFilter,
-            SessionFilter sessionFilter, RateLimitFilter rateLimitFilter) throws Exception {
+            SessionFilter sessionFilter, RateLimitFilter rateLimitFilter,
+            RequestIdFilter requestIdFilter) throws Exception {
         http
             .csrf(csrf -> csrf.ignoringRequestMatchers(
                 "/api/v1/billing/webhook",           // Stripe sends raw body with its own signature
@@ -53,9 +55,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .anyRequest().permitAll() // fine-grained auth handled by ApiKey/Session filters
             )
-            .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(sessionFilter, UsernamePasswordAuthenticationFilter.class)
+            // RequestIdFilter must run first so every subsequent
+            // filter (rate-limit, api-key, session) and every controller
+            // log line picks up the correlation id from MDC.
+            .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(rateLimitFilter, RequestIdFilter.class)
+            .addFilterAfter(apiKeyFilter, RateLimitFilter.class)
+            .addFilterAfter(sessionFilter, ApiKeyFilter.class)
             .headers(h -> h
                 .contentSecurityPolicy(c -> c.policyDirectives(
                     "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"))
