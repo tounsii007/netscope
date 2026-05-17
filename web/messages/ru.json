@@ -511,7 +511,15 @@
     "subtitle": "Опрос DNS-записей для любого домена.",
     "record_types": "Типы записей",
     "records_count": "{count} записей",
-    "no_records": "Нет записей"
+    "no_records": "Нет записей",
+    "soa_primary_ns": "Основной NS",
+    "soa_admin": "Админ",
+    "soa_serial": "Серийный номер",
+    "soa_refresh": "Обновление",
+    "soa_retry": "Повтор",
+    "soa_expire": "Истечение",
+    "soa_minimum": "Минимум",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "Распространение DNS",

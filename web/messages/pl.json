@@ -511,7 +511,15 @@
     "subtitle": "Odpytaj rekordy DNS dla dowolnej domeny.",
     "record_types": "Typy rekordów",
     "records_count": "{count} rekordów",
-    "no_records": "Brak rekordów"
+    "no_records": "Brak rekordów",
+    "soa_primary_ns": "Główny NS",
+    "soa_admin": "Admin",
+    "soa_serial": "Numer seryjny",
+    "soa_refresh": "Odświeżanie",
+    "soa_retry": "Ponowna próba",
+    "soa_expire": "Wygaśnięcie",
+    "soa_minimum": "Minimum",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "Propagacja DNS",

@@ -511,7 +511,15 @@
     "subtitle": "किसी भी डोमेन के DNS रिकॉर्ड क्वेरी करें।",
     "record_types": "रिकॉर्ड प्रकार",
     "records_count": "{count} रिकॉर्ड",
-    "no_records": "कोई रिकॉर्ड नहीं"
+    "no_records": "कोई रिकॉर्ड नहीं",
+    "soa_primary_ns": "मुख्य NS",
+    "soa_admin": "एडमिन",
+    "soa_serial": "सीरियल",
+    "soa_refresh": "रिफ्रेश",
+    "soa_retry": "पुनः प्रयास",
+    "soa_expire": "समाप्ति",
+    "soa_minimum": "न्यूनतम",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "DNS प्रसार",
