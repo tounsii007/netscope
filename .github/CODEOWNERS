@@ -1,0 +1,14 @@
+# CODEOWNERS — automatic review assignment.
+# Each line maps a path pattern to one or more owners; the last matching
+# rule wins. Owners are auto-requested as reviewers when a PR touches
+# matching files.
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo.
+*       @tounsii007
+
+# CI / infrastructure / security-sensitive configuration.
+/.github/                @tounsii007
+/.github/workflows/      @tounsii007
+SECURITY.md              @tounsii007
