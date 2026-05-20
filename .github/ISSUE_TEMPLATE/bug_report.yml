@@ -1,0 +1,42 @@
+name: Bug report
+description: Something broke. Help us reproduce it.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - frontend
+        - mobile
+        - infra/CI
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, what actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Numbered list ideally. The shorter the repro, the faster the fix.
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build / version
+      description: Commit SHA or package version.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error output
+      description: Paste the relevant slice. Redact any secrets first.
+      render: shell
