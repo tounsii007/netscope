@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type IpResult } from "@/lib/api";
 import { ResultCard, Spinner } from "@/components/tool-shell";
+import {
+  MapPin, Monitor, ShieldAlert, Wifi,
+  Check, X,
+} from "lucide-react";
 
 export function DashboardClient() {
   const t = useTranslations("dashboard");
@@ -18,40 +22,68 @@ export function DashboardClient() {
     api.me().then(setData).catch((e) => setErr(e.message));
   }, []);
 
-  if (err) return <div className="card border-danger/50 text-danger">{err}</div>;
-  if (!data) return <div className="card flex items-center gap-2"><Spinner /> {t("detecting")}</div>;
+  if (err) {
+    return (
+      <div className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-sm text-danger ring-1 ring-danger/20">
+        <div className="flex items-center gap-2 font-medium">
+          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+          {err}
+        </div>
+      </div>
+    );
+  }
+  if (!data) {
+    return (
+      <div className="card flex items-center gap-2 text-fg-muted">
+        <Spinner /> {t("detecting")}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <ResultCard>
-        <h3 className="mb-2 text-sm font-semibold">{t("section_connection")}</h3>
+      <SectionCard
+        accent="brand"
+        icon={<Wifi className="h-4 w-4" />}
+        title={t("section_connection")}
+      >
         <Row l={t("field_ip")} v={data.ip} mono />
         <Row l={t("field_hostname")} v={data.hostname} mono />
         <Row l={t("field_isp")} v={data.isp ?? data.org} />
         <Row l={t("field_asn")} v={data.asn} mono />
-      </ResultCard>
+      </SectionCard>
 
-      <ResultCard>
-        <h3 className="mb-2 text-sm font-semibold">{t("section_location")}</h3>
+      <SectionCard
+        accent="cyan"
+        icon={<MapPin className="h-4 w-4" />}
+        title={t("section_location")}
+      >
         <Row l={t("field_country")} v={data.country} />
         <Row l={t("field_region")} v={data.region} />
         <Row l={t("field_city")} v={data.city} />
         <Row l={t("field_tz_ip")} v={data.timezone} />
         <Row l={t("field_tz_browser")} v={tz} />
-      </ResultCard>
+      </SectionCard>
 
-      <ResultCard>
-        <h3 className="mb-2 text-sm font-semibold">{t("section_client")}</h3>
+      <SectionCard
+        accent="violet"
+        icon={<Monitor className="h-4 w-4" />}
+        title={t("section_client")}
+      >
         <Row l={t("field_browser")} v={data.client?.browser} />
         <Row l={t("field_os")} v={data.client?.os} />
         <Row l={t("field_device")} v={data.client?.device} />
         <Row l={t("field_screen")} v={screen} mono />
         <Row l={t("field_lang")} v={data.client?.acceptLanguage} mono />
-      </ResultCard>
+      </SectionCard>
 
       {data.threat && (
-        <ResultCard className="lg:col-span-3">
-          <h3 className="mb-3 text-sm font-semibold">{t("section_threat")}</h3>
+        <SectionCard
+          accent="success"
+          icon={<ShieldAlert className="h-4 w-4" />}
+          title={t("section_threat")}
+          className="lg:col-span-3 xl:col-span-4"
+        >
           <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
             <Pill label={t("threat_tor")} v={data.threat.tor} bad />
             <Pill label={t("threat_hosting")} v={data.threat.hosting} bad />
@@ -59,27 +91,73 @@ export function DashboardClient() {
             <Pill label={t("threat_proxy")} v={data.threat.proxy} bad />
             <Pill label={t("threat_residential")} v={data.threat.residential} />
           </div>
-        </ResultCard>
+        </SectionCard>
       )}
     </div>
   );
 }
 
+const ACCENT_TONE: Record<"brand" | "cyan" | "violet" | "success", string> = {
+  brand:   "text-brand bg-brand/10 ring-brand/25",
+  cyan:    "text-cyan-soft bg-cyan-brand/10 ring-cyan-brand/25",
+  violet:  "text-violet-soft bg-violet-brand/10 ring-violet-brand/25",
+  success: "text-success bg-success/10 ring-success/25",
+};
+
+function SectionCard({
+  icon,
+  title,
+  accent,
+  children,
+  className,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  accent: "brand" | "cyan" | "violet" | "success";
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <ResultCard className={`relative overflow-hidden ${className ?? ""}`}>
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-fg">
+        <span className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${ACCENT_TONE[accent]}`}>
+          {icon}
+        </span>
+        {title}
+      </h3>
+      {children}
+    </ResultCard>
+  );
+}
+
 function Row({ l, v, mono }: { l: string; v?: React.ReactNode; mono?: boolean }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-border/40 py-1.5 last:border-0 text-sm">
+    <div className="flex items-center justify-between gap-4 border-b border-border/40 py-1.5 last:border-0 text-sm">
       <span className="text-fg-muted">{l}</span>
-      <span className={`truncate ${mono ? "font-mono" : ""}`}>{v ?? "—"}</span>
+      <span className={`truncate text-right text-fg ${mono ? "font-mono" : ""}`}>
+        {v ?? <span className="text-fg-subtle">—</span>}
+      </span>
     </div>
   );
 }
 
 function Pill({ label, v, bad }: { label: string; v: boolean; bad?: boolean }) {
-  const red = bad ? v : false;
+  const flagged = bad ? v : false;
+  const tone = flagged
+    ? "border-danger/40 bg-danger/10 text-danger ring-danger/20"
+    : "border-success/30 bg-success/10 text-success ring-success/20";
+  const ValueIcon = v ? Check : X;
   return (
-    <div className={`rounded-lg border p-3 text-center ${red ? "border-danger/50 bg-danger/5" : "border-border bg-bg-elevated"}`}>
-      <div className="text-xs uppercase text-fg-subtle">{label}</div>
-      <div className={`mt-1 text-lg font-semibold ${red ? "text-danger" : "text-success"}`}>{v ? "Yes" : "No"}</div>
+    <div
+      className={`rounded-xl border ring-1 px-3 py-3 text-center transition hover:scale-[1.02] ${tone}`}
+    >
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
+        {label}
+      </div>
+      <div className="mt-1.5 flex items-center justify-center gap-1.5 text-lg font-semibold">
+        <ValueIcon className="h-4 w-4" aria-hidden="true" />
+        <span>{v ? "Yes" : "No"}</span>
+      </div>
     </div>
   );
 }

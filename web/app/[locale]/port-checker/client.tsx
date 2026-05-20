@@ -180,8 +180,12 @@ export function PortCheckerClient() {
       </form>
 
       {err && (
-        <div className="card border-danger/50 text-danger" role="alert">
-          {err}
+        <div
+          className="flex items-start gap-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-danger/20"
+          role="alert"
+        >
+          <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-danger" aria-hidden="true" />
+          <span>{err}</span>
         </div>
       )}
 

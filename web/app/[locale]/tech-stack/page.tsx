@@ -25,7 +25,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<Layers className="h-5 w-5" />}
+      icon={<Layers className="h-6 w-6" />}
+      accent="cyan"
     >
       <TechClient />
       <ToolExplainer slug={SLUG} locale={locale} />

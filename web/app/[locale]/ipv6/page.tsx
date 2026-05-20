@@ -25,7 +25,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<Wifi className="h-5 w-5" />}
+      icon={<Wifi className="h-6 w-6" />}
+      accent="brand"
     >
       <Ipv6Client />
       <ToolExplainer slug={SLUG} locale={locale} />

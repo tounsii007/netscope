@@ -29,7 +29,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<Globe className="h-5 w-5" />}
+      icon={<Globe className="h-6 w-6" />}
+      accent="brand"
     >
       <Suspense fallback={<div className="card flex items-center gap-2"><Spinner /> Loading…</div>}>
         <IpClient />

@@ -25,7 +25,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<ShieldX className="h-5 w-5" />}
+      icon={<ShieldX className="h-6 w-6" />}
+      accent="violet"
     >
       <BlacklistClient />
       <ToolExplainer slug={SLUG} locale={locale} />
