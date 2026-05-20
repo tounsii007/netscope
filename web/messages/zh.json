@@ -448,7 +448,8 @@
     "yes": "是",
     "no": "否",
     "error_title": "出现错误",
-    "retry": "重试"
+    "retry": "重试",
+    "back_home": "返回首页"
   },
   "not_found": {
     "code": "404",

@@ -448,7 +448,8 @@
     "yes": "oui",
     "no": "non",
     "error_title": "Une erreur est survenue",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "back_home": "Retour à l'accueil"
   },
   "not_found": {
     "code": "404",

@@ -448,7 +448,8 @@
     "yes": "yes",
     "no": "no",
     "error_title": "Something went wrong",
-    "retry": "Try again"
+    "retry": "Try again",
+    "back_home": "Back to home"
   },
   "not_found": {
     "code": "404",
