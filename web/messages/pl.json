@@ -449,7 +449,8 @@
     "no": "nie",
     "error_title": "Coś poszło nie tak",
     "retry": "Spróbuj ponownie",
-    "back_home": "Powrót do strony głównej"
+    "back_home": "Powrót do strony głównej",
+    "back_to_top": "Do góry"
   },
   "not_found": {
     "code": "404",

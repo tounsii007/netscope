@@ -449,7 +449,8 @@
     "no": "hayır",
     "error_title": "Bir şeyler ters gitti",
     "retry": "Tekrar dene",
-    "back_home": "Ana sayfaya dön"
+    "back_home": "Ana sayfaya dön",
+    "back_to_top": "Yukarı çık"
   },
   "not_found": {
     "code": "404",

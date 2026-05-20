@@ -449,7 +449,8 @@
     "no": "nein",
     "error_title": "Etwas ist schiefgelaufen",
     "retry": "Erneut versuchen",
-    "back_home": "Zurück zur Startseite"
+    "back_home": "Zurück zur Startseite",
+    "back_to_top": "Nach oben"
   },
   "not_found": {
     "code": "404",

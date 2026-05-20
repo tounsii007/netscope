@@ -449,7 +449,8 @@
     "no": "no",
     "error_title": "Qualcosa è andato storto",
     "retry": "Riprova",
-    "back_home": "Torna alla home"
+    "back_home": "Torna alla home",
+    "back_to_top": "Torna su"
   },
   "not_found": {
     "code": "404",

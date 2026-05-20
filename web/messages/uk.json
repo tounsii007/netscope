@@ -449,7 +449,8 @@
     "no": "ні",
     "error_title": "Щось пішло не так",
     "retry": "Повторити",
-    "back_home": "На головну"
+    "back_home": "На головну",
+    "back_to_top": "Наверх"
   },
   "not_found": {
     "code": "404",

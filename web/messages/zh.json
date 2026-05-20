@@ -449,7 +449,8 @@
     "no": "否",
     "error_title": "出现错误",
     "retry": "重试",
-    "back_home": "返回首页"
+    "back_home": "返回首页",
+    "back_to_top": "回到顶部"
   },
   "not_found": {
     "code": "404",

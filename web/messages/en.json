@@ -449,7 +449,8 @@
     "no": "no",
     "error_title": "Something went wrong",
     "retry": "Try again",
-    "back_home": "Back to home"
+    "back_home": "Back to home",
+    "back_to_top": "Back to top"
   },
   "not_found": {
     "code": "404",

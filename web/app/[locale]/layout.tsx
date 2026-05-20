@@ -8,6 +8,8 @@ import "../globals.css";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
+import { ScrollProgress } from "@/components/floating/scroll-progress";
+import { BackToTop } from "@/components/floating/back-to-top";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -84,7 +86,20 @@ export default async function LocaleLayout({ children, params }: Props) {
         <link rel="preconnect" href="https://tile.openstreetmap.org" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://api.pwnedpasswords.com" crossOrigin="anonymous" />
       </head>
-      <body className="min-h-screen bg-bg font-sans antialiased">
+      <body className="relative min-h-screen bg-bg font-sans antialiased">
+        {/* Decorative top-of-page gradient hairline — animated mini-strip
+            that ties the brand colours together across every page. Pure
+            CSS so it doesn't ship JS; sits below ScrollProgress's z-50. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 z-30 h-px bg-gradient-to-r from-brand/0 via-brand/30 to-brand/0"
+        />
+        {/* Ambient body backdrop — a very faint mesh wash that lifts the
+            dark page surface without competing with content. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 -z-10 bg-mesh-2 opacity-[0.12]"
+        />
         <NextIntlClientProvider messages={messages}>
           {/* Skip-to-content link — invisible until focused. Lets keyboard
               and screen-reader users bypass the nav and jump straight to
@@ -97,6 +112,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           >
             {t("skip_to_content")}
           </a>
+          <ScrollProgress />
           <SiteNav />
           <main
             id="main"
@@ -106,6 +122,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             {children}
           </main>
           <SiteFooter />
+          <BackToTop />
           <WebVitalsReporter />
         </NextIntlClientProvider>
       </body>

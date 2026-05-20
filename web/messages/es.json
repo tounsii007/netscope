@@ -449,7 +449,8 @@
     "no": "no",
     "error_title": "Algo salió mal",
     "retry": "Reintentar",
-    "back_home": "Volver al inicio"
+    "back_home": "Volver al inicio",
+    "back_to_top": "Volver arriba"
   },
   "not_found": {
     "code": "404",
