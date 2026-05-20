@@ -69,7 +69,41 @@
     "subtitle": "端口检查、IP 情报、DNS、WHOIS、SSL 检测和正常运行时间监控 — 一个快速平台，免费开始使用。",
     "cta_tools": "试用工具",
     "tools_heading": "所有网络工具",
-    "tools_count": "{count} 个工具 · 提供免费层"
+    "tools_count": "{count} 个工具 · 提供免费层",
+    "hero_tag": "现代界面",
+    "cta_dashboard": "打开仪表盘",
+    "stat_tools": "工具",
+    "stat_langs": "语言",
+    "stat_price": "免费层",
+    "cat_dns_title": "DNS 与域名",
+    "cat_dns_caption": "解析、传播、保护、识别所有者。",
+    "cat_network_title": "网络",
+    "cat_network_caption": "端口、IP、路由、可达性。",
+    "cat_security_title": "安全",
+    "cat_security_caption": "TLS、黑名单、密钥、泄露。",
+    "cat_email_title": "邮件",
+    "cat_email_caption": "送达和身份验证。",
+    "cat_web_title": "Web",
+    "cat_web_caption": "请求头、技术栈、内容、元数据。",
+    "features": {
+      "title": "为工程师而建,人人可用",
+      "subtitle": "在浏览器中实现快速、私密、易用的网络工具。",
+      "speed_title": "为速度而生",
+      "speed_body": "边缘探针 — 毫秒级响应。",
+      "privacy_title": "隐私至上",
+      "privacy_body": "无追踪像素。您的查询永不外泄。",
+      "global_title": "全球覆盖",
+      "global_body": "多区域探针提供真实的网络全景。",
+      "api_title": "随时接入 API",
+      "api_body": "每个工具都带有文档化的 REST 端点。"
+    },
+    "cta": {
+      "eyebrow": "准备好了吗?",
+      "title": "把所有工具固定到一个仪表盘。",
+      "subtitle": "保存收藏、获得正常运行时间提醒、快速分享。",
+      "primary": "打开仪表盘",
+      "secondary": "查看状态"
+    }
   },
   "tools": {
     "port-checker": {

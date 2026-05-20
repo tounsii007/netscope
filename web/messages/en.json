@@ -69,7 +69,41 @@
     "subtitle": "Port checks, IP intelligence, DNS, WHOIS, SSL inspection and uptime monitoring — one fast platform, free to start.",
     "cta_tools": "Try the tools",
     "tools_heading": "All network tools",
-    "tools_count": "{count} tools · free tier available"
+    "tools_count": "{count} tools · free tier available",
+    "hero_tag": "Modern UI",
+    "cta_dashboard": "Open dashboard",
+    "stat_tools": "Tools",
+    "stat_langs": "Languages",
+    "stat_price": "Free tier",
+    "cat_dns_title": "DNS & Domain",
+    "cat_dns_caption": "Resolve, propagate, secure, identify owner.",
+    "cat_network_title": "Network",
+    "cat_network_caption": "Ports, IPs, routing, reachability.",
+    "cat_security_title": "Security",
+    "cat_security_caption": "TLS, blacklists, secrets, breaches.",
+    "cat_email_title": "Email",
+    "cat_email_caption": "Verify deliverability and authentication.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Headers, stack, content, metadata.",
+    "features": {
+      "title": "Built for engineers, ready for everyone",
+      "subtitle": "Fast, private, and accessible network tooling in your browser.",
+      "speed_title": "Built for speed",
+      "speed_body": "Edge-routed checks deliver answers in milliseconds, not minutes.",
+      "privacy_title": "Privacy first",
+      "privacy_body": "No tracking pixels. Your queries are never sold or shared.",
+      "global_title": "Global coverage",
+      "global_body": "Multi-region probes give you a real picture of your network.",
+      "api_title": "API-ready",
+      "api_body": "Every tool ships with a documented REST endpoint."
+    },
+    "cta": {
+      "eyebrow": "Ready to dive in?",
+      "title": "Pin every tool you need on one dashboard.",
+      "subtitle": "Save favourites, get uptime alerts, and share results in seconds.",
+      "primary": "Open dashboard",
+      "secondary": "View status"
+    }
   },
   "tools": {
     "port-checker": {

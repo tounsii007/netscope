@@ -69,7 +69,41 @@
     "subtitle": "Vérifications de ports, intelligence IP, DNS, WHOIS, inspection SSL et monitoring de disponibilité — une plateforme rapide, gratuite à l'essai.",
     "cta_tools": "Essayer les outils",
     "tools_heading": "Tous les outils réseau",
-    "tools_count": "{count} outils · offre gratuite disponible"
+    "tools_count": "{count} outils · offre gratuite disponible",
+    "hero_tag": "Interface moderne",
+    "cta_dashboard": "Ouvrir le tableau de bord",
+    "stat_tools": "Outils",
+    "stat_langs": "Langues",
+    "stat_price": "Offre gratuite",
+    "cat_dns_title": "DNS & Domaine",
+    "cat_dns_caption": "Résoudre, propager, sécuriser, identifier.",
+    "cat_network_title": "Réseau",
+    "cat_network_caption": "Ports, IPs, routage, accessibilité.",
+    "cat_security_title": "Sécurité",
+    "cat_security_caption": "TLS, listes noires, secrets, fuites.",
+    "cat_email_title": "E-mail",
+    "cat_email_caption": "Délivrabilité et authentification.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "En-têtes, stack, contenu, métadonnées.",
+    "features": {
+      "title": "Conçu pour les ingénieurs, pensé pour tous",
+      "subtitle": "Des outils réseau rapides et respectueux de la vie privée.",
+      "speed_title": "Conçu pour la vitesse",
+      "speed_body": "Sondes edge — réponses en millisecondes.",
+      "privacy_title": "Vie privée d'abord",
+      "privacy_body": "Aucun pixel de suivi. Vos requêtes restent privées.",
+      "global_title": "Couverture mondiale",
+      "global_body": "Sondes multi-régions pour une vue réaliste.",
+      "api_title": "API prête",
+      "api_body": "Chaque outil dispose d'un endpoint REST documenté."
+    },
+    "cta": {
+      "eyebrow": "Prêt à plonger ?",
+      "title": "Tous vos outils sur un seul tableau de bord.",
+      "subtitle": "Enregistrez vos favoris, alertes de disponibilité, partage rapide.",
+      "primary": "Ouvrir le tableau de bord",
+      "secondary": "Voir le statut"
+    }
   },
   "tools": {
     "port-checker": {

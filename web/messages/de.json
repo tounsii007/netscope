@@ -69,7 +69,41 @@
     "subtitle": "Portprüfungen, IP-Analyse, DNS, WHOIS, SSL-Inspektion und Uptime-Monitoring — eine schnelle Plattform, kostenlos starten.",
     "cta_tools": "Tools ausprobieren",
     "tools_heading": "Alle Netzwerk-Tools",
-    "tools_count": "{count} Tools · kostenloses Kontingent verfügbar"
+    "tools_count": "{count} Tools · kostenloses Kontingent verfügbar",
+    "hero_tag": "Modernes UI",
+    "cta_dashboard": "Dashboard öffnen",
+    "stat_tools": "Tools",
+    "stat_langs": "Sprachen",
+    "stat_price": "Kostenlos",
+    "cat_dns_title": "DNS & Domain",
+    "cat_dns_caption": "Auflösen, Propagation, sichern, Inhaber prüfen.",
+    "cat_network_title": "Netzwerk",
+    "cat_network_caption": "Ports, IPs, Routing, Erreichbarkeit.",
+    "cat_security_title": "Sicherheit",
+    "cat_security_caption": "TLS, Blacklists, Secrets, Datenlecks.",
+    "cat_email_title": "E-Mail",
+    "cat_email_caption": "Zustellbarkeit und Authentifizierung prüfen.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Header, Stack, Inhalte, Metadaten.",
+    "features": {
+      "title": "Für Profis gebaut, für alle gemacht",
+      "subtitle": "Schnelles, datenschutzfreundliches Network-Tooling im Browser.",
+      "speed_title": "Schnell wie nie",
+      "speed_body": "Edge-Probes liefern Antworten in Millisekunden — nicht Minuten.",
+      "privacy_title": "Datenschutz zuerst",
+      "privacy_body": "Keine Tracker. Deine Abfragen werden niemals verkauft oder geteilt.",
+      "global_title": "Globale Abdeckung",
+      "global_body": "Multi-Region-Probes zeigen dir das echte Bild deines Netzwerks.",
+      "api_title": "API-bereit",
+      "api_body": "Jedes Tool bringt einen dokumentierten REST-Endpoint mit."
+    },
+    "cta": {
+      "eyebrow": "Bereit loszulegen?",
+      "title": "Alle Tools auf einem Dashboard.",
+      "subtitle": "Favoriten speichern, Uptime-Alerts erhalten, Ergebnisse teilen.",
+      "primary": "Dashboard öffnen",
+      "secondary": "Status ansehen"
+    }
   },
   "tools": {
     "port-checker": {

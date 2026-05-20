@@ -69,7 +69,41 @@
     "subtitle": "Comprobaciones de puertos, inteligencia IP, DNS, WHOIS, inspección SSL y monitoreo de disponibilidad — una plataforma rápida, gratis para empezar.",
     "cta_tools": "Probar las herramientas",
     "tools_heading": "Todas las herramientas de red",
-    "tools_count": "{count} herramientas · con plan gratuito"
+    "tools_count": "{count} herramientas · con plan gratuito",
+    "hero_tag": "UI moderna",
+    "cta_dashboard": "Abrir el panel",
+    "stat_tools": "Herramientas",
+    "stat_langs": "Idiomas",
+    "stat_price": "Plan gratuito",
+    "cat_dns_title": "DNS y dominio",
+    "cat_dns_caption": "Resolver, propagar, asegurar, identificar.",
+    "cat_network_title": "Red",
+    "cat_network_caption": "Puertos, IPs, enrutamiento, accesibilidad.",
+    "cat_security_title": "Seguridad",
+    "cat_security_caption": "TLS, listas negras, secretos, filtraciones.",
+    "cat_email_title": "Correo",
+    "cat_email_caption": "Entrega y autenticación.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Cabeceras, stack, contenido, metadatos.",
+    "features": {
+      "title": "Hecho para ingenieros, listo para todos",
+      "subtitle": "Herramientas de red rápidas, privadas y accesibles.",
+      "speed_title": "Hecho para la velocidad",
+      "speed_body": "Sondas en el borde — respuestas en milisegundos.",
+      "privacy_title": "Privacidad primero",
+      "privacy_body": "Sin píxeles de rastreo. Tus consultas no se venden.",
+      "global_title": "Cobertura global",
+      "global_body": "Sondas multirregión para una visión real de tu red.",
+      "api_title": "API lista",
+      "api_body": "Cada herramienta tiene un endpoint REST documentado."
+    },
+    "cta": {
+      "eyebrow": "¿Listo para sumergirte?",
+      "title": "Todas las herramientas en un solo panel.",
+      "subtitle": "Favoritos, alertas de disponibilidad y compartir al instante.",
+      "primary": "Abrir el panel",
+      "secondary": "Ver estado"
+    }
   },
   "tools": {
     "port-checker": {

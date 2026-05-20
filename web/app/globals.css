@@ -2,9 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  /* Surface tokens used by glass utilities — keeping them as CSS vars
+     lets a future light theme override just two values instead of
+     duplicating every utility. */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --grid-line: rgba(255, 255, 255, 0.035);
+}
 
 html, body { background: #0a0a0a; color: #fafafa; }
+
+/* Smoother scroll feel for in-page anchor jumps, but respect users
+   who have asked the OS to reduce motion. */
+html { scroll-behavior: smooth; }
+
+/* Subtle text selection color so highlighted code/strings stand out
+   against the dark surface without screaming brand orange. */
+::selection {
+  background: rgba(249, 115, 22, 0.28);
+  color: #fff;
+}
+
+/* Custom scrollbar — keep it thin and brand-aware on the few overflow
+   regions (mobile drawer, code blocks, long result tables). Webkit
+   only; Firefox uses scrollbar-color below. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(249, 115, 22, 0.45); background-clip: padding-box; }
+* { scrollbar-color: rgba(255,255,255,0.12) transparent; scrollbar-width: thin; }
 
 /* Respect users who've asked the OS to reduce motion. We keep the
    appearance (colors, layout) but cap animation duration to 1ms and
@@ -36,19 +69,131 @@ html, body { background: #0a0a0a; color: #fafafa; }
 }
 
 @layer utilities {
+  /* Grid background — slightly more visible than before so the mesh
+     gradient lays nicely on top. */
   .grid-bg {
     background-image:
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: 48px 48px;
   }
+
+  /* Dot-matrix background — alternative to grid for hero sections. */
+  .dot-bg {
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
   .glow { box-shadow: 0 0 40px -10px rgba(249,115,22,0.35); }
+  .glow-soft { box-shadow: 0 0 60px -20px rgba(249,115,22,0.4); }
+  .glow-cyan { box-shadow: 0 0 40px -10px rgba(6,182,212,0.4); }
+  .glow-violet { box-shadow: 0 0 40px -10px rgba(168,85,247,0.4); }
+
+  /* Glass surfaces — used by hero accents, floating panels, badge
+     pills. Falls back gracefully on browsers without backdrop-filter
+     (background still renders, just opaque-ish). */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+  }
+  .glass-strong {
+    background: rgba(20, 20, 20, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+
+  /* Gradient text — animated rainbow-orange used on the hero title's
+     accent word. Keep the size large enough that subpixel banding from
+     the gradient isn't visible. */
+  .text-gradient-brand {
+    background-image: linear-gradient(120deg, #f97316 0%, #fb923c 30%, #f59e0b 60%, #f97316 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientX 8s ease-in-out infinite;
+  }
+  .text-gradient-rainbow {
+    background-image: linear-gradient(120deg, #f97316 0%, #a855f7 35%, #06b6d4 70%, #f97316 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientX 10s ease-in-out infinite;
+  }
+  .text-gradient-cool {
+    background-image: linear-gradient(120deg, #fafafa 0%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   /* Card padding scales down on phones so result tables don't waste 40px
      of horizontal space, but stays comfortable on tablet/desktop. */
   .card {
     @apply rounded-xl border border-border bg-bg-card p-3 sm:p-4 md:p-5
            shadow-lg shadow-black/20;
   }
+
+  /* Premium card with subtle gradient border on hover. The border is a
+     pseudo-element so we can animate opacity without repainting layout. */
+  .card-premium {
+    @apply relative rounded-xl border border-border bg-bg-card p-4 sm:p-5
+           transition duration-300;
+  }
+  .card-premium::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(249,115,22,0.6), rgba(168,85,247,0.45), rgba(6,182,212,0.45));
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .card-premium:hover::before,
+  .card-premium:focus-within::before { opacity: 1; }
+  .card-premium:hover { transform: translateY(-2px); }
+
+  /* Animated shine sweep for CTAs / badges. Apply on a wrapper so the
+     pseudo overlays the parent without clipping its content. */
+  .shine-on-hover {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .shine-on-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+    background-size: 200% 100%;
+    background-position: 200% 0;
+    transition: background-position 0.7s ease;
+    pointer-events: none;
+  }
+  .shine-on-hover:hover::after { background-position: -200% 0; }
+
+  /* Decorative blurred orbs used in the hero. Use mix-blend-screen so
+     they layer correctly on the dark bg without washing out. */
+  .orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
   /* Input min-h prevents iOS Safari from auto-zooming on focus when font
      size dips below 16px. We keep visual size at 14px but force at least
      a 44px hit-target for fingers. */
@@ -57,6 +202,7 @@ html, body { background: #0a0a0a; color: #fafafa; }
            px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:border-brand
            focus:outline-none focus:ring-2 focus:ring-brand/30 transition;
   }
+
   /* Buttons match input min-height so input + button rows align without
      manual sizing.  flex-shrink-0 stops the button from collapsing when
      the adjacent input is wider than the row. */
@@ -65,15 +211,56 @@ html, body { background: #0a0a0a; color: #fafafa; }
            bg-brand px-4 py-2 min-h-[44px] text-sm font-medium text-white transition
            hover:bg-brand-hover disabled:opacity-50 disabled:pointer-events-none;
   }
+  .btn-primary {
+    @apply btn shadow-glow-brand hover:shadow-[0_24px_70px_-18px_rgba(249,115,22,0.6)];
+  }
   .btn-ghost {
     @apply inline-flex shrink-0 items-center justify-center gap-2 rounded-lg
            border border-border bg-bg-elevated px-3 sm:px-4 py-2 min-h-[40px]
-           text-sm font-medium hover:border-fg-muted transition;
+           text-sm font-medium hover:border-fg-muted hover:bg-bg-card transition;
   }
+  .btn-outline {
+    @apply inline-flex shrink-0 items-center justify-center gap-2 rounded-lg
+           border border-brand/40 bg-transparent px-4 py-2 min-h-[44px] text-sm
+           font-medium text-brand transition hover:bg-brand/10 hover:border-brand;
+  }
+
   .badge {
     @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium;
   }
   .badge-ok { @apply badge bg-success/15 text-success; }
   .badge-err { @apply badge bg-danger/15 text-danger; }
   .badge-warn { @apply badge bg-warn/15 text-warn; }
+  .badge-info { @apply badge bg-cyan-brand/15 text-cyan-soft; }
+  .badge-violet { @apply badge bg-violet-brand/15 text-violet-soft; }
+
+  /* Animated pill with status dot — used for the "All systems
+     operational" hero badge. */
+  .pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-bg-elevated/80 px-3 py-1 text-xs text-fg-muted backdrop-blur;
+  }
+
+  /* Staggered entrance helper — child elements pick this up via
+     animation-delay overrides set inline. */
+  .stagger > * { animation: rise 0.65s cubic-bezier(0.16,1,0.3,1) both; }
+  .stagger > *:nth-child(1) { animation-delay: 0ms;   }
+  .stagger > *:nth-child(2) { animation-delay: 70ms;  }
+  .stagger > *:nth-child(3) { animation-delay: 140ms; }
+  .stagger > *:nth-child(4) { animation-delay: 210ms; }
+  .stagger > *:nth-child(5) { animation-delay: 280ms; }
+  .stagger > *:nth-child(6) { animation-delay: 350ms; }
+  .stagger > *:nth-child(7) { animation-delay: 420ms; }
+  .stagger > *:nth-child(8) { animation-delay: 490ms; }
+
+  /* Marquee track — used by the trust strip. Width must be 2× the
+     content so the loop is seamless. */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+  }
+  .marquee-mask {
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  }
 }
