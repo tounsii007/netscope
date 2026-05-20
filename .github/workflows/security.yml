@@ -11,16 +11,16 @@ jobs:
     permissions: { actions: read, contents: read, security-events: write }
     strategy:
       matrix:
-        language: [java, javascript-typescript]
+        language: [java-kotlin, javascript-typescript]
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
         with: { languages: ${{ matrix.language }} }
       - uses: actions/setup-java@v4
-        if: matrix.language == 'java'
+        if: matrix.language == 'java-kotlin'
         with: { distribution: temurin, java-version: "21" }
       - name: Build Java
-        if: matrix.language == 'java'
+        if: matrix.language == 'java-kotlin'
         run: cd api && mvn -B -DskipTests package
       - uses: github/codeql-action/analyze@v3
 
