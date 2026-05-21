@@ -276,7 +276,7 @@
       "meta_description": "Herhangi bir domain için e-posta kimlik doğrulama kayıtlarını kontrol et. SPF politikasını, DMARC enforcement'ı ve DKIM yapılandırmasını uyarılarla gör.",
       "explainer": {
         "purpose": "SPF / DKIM / DMARC analizörü bir domainin e-posta kimlik doğrulamasını denetler — birlikte saldırganların senin adına e-posta göndermesini (spoofing, phishing) önleyen üç standart. Somut iyileştirme önerileriyle bir derece çıkarır.",
-        "how_it_works": "TXT kayıtlarını okur: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF 10 lookup limitine karşı kontrol edilir; DMARC için p= ve rua=.\nDKIM seçicileri yaygın isimlerle (default, google, mail) sondalanır.",
+        "how_it_works": "TXT kayıtlarını okur: v=spf1, _dmarc.‹domain›, default._domainkey.‹domain›.\nSPF 10 lookup limitine karşı kontrol edilir; DMARC için p= ve rua=.\nDKIM seçicileri yaygın isimlerle (default, google, mail) sondalanır.",
         "when_to_use": "Kritik bir newsletter kampanyası öncesi kendi e-posta kimlik doğrulamanı denetle.\nKurulumdan sonra DMARC enforcement (p=quarantine/reject) etkin olduğunu doğrula.\nMüşteri domainlerindeki spoofing sorunlarını tanıla.",
         "limits": "DKIM seçici tespiti sezgiseldir; özel seçiciler kaçırılabilir.\nGerçek gönderme yollarını test etmez — yalnızca yapılandırma derecelendirilir."
       }

@@ -276,7 +276,7 @@
       "meta_description": "检查任意域名的邮件认证记录。查看带警告的 SPF 策略、DMARC 强制执行和 DKIM 配置。",
       "explainer": {
         "purpose": "SPF / DKIM / DMARC 分析器审计域名的邮件身份验证 — 三项标准共同防止攻击者以您的名义发送邮件 (欺骗、钓鱼)。输出评级与具体改进建议。",
-        "how_it_works": "读取 TXT 记录：v=spf1、_dmarc.<域>、default._domainkey.<域>。\nSPF 检查 10 次查询上限；DMARC 检查 p= 和 rua=。\nDKIM 选择器尝试常见名称 (default、google、mail)。",
+        "how_it_works": "读取 TXT 记录：v=spf1、_dmarc.‹域›、default._domainkey.‹域›。\nSPF 检查 10 次查询上限；DMARC 检查 p= 和 rua=。\nDKIM 选择器尝试常见名称 (default、google、mail)。",
         "when_to_use": "重要邮件营销前审计自有邮件身份验证。\n部署后验证 DMARC 强制执行 (p=quarantine/reject) 已生效。\n诊断客户域名的欺骗问题。",
         "limits": "DKIM 选择器检测为启发式；自定义选择器可能漏检。\n不测试实际发送路径 — 仅评估配置。"
       }

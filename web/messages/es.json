@@ -276,7 +276,7 @@
       "meta_description": "Comprueba los registros de autenticación de correo para cualquier dominio. Ve la política SPF, el enforcement DMARC y la configuración DKIM con advertencias.",
       "explainer": {
         "purpose": "El analizador SPF / DKIM / DMARC audita la autenticación de correo de un dominio — tres estándares que juntos previenen que atacantes envíen correo en tu nombre (spoofing, phishing). Genera una calificación con sugerencias concretas de mejora.",
-        "how_it_works": "Lee registros TXT: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF se comprueba contra el límite de 10 lookups; DMARC para p= y rua=.\nLos selectores DKIM se sondean con nombres comunes (default, google, mail).",
+        "how_it_works": "Lee registros TXT: v=spf1, _dmarc.‹domain›, default._domainkey.‹domain›.\nSPF se comprueba contra el límite de 10 lookups; DMARC para p= y rua=.\nLos selectores DKIM se sondean con nombres comunes (default, google, mail).",
         "when_to_use": "Auditar tu propia autenticación de correo antes de una campaña newsletter crítica.\nVerificar que el enforcement DMARC (p=quarantine/reject) está activo tras la configuración.\nDiagnosticar problemas de spoofing en dominios de clientes.",
         "limits": "La detección de selectores DKIM es heurística; los selectores personalizados pueden perderse.\nNo prueba caminos reales de envío — solo se califica la configuración."
       }

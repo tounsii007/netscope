@@ -276,7 +276,7 @@
       "meta_description": "Sprawdź rekordy uwierzytelniania poczty dla dowolnej domeny. Zobacz politykę SPF, enforcement DMARC i konfigurację DKIM z ostrzeżeniami.",
       "explainer": {
         "purpose": "Analizator SPF / DKIM / DMARC audytuje uwierzytelnianie poczty domeny — trzy standardy, które razem zapobiegają wysyłaniu maili przez atakujących w twoim imieniu (spoofing, phishing). Wystawia ocenę z konkretnymi sugestiami poprawy.",
-        "how_it_works": "Czyta rekordy TXT: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF jest sprawdzany wobec limitu 10 lookupów; DMARC dla p= i rua=.\nSelektory DKIM są sondowane typowymi nazwami (default, google, mail).",
+        "how_it_works": "Czyta rekordy TXT: v=spf1, _dmarc.‹domain›, default._domainkey.‹domain›.\nSPF jest sprawdzany wobec limitu 10 lookupów; DMARC dla p= i rua=.\nSelektory DKIM są sondowane typowymi nazwami (default, google, mail).",
         "when_to_use": "Audytuj własne uwierzytelnianie poczty przed krytyczną kampanią newsletterową.\nZweryfikuj, że enforcement DMARC (p=quarantine/reject) działa po konfiguracji.\nDiagnozuj problemy ze spoofingiem na domenach klientów.",
         "limits": "Wykrywanie selektora DKIM jest heurystyczne; niestandardowe selektory mogą zostać pominięte.\nNie testuje rzeczywistych ścieżek wysyłki — oceniana jest tylko konfiguracja."
       }

@@ -276,7 +276,7 @@
       "meta_description": "Check email authentication records for any domain. See SPF policy, DMARC enforcement and DKIM setup with warnings.",
       "explainer": {
         "purpose": "SPF / DKIM / DMARC Analyzer audits a domain's email authentication — three standards that together prevent attackers from sending mail in your name (spoofing, phishing). Outputs a grade with concrete improvement suggestions.",
-        "how_it_works": "Reads TXT records: v=spf1, _dmarc.<domain>, default._domainkey.<domain>.\nSPF is checked against the 10-lookup limit; DMARC for p= and rua=.\nDKIM selectors are probed with common names (default, google, mail).",
+        "how_it_works": "Reads TXT records: v=spf1, _dmarc.‹domain›, default._domainkey.‹domain›.\nSPF is checked against the 10-lookup limit; DMARC for p= and rua=.\nDKIM selectors are probed with common names (default, google, mail).",
         "when_to_use": "Audit your own mail authentication before a critical newsletter campaign.\nVerify DMARC enforcement (p=quarantine/reject) is in effect after setup.\nDiagnose spoofing problems on customer domains.",
         "limits": "DKIM-selector detection is heuristic; custom selectors may be missed.\nDoes not test actual send paths — only configuration is graded."
       }

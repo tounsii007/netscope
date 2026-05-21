@@ -86,6 +86,16 @@ export default async function LocaleLayout({ children, params }: Props) {
         <link rel="preconnect" href="https://basemaps.cartocdn.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://tile.openstreetmap.org" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://api.pwnedpasswords.com" crossOrigin="anonymous" />
+        {/*
+          Favicon declared manually instead of via the app/icon.png file
+          convention. The convention auto-generates a route at /icon.png
+          which collides with the static asset at public/icon.png that
+          the BrandLink / Hero404 / footer / sign-in <img> tags reference
+          — Next.js then returns 500 for /icon.png with
+          "conflicting public file and page file". Pointing the favicon
+          at the same /public asset keeps both behaviours working.
+        */}
+        <link rel="icon" type="image/png" href="/icon.png" />
       </head>
       <body className="relative min-h-screen bg-bg font-sans antialiased">
         {/* Decorative top-of-page gradient hairline — animated mini-strip
