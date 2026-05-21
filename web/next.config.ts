@@ -33,6 +33,16 @@ const config: NextConfig = {
     //   plus every `<Script>` and Tailwind output — tracked separately
     //   as a larger refactor.
     //
+    //   In DEVELOPMENT we additionally allow 'unsafe-eval' and ws:
+    //   connections so Next.js' React Refresh / HMR runtime works.
+    //   The dev runtime compiles modules with `new Function(...)` and
+    //   `eval(...)` inside @next/react-refresh-utils — without this
+    //   relaxation the page LOADS HTML+CSS but never hydrates, which
+    //   makes the language switcher, command palette, every form
+    //   button etc. completely inert (silent failure — no console
+    //   message in the page itself, only a CSP report). Production
+    //   builds don't need either and keep the stricter policy.
+    //
     //   What we can tighten without a downstream rewrite:
     //
     //     • frame-src 'none' — make the implicit "no iframes" explicit
@@ -45,13 +55,25 @@ const config: NextConfig = {
     //   require-trusted-types-for is NOT enabled until Next.js
     //   officially supports it — adding it now would break SSR
     //   hydration on browsers that enforce it (Chromium-based).
+    const isDev = process.env.NODE_ENV !== "production";
+    const scriptSrc = isDev
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline'";
+    // Same-origin ws:/wss: are usually allowed automatically under
+    // `connect-src 'self'`, but Chromium enforces explicit ws:// for
+    // some HMR runtimes. Listing both schemes for localhost in dev is
+    // belt-and-braces and harmless in production where the dev URL
+    // isn't reachable.
+    const connectExtras = isDev
+      ? " ws://localhost:* http://localhost:*"
+      : "";
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      scriptSrc,
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
       "font-src 'self' fonts.gstatic.com",
       "img-src 'self' data: blob: *.openstreetmap.org *.cartocdn.com tile.openstreetmap.org basemaps.cartocdn.com flagcdn.com",
-      "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080") + " api.pwnedpasswords.com",
+      "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080") + " api.pwnedpasswords.com" + connectExtras,
       "frame-src 'none'",
       "frame-ancestors 'none'",
       "base-uri 'self'",

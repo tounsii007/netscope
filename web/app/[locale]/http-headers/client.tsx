@@ -59,11 +59,11 @@ export function HeadersClient() {
       >
         <div className="relative flex-1">
           <LinkIcon
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
+            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted"
             aria-hidden="true"
           />
           <input
-            className="input pl-9"
+            className="input pl-11"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder={tc("enter_url")}

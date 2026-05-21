@@ -59,12 +59,12 @@ export function DnsClient() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <Globe
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted"
               aria-hidden="true"
             />
             <input
               id={inputId}
-              className="input pl-9"
+              className="input pl-11"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="example.com"
