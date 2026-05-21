@@ -53,7 +53,14 @@
       "mixed": "Mixto",
       "jwt": "JWT",
       "pwd": "Contraseña"
-    }
+    },
+    "open_search": "Abrir búsqueda",
+    "search_tools": "Buscar herramientas",
+    "search_placeholder": "Buscar herramientas…",
+    "search_empty": "Sin coincidencias.",
+    "search_navigate": "Navegar",
+    "search_open": "Abrir",
+    "search_close": "Cerrar"
   },
   "auth": {
     "meta_title": "Iniciar sesión",

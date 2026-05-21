@@ -53,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Mot de passe"
-    }
+    },
+    "open_search": "Ouvrir la recherche",
+    "search_tools": "Rechercher des outils",
+    "search_placeholder": "Rechercher des outils…",
+    "search_empty": "Aucun outil correspondant.",
+    "search_navigate": "Naviguer",
+    "search_open": "Ouvrir",
+    "search_close": "Fermer"
   },
   "auth": {
     "meta_title": "Connexion",

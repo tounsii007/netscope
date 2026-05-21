@@ -53,7 +53,14 @@
     "lang_pl": "Polski",
     "lang_ru": "Русский",
     "lang_uk": "Українська",
-    "lang_tr": "Türkçe"
+    "lang_tr": "Türkçe",
+    "open_search": "Suche öffnen",
+    "search_tools": "Tools durchsuchen",
+    "search_placeholder": "Tools suchen…",
+    "search_empty": "Keine passenden Tools.",
+    "search_navigate": "Navigieren",
+    "search_open": "Öffnen",
+    "search_close": "Schließen"
   },
   "auth": {
     "meta_title": "Anmelden",

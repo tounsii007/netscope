@@ -53,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Пароль"
-    }
+    },
+    "open_search": "Открыть поиск",
+    "search_tools": "Поиск инструментов",
+    "search_placeholder": "Поиск инструментов…",
+    "search_empty": "Совпадений нет.",
+    "search_navigate": "Навигация",
+    "search_open": "Открыть",
+    "search_close": "Закрыть"
   },
   "auth": {
     "meta_title": "Войти",

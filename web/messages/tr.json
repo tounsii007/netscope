@@ -53,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Parola"
-    }
+    },
+    "open_search": "Aramayı aç",
+    "search_tools": "Araçlarda ara",
+    "search_placeholder": "Araçlarda ara…",
+    "search_empty": "Eşleşen araç yok.",
+    "search_navigate": "Gezin",
+    "search_open": "Aç",
+    "search_close": "Kapat"
   },
   "auth": {
     "meta_title": "Giriş yap",

@@ -53,7 +53,14 @@
     "lang_pl": "Polski",
     "lang_ru": "Русский",
     "lang_uk": "Українська",
-    "lang_tr": "Türkçe"
+    "lang_tr": "Türkçe",
+    "open_search": "खोज खोलें",
+    "search_tools": "टूल खोजें",
+    "search_placeholder": "टूल खोजें…",
+    "search_empty": "कोई मेल नहीं।",
+    "search_navigate": "नेविगेट करें",
+    "search_open": "खोलें",
+    "search_close": "बंद करें"
   },
   "auth": {
     "meta_title": "साइन इन",

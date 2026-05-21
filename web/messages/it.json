@@ -53,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Password"
-    }
+    },
+    "open_search": "Apri ricerca",
+    "search_tools": "Cerca strumenti",
+    "search_placeholder": "Cerca strumenti…",
+    "search_empty": "Nessuno strumento trovato.",
+    "search_navigate": "Naviga",
+    "search_open": "Apri",
+    "search_close": "Chiudi"
   },
   "auth": {
     "meta_title": "Accedi",

@@ -53,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Пароль"
-    }
+    },
+    "open_search": "Відкрити пошук",
+    "search_tools": "Пошук інструментів",
+    "search_placeholder": "Пошук інструментів…",
+    "search_empty": "Збігів не знайдено.",
+    "search_navigate": "Навігація",
+    "search_open": "Відкрити",
+    "search_close": "Закрити"
   },
   "auth": {
     "meta_title": "Увійти",

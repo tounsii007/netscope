@@ -3,6 +3,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { MobileNav } from "@/components/mobile-nav";
 import { BrandLink } from "@/components/site-nav/brand-link";
 import { DesktopToolsMenu } from "@/components/site-nav/desktop-tools-menu";
+import { CommandPalette } from "@/components/command-palette/command-palette";
 import { TOOL_LINKS } from "@/lib/tool-links";
 
 /**
@@ -46,6 +47,7 @@ export async function SiteNav() {
           <BrandLink />
           <DesktopToolsMenu />
           <div className="ml-auto flex items-center gap-2">
+            <CommandPalette />
             <LanguageSwitcher />
             <MobileNav toolLinks={TOOL_LINKS} />
           </div>

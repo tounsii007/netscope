@@ -53,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Hasło"
-    }
+    },
+    "open_search": "Otwórz wyszukiwarkę",
+    "search_tools": "Szukaj narzędzi",
+    "search_placeholder": "Szukaj narzędzi…",
+    "search_empty": "Brak pasujących narzędzi.",
+    "search_navigate": "Nawiguj",
+    "search_open": "Otwórz",
+    "search_close": "Zamknij"
   },
   "auth": {
     "meta_title": "Zaloguj się",

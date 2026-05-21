@@ -53,7 +53,14 @@
     "lang_pl": "Polski",
     "lang_ru": "Русский",
     "lang_uk": "Українська",
-    "lang_tr": "Türkçe"
+    "lang_tr": "Türkçe",
+    "open_search": "打开搜索",
+    "search_tools": "搜索工具",
+    "search_placeholder": "搜索工具…",
+    "search_empty": "未找到匹配的工具。",
+    "search_navigate": "导航",
+    "search_open": "打开",
+    "search_close": "关闭"
   },
   "auth": {
     "meta_title": "登录",
