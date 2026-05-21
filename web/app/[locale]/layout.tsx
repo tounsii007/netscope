@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
 import { ScrollProgress } from "@/components/floating/scroll-progress";
 import { BackToTop } from "@/components/floating/back-to-top";
+import { ToastProvider } from "@/components/toast/toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -101,29 +102,31 @@ export default async function LocaleLayout({ children, params }: Props) {
           className="pointer-events-none fixed inset-0 -z-10 bg-mesh-2 opacity-[0.12]"
         />
         <NextIntlClientProvider messages={messages}>
-          {/* Skip-to-content link — invisible until focused. Lets keyboard
-              and screen-reader users bypass the nav and jump straight to
-              the main content of every page. */}
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60]
-                       focus:rounded-lg focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-sm
-                       focus:font-medium focus:text-fg focus:ring-2 focus:ring-brand"
-          >
-            {t("skip_to_content")}
-          </a>
-          <ScrollProgress />
-          <SiteNav />
-          <main
-            id="main"
-            tabIndex={-1}
-            className="mx-auto w-full max-w-6xl 2xl:max-w-7xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 outline-none"
-          >
-            {children}
-          </main>
-          <SiteFooter />
-          <BackToTop />
-          <WebVitalsReporter />
+          <ToastProvider>
+            {/* Skip-to-content link — invisible until focused. Lets keyboard
+                and screen-reader users bypass the nav and jump straight to
+                the main content of every page. */}
+            <a
+              href="#main"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60]
+                         focus:rounded-lg focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-sm
+                         focus:font-medium focus:text-fg focus:ring-2 focus:ring-brand"
+            >
+              {t("skip_to_content")}
+            </a>
+            <ScrollProgress />
+            <SiteNav />
+            <main
+              id="main"
+              tabIndex={-1}
+              className="mx-auto w-full max-w-6xl 2xl:max-w-7xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 outline-none"
+            >
+              {children}
+            </main>
+            <SiteFooter />
+            <BackToTop />
+            <WebVitalsReporter />
+          </ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

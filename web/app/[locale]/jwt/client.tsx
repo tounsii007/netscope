@@ -2,11 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Lock, KeyRound, FileSignature, ShieldOff } from "lucide-react";
+import {
+  AlertTriangle, Lock, KeyRound, FileSignature, ShieldOff, Copy,
+} from "lucide-react";
 import { ResultCard } from "@/components/tool-shell";
 import { decode, SAMPLE_JWT } from "@/app/[locale]/jwt/jwt-decode";
 import { ClaimsCard } from "@/app/[locale]/jwt/claims-card";
 import { JsonCard } from "@/app/[locale]/jwt/json-card";
+import { copyWithToast, useToast } from "@/components/toast/toast";
 
 /**
  * JWT-Decoder orchestrator. Owns just the input state; everything else
@@ -20,6 +23,8 @@ import { JsonCard } from "@/app/[locale]/jwt/json-card";
  */
 export function JwtClient() {
   const t = useTranslations("jwt");
+  const tc = useTranslations("common");
+  const toast = useToast();
   const [token, setToken] = useState(SAMPLE_JWT);
   const decoded = useMemo(() => decode(token), [token]);
 
@@ -83,6 +88,20 @@ export function JwtClient() {
                 <KeyRound className="h-3 w-3" aria-hidden="true" />
                 Not verified
               </span>
+              <button
+                type="button"
+                onClick={() =>
+                  copyWithToast(decoded.signature, toast, {
+                    ok: tc("copied"),
+                    fail: tc("error"),
+                  })
+                }
+                className="ml-auto inline-flex items-center gap-1 rounded-md border border-border bg-bg-elevated px-2 py-1 text-[11px] text-fg-muted transition hover:border-brand/40 hover:text-fg"
+                aria-label={tc("copy")}
+              >
+                <Copy className="h-3 w-3" aria-hidden="true" />
+                {tc("copy")}
+              </button>
             </h3>
             <div className="break-all rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
               {decoded.signature}

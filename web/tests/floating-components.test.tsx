@@ -76,7 +76,10 @@ describe("ScrollProgress", () => {
       dispatchEvent: () => false,
     }));
     const { container } = renderWithIntl(<ScrollProgress />);
-    expect(container.firstChild).toBeNull();
+    // ToastProvider always mounts an empty viewport on the container, so
+    // we can't assert container.firstChild === null. Instead verify that
+    // ScrollProgress's gradient bar isn't in the tree.
+    expect(container.querySelector("[class*='from-brand']")).toBeNull();
   });
 
   it("updates the bar transform when the user scrolls", () => {
