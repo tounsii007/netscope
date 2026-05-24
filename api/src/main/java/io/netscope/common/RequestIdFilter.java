@@ -51,6 +51,15 @@ public class RequestIdFilter extends OncePerRequestFilter implements Ordered {
 
     public static final String MDC_KEY = "requestId";
     public static final String HEADER  = "X-Request-Id";
+    /**
+     * W3C Trace Context header.
+     * Format: `00-<32-hex-trace-id>-<16-hex-span-id>-<2-hex-flags>`.
+     * Emitted by CloudFront, OpenTelemetry SDKs, Datadog, NewRelic and
+     * most modern reverse proxies. We accept it as a secondary source
+     * so a request that came in already tagged with a trace gets
+     * correlated to OUR log line via the trace-id segment.
+     */
+    public static final String W3C_TRACEPARENT = "traceparent";
 
     /**
      * Allowed characters in a client-supplied request id. ULID, UUID,
@@ -59,6 +68,15 @@ public class RequestIdFilter extends OncePerRequestFilter implements Ordered {
      * ANSI / quote injection into the log files.
      */
     private static final Pattern SAFE_ID = Pattern.compile("^[A-Za-z0-9_.\\-]{8,64}$");
+
+    /**
+     * W3C traceparent regex with explicit anchors. Each component is
+     * fixed-length hex so an attacker can't smuggle extra bytes via
+     * a long trace-id. We only consume capture group 1 (the 32-char
+     * trace-id) — span-id + flags are discarded.
+     */
+    private static final Pattern TRACEPARENT =
+        Pattern.compile("^00-([0-9a-f]{32})-[0-9a-f]{16}-[0-9a-f]{2}$");
 
     /** ThreadLocal SecureRandom — cheap, contention-free across pods. */
     private static final ThreadLocal<SecureRandom> RANDOM =
@@ -69,17 +87,8 @@ public class RequestIdFilter extends OncePerRequestFilter implements Ordered {
             HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
-        String inbound = req.getHeader(HEADER);
-        String id;
-        if (inbound != null && SAFE_ID.matcher(inbound).matches()) {
-            // Trust the upstream id only when it passes the pattern.
-            // We deliberately do NOT trim or normalise — the inbound
-            // header is echoed verbatim if it was clean, otherwise
-            // replaced entirely. Half-measures invite bypasses.
-            id = inbound;
-        } else {
-            id = generate();
-        }
+        String id = resolveInboundId(req);
+        if (id == null) id = generate();
 
         MDC.put(MDC_KEY, id);
         // Echo to the client BEFORE the chain runs so even a 500 carries
@@ -94,6 +103,36 @@ public class RequestIdFilter extends OncePerRequestFilter implements Ordered {
             // NEXT request's log lines to the previous user.
             MDC.remove(MDC_KEY);
         }
+    }
+
+    /**
+     * Pick a request id from inbound headers, preferring the explicit
+     * X-Request-Id (clients that already set one expect it back) and
+     * falling back to the W3C traceparent's trace-id segment.
+     *
+     * Returns {@code null} when neither is usable so the caller can
+     * generate a fresh id without an extra "did we try?" branch.
+     *
+     * Package-visible for direct unit-testing without going through a
+     * full request lifecycle.
+     */
+    static String resolveInboundId(HttpServletRequest req) {
+        // 1) Explicit X-Request-Id from the upstream — caller expects
+        //    this verbatim if it passes the strict charset filter.
+        String xrid = req.getHeader(HEADER);
+        if (xrid != null && SAFE_ID.matcher(xrid).matches()) return xrid;
+
+        // 2) W3C traceparent — accept the 32-hex trace-id segment as
+        //    our request id. Long form (64 chars after the "00-" +
+        //    "-…-…") would blow the SAFE_ID cap, so we extract just
+        //    the trace-id (always 32 hex). Lower-cased per spec.
+        String tp = req.getHeader(W3C_TRACEPARENT);
+        if (tp != null) {
+            var m = TRACEPARENT.matcher(tp.trim().toLowerCase());
+            if (m.matches()) return m.group(1);
+        }
+
+        return null;
     }
 
     /**

@@ -171,6 +171,70 @@ class RequestIdFilterTest {
         assertThat(id1).isNotEqualTo(id2);
     }
 
+    /* ─── W3C traceparent support (iter 30) ──────────────────────────── */
+
+    @Test void w3c_traceparent_provides_traceId_when_no_xrid_present() throws IOException, ServletException {
+        // CloudFront / Datadog / OTel SDKs all set this header. We pick
+        // up the 32-hex trace-id segment and use it as our request id
+        // so the same trace correlates across our logs + theirs.
+        String traceId = "4bf92f3577b34da6a3ce929d0e0e4736";
+        MockHttpServletRequest req = new MockHttpServletRequest("GET", "/x");
+        req.addHeader("traceparent",
+            "00-" + traceId + "-00f067aa0ba902b7-01");
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        filter.doFilter(req, res, new MockFilterChain());
+
+        assertThat(res.getHeader(RequestIdFilter.HEADER)).isEqualTo(traceId);
+    }
+
+    @Test void xrid_wins_over_traceparent_when_both_present() throws IOException, ServletException {
+        // Explicit X-Request-Id is the caller's stronger signal — they
+        // set it so they could grep for THAT specific id. traceparent
+        // is the fallback when no x-rid is given.
+        MockHttpServletRequest req = new MockHttpServletRequest("GET", "/x");
+        req.addHeader(RequestIdFilter.HEADER, "client-supplied-id-1234");
+        req.addHeader("traceparent",
+            "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        filter.doFilter(req, res, new MockFilterChain());
+
+        assertThat(res.getHeader(RequestIdFilter.HEADER))
+            .isEqualTo("client-supplied-id-1234");
+    }
+
+    @Test void malformed_traceparent_falls_back_to_generated_id() throws IOException, ServletException {
+        // Wrong version byte, wrong segment lengths, garbled — must not
+        // be accepted. The filter generates a fresh 16-hex id instead.
+        MockHttpServletRequest req = new MockHttpServletRequest("GET", "/x");
+        req.addHeader("traceparent", "ff-not-valid-trace-id-here");
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        filter.doFilter(req, res, new MockFilterChain());
+
+        String id = res.getHeader(RequestIdFilter.HEADER);
+        assertThat(id).isNotNull();
+        // Generated ids are 16 hex chars.
+        assertThat(id).matches("^[0-9a-f]{16}$");
+    }
+
+    @Test void uppercase_traceparent_normalised_to_lowercase() throws IOException, ServletException {
+        // Spec says trace-id is lower-case hex, but a malicious client
+        // could send uppercase to bypass a downstream grep. We lower-
+        // case before matching so the regex still hits and we surface
+        // a canonical lowercase id.
+        MockHttpServletRequest req = new MockHttpServletRequest("GET", "/x");
+        req.addHeader("traceparent",
+            "00-4BF92F3577B34DA6A3CE929D0E0E4736-00F067AA0BA902B7-01");
+        MockHttpServletResponse res = new MockHttpServletResponse();
+
+        filter.doFilter(req, res, new MockFilterChain());
+
+        assertThat(res.getHeader(RequestIdFilter.HEADER))
+            .isEqualTo("4bf92f3577b34da6a3ce929d0e0e4736");
+    }
+
     /** Chain that captures the MDC value mid-flight so we can assert
      *  the filter populated it BEFORE invoking the rest of the chain. */
     private static class IdCapturingChain implements FilterChain {
