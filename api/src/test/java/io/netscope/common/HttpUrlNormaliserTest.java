@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpUrlNormaliserTest {
 
@@ -51,7 +52,6 @@ class HttpUrlNormaliserTest {
     @ParameterizedTest
     @ValueSource(strings = {
         "http",            // the bare literal
-        "httpfoo://x.y",   // looks like a scheme but isn't
         "httphijack",      // arbitrary string starting with "http"
         "httpsy",          // arbitrary string starting with "http"
     })
@@ -65,5 +65,62 @@ class HttpUrlNormaliserTest {
         // turn "" into "https://" because that's a different malformed URL.
         assertThat(HttpUrlNormaliser.ensureHttpScheme("")).isEqualTo("");
         assertThat(HttpUrlNormaliser.ensureHttpScheme(null)).isNull();
+    }
+
+    /* ── new corner cases (iter 22) ───────────────────────────────── */
+
+    @Test void trimsLeadingAndTrailingWhitespace() {
+        assertThat(HttpUrlNormaliser.ensureHttpScheme("   example.com   "))
+            .isEqualTo("https://example.com");
+        assertThat(HttpUrlNormaliser.ensureHttpScheme("\t https://e.com \n"))
+            .isEqualTo("https://e.com");
+    }
+
+    @Test void whitespaceOnlyReturnsTrimmedEmpty() {
+        // The trimmed-empty branch returns the empty string, not the
+        // null sentinel — the contract is "don't manufacture a scheme
+        // for empty input" and callers handle either flavour.
+        assertThat(HttpUrlNormaliser.ensureHttpScheme("   ")).isEqualTo("");
+    }
+
+    @Test void protocolRelativeBecomesHttps() {
+        assertThat(HttpUrlNormaliser.ensureHttpScheme("//example.com/foo"))
+            .isEqualTo("https://example.com/foo");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "ftp://example.com",
+        "gopher://example.com",
+        "file:///etc/passwd",
+        "javascript:alert(1)",
+        "data:text/html,<script>",
+        "ldap://internal.example/",
+        "jar:file:///x.jar!/y",
+    })
+    void rejectsNonHttpSchemes(String input) {
+        // Old code would have produced 'https://ftp://example.com' etc.
+        // New behaviour: surface a 400 with a clear message.
+        assertThatThrownBy(() -> HttpUrlNormaliser.ensureHttpScheme(input))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining("unsupported URL scheme");
+    }
+
+    @Test void httpfooSchemeIsRejectedAsNonHttp() {
+        // "httpfoo://x.y" contains "://" so the substring-based
+        // detection rejects it. Previously it was misclassified as a
+        // bare host and got double-prepended with https://.
+        assertThatThrownBy(() -> HttpUrlNormaliser.ensureHttpScheme("httpfoo://x.y"))
+            .isInstanceOf(ApiException.class);
+    }
+
+    @Test void portInBareHostIsPreservedNotMistakenForScheme() {
+        // Critical: 'example.com:8080' has a colon but no '://', so
+        // it must NOT trigger the unsupported-scheme rejection. A
+        // naive regex on '^\\w+:' would have broken this.
+        assertThat(HttpUrlNormaliser.ensureHttpScheme("example.com:8080/admin"))
+            .isEqualTo("https://example.com:8080/admin");
+        assertThat(HttpUrlNormaliser.ensureHttpScheme("example.com:443"))
+            .isEqualTo("https://example.com:443");
     }
 }
