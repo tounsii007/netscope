@@ -60,7 +60,15 @@
     "search_empty": "Brak pasujących narzędzi.",
     "search_navigate": "Nawiguj",
     "search_open": "Otwórz",
-    "search_close": "Zamknij"
+    "search_close": "Zamknij",
+    "keyboard_shortcuts": "Skróty klawiszowe",
+    "shortcut_search": "Szukaj narzędzi",
+    "shortcut_quick_search": "Szybkie wyszukiwanie",
+    "shortcut_help": "Pokaż ten dialog",
+    "shortcut_close": "Zamknij dialog",
+    "shortcut_navigate": "Nawiguj opcjami",
+    "shortcut_select": "Wybierz",
+    "shortcut_footer": "Wskazówka: skróty działają tylko gdy żaden input nie ma fokusu."
   },
   "auth": {
     "meta_title": "Zaloguj się",

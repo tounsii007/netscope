@@ -60,7 +60,15 @@
     "search_empty": "Eşleşen araç yok.",
     "search_navigate": "Gezin",
     "search_open": "Aç",
-    "search_close": "Kapat"
+    "search_close": "Kapat",
+    "keyboard_shortcuts": "Klavye kısayolları",
+    "shortcut_search": "Araç ara",
+    "shortcut_quick_search": "Hızlı arama",
+    "shortcut_help": "Bu pencereyi göster",
+    "shortcut_close": "Pencereyi kapat",
+    "shortcut_navigate": "Seçenekler arasında gez",
+    "shortcut_select": "Seç",
+    "shortcut_footer": "İpucu: kısayollar yalnızca odakta input yokken çalışır."
   },
   "auth": {
     "meta_title": "Giriş yap",

@@ -60,7 +60,15 @@
     "search_empty": "Совпадений нет.",
     "search_navigate": "Навигация",
     "search_open": "Открыть",
-    "search_close": "Закрыть"
+    "search_close": "Закрыть",
+    "keyboard_shortcuts": "Горячие клавиши",
+    "shortcut_search": "Поиск инструментов",
+    "shortcut_quick_search": "Быстрый поиск",
+    "shortcut_help": "Показать это окно",
+    "shortcut_close": "Закрыть окно",
+    "shortcut_navigate": "Навигация по опциям",
+    "shortcut_select": "Выбрать",
+    "shortcut_footer": "Подсказка: клавиши срабатывают только без фокуса в поле."
   },
   "auth": {
     "meta_title": "Войти",

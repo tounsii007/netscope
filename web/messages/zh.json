@@ -60,7 +60,15 @@
     "search_empty": "未找到匹配的工具。",
     "search_navigate": "导航",
     "search_open": "打开",
-    "search_close": "关闭"
+    "search_close": "关闭",
+    "keyboard_shortcuts": "键盘快捷键",
+    "shortcut_search": "搜索工具",
+    "shortcut_quick_search": "快速搜索",
+    "shortcut_help": "显示此对话框",
+    "shortcut_close": "关闭对话框",
+    "shortcut_navigate": "导航选项",
+    "shortcut_select": "选择",
+    "shortcut_footer": "提示：仅在没有输入框聚焦时快捷键生效。"
   },
   "auth": {
     "meta_title": "登录",

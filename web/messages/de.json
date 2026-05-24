@@ -60,7 +60,15 @@
     "search_empty": "Keine passenden Tools.",
     "search_navigate": "Navigieren",
     "search_open": "Öffnen",
-    "search_close": "Schließen"
+    "search_close": "Schließen",
+    "keyboard_shortcuts": "Tastenkürzel",
+    "shortcut_search": "Tools suchen",
+    "shortcut_quick_search": "Schnellsuche",
+    "shortcut_help": "Diesen Dialog öffnen",
+    "shortcut_close": "Dialog schließen",
+    "shortcut_navigate": "Optionen navigieren",
+    "shortcut_select": "Auswählen",
+    "shortcut_footer": "Tipp: Kürzel feuern nur wenn kein Input fokussiert ist."
   },
   "auth": {
     "meta_title": "Anmelden",

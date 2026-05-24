@@ -60,7 +60,15 @@
     "search_empty": "Aucun outil correspondant.",
     "search_navigate": "Naviguer",
     "search_open": "Ouvrir",
-    "search_close": "Fermer"
+    "search_close": "Fermer",
+    "keyboard_shortcuts": "Raccourcis clavier",
+    "shortcut_search": "Rechercher des outils",
+    "shortcut_quick_search": "Recherche rapide",
+    "shortcut_help": "Afficher cette boîte",
+    "shortcut_close": "Fermer la boîte",
+    "shortcut_navigate": "Naviguer dans les options",
+    "shortcut_select": "Sélectionner",
+    "shortcut_footer": "Astuce : les raccourcis ne se déclenchent que si aucun champ n'est focus."
   },
   "auth": {
     "meta_title": "Connexion",

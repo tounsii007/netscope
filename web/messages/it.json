@@ -60,7 +60,15 @@
     "search_empty": "Nessuno strumento trovato.",
     "search_navigate": "Naviga",
     "search_open": "Apri",
-    "search_close": "Chiudi"
+    "search_close": "Chiudi",
+    "keyboard_shortcuts": "Scorciatoie da tastiera",
+    "shortcut_search": "Cerca strumenti",
+    "shortcut_quick_search": "Ricerca rapida",
+    "shortcut_help": "Mostra questo dialogo",
+    "shortcut_close": "Chiudi dialogo",
+    "shortcut_navigate": "Naviga opzioni",
+    "shortcut_select": "Seleziona",
+    "shortcut_footer": "Suggerimento: le scorciatoie funzionano solo senza input attivo."
   },
   "auth": {
     "meta_title": "Accedi",

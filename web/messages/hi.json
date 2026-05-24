@@ -60,7 +60,15 @@
     "search_empty": "कोई मेल नहीं।",
     "search_navigate": "नेविगेट करें",
     "search_open": "खोलें",
-    "search_close": "बंद करें"
+    "search_close": "बंद करें",
+    "keyboard_shortcuts": "कीबोर्ड शॉर्टकट",
+    "shortcut_search": "टूल खोजें",
+    "shortcut_quick_search": "त्वरित खोज",
+    "shortcut_help": "यह डायलॉग दिखाएँ",
+    "shortcut_close": "डायलॉग बंद करें",
+    "shortcut_navigate": "विकल्पों में जाएँ",
+    "shortcut_select": "चुनें",
+    "shortcut_footer": "टिप: शॉर्टकट केवल तब काम करते हैं जब कोई इनपुट फोकस में न हो।"
   },
   "auth": {
     "meta_title": "साइन इन",

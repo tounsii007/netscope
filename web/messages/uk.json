@@ -60,7 +60,15 @@
     "search_empty": "Збігів не знайдено.",
     "search_navigate": "Навігація",
     "search_open": "Відкрити",
-    "search_close": "Закрити"
+    "search_close": "Закрити",
+    "keyboard_shortcuts": "Гарячі клавіші",
+    "shortcut_search": "Пошук інструментів",
+    "shortcut_quick_search": "Швидкий пошук",
+    "shortcut_help": "Показати це вікно",
+    "shortcut_close": "Закрити вікно",
+    "shortcut_navigate": "Навігація опціями",
+    "shortcut_select": "Вибрати",
+    "shortcut_footer": "Підказка: клавіші спрацьовують лише без фокусу в полі."
   },
   "auth": {
     "meta_title": "Увійти",

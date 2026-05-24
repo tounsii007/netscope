@@ -11,6 +11,7 @@ import { WebVitalsReporter } from "@/components/web-vitals-reporter";
 import { ScrollProgress } from "@/components/floating/scroll-progress";
 import { BackToTop } from "@/components/floating/back-to-top";
 import { ToastProvider } from "@/components/toast/toast";
+import { KeyboardHelp } from "@/components/command-palette/keyboard-help";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -135,6 +136,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             </main>
             <SiteFooter />
             <BackToTop />
+            <KeyboardHelp />
             <WebVitalsReporter />
           </ToastProvider>
         </NextIntlClientProvider>

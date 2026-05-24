@@ -60,7 +60,15 @@
     "search_empty": "Sin coincidencias.",
     "search_navigate": "Navegar",
     "search_open": "Abrir",
-    "search_close": "Cerrar"
+    "search_close": "Cerrar",
+    "keyboard_shortcuts": "Atajos de teclado",
+    "shortcut_search": "Buscar herramientas",
+    "shortcut_quick_search": "Búsqueda rápida",
+    "shortcut_help": "Mostrar este diálogo",
+    "shortcut_close": "Cerrar diálogo",
+    "shortcut_navigate": "Navegar opciones",
+    "shortcut_select": "Seleccionar",
+    "shortcut_footer": "Consejo: los atajos solo funcionan si no hay un campo enfocado."
   },
   "auth": {
     "meta_title": "Iniciar sesión",

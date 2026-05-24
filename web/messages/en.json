@@ -60,7 +60,15 @@
     "search_empty": "No matching tools.",
     "search_navigate": "Navigate",
     "search_open": "Open",
-    "search_close": "Close"
+    "search_close": "Close",
+    "keyboard_shortcuts": "Keyboard shortcuts",
+    "shortcut_search": "Search tools",
+    "shortcut_quick_search": "Quick search",
+    "shortcut_help": "Show this dialog",
+    "shortcut_close": "Close any dialog",
+    "shortcut_navigate": "Navigate options",
+    "shortcut_select": "Select option",
+    "shortcut_footer": "Tip: shortcuts only fire when no input is focused."
   },
   "auth": {
     "meta_title": "Sign in",
