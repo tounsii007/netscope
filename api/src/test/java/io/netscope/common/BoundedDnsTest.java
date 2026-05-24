@@ -126,4 +126,51 @@ class BoundedDnsTest {
         // If DNS is unavailable in the test env, that's OK — the test is about
         // the bounded contract, not network connectivity.
     }
+
+    /* ─── input validation (iter 24 hardening) ──────────────────────────── */
+
+    @Test void run_returns_null_for_null_name_without_spinning_a_thread() {
+        // Should be cheap — synchronous null check, no virtual thread.
+        long t0 = System.nanoTime();
+        Record[] r = BoundedDns.run(null, Type.A);
+        long elapsedMs = (System.nanoTime() - t0) / 1_000_000;
+        assertThat(r).isNull();
+        assertThat(elapsedMs).as("null check is synchronous, must be fast")
+            .isLessThan(50);
+    }
+
+    @Test void run_returns_null_for_blank_name_without_spinning_a_thread() {
+        long t0 = System.nanoTime();
+        Record[] r = BoundedDns.run("   ", Type.A);
+        long elapsedMs = (System.nanoTime() - t0) / 1_000_000;
+        assertThat(r).isNull();
+        assertThat(elapsedMs).isLessThan(50);
+    }
+
+    @Test void negative_timeout_falls_back_to_default_not_zero_wait() {
+        // Negative or zero timeout was passing through as 0ms cap → instant
+        // null return. New behaviour: clamp to DEFAULT_TIMEOUT so the lookup
+        // actually gets a chance to resolve.
+        long t0 = System.nanoTime();
+        BoundedDns.run("missing-clamp-test.invalid", Type.A, Duration.ofSeconds(-5));
+        long elapsedMs = (System.nanoTime() - t0) / 1_000_000;
+        // Should use DEFAULT_TIMEOUT (3s) rather than instant-fail.
+        // Allow the .invalid query to time out around DEFAULT_TIMEOUT.
+        assertThat(elapsedMs).as("negative timeout must clamp to DEFAULT, not instant fail")
+            .isBetween(50L, BoundedDns.DEFAULT_TIMEOUT.toMillis() + 2_000);
+    }
+
+    @Test void zero_timeout_falls_back_to_default() {
+        long t0 = System.nanoTime();
+        BoundedDns.run("missing-zero-test.invalid", Type.A, Duration.ZERO);
+        long elapsedMs = (System.nanoTime() - t0) / 1_000_000;
+        assertThat(elapsedMs).as("zero timeout must clamp to DEFAULT").isGreaterThan(50);
+    }
+
+    @Test void MAX_RECORDS_constant_is_reasonable() {
+        // Smoke check on the cap value — should leave headroom for real
+        // domains. 200 fits the largest legitimate response we've seen.
+        assertThat(BoundedDns.MAX_RECORDS).isGreaterThanOrEqualTo(100);
+        assertThat(BoundedDns.MAX_RECORDS).isLessThanOrEqualTo(10_000);
+    }
 }
