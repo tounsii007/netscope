@@ -475,7 +475,8 @@
     "invalid_url_shape": "sieht nicht wie eine URL aus",
     "invalid_host_shape": "sieht nicht wie Hostname oder IP aus",
     "invalid_email_shape": "sieht nicht wie eine E-Mail aus",
-    "error_timeout": "Zeitüberschreitung. Der Server hat nicht rechtzeitig geantwortet."
+    "error_timeout": "Zeitüberschreitung. Der Server hat nicht rechtzeitig geantwortet.",
+    "recent_pick_one": "Letztes Ziel wählen"
   },
   "not_found": {
     "code": "404",

@@ -110,7 +110,7 @@ export function SslClient() {
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <RecentTargets recent={recent} onPick={setHost} onForget={forget} />
+            <RecentTargets recent={recent} onPick={setHost} onForget={forget} currentValue={host} />
             <InputStatus result={hostStatus} />
           </div>
           <ShareLink url={buildUrl(host)} />

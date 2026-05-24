@@ -475,7 +475,8 @@
     "invalid_url_shape": "non sembra un URL",
     "invalid_host_shape": "non sembra un host o IP",
     "invalid_email_shape": "non sembra un'email",
-    "error_timeout": "Tempo scaduto. Il server non ha risposto in tempo."
+    "error_timeout": "Tempo scaduto. Il server non ha risposto in tempo.",
+    "recent_pick_one": "Scegli un bersaglio recente"
   },
   "not_found": {
     "code": "404",

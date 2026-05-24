@@ -475,7 +475,8 @@
     "invalid_url_shape": "doesn't look like a URL",
     "invalid_host_shape": "doesn't look like a hostname or IP",
     "invalid_email_shape": "doesn't look like an email",
-    "error_timeout": "Request timed out. The server didn't respond in time."
+    "error_timeout": "Request timed out. The server didn't respond in time.",
+    "recent_pick_one": "Pick a recent target"
   },
   "not_found": {
     "code": "404",

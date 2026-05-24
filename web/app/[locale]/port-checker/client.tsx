@@ -212,7 +212,7 @@ export function PortCheckerClient() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <RecentTargets recent={recent} onPick={setTarget} onForget={forget} />
+            <RecentTargets recent={recent} onPick={setTarget} onForget={forget} currentValue={target} />
             <InputStatus result={hostStatus} />
           </div>
           <ShareLink url={buildUrl(target)} />

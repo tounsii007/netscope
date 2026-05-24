@@ -475,7 +475,8 @@
     "invalid_url_shape": "не схоже на URL",
     "invalid_host_shape": "не схоже на хост або IP",
     "invalid_email_shape": "не схоже на email",
-    "error_timeout": "Час очікування вичерпано. Сервер не відповів вчасно."
+    "error_timeout": "Час очікування вичерпано. Сервер не відповів вчасно.",
+    "recent_pick_one": "Виберіть нещодавню ціль"
   },
   "not_found": {
     "code": "404",

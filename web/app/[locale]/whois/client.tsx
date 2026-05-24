@@ -79,7 +79,7 @@ export function WhoisClient() {
        </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+            <RecentTargets recent={recent} onPick={setDomain} onForget={forget} currentValue={domain} />
             <InputStatus result={hostStatus} />
           </div>
           <ShareLink url={buildUrl(domain)} />

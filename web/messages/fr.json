@@ -475,7 +475,8 @@
     "invalid_url_shape": "ne ressemble pas à une URL",
     "invalid_host_shape": "pas un hôte ou une IP",
     "invalid_email_shape": "pas un e-mail valide",
-    "error_timeout": "Délai dépassé. Le serveur n'a pas répondu à temps."
+    "error_timeout": "Délai dépassé. Le serveur n'a pas répondu à temps.",
+    "recent_pick_one": "Choisir une cible récente"
   },
   "not_found": {
     "code": "404",

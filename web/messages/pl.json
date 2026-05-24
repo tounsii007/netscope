@@ -475,7 +475,8 @@
     "invalid_url_shape": "nie wygląda jak URL",
     "invalid_host_shape": "nie wygląda jak host lub IP",
     "invalid_email_shape": "nie wygląda jak e-mail",
-    "error_timeout": "Przekroczono czas. Serwer nie odpowiedział na czas."
+    "error_timeout": "Przekroczono czas. Serwer nie odpowiedział na czas.",
+    "recent_pick_one": "Wybierz ostatni cel"
   },
   "not_found": {
     "code": "404",

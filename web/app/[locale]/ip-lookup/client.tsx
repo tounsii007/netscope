@@ -134,7 +134,7 @@ export function IpClient({ initial }: { initial?: IpResult }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <RecentTargets recent={recent} onPick={setIp} onForget={forget} />
+            <RecentTargets recent={recent} onPick={setIp} onForget={forget} currentValue={ip} />
             <InputStatus result={ipStatus} />
           </div>
           <ShareLink url={buildUrl(ip)} />

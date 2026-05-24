@@ -475,7 +475,8 @@
     "invalid_url_shape": "看起来不是 URL",
     "invalid_host_shape": "看起来不是主机或 IP",
     "invalid_email_shape": "看起来不是邮箱",
-    "error_timeout": "请求超时。服务器未及时响应。"
+    "error_timeout": "请求超时。服务器未及时响应。",
+    "recent_pick_one": "选择最近的目标"
   },
   "not_found": {
     "code": "404",

@@ -13,30 +13,47 @@ import { useTranslations } from "next-intl";
  *
  * Pure presentational. The recent list + mutators come from
  * `useRecentTargets`, owned by the tool's client.
+ *
+ * Optional `currentValue` triggers a subtle "Pick a recent" highlight
+ * when the user has cleared the input — gives them a nudge instead
+ * of a silent set of chips. Pass nothing to opt out.
  */
 export function RecentTargets({
   recent,
   onPick,
   onForget,
+  currentValue,
   className = "",
 }: {
   recent: string[];
   onPick: (value: string) => void;
   onForget: (value: string) => void;
+  /** When provided and equal to "", the eyebrow shows a gentle "pick one" hint. */
+  currentValue?: string;
   className?: string;
 }) {
   const t = useTranslations("common");
 
   if (recent.length === 0) return null;
 
+  // Treat undefined / whitespace as "no input" so the hint nudges
+  // when the user cleared the field, not on first paint of an
+  // uncontrolled wrapper that hasn't passed currentValue.
+  const inputIsEmpty =
+    currentValue !== undefined && currentValue.trim().length === 0;
+
   return (
     <div
       className={`flex flex-wrap items-center gap-1.5 text-xs ${className}`}
       aria-label={t("recent_targets")}
     >
-      <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
+      <span
+        className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider transition ${
+          inputIsEmpty ? "text-brand" : "text-fg-subtle"
+        }`}
+      >
         <History className="h-3 w-3" aria-hidden="true" />
-        {t("recent")}
+        {inputIsEmpty ? t("recent_pick_one") : t("recent")}
       </span>
       {recent.map((value) => (
         <span

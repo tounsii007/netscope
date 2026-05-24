@@ -475,7 +475,8 @@
     "invalid_url_shape": "не похоже на URL",
     "invalid_host_shape": "не похоже на хост или IP",
     "invalid_email_shape": "не похоже на email",
-    "error_timeout": "Время ожидания истекло. Сервер не ответил вовремя."
+    "error_timeout": "Время ожидания истекло. Сервер не ответил вовремя.",
+    "recent_pick_one": "Выберите недавнюю цель"
   },
   "not_found": {
     "code": "404",

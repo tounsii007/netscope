@@ -475,7 +475,8 @@
     "invalid_url_shape": "URL नहीं लगता",
     "invalid_host_shape": "होस्ट या IP नहीं लगता",
     "invalid_email_shape": "ईमेल नहीं लगता",
-    "error_timeout": "समय समाप्त। सर्वर ने समय पर जवाब नहीं दिया।"
+    "error_timeout": "समय समाप्त। सर्वर ने समय पर जवाब नहीं दिया।",
+    "recent_pick_one": "हाल का लक्ष्य चुनें"
   },
   "not_found": {
     "code": "404",
