@@ -4,8 +4,16 @@ import dynamic from "next/dynamic";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { AlertCircle } from "lucide-react";
 import { api, type IpResult } from "@/lib/api";
 import { ResultCard, LoadingButton } from "@/components/tool-shell";
+import { SkeletonCard } from "@/components/skeleton";
+import { RecentTargets } from "@/components/recent-targets";
+import { ShareLink } from "@/components/share-link";
+import { InputStatus } from "@/components/input-status";
+import { useRecentTargets } from "@/lib/use-recent-targets";
+import { useDeepLink } from "@/lib/use-deep-link";
+import { isHostOrIp, validateInput } from "@/lib/input-validators";
 import { MultiSourcePanel } from "./multi-source-panel";
 import { useCountryName } from "./use-country-name";
 import { LocationBanner } from "./location-banner";
@@ -42,6 +50,16 @@ export function IpClient({ initial }: { initial?: IpResult }) {
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<IpResult | null>(initial ?? null);
 
+  const { recent, remember, forget } = useRecentTargets("ip-lookup");
+  const { buildUrl, pushUrl } = useDeepLink({
+    setTarget: setIp,
+    onAutoRun: () => lookup(ip),
+  });
+  const ipStatus = useMemo(
+    () => validateInput(ip, isHostOrIp, tc("invalid_host_shape")),
+    [ip, tc],
+  );
+
   async function lookup(target: string) {
     const cleaned = normaliseIp(target);
     if (!cleaned) {
@@ -59,6 +77,8 @@ export function IpClient({ initial }: { initial?: IpResult }) {
     setLoading(true);
     try {
       setData(await api.ip(cleaned));
+      remember(cleaned);
+      pushUrl(cleaned);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Error");
     } finally {
@@ -92,27 +112,51 @@ export function IpClient({ initial }: { initial?: IpResult }) {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={run} noValidate className="card flex flex-col gap-2 sm:flex-row" aria-label={tn("ip")}>
-        <label htmlFor={inputId} className="sr-only">{tc("enter_host")}</label>
-        <input
-          id={inputId}
-          className="input"
-          value={ip}
-          onChange={(e) => setIp(e.target.value)}
-          onBlur={(e) => setIp(normaliseIp(e.target.value))}
-          placeholder={t("placeholder")}
-          autoComplete="off"
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          inputMode="url"
-        />
-        <LoadingButton loading={loading} loadingLabel={tc("loading")}>
-          {tc("lookup")}
-        </LoadingButton>
+      <form onSubmit={run} noValidate className="card space-y-3" aria-label={tn("ip")}>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <label htmlFor={inputId} className="sr-only">{tc("enter_host")}</label>
+          <input
+            id={inputId}
+            className="input"
+            value={ip}
+            onChange={(e) => setIp(e.target.value)}
+            onBlur={(e) => setIp(normaliseIp(e.target.value))}
+            placeholder={t("placeholder")}
+            autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="url"
+          />
+          <LoadingButton loading={loading} loadingLabel={tc("loading")}>
+            {tc("lookup")}
+          </LoadingButton>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <RecentTargets recent={recent} onPick={setIp} onForget={forget} />
+            <InputStatus result={ipStatus} />
+          </div>
+          <ShareLink url={buildUrl(ip)} />
+        </div>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger" role="alert">{err}</div>}
+      {err && (
+        <div
+          className="flex items-start gap-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-danger/20"
+          role="alert"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{err}</span>
+        </div>
+      )}
+
+      {loading && !data && (
+        <div className="grid gap-4 lg:grid-cols-3">
+          <SkeletonCard count={2} className="lg:col-span-2" />
+          <SkeletonCard />
+        </div>
+      )}
 
       {data && (
         <>
