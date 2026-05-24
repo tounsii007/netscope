@@ -38,9 +38,15 @@ export function InputStatus({
     );
   }
   return (
+    // role="status" not "alert" — this is a PASSIVE shape hint as the
+    // user types, not a submit-time error event. Using "alert" caused
+    // testing-library's getByRole("alert") to find two matches when a
+    // real submit-time error was already on screen. The screen reader
+    // still picks the message up via aria-live="polite" implicit on
+    // role="status".
     <p
       className={`inline-flex items-center gap-1 text-[11px] text-danger ${className}`}
-      role="alert"
+      role="status"
     >
       <AlertCircle className="h-3 w-3" aria-hidden="true" />
       <span>{result.hint ?? "invalid"}</span>
