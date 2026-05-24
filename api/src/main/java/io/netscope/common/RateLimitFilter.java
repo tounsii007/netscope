@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HexFormat;
 
 /**
@@ -97,7 +99,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 return;
             }
             if (authCount != null && authCount > authEndpointPerMinute) {
-                writeTooManyRequests(res, authEndpointPerMinute, resetEpochSec,
+                writeTooManyRequests(req, res, authEndpointPerMinute, resetEpochSec,
                     "auth endpoint rate limit exceeded");
                 return;
             }
@@ -122,7 +124,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         res.setHeader("X-RateLimit-Reset", String.valueOf(resetEpochSec));
 
         if (count != null && count > limit) {
-            writeTooManyRequests(res, limit, resetEpochSec, "rate limit exceeded");
+            writeTooManyRequests(req, res, limit, resetEpochSec, "rate limit exceeded");
             return;
         }
         chain.doFilter(req, res);
@@ -131,12 +133,22 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /**
      * Centralised 429 emitter so both tiers respond consistently:
      * status 429, Retry-After in seconds (legacy clients), and the
-     * full X-RateLimit-* triplet (modern clients). The body is a
-     * tiny JSON object so SPA error handlers can branch on `error`
-     * without parsing free-text.
+     * full X-RateLimit-* triplet (modern clients).
+     *
+     * The body shape mirrors {@link GlobalExceptionHandler}'s
+     * canonical error envelope so SPA error handlers don't need a
+     * special branch for 429s:
+     *
+     *   { error, code: RATE_LIMITED, message, path, requestId, timestamp }
+     *
+     * `reason` is hard-coded by the two call-sites — we do NOT echo
+     * user-supplied bytes — so the manual JSON concatenation is safe.
+     * Re-escaping " and \ defensively anyway in case a future caller
+     * wires in a dynamic message.
      */
     private static void writeTooManyRequests(
-            HttpServletResponse res, int limit, long resetEpochSec, String reason)
+            HttpServletRequest req, HttpServletResponse res,
+            int limit, long resetEpochSec, String reason)
             throws IOException {
         long retryAfterSec = Math.max(1L,
             resetEpochSec - (System.currentTimeMillis() / 1000L));
@@ -145,9 +157,38 @@ public class RateLimitFilter extends OncePerRequestFilter {
         res.setHeader("X-RateLimit-Limit", String.valueOf(limit));
         res.setHeader("X-RateLimit-Remaining", "0");
         res.setHeader("X-RateLimit-Reset", String.valueOf(resetEpochSec));
-        res.setContentType("application/json");
-        res.getWriter().write(
-            "{\"error\":\"Too Many Requests\",\"message\":\"" + reason + "\"}");
+        res.setContentType("application/json;charset=UTF-8");
+
+        String requestId = MDC.get("requestId");
+        String path = req.getRequestURI();
+        String body = "{"
+            + "\"error\":\"Too Many Requests\","
+            + "\"code\":\"RATE_LIMITED\","
+            + "\"message\":\"" + jsonEscape(reason) + "\","
+            + "\"path\":\""    + jsonEscape(path == null ? "" : path) + "\","
+            + "\"requestId\":\""+ jsonEscape(requestId == null ? "unknown" : requestId) + "\","
+            + "\"timestamp\":\""+ Instant.now() + "\""
+            + "}";
+        res.getWriter().write(body);
+    }
+
+    /**
+     * Minimal JSON string escape. Only handles the two characters
+     * required for syntactic correctness inside a double-quoted JSON
+     * literal — backslash and double-quote. We do NOT bring Jackson
+     * into the hot 429 path; the body is tiny and writing it via
+     * ObjectMapper would allocate a writer per request.
+     */
+    private static String jsonEscape(String s) {
+        if (s == null) return "";
+        if (s.indexOf('\\') < 0 && s.indexOf('"') < 0) return s;
+        StringBuilder out = new StringBuilder(s.length() + 8);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\\' || c == '"') out.append('\\');
+            out.append(c);
+        }
+        return out.toString();
     }
 
     /**
