@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle, Zap } from "lucide-react";
 import type { PortCheckResult } from "@/lib/api";
 import { ResultCard } from "@/components/tool-shell";
+import { CopyButton } from "@/components/copy-button";
 
 /**
  * Big-icon result card for the single-port mode. Displays the open /
@@ -25,6 +26,7 @@ export function SinglePortResult({ result }: { result: PortCheckResult }) {
 
   return (
     <ResultCard className={`relative overflow-hidden border-l-4 ${tone}`}>
+      <CopyButton className="absolute right-3 top-3" value={result} />
       <div className="flex items-center gap-4">
         <span
           className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ring-1 ${iconBg}`}

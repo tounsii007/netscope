@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Zap, ArrowRight } from "lucide-react";
 import type { PortScanResult } from "@/lib/api";
 import { ResultCard } from "@/components/tool-shell";
+import { CopyButton } from "@/components/copy-button";
 
 /**
  * Grid result card for common-ports / port-range modes. One small tile
@@ -17,8 +18,9 @@ import { ResultCard } from "@/components/tool-shell";
 export function ScanResult({ result }: { result: PortScanResult }) {
   const t = useTranslations("ports");
   return (
-    <ResultCard>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <ResultCard className="relative">
+      <CopyButton className="absolute right-3 top-3" value={result} />
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 pr-20">
         <div className="min-w-0">
           <div className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-elevated/70 px-2 py-1 text-xs">
             <span className="font-mono text-fg-muted">{result.target}</span>
