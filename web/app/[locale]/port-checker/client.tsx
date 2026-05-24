@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
 import { LoadingButton } from "@/components/tool-shell";
@@ -9,6 +9,8 @@ import { RecentTargets } from "@/components/recent-targets";
 import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
 import { useDeepLink } from "@/lib/use-deep-link";
+import { isHostOrIp, validateInput } from "@/lib/input-validators";
+import { InputStatus } from "@/components/input-status";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { ModeTabs, type Mode } from "@/app/[locale]/port-checker/mode-tabs";
 import { SinglePortResult } from "@/app/[locale]/port-checker/single-result";
@@ -57,6 +59,10 @@ export function PortCheckerClient() {
       run({ preventDefault: () => {} } as unknown as React.FormEvent);
     },
   });
+  const hostStatus = useMemo(
+    () => validateInput(target, isHostOrIp, tc("invalid_host_shape")),
+    [target, tc],
+  );
 
   // Tracks the in-flight scan so a fresh submit can cancel a slow one.
   // Without this, a user typing then hitting enter, editing, hitting
@@ -205,7 +211,10 @@ export function PortCheckerClient() {
           </LoadingButton>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <RecentTargets recent={recent} onPick={setTarget} onForget={forget} />
+          <div className="flex flex-wrap items-center gap-3">
+            <RecentTargets recent={recent} onPick={setTarget} onForget={forget} />
+            <InputStatus result={hostStatus} />
+          </div>
           <ShareLink url={buildUrl(target)} />
         </div>
       </form>

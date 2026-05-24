@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
@@ -9,6 +9,8 @@ import { RecentTargets } from "@/components/recent-targets";
 import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
 import { useDeepLink } from "@/lib/use-deep-link";
+import { isHostOrIp, validateInput } from "@/lib/input-validators";
+import { InputStatus } from "@/components/input-status";
 import {
   ShieldCheck, ShieldAlert, Lock, AlertCircle, Calendar,
   Clock, KeyRound, Award, Globe, Layers,
@@ -33,6 +35,10 @@ export function SslClient() {
     setTarget: setHost,
     onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
   });
+  const hostStatus = useMemo(
+    () => validateInput(host, isHostOrIp, tc("invalid_host_shape")),
+    [host, tc],
+  );
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -103,7 +109,10 @@ export function SslClient() {
           </LoadingButton>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <RecentTargets recent={recent} onPick={setHost} onForget={forget} />
+          <div className="flex flex-wrap items-center gap-3">
+            <RecentTargets recent={recent} onPick={setHost} onForget={forget} />
+            <InputStatus result={hostStatus} />
+          </div>
           <ShareLink url={buildUrl(host)} />
         </div>
       </form>

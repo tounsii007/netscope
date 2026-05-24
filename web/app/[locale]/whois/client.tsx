@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type WhoisResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
@@ -8,6 +8,8 @@ import { RecentTargets } from "@/components/recent-targets";
 import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
 import { useDeepLink } from "@/lib/use-deep-link";
+import { isHostname, validateInput } from "@/lib/input-validators";
+import { InputStatus } from "@/components/input-status";
 import {
   Server, AlertCircle, Building2, Calendar, Globe2, Hash,
 } from "lucide-react";
@@ -25,6 +27,10 @@ export function WhoisClient() {
     setTarget: setDomain,
     onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
   });
+  const hostStatus = useMemo(
+    () => validateInput(domain, isHostname, tc("invalid_host_shape")),
+    [domain, tc],
+  );
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -72,7 +78,10 @@ export function WhoisClient() {
         </LoadingButton>
        </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+          <div className="flex flex-wrap items-center gap-3">
+            <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+            <InputStatus result={hostStatus} />
+          </div>
           <ShareLink url={buildUrl(domain)} />
         </div>
       </form>
