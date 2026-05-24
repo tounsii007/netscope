@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type HeadersResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
+import { SkeletonCard } from "@/components/skeleton";
 import {
   CheckCircle2, AlertCircle, XCircle, Link as LinkIcon,
   Shield, Code2, FileCode,
@@ -89,6 +90,8 @@ export function HeadersClient() {
           <span>{err}</span>
         </div>
       )}
+
+      {loading && !data && <SkeletonCard count={2} />}
 
       {data && (
         <div className="space-y-4" aria-live="polite">

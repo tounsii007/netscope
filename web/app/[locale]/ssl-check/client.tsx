@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
+import { SkeletonCard } from "@/components/skeleton";
 import {
   ShieldCheck, ShieldAlert, Lock, AlertCircle, Calendar,
   Clock, KeyRound, Award, Globe, Layers,
@@ -98,6 +99,13 @@ export function SslClient() {
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{err}</span>
+        </div>
+      )}
+
+      {loading && !data && (
+        <div className="space-y-3">
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       )}
 

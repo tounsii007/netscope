@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
 import { LoadingButton } from "@/components/tool-shell";
+import { SkeletonCard } from "@/components/skeleton";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { ModeTabs, type Mode } from "@/app/[locale]/port-checker/mode-tabs";
 import { SinglePortResult } from "@/app/[locale]/port-checker/single-result";
@@ -190,6 +191,13 @@ export function PortCheckerClient() {
       )}
 
       <div aria-live="polite">
+        {/*
+          Skeleton placeholder while the first probe runs. We render
+          ONLY when no result is yet present — subsequent re-submits
+          keep the previous result on screen so the user has visual
+          continuity instead of a flash of empty.
+        */}
+        {loading && !single && !scan && <SkeletonCard />}
         {single && <SinglePortResult result={single} />}
         {scan && <ScanResult result={scan} />}
       </div>

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Globe, Zap, AlertCircle } from "lucide-react";
 import { api, type DnsResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
+import { SkeletonCard } from "@/components/skeleton";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { DetailedRecordList } from "@/app/[locale]/dns-lookup/detailed-record-list";
 
@@ -115,6 +116,16 @@ export function DnsClient() {
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{err}</span>
+        </div>
+      )}
+
+      {/* Skeleton while the lookup runs and no previous data is on
+          screen — keeps the result area at roughly its eventual
+          height instead of collapsing to zero and bouncing the page. */}
+      {loading && !data && (
+        <div className="grid gap-3 md:grid-cols-2">
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       )}
 
