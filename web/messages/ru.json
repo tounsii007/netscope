@@ -421,7 +421,8 @@
     "status": "Статус",
     "security_policy": "Безопасность",
     "aria_label": "Подвал",
-    "copyright": "© {year} Traceronix."
+    "copyright": "© {year} Traceronix.",
+    "changelog": "Что нового"
   },
   "guard": {
     "blocked_localhost": "Localhost и адреса обратной связи не разрешены. Используйте публичный хост или IP.",
@@ -870,5 +871,11 @@
     "section_incidents": "История инцидентов",
     "no_incidents": "Инцидентов не зарегистрировано.",
     "incident_resolved": "Решено"
+  },
+  "changelog": {
+    "meta_title": "Список изменений",
+    "meta_description": "Заметки о выпуске Traceronix.",
+    "title": "Список изменений",
+    "subtitle": "Что изменилось в последних релизах."
   }
 }

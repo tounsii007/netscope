@@ -421,7 +421,8 @@
     "status": "Durum",
     "security_policy": "Güvenlik",
     "aria_label": "Alt bilgi",
-    "copyright": "© {year} Traceronix."
+    "copyright": "© {year} Traceronix.",
+    "changelog": "Yenilikler"
   },
   "guard": {
     "blocked_localhost": "Localhost ve loopback adreslerine izin verilmiyor. Lütfen genel bir ana bilgisayar veya IP girin.",
@@ -870,5 +871,11 @@
     "section_incidents": "Olay geçmişi",
     "no_incidents": "Bildirilen olay yok.",
     "incident_resolved": "Çözüldü"
+  },
+  "changelog": {
+    "meta_title": "Sürüm notları",
+    "meta_description": "Traceronix sürüm notları.",
+    "title": "Sürüm notları",
+    "subtitle": "Son sürümlerde neyin değiştiği."
   }
 }

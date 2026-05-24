@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ShieldCheck, Activity, Heart } from "lucide-react";
+import { ShieldCheck, Activity, Heart, Sparkles } from "lucide-react";
 
 export async function SiteFooter() {
   const t = await getTranslations("footer");
@@ -52,6 +52,13 @@ export async function SiteFooter() {
 
           {/* Footer links */}
           <nav aria-label={t("aria_label")} className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/changelog"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-card/50 px-3 py-1.5 text-xs text-fg-muted transition hover:border-brand/40 hover:text-fg"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+              {t("changelog")}
+            </Link>
             <Link
               href="/status"
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-card/50 px-3 py-1.5 text-xs text-fg-muted transition hover:border-success/40 hover:text-fg"

@@ -421,7 +421,8 @@
     "status": "Status",
     "security_policy": "Security",
     "aria_label": "Footer",
-    "copyright": "© {year} Traceronix."
+    "copyright": "© {year} Traceronix.",
+    "changelog": "What's new"
   },
   "guard": {
     "blocked_localhost": "Localhost and loopback addresses are not allowed. Try a public hostname or IP.",
@@ -870,5 +871,11 @@
     "section_incidents": "Incident history",
     "no_incidents": "No incidents reported.",
     "incident_resolved": "Resolved"
+  },
+  "changelog": {
+    "meta_title": "Changelog",
+    "meta_description": "Release notes for Traceronix.",
+    "title": "Changelog",
+    "subtitle": "What changed across recent releases."
   }
 }

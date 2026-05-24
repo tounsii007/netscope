@@ -421,7 +421,8 @@
     "status": "Status",
     "security_policy": "Bezpieczeństwo",
     "aria_label": "Stopka",
-    "copyright": "© {year} Traceronix."
+    "copyright": "© {year} Traceronix.",
+    "changelog": "Nowości"
   },
   "guard": {
     "blocked_localhost": "Localhost i adresy zwrotne są niedozwolone. Użyj publicznego hosta lub adresu IP.",
@@ -870,5 +871,11 @@
     "section_incidents": "Historia incydentów",
     "no_incidents": "Nie zgłoszono żadnych incydentów.",
     "incident_resolved": "Rozwiązany"
+  },
+  "changelog": {
+    "meta_title": "Dziennik zmian",
+    "meta_description": "Notatki wydania Traceronix.",
+    "title": "Dziennik zmian",
+    "subtitle": "Co się zmieniło w ostatnich wydaniach."
   }
 }

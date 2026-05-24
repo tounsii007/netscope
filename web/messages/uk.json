@@ -421,7 +421,8 @@
     "status": "Статус",
     "security_policy": "Безпека",
     "aria_label": "Підвал",
-    "copyright": "© {year} Traceronix."
+    "copyright": "© {year} Traceronix.",
+    "changelog": "Що нового"
   },
   "guard": {
     "blocked_localhost": "Localhost і адреси зворотного зв'язку не дозволені. Використовуйте публічний хост або IP.",
@@ -870,5 +871,11 @@
     "section_incidents": "Історія інцидентів",
     "no_incidents": "Інциденти не зареєстровані.",
     "incident_resolved": "Розв'язано"
+  },
+  "changelog": {
+    "meta_title": "Журнал змін",
+    "meta_description": "Нотатки до випуску Traceronix.",
+    "title": "Журнал змін",
+    "subtitle": "Що змінилося в останніх релізах."
   }
 }

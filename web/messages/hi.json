@@ -421,7 +421,8 @@
     "status": "स्थिति",
     "security_policy": "सुरक्षा",
     "aria_label": "फ़ुटर",
-    "copyright": "© {year} Traceronix।"
+    "copyright": "© {year} Traceronix।",
+    "changelog": "नया क्या है"
   },
   "guard": {
     "blocked_localhost": "Localhost और loopback पते अनुमत नहीं हैं। कृपया सार्वजनिक होस्टनाम या IP डालें।",
@@ -870,5 +871,11 @@
     "section_incidents": "घटना इतिहास",
     "no_incidents": "कोई घटना दर्ज नहीं की गई है।",
     "incident_resolved": "हल किया गया"
+  },
+  "changelog": {
+    "meta_title": "बदलावों की सूची",
+    "meta_description": "Traceronix रिलीज़ नोट्स।",
+    "title": "बदलावों की सूची",
+    "subtitle": "हाल के रिलीज़ में क्या बदला।"
   }
 }

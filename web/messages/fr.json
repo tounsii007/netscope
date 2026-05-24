@@ -421,7 +421,8 @@
     "status": "Statut",
     "security_policy": "Sécurité",
     "aria_label": "Pied de page",
-    "copyright": "© {year} Traceronix."
+    "copyright": "© {year} Traceronix.",
+    "changelog": "Nouveautés"
   },
   "guard": {
     "blocked_localhost": "Localhost et les adresses de bouclage sont interdites. Saisissez un nom d'hôte ou une IP publique.",
@@ -870,5 +871,11 @@
     "section_incidents": "Historique des incidents",
     "no_incidents": "Aucun incident signalé.",
     "incident_resolved": "Résolu"
+  },
+  "changelog": {
+    "meta_title": "Journal des changements",
+    "meta_description": "Notes de version de Traceronix.",
+    "title": "Journal des changements",
+    "subtitle": "Ce qui a changé dans les dernières versions."
   }
 }
