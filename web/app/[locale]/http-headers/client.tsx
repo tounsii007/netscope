@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { api, type HeadersResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
+import { ShareLink } from "@/components/share-link";
+import { useDeepLink } from "@/lib/use-deep-link";
 import {
   CheckCircle2, AlertCircle, XCircle, Link as LinkIcon,
   Shield, Code2, FileCode,
@@ -31,6 +33,10 @@ export function HeadersClient() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<HeadersResult | null>(null);
+  const { buildUrl, pushUrl } = useDeepLink({
+    setTarget: setUrl,
+    onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
+  });
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -46,8 +52,10 @@ export function HeadersClient() {
       return;
     }
     setErr(null); setLoading(true); setData(null);
-    try { setData(await api.headers(url)); }
-    catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
+    try {
+      setData(await api.headers(url));
+      pushUrl(url);
+    } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
 
@@ -56,8 +64,9 @@ export function HeadersClient() {
       <form
         onSubmit={run}
         noValidate
-        className="card flex flex-col gap-2 sm:flex-row"
+        className="card space-y-3"
       >
+       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
           <LinkIcon
             className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted"
@@ -79,6 +88,10 @@ export function HeadersClient() {
         <LoadingButton loading={loading} loadingLabel={tc("loading")}>
           {tc("analyze")}
         </LoadingButton>
+       </div>
+        <div className="flex justify-end">
+          <ShareLink url={buildUrl(url)} />
+        </div>
       </form>
 
       {err && (

@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { api, type WhoisResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { RecentTargets } from "@/components/recent-targets";
+import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
+import { useDeepLink } from "@/lib/use-deep-link";
 import {
   Server, AlertCircle, Building2, Calendar, Globe2, Hash,
 } from "lucide-react";
@@ -19,6 +21,10 @@ export function WhoisClient() {
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<WhoisResult | null>(null);
   const { recent, remember, forget } = useRecentTargets("whois");
+  const { buildUrl, pushUrl } = useDeepLink({
+    setTarget: setDomain,
+    onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
+  });
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -31,6 +37,7 @@ export function WhoisClient() {
     try {
       setData(await api.whois(domain));
       remember(domain);
+      pushUrl(domain);
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
@@ -64,7 +71,10 @@ export function WhoisClient() {
           {tc("lookup")}
         </LoadingButton>
        </div>
-        <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+          <ShareLink url={buildUrl(domain)} />
+        </div>
       </form>
 
       {err && (

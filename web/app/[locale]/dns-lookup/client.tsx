@@ -7,7 +7,9 @@ import { api, type DnsResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
 import { RecentTargets } from "@/components/recent-targets";
+import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
+import { useDeepLink } from "@/lib/use-deep-link";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { DetailedRecordList } from "@/app/[locale]/dns-lookup/detailed-record-list";
 
@@ -25,6 +27,10 @@ export function DnsClient() {
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<DnsResult | null>(null);
   const { recent, remember, forget } = useRecentTargets("dns-lookup");
+  const { buildUrl, pushUrl } = useDeepLink({
+    setTarget: setDomain,
+    onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
+  });
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -44,6 +50,7 @@ export function DnsClient() {
       const types = Array.from(selected).join(",");
       setData(await api.dns(domain, types));
       remember(domain);
+      pushUrl(domain);
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
@@ -84,7 +91,10 @@ export function DnsClient() {
             {tc("lookup")}
           </LoadingButton>
         </div>
-        <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+          <ShareLink url={buildUrl(domain)} />
+        </div>
         <div
           className="flex flex-wrap gap-2"
           role="group"

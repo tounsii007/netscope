@@ -1,8 +1,32 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach, beforeAll, afterAll } from "vitest";
+import { afterEach, beforeAll, afterAll, vi } from "vitest";
 import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
+
+/**
+ * Default no-op stub for next/navigation. Many client components now
+ * pull in useRouter / usePathname / useSearchParams via the deep-link
+ * hook, and without a mock the test renderer crashes with
+ * "invariant expected app router to be mounted".
+ *
+ * Individual tests that need bespoke behaviour (e.g. command-palette
+ * asserts router.push was called with a specific URL) override this
+ * with their own vi.mock("next/navigation", ...) at the file top —
+ * vi.mock is per-file so the override wins cleanly.
+ */
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: () => {},
+    replace: () => {},
+    refresh: () => {},
+    back: () => {},
+    forward: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 /**
  * MSW handlers — one per backend endpoint that frontend tests need to

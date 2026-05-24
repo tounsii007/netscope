@@ -6,7 +6,9 @@ import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
 import { RecentTargets } from "@/components/recent-targets";
+import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
+import { useDeepLink } from "@/lib/use-deep-link";
 import {
   ShieldCheck, ShieldAlert, Lock, AlertCircle, Calendar,
   Clock, KeyRound, Award, Globe, Layers,
@@ -27,6 +29,10 @@ export function SslClient() {
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<SslResult | null>(null);
   const { recent, remember, forget } = useRecentTargets("ssl-check");
+  const { buildUrl, pushUrl } = useDeepLink({
+    setTarget: setHost,
+    onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
+  });
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +56,7 @@ export function SslClient() {
     try {
       setData(await api.ssl(host, port));
       remember(host);
+      pushUrl(host);
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
@@ -95,12 +102,10 @@ export function SslClient() {
             {tc("inspect")}
           </LoadingButton>
         </div>
-        <RecentTargets
-          className="mt-3"
-          recent={recent}
-          onPick={setHost}
-          onForget={forget}
-        />
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <RecentTargets recent={recent} onPick={setHost} onForget={forget} />
+          <ShareLink url={buildUrl(host)} />
+        </div>
       </form>
 
       {err && (
