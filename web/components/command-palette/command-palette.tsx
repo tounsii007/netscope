@@ -217,7 +217,7 @@ export function CommandPalette() {
               ref={listRef}
               role="listbox"
               aria-label={t("search_tools")}
-              className="max-h-[60vh] overflow-y-auto p-1.5"
+              className="pretty-scroll max-h-[60vh] overflow-y-auto p-1.5"
             >
               {filtered.length === 0 ? (
                 <li className="px-4 py-8 text-center text-sm text-fg-muted">

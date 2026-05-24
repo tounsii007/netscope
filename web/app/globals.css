@@ -37,7 +37,30 @@ html { scroll-behavior: smooth; }
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(249, 115, 22, 0.45); background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
 * { scrollbar-color: rgba(255,255,255,0.12) transparent; scrollbar-width: thin; }
+
+/* Higher-contrast scrollbar variant for nested overflow regions that
+   sit on dark bg-elevated / bg-card surfaces — the default
+   `rgba(255,255,255,0.08)` thumb is nearly invisible against the
+   slightly lighter inner background. Opt-in via the `.pretty-scroll`
+   utility class so we don't lift the contrast everywhere (the global
+   subtle look stays correct on the page background).
+
+   Why opt-in: the .input, .card, body, and most surfaces sit on
+   bg-bg (#0a0a0a) where the subtle thumb is fine. Inner panels —
+   bg-bg-elevated/60, the JWT JSON viewer, raw-headers pre tag,
+   mobile drawer body — sit on #161616-ish and need a brighter thumb.
+   Keep both utilities so designers can pick per region. */
+.pretty-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: padding-box;
+}
+.pretty-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.55);
+  background-clip: padding-box;
+}
+.pretty-scroll { scrollbar-color: rgba(255,255,255,0.22) transparent; }
 
 /* Respect users who've asked the OS to reduce motion. We keep the
    appearance (colors, layout) but cap animation duration to 1ms and

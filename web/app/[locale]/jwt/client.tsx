@@ -88,7 +88,7 @@ export function JwtClient() {
               </span>
               <CopyButton className="ml-auto" value={decoded.signature} />
             </h3>
-            <div className="break-all rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
+            <div className="pretty-scroll break-all overflow-auto max-h-32 rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
               {decoded.signature}
             </div>
             <p className="mt-2.5 text-xs text-fg-subtle">{t("sig_note")}</p>

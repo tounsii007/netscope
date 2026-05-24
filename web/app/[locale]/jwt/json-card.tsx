@@ -38,7 +38,7 @@ export function JsonCard({
         {title}
         <CopyButton className="ml-auto" value={data ?? {}} />
       </h3>
-      <pre className="max-h-80 overflow-auto rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
+      <pre className="pretty-scroll max-h-80 overflow-auto rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
         {JSON.stringify(data, null, 2)}
       </pre>
     </ResultCard>

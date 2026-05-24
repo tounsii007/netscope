@@ -281,7 +281,7 @@ export function HeadersClient() {
               </span>
               {t("raw_headers")}
             </h3>
-            <pre className="max-h-80 overflow-auto rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
+            <pre className="pretty-scroll max-h-80 overflow-auto rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs leading-relaxed text-fg-muted">
               {Object.entries(data.rawHeaders).map(([k, v]) => `${k}: ${v}`).join("\n")}
             </pre>
           </ResultCard>

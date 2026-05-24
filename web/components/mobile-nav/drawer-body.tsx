@@ -40,7 +40,7 @@ export function DrawerBody({ onNavigate }: { onNavigate: () => void }) {
     pathname === "/" || /^\/[a-z]{2}$/.test(pathname);
 
   return (
-    <nav className="flex-1 overflow-y-auto px-2 py-3">
+    <nav className="pretty-scroll flex-1 overflow-y-auto px-2 py-3">
       {/* Home row — uses the same icon-chip layout as the tool rows for
           visual consistency. */}
       <Link
