@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
 import { LoadingButton } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
+import { RecentTargets } from "@/components/recent-targets";
+import { useRecentTargets } from "@/lib/use-recent-targets";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { ModeTabs, type Mode } from "@/app/[locale]/port-checker/mode-tabs";
 import { SinglePortResult } from "@/app/[locale]/port-checker/single-result";
@@ -36,6 +38,10 @@ export function PortCheckerClient() {
   const [err, setErr] = useState<string | null>(null);
   const [single, setSingle] = useState<PortCheckResult | null>(null);
   const [scan, setScan] = useState<PortScanResult | null>(null);
+
+  // Persisted last-5 host strings across reloads. Slug is hand-picked
+  // so this stays stable even if the URL slug changes one day.
+  const { recent, remember, forget } = useRecentTargets("port-checker");
 
   // Tracks the in-flight scan so a fresh submit can cancel a slow one.
   // Without this, a user typing then hitting enter, editing, hitting
@@ -90,6 +96,9 @@ export function PortCheckerClient() {
       } else {
         setScan(await api.portScan(target, { fromPort, toPort }, { signal: ac.signal }));
       }
+      // Save the host only when the lookup actually returned a value.
+      // Aborted / failed requests don't pollute the history.
+      remember(target);
     } catch (e) {
       // AbortError means a fresher submit superseded this one — silent.
       if ((e as Error)?.name === "AbortError") return;
@@ -178,6 +187,7 @@ export function PortCheckerClient() {
             {tc("check")}
           </LoadingButton>
         </div>
+        <RecentTargets recent={recent} onPick={setTarget} onForget={forget} />
       </form>
 
       {err && (

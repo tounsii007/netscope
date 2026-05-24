@@ -465,7 +465,10 @@
     "error_title": "Bir şeyler ters gitti",
     "retry": "Tekrar dene",
     "back_home": "Ana sayfaya dön",
-    "back_to_top": "Yukarı çık"
+    "back_to_top": "Yukarı çık",
+    "recent": "Son",
+    "recent_targets": "Son hedefler",
+    "recent_forget": "{value} unutuldu"
   },
   "not_found": {
     "code": "404",

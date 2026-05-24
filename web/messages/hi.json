@@ -465,7 +465,10 @@
     "error_title": "कुछ गलत हुआ",
     "retry": "पुनः प्रयास करें",
     "back_home": "होम पर वापस",
-    "back_to_top": "ऊपर जाएँ"
+    "back_to_top": "ऊपर जाएँ",
+    "recent": "हाल के",
+    "recent_targets": "हाल के लक्ष्य",
+    "recent_forget": "{value} भूल जाएँ"
   },
   "not_found": {
     "code": "404",

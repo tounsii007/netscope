@@ -465,7 +465,10 @@
     "error_title": "Что-то пошло не так",
     "retry": "Повторить",
     "back_home": "На главную",
-    "back_to_top": "Наверх"
+    "back_to_top": "Наверх",
+    "recent": "Недавние",
+    "recent_targets": "Недавние цели",
+    "recent_forget": "Забыть {value}"
   },
   "not_found": {
     "code": "404",

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
+import { RecentTargets } from "@/components/recent-targets";
+import { useRecentTargets } from "@/lib/use-recent-targets";
 import {
   ShieldCheck, ShieldAlert, Lock, AlertCircle, Calendar,
   Clock, KeyRound, Award, Globe, Layers,
@@ -24,6 +26,7 @@ export function SslClient() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<SslResult | null>(null);
+  const { recent, remember, forget } = useRecentTargets("ssl-check");
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -44,8 +47,10 @@ export function SslClient() {
       return;
     }
     setErr(null); setLoading(true); setData(null);
-    try { setData(await api.ssl(host, port)); }
-    catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
+    try {
+      setData(await api.ssl(host, port));
+      remember(host);
+    } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
 
@@ -90,6 +95,12 @@ export function SslClient() {
             {tc("inspect")}
           </LoadingButton>
         </div>
+        <RecentTargets
+          className="mt-3"
+          recent={recent}
+          onPick={setHost}
+          onForget={forget}
+        />
       </form>
 
       {err && (

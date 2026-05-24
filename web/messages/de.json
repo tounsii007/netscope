@@ -465,7 +465,10 @@
     "error_title": "Etwas ist schiefgelaufen",
     "retry": "Erneut versuchen",
     "back_home": "Zurück zur Startseite",
-    "back_to_top": "Nach oben"
+    "back_to_top": "Nach oben",
+    "recent": "Zuletzt",
+    "recent_targets": "Zuletzt verwendete Ziele",
+    "recent_forget": "{value} entfernen"
   },
   "not_found": {
     "code": "404",

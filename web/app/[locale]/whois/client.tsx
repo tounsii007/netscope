@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type WhoisResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
+import { RecentTargets } from "@/components/recent-targets";
+import { useRecentTargets } from "@/lib/use-recent-targets";
 import {
   Server, AlertCircle, Building2, Calendar, Globe2, Hash,
 } from "lucide-react";
@@ -16,6 +18,7 @@ export function WhoisClient() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<WhoisResult | null>(null);
+  const { recent, remember, forget } = useRecentTargets("whois");
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -25,8 +28,10 @@ export function WhoisClient() {
       return;
     }
     setErr(null); setLoading(true); setData(null);
-    try { setData(await api.whois(domain)); }
-    catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
+    try {
+      setData(await api.whois(domain));
+      remember(domain);
+    } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
 
@@ -34,9 +39,10 @@ export function WhoisClient() {
     <div className="space-y-6">
       <form
         onSubmit={run}
-        className="card flex flex-col gap-2 sm:flex-row"
+        className="card space-y-3"
         aria-label={tn("whois")}
       >
+       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
           <Server
             className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted"
@@ -57,6 +63,8 @@ export function WhoisClient() {
         <LoadingButton loading={loading} loadingLabel={tc("loading")}>
           {tc("lookup")}
         </LoadingButton>
+       </div>
+        <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
       </form>
 
       {err && (

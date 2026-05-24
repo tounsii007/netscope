@@ -6,6 +6,8 @@ import { Globe, Zap, AlertCircle } from "lucide-react";
 import { api, type DnsResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
+import { RecentTargets } from "@/components/recent-targets";
+import { useRecentTargets } from "@/lib/use-recent-targets";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { DetailedRecordList } from "@/app/[locale]/dns-lookup/detailed-record-list";
 
@@ -22,6 +24,7 @@ export function DnsClient() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<DnsResult | null>(null);
+  const { recent, remember, forget } = useRecentTargets("dns-lookup");
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +43,7 @@ export function DnsClient() {
     try {
       const types = Array.from(selected).join(",");
       setData(await api.dns(domain, types));
+      remember(domain);
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setLoading(false); }
   }
@@ -80,6 +84,7 @@ export function DnsClient() {
             {tc("lookup")}
           </LoadingButton>
         </div>
+        <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
         <div
           className="flex flex-wrap gap-2"
           role="group"

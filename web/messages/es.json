@@ -465,7 +465,10 @@
     "error_title": "Algo salió mal",
     "retry": "Reintentar",
     "back_home": "Volver al inicio",
-    "back_to_top": "Volver arriba"
+    "back_to_top": "Volver arriba",
+    "recent": "Recientes",
+    "recent_targets": "Objetivos recientes",
+    "recent_forget": "Olvidar {value}"
   },
   "not_found": {
     "code": "404",

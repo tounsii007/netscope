@@ -465,7 +465,10 @@
     "error_title": "Qualcosa è andato storto",
     "retry": "Riprova",
     "back_home": "Torna alla home",
-    "back_to_top": "Torna su"
+    "back_to_top": "Torna su",
+    "recent": "Recenti",
+    "recent_targets": "Bersagli recenti",
+    "recent_forget": "Dimentica {value}"
   },
   "not_found": {
     "code": "404",

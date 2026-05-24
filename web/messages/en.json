@@ -465,7 +465,10 @@
     "error_title": "Something went wrong",
     "retry": "Try again",
     "back_home": "Back to home",
-    "back_to_top": "Back to top"
+    "back_to_top": "Back to top",
+    "recent": "Recent",
+    "recent_targets": "Recent targets",
+    "recent_forget": "Forget {value}"
   },
   "not_found": {
     "code": "404",
