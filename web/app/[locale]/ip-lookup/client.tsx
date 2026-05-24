@@ -23,8 +23,15 @@ import { normaliseIp } from "./ip-utils";
 import { checkTargetGuard } from "@/lib/target-guard";
 
 // The map is heavy (Leaflet + tiles) and never needed on first paint, so
-// we defer it client-side and skip SSR entirely.
-const IpMap = dynamic(() => import("@/components/ip-map"), { ssr: false });
+// we defer it client-side and skip SSR entirely. The loading prop gives
+// users a shimmer placeholder instead of a 300x500-ish blank panel
+// while the leaflet chunk downloads (~80 KB gzipped + a tiles roundtrip).
+const IpMap = dynamic(() => import("@/components/ip-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="animate-pulse bg-bg-elevated/80 ring-1 ring-border/40" style={{ height: 320 }} aria-hidden="true" />
+  ),
+});
 
 /**
  * IP-Lookup orchestrator. Owns the input state and the network call, then
