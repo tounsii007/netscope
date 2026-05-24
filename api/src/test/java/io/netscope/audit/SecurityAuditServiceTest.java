@@ -96,6 +96,42 @@ class SecurityAuditServiceTest {
         assertThat(repo.events).hasSize(5);
     }
 
+    /* ─── typed EventType overload (iter 27) ─────────────────────────────── */
+
+    @Test void typed_overload_writes_stable_wire_name() {
+        // The DB column stores the EventType's wireName(), NOT the enum's
+        // name(). Renaming an enum constant must not change the on-disk
+        // string — that would break every dashboard filter.
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRemoteAddr("203.0.113.10");
+
+        svc.record(SecurityAuditService.EventType.API_KEY_INVALID,
+            SecurityAuditService.Severity.WARN, req, null, Map.of());
+
+        assertThat(repo.events).hasSize(1);
+        assertThat(repo.events.get(0).getEventType()).isEqualTo("api_key.invalid");
+    }
+
+    @Test void every_EventType_constant_has_a_dotted_wireName() {
+        // Convention: wireName follows "namespace.action" so log queries
+        // can filter by prefix (`event_type LIKE 'auth.%'`).
+        for (SecurityAuditService.EventType t : SecurityAuditService.EventType.values()) {
+            assertThat(t.wireName())
+                .as("EventType.%s.wireName() should be lower.snake.dotted", t.name())
+                .matches("^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$");
+        }
+    }
+
+    @Test void EventType_wireName_values_are_unique() {
+        // Two enum constants with the same wire name would corrupt the
+        // event-type histogram — each row would be ambiguous.
+        Set<String> seen = new HashSet<>();
+        for (SecurityAuditService.EventType t : SecurityAuditService.EventType.values()) {
+            assertThat(seen.add(t.wireName()))
+                .as("duplicate wireName: " + t.wireName()).isTrue();
+        }
+    }
+
     /* ─── stub repository ────────────────────────────────────────────────── */
 
     /**

@@ -45,14 +45,19 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                 if (resolved.isPresent()) {
                     ApiKeyContext.set(resolved.get());
                 } else {
-                    audit.record("api_key.invalid", SecurityAuditService.Severity.WARN,
+                    // Typed event constant — see SecurityAuditService.EventType.
+                    // Renames are guarded by the enum's wireName() so the
+                    // on-disk string stays stable across copy changes.
+                    audit.record(SecurityAuditService.EventType.API_KEY_INVALID,
+                        SecurityAuditService.Severity.WARN,
                         req, null, Map.of("path", path, "key_prefix",
                             header.substring(0, Math.min(6, header.length()))));
                 }
             }
 
             if (ApiKeyContext.get() == null && requiresAuth(path)) {
-                audit.record("auth.unauthorized", SecurityAuditService.Severity.INFO,
+                audit.record(SecurityAuditService.EventType.AUTH_UNAUTHORIZED,
+                    SecurityAuditService.Severity.INFO,
                     req, null, Map.of("path", path));
                 res.setStatus(401);
                 res.setContentType("application/json");
