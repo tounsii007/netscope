@@ -155,16 +155,43 @@ public class SecurityConfig {
                 "netscope.cors.allowed-origins must not contain '*'; "
                     + "list explicit origins instead.");
         }
+        // Fail-fast: every entry must be a real http(s) origin. Catches
+        // copy-paste typos like `app.netscope.io` (no scheme) or
+        // `https://app.netscope.io/` (trailing slash) BEFORE the proxy
+        // serves a single request. Spring's CORS layer would otherwise
+        // silently miss the comparison and 403 every legitimate browser.
+        for (String o : origins) {
+            if (!(o.startsWith("http://") || o.startsWith("https://"))) {
+                throw new IllegalStateException(
+                    "netscope.cors.allowed-origins entry must start with http:// or https://: " + o);
+            }
+            if (o.endsWith("/")) {
+                throw new IllegalStateException(
+                    "netscope.cors.allowed-origins entry must not have a trailing slash: " + o);
+            }
+        }
 
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(origins);
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        cfg.setAllowedHeaders(List.of("Content-Type", "X-API-Key", "Accept"));
+        // Accept the W3C trace header from frontends that propagate
+        // an upstream APM trace (iter 30) so the trace-id can flow
+        // through CORS preflight. Same for an explicit client-supplied
+        // X-Request-Id — without listing them here, the browser
+        // strips both on cross-origin POST + the backend never sees
+        // the correlation hint.
+        cfg.setAllowedHeaders(List.of(
+            "Content-Type", "X-API-Key", "Accept",
+            "X-Request-Id", "traceparent"));
+        // Exposed headers: every per-response signal the SPA actually
+        // reads. X-Request-Id is now exposed so support tickets can
+        // include the id without an extra round-trip to the server log.
         cfg.setExposedHeaders(List.of(
             "X-RateLimit-Limit",
             "X-RateLimit-Remaining",
             "X-RateLimit-Reset",
-            "Retry-After"));
+            "Retry-After",
+            "X-Request-Id"));
         cfg.setAllowCredentials(false);
         cfg.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();

@@ -72,4 +72,56 @@ class CorsConfigTest {
         assertThatThrownBy(c::corsConfigurationSource)
             .isInstanceOf(IllegalStateException.class);
     }
+
+    /* ── shape validation (iter 32) ──────────────────────────────── */
+
+    @Test void scheme_less_origin_fails_fast() {
+        // "app.netscope.io" without scheme is a classic copy-paste typo;
+        // Spring's CORS would silently miss the comparison.
+        SecurityConfig c = configWithOrigins("app.netscope.io");
+        assertThatThrownBy(c::corsConfigurationSource)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("must start with http:// or https://");
+    }
+
+    @Test void trailing_slash_origin_fails_fast() {
+        // CORS spec compares origins as scheme + host + port; a trailing
+        // slash means we'd never match the browser's actual Origin header.
+        SecurityConfig c = configWithOrigins("https://app.netscope.io/");
+        assertThatThrownBy(c::corsConfigurationSource)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("trailing slash");
+    }
+
+    @Test void ftp_or_other_schemes_fail_fast() {
+        SecurityConfig c = configWithOrigins("ftp://example.com");
+        assertThatThrownBy(c::corsConfigurationSource)
+            .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test void http_origin_for_dev_is_accepted() {
+        // Local dev still wants http://localhost:3000 etc.
+        SecurityConfig c = configWithOrigins("http://localhost:3000");
+        assertThatCode(c::corsConfigurationSource).doesNotThrowAnyException();
+    }
+
+    @Test void exposed_headers_include_X_Request_Id_for_support_tickets() {
+        SecurityConfig c = configWithOrigins("https://app.netscope.io");
+        var src = c.corsConfigurationSource();
+        var cfg = ((org.springframework.web.cors.UrlBasedCorsConfigurationSource) src)
+            .getCorsConfigurations().get("/api/**");
+        assertThat(cfg.getExposedHeaders())
+            .as("X-Request-Id must be in Access-Control-Expose-Headers so the SPA can read it")
+            .contains("X-Request-Id");
+    }
+
+    @Test void allowed_headers_include_traceparent_for_distributed_tracing() {
+        SecurityConfig c = configWithOrigins("https://app.netscope.io");
+        var src = c.corsConfigurationSource();
+        var cfg = ((org.springframework.web.cors.UrlBasedCorsConfigurationSource) src)
+            .getCorsConfigurations().get("/api/**");
+        assertThat(cfg.getAllowedHeaders())
+            .as("traceparent must be allow-listed so frontend can propagate trace context")
+            .contains("traceparent", "X-Request-Id");
+    }
 }
