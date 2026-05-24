@@ -470,7 +470,10 @@
     "recent_targets": "हाल के लक्ष्य",
     "recent_forget": "{value} भूल जाएँ",
     "share": "शेयर करें",
-    "share_copied": "लिंक कॉपी हुआ!"
+    "share_copied": "लिंक कॉपी हुआ!",
+    "invalid_url_shape": "URL नहीं लगता",
+    "invalid_host_shape": "होस्ट या IP नहीं लगता",
+    "invalid_email_shape": "ईमेल नहीं लगता"
   },
   "not_found": {
     "code": "404",

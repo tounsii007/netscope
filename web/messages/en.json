@@ -470,7 +470,10 @@
     "recent_targets": "Recent targets",
     "recent_forget": "Forget {value}",
     "share": "Share",
-    "share_copied": "Link copied!"
+    "share_copied": "Link copied!",
+    "invalid_url_shape": "doesn't look like a URL",
+    "invalid_host_shape": "doesn't look like a hostname or IP",
+    "invalid_email_shape": "doesn't look like an email"
   },
   "not_found": {
     "code": "404",

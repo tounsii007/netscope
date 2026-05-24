@@ -1,9 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Globe, Zap, AlertCircle } from "lucide-react";
 import { api, type DnsResult } from "@/lib/api";
+import { isHostname, validateInput } from "@/lib/input-validators";
+import { InputStatus } from "@/components/input-status";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
 import { RecentTargets } from "@/components/recent-targets";
@@ -31,6 +33,10 @@ export function DnsClient() {
     setTarget: setDomain,
     onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
   });
+  const hostStatus = useMemo(
+    () => validateInput(domain, isHostname, tc("invalid_host_shape")),
+    [domain, tc],
+  );
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -92,7 +98,10 @@ export function DnsClient() {
           </LoadingButton>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+          <div className="flex flex-wrap items-center gap-3">
+            <RecentTargets recent={recent} onPick={setDomain} onForget={forget} />
+            <InputStatus result={hostStatus} />
+          </div>
           <ShareLink url={buildUrl(domain)} />
         </div>
         <div

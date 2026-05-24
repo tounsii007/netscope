@@ -470,7 +470,10 @@
     "recent_targets": "Son hedefler",
     "recent_forget": "{value} unutuldu",
     "share": "Paylaş",
-    "share_copied": "Bağlantı kopyalandı!"
+    "share_copied": "Bağlantı kopyalandı!",
+    "invalid_url_shape": "URL gibi görünmüyor",
+    "invalid_host_shape": "host veya IP gibi görünmüyor",
+    "invalid_email_shape": "e-posta gibi görünmüyor"
   },
   "not_found": {
     "code": "404",

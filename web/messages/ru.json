@@ -470,7 +470,10 @@
     "recent_targets": "Недавние цели",
     "recent_forget": "Забыть {value}",
     "share": "Поделиться",
-    "share_copied": "Ссылка скопирована!"
+    "share_copied": "Ссылка скопирована!",
+    "invalid_url_shape": "не похоже на URL",
+    "invalid_host_shape": "не похоже на хост или IP",
+    "invalid_email_shape": "не похоже на email"
   },
   "not_found": {
     "code": "404",

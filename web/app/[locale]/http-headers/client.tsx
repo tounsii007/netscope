@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type HeadersResult } from "@/lib/api";
+import { isHttpUrl, validateInput } from "@/lib/input-validators";
+import { InputStatus } from "@/components/input-status";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
 import { ShareLink } from "@/components/share-link";
@@ -37,6 +39,14 @@ export function HeadersClient() {
     setTarget: setUrl,
     onAutoRun: () => { run({ preventDefault: () => {} } as unknown as React.FormEvent); },
   });
+
+  // Live URL-shape feedback. useMemo so the regex doesn't re-run on
+  // unrelated state changes; cheap either way but keeps the contract
+  // honest.
+  const urlStatus = useMemo(
+    () => validateInput(url, isHttpUrl, tc("invalid_url_shape")),
+    [url, tc],
+  );
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -89,7 +99,8 @@ export function HeadersClient() {
           {tc("analyze")}
         </LoadingButton>
        </div>
-        <div className="flex justify-end">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <InputStatus result={urlStatus} />
           <ShareLink url={buildUrl(url)} />
         </div>
       </form>
