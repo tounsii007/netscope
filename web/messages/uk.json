@@ -468,7 +468,9 @@
     "back_to_top": "Наверх",
     "recent": "Нещодавні",
     "recent_targets": "Нещодавні цілі",
-    "recent_forget": "Забути {value}"
+    "recent_forget": "Забути {value}",
+    "share": "Поділитись",
+    "share_copied": "Посилання скопійовано!"
   },
   "not_found": {
     "code": "404",

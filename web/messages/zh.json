@@ -468,7 +468,9 @@
     "back_to_top": "回到顶部",
     "recent": "最近",
     "recent_targets": "最近的目标",
-    "recent_forget": "忘记 {value}"
+    "recent_forget": "忘记 {value}",
+    "share": "分享",
+    "share_copied": "链接已复制!"
   },
   "not_found": {
     "code": "404",

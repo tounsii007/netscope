@@ -468,7 +468,9 @@
     "back_to_top": "Yukarı çık",
     "recent": "Son",
     "recent_targets": "Son hedefler",
-    "recent_forget": "{value} unutuldu"
+    "recent_forget": "{value} unutuldu",
+    "share": "Paylaş",
+    "share_copied": "Bağlantı kopyalandı!"
   },
   "not_found": {
     "code": "404",

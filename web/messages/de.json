@@ -468,7 +468,9 @@
     "back_to_top": "Nach oben",
     "recent": "Zuletzt",
     "recent_targets": "Zuletzt verwendete Ziele",
-    "recent_forget": "{value} entfernen"
+    "recent_forget": "{value} entfernen",
+    "share": "Teilen",
+    "share_copied": "Link kopiert!"
   },
   "not_found": {
     "code": "404",

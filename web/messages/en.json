@@ -468,7 +468,9 @@
     "back_to_top": "Back to top",
     "recent": "Recent",
     "recent_targets": "Recent targets",
-    "recent_forget": "Forget {value}"
+    "recent_forget": "Forget {value}",
+    "share": "Share",
+    "share_copied": "Link copied!"
   },
   "not_found": {
     "code": "404",

@@ -6,7 +6,9 @@ import { api, type PortCheckResult, type PortScanResult } from "@/lib/api";
 import { LoadingButton } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
 import { RecentTargets } from "@/components/recent-targets";
+import { ShareLink } from "@/components/share-link";
 import { useRecentTargets } from "@/lib/use-recent-targets";
+import { useDeepLink } from "@/lib/use-deep-link";
 import { checkTargetGuard } from "@/lib/target-guard";
 import { ModeTabs, type Mode } from "@/app/[locale]/port-checker/mode-tabs";
 import { SinglePortResult } from "@/app/[locale]/port-checker/single-result";
@@ -42,6 +44,19 @@ export function PortCheckerClient() {
   // Persisted last-5 host strings across reloads. Slug is hand-picked
   // so this stays stable even if the URL slug changes one day.
   const { recent, remember, forget } = useRecentTargets("port-checker");
+
+  // ?target= deep-link: prefill the input on landing AND auto-submit
+  // so a shared URL lands the recipient on the results page.
+  // buildUrl is pure (used for Share); pushUrl writes the URL after
+  // a successful submit so the back button isn't trapped per
+  // keystroke.
+  const { buildUrl, pushUrl } = useDeepLink({
+    setTarget,
+    onAutoRun: () => {
+      // Synthesize a submit so the validate/abort/fetch path runs.
+      run({ preventDefault: () => {} } as unknown as React.FormEvent);
+    },
+  });
 
   // Tracks the in-flight scan so a fresh submit can cancel a slow one.
   // Without this, a user typing then hitting enter, editing, hitting
@@ -99,6 +114,8 @@ export function PortCheckerClient() {
       // Save the host only when the lookup actually returned a value.
       // Aborted / failed requests don't pollute the history.
       remember(target);
+      // Sync the URL so the user can share / bookmark the result.
+      pushUrl(target);
     } catch (e) {
       // AbortError means a fresher submit superseded this one — silent.
       if ((e as Error)?.name === "AbortError") return;
@@ -187,7 +204,10 @@ export function PortCheckerClient() {
             {tc("check")}
           </LoadingButton>
         </div>
-        <RecentTargets recent={recent} onPick={setTarget} onForget={forget} />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <RecentTargets recent={recent} onPick={setTarget} onForget={forget} />
+          <ShareLink url={buildUrl(target)} />
+        </div>
       </form>
 
       {err && (

@@ -468,7 +468,9 @@
     "back_to_top": "ऊपर जाएँ",
     "recent": "हाल के",
     "recent_targets": "हाल के लक्ष्य",
-    "recent_forget": "{value} भूल जाएँ"
+    "recent_forget": "{value} भूल जाएँ",
+    "share": "शेयर करें",
+    "share_copied": "लिंक कॉपी हुआ!"
   },
   "not_found": {
     "code": "404",
