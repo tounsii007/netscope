@@ -473,7 +473,8 @@
     "share_copied": "Ссылка скопирована!",
     "invalid_url_shape": "не похоже на URL",
     "invalid_host_shape": "не похоже на хост или IP",
-    "invalid_email_shape": "не похоже на email"
+    "invalid_email_shape": "не похоже на email",
+    "error_timeout": "Время ожидания истекло. Сервер не ответил вовремя."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Хостинг",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Резидентный"
+    "threat_residential": "Резидентный",
+    "err_hint": "Если проблема не уходит, проверьте доступность бэкенда по адресу /api/v1/me."
   },
   "dns": {
     "title": "Поиск DNS",

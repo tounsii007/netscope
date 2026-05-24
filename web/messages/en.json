@@ -473,7 +473,8 @@
     "share_copied": "Link copied!",
     "invalid_url_shape": "doesn't look like a URL",
     "invalid_host_shape": "doesn't look like a hostname or IP",
-    "invalid_email_shape": "doesn't look like an email"
+    "invalid_email_shape": "doesn't look like an email",
+    "error_timeout": "Request timed out. The server didn't respond in time."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Residential"
+    "threat_residential": "Residential",
+    "err_hint": "If the problem persists, check the backend is reachable at /api/v1/me."
   },
   "dns": {
     "title": "DNS Lookup",

@@ -473,7 +473,8 @@
     "share_copied": "Link kopiert!",
     "invalid_url_shape": "sieht nicht wie eine URL aus",
     "invalid_host_shape": "sieht nicht wie Hostname oder IP aus",
-    "invalid_email_shape": "sieht nicht wie eine E-Mail aus"
+    "invalid_email_shape": "sieht nicht wie eine E-Mail aus",
+    "error_timeout": "Zeitüberschreitung. Der Server hat nicht rechtzeitig geantwortet."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Privat"
+    "threat_residential": "Privat",
+    "err_hint": "Wenn das Problem anhält, prüfe ob das Backend unter /api/v1/me erreichbar ist."
   },
   "dns": {
     "title": "DNS-Abfrage",

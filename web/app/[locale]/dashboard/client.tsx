@@ -1,41 +1,108 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type IpResult } from "@/lib/api";
-import { ResultCard, Spinner } from "@/components/tool-shell";
+import { ResultCard } from "@/components/tool-shell";
+import { SkeletonCard } from "@/components/skeleton";
 import {
   MapPin, Monitor, ShieldAlert, Wifi,
-  Check, X,
+  Check, X, RefreshCw,
 } from "lucide-react";
 
 export function DashboardClient() {
   const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const [data, setData] = useState<IpResult | null>(null);
   const [screen, setScreen] = useState<string>("");
   const [tz, setTz] = useState<string>("");
   const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
+
+  // Single fetch helper so the Retry button can call it without
+  // duplicating the timeout / error handling.
+  const fetchIp = useCallback(() => {
+    setLoading(true);
+    setErr(null);
+    // Bound the request so a wedged backend doesn't leave the user
+    // staring at a spinner forever. 5 s is enough for the slowest
+    // legitimate /me round-trip + ~2s GeoIP enrichment.
+    const ac = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      ac.abort();
+      setErr(tc("error_timeout"));
+      setLoading(false);
+    }, 5_000);
+
+    api.me({ signal: ac.signal })
+      .then((d) => {
+        window.clearTimeout(timeoutId);
+        setData(d);
+        setLoading(false);
+      })
+      .catch((e) => {
+        window.clearTimeout(timeoutId);
+        // Abort surface is the timeout we already handled — ignore.
+        if ((e as Error)?.name === "AbortError") return;
+        setErr(e instanceof Error ? e.message : "Error");
+        setLoading(false);
+      });
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      ac.abort();
+    };
+  }, [tc]);
 
   useEffect(() => {
     setScreen(`${window.screen.width}×${window.screen.height} @ ${window.devicePixelRatio}x`);
     setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    api.me().then(setData).catch((e) => setErr(e.message));
-  }, []);
+    return fetchIp();
+    // attempt is in the deps so clicking Retry kicks a fresh request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attempt]);
 
   if (err) {
     return (
-      <div className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-sm text-danger ring-1 ring-danger/20">
-        <div className="flex items-center gap-2 font-medium">
-          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
-          {err}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-start gap-3 rounded-xl border border-danger/40 bg-danger/10 p-4 text-sm text-danger ring-1 ring-danger/20">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <div className="flex-1">
+            <p className="font-medium">{err}</p>
+            <p className="mt-1 text-xs text-danger/80">{t("err_hint")}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAttempt((a) => a + 1)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-danger/40 bg-danger/10 px-2.5 py-1 text-xs font-medium text-danger transition hover:bg-danger/20"
+          >
+            <RefreshCw className="h-3 w-3" aria-hidden="true" />
+            {tc("retry")}
+          </button>
         </div>
       </div>
     );
   }
-  if (!data) {
+  if (loading || !data) {
     return (
-      <div className="card flex items-center gap-2 text-fg-muted">
-        <Spinner /> {t("detecting")}
+      <div className="space-y-3">
+        <p
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-bg-elevated/70 px-3 py-1.5 text-xs text-fg-muted"
+          role="status"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-brand opacity-60 animate-ping-slow preserve-motion" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+          </span>
+          {t("detecting")}
+        </p>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }

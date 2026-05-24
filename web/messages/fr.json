@@ -473,7 +473,8 @@
     "share_copied": "Lien copié !",
     "invalid_url_shape": "ne ressemble pas à une URL",
     "invalid_host_shape": "pas un hôte ou une IP",
-    "invalid_email_shape": "pas un e-mail valide"
+    "invalid_email_shape": "pas un e-mail valide",
+    "error_timeout": "Délai dépassé. Le serveur n'a pas répondu à temps."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Hébergement",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Résidentiel"
+    "threat_residential": "Résidentiel",
+    "err_hint": "Si le problème persiste, vérifiez que le backend est joignable à /api/v1/me."
   },
   "dns": {
     "title": "Recherche DNS",

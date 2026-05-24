@@ -473,7 +473,8 @@
     "share_copied": "Bağlantı kopyalandı!",
     "invalid_url_shape": "URL gibi görünmüyor",
     "invalid_host_shape": "host veya IP gibi görünmüyor",
-    "invalid_email_shape": "e-posta gibi görünmüyor"
+    "invalid_email_shape": "e-posta gibi görünmüyor",
+    "error_timeout": "Zaman aşımı. Sunucu zamanında yanıt vermedi."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Konut"
+    "threat_residential": "Konut",
+    "err_hint": "Sorun devam ederse, backend'in /api/v1/me adresinden erişilebilir olduğunu kontrol edin."
   },
   "dns": {
     "title": "DNS araması",

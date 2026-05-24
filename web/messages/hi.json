@@ -473,7 +473,8 @@
     "share_copied": "लिंक कॉपी हुआ!",
     "invalid_url_shape": "URL नहीं लगता",
     "invalid_host_shape": "होस्ट या IP नहीं लगता",
-    "invalid_email_shape": "ईमेल नहीं लगता"
+    "invalid_email_shape": "ईमेल नहीं लगता",
+    "error_timeout": "समय समाप्त। सर्वर ने समय पर जवाब नहीं दिया।"
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "होस्टिंग",
     "threat_vpn": "VPN",
     "threat_proxy": "प्रॉक्सी",
-    "threat_residential": "आवासीय"
+    "threat_residential": "आवासीय",
+    "err_hint": "यदि समस्या बनी रहती है, तो जाँचें कि बैकएंड /api/v1/me पर पहुँच योग्य है।"
   },
   "dns": {
     "title": "DNS लुकअप",

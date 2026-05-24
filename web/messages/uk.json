@@ -473,7 +473,8 @@
     "share_copied": "Посилання скопійовано!",
     "invalid_url_shape": "не схоже на URL",
     "invalid_host_shape": "не схоже на хост або IP",
-    "invalid_email_shape": "не схоже на email"
+    "invalid_email_shape": "не схоже на email",
+    "error_timeout": "Час очікування вичерпано. Сервер не відповів вчасно."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Хостинг",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Резидентний"
+    "threat_residential": "Резидентний",
+    "err_hint": "Якщо проблема залишається, перевірте чи бекенд доступний за адресою /api/v1/me."
   },
   "dns": {
     "title": "Пошук DNS",

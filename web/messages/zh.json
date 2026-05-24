@@ -473,7 +473,8 @@
     "share_copied": "链接已复制!",
     "invalid_url_shape": "看起来不是 URL",
     "invalid_host_shape": "看起来不是主机或 IP",
-    "invalid_email_shape": "看起来不是邮箱"
+    "invalid_email_shape": "看起来不是邮箱",
+    "error_timeout": "请求超时。服务器未及时响应。"
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "托管",
     "threat_vpn": "VPN",
     "threat_proxy": "代理",
-    "threat_residential": "住宅 IP"
+    "threat_residential": "住宅 IP",
+    "err_hint": "如果问题持续,请检查后端是否可在 /api/v1/me 访问。"
   },
   "dns": {
     "title": "DNS 查询",

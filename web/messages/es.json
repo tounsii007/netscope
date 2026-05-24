@@ -473,7 +473,8 @@
     "share_copied": "¡Enlace copiado!",
     "invalid_url_shape": "no parece una URL",
     "invalid_host_shape": "no parece un host o IP",
-    "invalid_email_shape": "no parece un correo"
+    "invalid_email_shape": "no parece un correo",
+    "error_timeout": "Tiempo agotado. El servidor no respondió a tiempo."
   },
   "not_found": {
     "code": "404",
@@ -563,7 +564,8 @@
     "threat_hosting": "Hosting",
     "threat_vpn": "VPN",
     "threat_proxy": "Proxy",
-    "threat_residential": "Residencial"
+    "threat_residential": "Residencial",
+    "err_hint": "Si el problema persiste, comprueba que el backend sea accesible en /api/v1/me."
   },
   "dns": {
     "title": "Búsqueda DNS",
