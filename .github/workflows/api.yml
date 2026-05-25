@@ -15,7 +15,7 @@ jobs:
       - name: Unit + integration tests
         run: mvn -B verify
       - name: Upload JaCoCo coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: api/target/site/jacoco/jacoco.xml
           flags: backend
