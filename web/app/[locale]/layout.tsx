@@ -8,6 +8,9 @@ import "../globals.css";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
+import { ScrollProgress } from "@/components/floating/scroll-progress";
+import { BackToTop } from "@/components/floating/back-to-top";
+import { ToastProvider } from "@/components/toast/toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -55,29 +58,75 @@ export default async function LocaleLayout({ children, params }: Props) {
   const t = await getTranslations({ locale, namespace: "nav" });
   return (
     <html lang={locale} dir={dir} className={`dark ${inter.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-bg font-sans antialiased">
+      <head>
+        {/*
+          Preconnect to the four cross-origin asset hosts we hit from
+          almost every page so the browser parallelises DNS + TCP +
+          TLS setup with the HTML response, shaving ~100-300 ms off
+          the first byte of each subresource.
+
+          • flagcdn.com         — country flag PNGs (every locale switch
+                                  + every IP / WHOIS result)
+          • basemaps.cartocdn.com / *.basemaps.cartocdn.com — map tiles
+                                  (the IP-lookup map dynamically lazy-
+                                  loads these on demand)
+          • tile.openstreetmap.org — OSM tile fallback
+          • api.pwnedpasswords.com  — Have-I-Been-Pwned k-anonymity
+                                       endpoint used by the password-leak tool
+
+          We deliberately do NOT use dns-prefetch here because preconnect
+          subsumes it on every browser shipped after 2020. dns-prefetch
+          would add a redundant DNS query when preconnect is already
+          warming the same connection. `crossOrigin="anonymous"` matches
+          the CORS mode the images/JSON are actually fetched with — a
+          mismatched mode would force the browser to open a second
+          connection and waste the preconnect entirely.
+        */}
+        <link rel="preconnect" href="https://flagcdn.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://basemaps.cartocdn.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://tile.openstreetmap.org" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.pwnedpasswords.com" crossOrigin="anonymous" />
+      </head>
+      <body className="relative min-h-screen bg-bg font-sans antialiased">
+        {/* Decorative top-of-page gradient hairline — animated mini-strip
+            that ties the brand colours together across every page. Pure
+            CSS so it doesn't ship JS; sits below ScrollProgress's z-50. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 z-30 h-px bg-gradient-to-r from-brand/0 via-brand/30 to-brand/0"
+        />
+        {/* Ambient body backdrop — a very faint mesh wash that lifts the
+            dark page surface without competing with content. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 -z-10 bg-mesh-2 opacity-[0.12]"
+        />
         <NextIntlClientProvider messages={messages}>
-          {/* Skip-to-content link — invisible until focused. Lets keyboard
-              and screen-reader users bypass the nav and jump straight to
-              the main content of every page. */}
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60]
-                       focus:rounded-lg focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-sm
-                       focus:font-medium focus:text-fg focus:ring-2 focus:ring-brand"
-          >
-            {t("skip_to_content")}
-          </a>
-          <SiteNav />
-          <main
-            id="main"
-            tabIndex={-1}
-            className="mx-auto w-full max-w-6xl 2xl:max-w-7xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 outline-none"
-          >
-            {children}
-          </main>
-          <SiteFooter />
-          <WebVitalsReporter />
+          <ToastProvider>
+            {/* Skip-to-content link — invisible until focused. Lets keyboard
+                and screen-reader users bypass the nav and jump straight to
+                the main content of every page. */}
+            <a
+              href="#main"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60]
+                         focus:rounded-lg focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-sm
+                         focus:font-medium focus:text-fg focus:ring-2 focus:ring-brand"
+            >
+              {t("skip_to_content")}
+            </a>
+            <ScrollProgress />
+            <SiteNav />
+            <main
+              id="main"
+              tabIndex={-1}
+              className="mx-auto w-full max-w-6xl 2xl:max-w-7xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 outline-none"
+            >
+              {children}
+            </main>
+            <SiteFooter />
+            <BackToTop />
+            <WebVitalsReporter />
+          </ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

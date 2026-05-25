@@ -1,20 +1,78 @@
+import { useId } from "react";
 import { cn } from "@/lib/cn";
 
+/**
+ * Shared layout shell wrapped around every tool page. Provides a
+ * consistent header (icon + title + subtitle) plus a subtle decorative
+ * backdrop, and exposes a couple of building blocks (`ResultCard`,
+ * `Spinner`, `LoadingButton`) used in the body of each tool.
+ *
+ * The header is now a small "hero card" — a glass surface with a
+ * mesh-tinted backdrop and the icon sitting in a coloured chip with a
+ * soft brand glow. The accent prop lets tools pick brand / cyan /
+ * violet / success — matching the landing-page category accent so the
+ * cross-page navigation feels cohesive.
+ */
 export function ToolShell({
-  title, subtitle, icon, children, className,
+  title, subtitle, icon, children, className, accent = "brand",
 }: {
   title: string; subtitle: string; icon: React.ReactNode;
   children: React.ReactNode; className?: string;
+  accent?: "brand" | "cyan" | "violet" | "success";
 }) {
+  // Link the <section> landmark to its <h1> via aria-labelledby. A
+  // section with no accessible name reads as just "region" in the
+  // screen-reader landmark list — useless when a user is trying to
+  // jump between sections. Pulling the heading text in by id gives
+  // each tool a distinct entry ("DNS Lookup region", "Port Checker
+  // region", ...) without duplicating the string.
+  //
+  // useId() returns a stable cross-render id that matches between
+  // SSR and hydration; safe in the server component, safe in client.
+  const titleId = useId();
+  const iconTone =
+    accent === "cyan"
+      ? "text-cyan-soft bg-cyan-brand/10 ring-cyan-brand/25"
+      : accent === "violet"
+        ? "text-violet-soft bg-violet-brand/10 ring-violet-brand/25"
+        : accent === "success"
+          ? "text-success bg-success/10 ring-success/25"
+          : "text-brand bg-brand/10 ring-brand/25";
+  const orbTone =
+    accent === "cyan"
+      ? "bg-cyan-brand"
+      : accent === "violet"
+        ? "bg-violet-brand"
+        : accent === "success"
+          ? "bg-success"
+          : "bg-brand";
   return (
-    <section className={cn("space-y-6 animate-slide-up", className)}>
-      <header className="flex items-start gap-4">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
-          {icon}
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-sm text-fg-muted">{subtitle}</p>
+    <section
+      aria-labelledby={titleId}
+      className={cn("space-y-6 animate-slide-up", className)}
+    >
+      <header className="relative isolate overflow-hidden rounded-2xl border border-border bg-bg-card">
+        <div aria-hidden="true" className="absolute inset-0 grid-bg opacity-50" />
+        <div
+          aria-hidden="true"
+          className={`orb h-48 w-48 -top-12 -left-12 ${orbTone} opacity-40`}
+        />
+        <div className="relative flex items-start gap-4 px-5 py-5 sm:px-6 sm:py-6">
+          <div
+            aria-hidden="true"
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ${iconTone}`}
+          >
+            {icon}
+          </div>
+          <div className="min-w-0">
+            <h1
+              id={titleId}
+              className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl"
+            >
+              {title}
+            </h1>
+            <p className="mt-1 text-sm text-fg-muted sm:text-base">{subtitle}</p>
+          </div>
         </div>
       </header>
       {children}
@@ -22,6 +80,10 @@ export function ToolShell({
   );
 }
 
+/**
+ * Standard surface for tool results — a card with a soft inner border
+ * so it reads as elevated content without competing with the page bg.
+ */
 export function ResultCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("card", className)}>{children}</div>;
 }
@@ -98,7 +160,7 @@ export function LoadingButton({
       onClick={onClick}
       disabled={loading || disabled}
       aria-busy={loading || undefined}
-      className={`btn min-w-[7rem] justify-center ${className}`}
+      className={`btn shine-on-hover min-w-[7rem] justify-center shadow-glow-brand transition hover:shadow-[0_24px_70px_-18px_rgba(249,115,22,0.6)] ${className}`}
     >
       {loading ? (
         <span className="flex items-center gap-2">
@@ -109,5 +171,35 @@ export function LoadingButton({
         children
       )}
     </button>
+  );
+}
+
+/**
+ * Empty-state placeholder for tools that have rendered the form but
+ * have no result yet. Pair with the result area so the page never
+ * looks half-built before the user submits. The component is purely
+ * presentational — callers decide when to show it.
+ */
+export function EmptyState({
+  icon,
+  title,
+  description,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-border bg-bg-card/40 px-6 py-10 text-center">
+      {icon && (
+        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-bg-elevated text-fg-muted ring-1 ring-border">
+          {icon}
+        </div>
+      )}
+      <p className="text-sm font-medium text-fg">{title}</p>
+      {description && (
+        <p className="mx-auto mt-1 max-w-md text-sm text-fg-muted">{description}</p>
+      )}
+    </div>
   );
 }

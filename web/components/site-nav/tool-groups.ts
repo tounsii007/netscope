@@ -1,8 +1,22 @@
+import {
+  Network, Globe, Lock, Search, Server, GitBranch, Cloud, KeyRound,
+  Mail, ShieldAlert, ShieldX, ArrowRightLeft, Layers, Cookie,
+  Image as ImageIcon, FileSearch, Wifi, Route, Unlock, ShieldEllipsis,
+  Globe2, ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+
 /**
  * Categorised view used by the desktop nav. Five buckets keep the bar
  * to five buttons + ChevronDown each — fits nicely on a 1280 px screen
  * without overflow. Mobile uses an identical grouping (see
  * `components/mobile-nav/categories.ts`) so the two stay aligned.
+ *
+ * Each item also carries an `icon` so the dropdown panel can render
+ * a colour-tinted icon next to the label — making the menu scannable
+ * by shape as well as text. The flat list in `@/lib/tool-links`
+ * intentionally stays icon-free so non-UI consumers (router /
+ * sitemap / 404 fuzzy match) keep their import surface small.
  */
 export type CategoryLabel =
   | "cat_dns"
@@ -11,58 +25,72 @@ export type CategoryLabel =
   | "cat_email"
   | "cat_web";
 
+export type CategoryAccent = "brand" | "cyan" | "violet" | "success";
+
+export interface ToolGroupItem {
+  href: string;
+  key: string;
+  icon: LucideIcon;
+}
+
 export interface ToolGroup {
   labelKey: CategoryLabel;
-  items: { href: string; key: string }[];
+  accent: CategoryAccent;
+  items: ToolGroupItem[];
 }
 
 export const TOOL_GROUPS: ToolGroup[] = [
   {
     labelKey: "cat_dns",
+    accent: "cyan",
     items: [
-      { href: "/dns-lookup",      key: "dns" },
-      { href: "/dns-propagation", key: "propagation" },
-      { href: "/dnssec",          key: "dnssec" },
-      { href: "/whois",           key: "whois" },
-      { href: "/subdomains",      key: "subs" },
+      { href: "/dns-lookup",      key: "dns",         icon: Search   },
+      { href: "/dns-propagation", key: "propagation", icon: Globe2   },
+      { href: "/dnssec",          key: "dnssec",      icon: Lock     },
+      { href: "/whois",           key: "whois",       icon: Server   },
+      { href: "/subdomains",      key: "subs",        icon: GitBranch },
     ],
   },
   {
     labelKey: "cat_network",
+    accent: "brand",
     items: [
-      { href: "/port-checker",    key: "ports" },
-      { href: "/ip-lookup",       key: "ip" },
-      { href: "/ipv6",            key: "ipv6" },
-      { href: "/bgp",             key: "bgp" },
-      { href: "/cdn-detector",    key: "cdn" },
+      { href: "/port-checker",    key: "ports",       icon: Network },
+      { href: "/ip-lookup",       key: "ip",          icon: Globe   },
+      { href: "/ipv6",            key: "ipv6",        icon: Wifi    },
+      { href: "/bgp",             key: "bgp",         icon: Route   },
+      { href: "/cdn-detector",    key: "cdn",         icon: Cloud   },
     ],
   },
   {
     labelKey: "cat_security",
+    accent: "violet",
     items: [
-      { href: "/ssl-check",       key: "ssl" },
-      { href: "/blacklist",       key: "blacklist" },
-      { href: "/jwt",             key: "jwt" },
-      { href: "/password-leak",   key: "pwd" },
-      { href: "/mixed-content",   key: "mixed" },
+      { href: "/ssl-check",       key: "ssl",         icon: Lock              },
+      { href: "/blacklist",       key: "blacklist",   icon: ShieldX           },
+      { href: "/jwt",             key: "jwt",         icon: KeyRound          },
+      { href: "/password-leak",   key: "pwd",         icon: ShieldEllipsis    },
+      { href: "/mixed-content",   key: "mixed",       icon: Unlock            },
     ],
   },
   {
     labelKey: "cat_email",
+    accent: "success",
     items: [
-      { href: "/email-verify",    key: "email" },
-      { href: "/email-auth",      key: "email_auth" },
+      { href: "/email-verify",    key: "email",       icon: Mail        },
+      { href: "/email-auth",      key: "email_auth",  icon: ShieldAlert },
     ],
   },
   {
     labelKey: "cat_web",
+    accent: "cyan",
     items: [
-      { href: "/http-headers",    key: "headers" },
-      { href: "/tech-stack",      key: "tech" },
-      { href: "/redirects",       key: "redirects" },
-      { href: "/opengraph",       key: "og" },
-      { href: "/cookies",         key: "cookies" },
-      { href: "/robots",          key: "robots" },
+      { href: "/http-headers",    key: "headers",     icon: ShieldCheck   },
+      { href: "/tech-stack",      key: "tech",        icon: Layers        },
+      { href: "/redirects",       key: "redirects",   icon: ArrowRightLeft },
+      { href: "/opengraph",       key: "og",          icon: ImageIcon     },
+      { href: "/cookies",         key: "cookies",     icon: Cookie        },
+      { href: "/robots",          key: "robots",      icon: FileSearch    },
     ],
   },
 ];

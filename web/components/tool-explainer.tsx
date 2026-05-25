@@ -15,6 +15,10 @@ import { safeT, splitBullets } from "@/components/tool-explainer/split-bullets";
  *
  * Renders nothing when {@code purpose} is missing — tools without copy
  * degrade to no card at all rather than an empty placeholder.
+ *
+ * Visual layout: a glass card with three coloured top "tabs" linking
+ * each column to its accent (brand / success / warn). Reads as a
+ * mini-dashboard rather than a wall of prose.
  */
 export async function ToolExplainer({
   slug,
@@ -51,40 +55,54 @@ export async function ToolExplainer({
   return (
     <section
       aria-labelledby={`explainer-${slug}`}
-      className="mt-10 rounded-xl border border-border bg-bg-card/40 p-6"
+      className="relative isolate mt-12 overflow-hidden rounded-2xl border border-border bg-bg-card/60"
     >
-      <h2
-        id={`explainer-${slug}`}
-        className="mb-4 flex items-center gap-2 text-base font-semibold"
-      >
-        <Info className="h-4 w-4 text-brand" />
-        {th("about_title")}
-      </h2>
+      {/* Soft mesh wash so the explainer feels alive against the page
+          bg but doesn't compete with the result panel above it. */}
+      <div aria-hidden="true" className="absolute inset-0 bg-mesh-2 opacity-25" />
+      <div aria-hidden="true" className="absolute inset-0 grid-bg opacity-30" />
 
-      <p className="text-sm leading-relaxed text-fg-muted">{purpose}</p>
+      <div className="relative px-5 py-6 sm:px-7 sm:py-7">
+        <h2
+          id={`explainer-${slug}`}
+          className="mb-3 flex items-center gap-2 text-base font-semibold text-fg"
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand/25">
+            <Info className="h-4 w-4" aria-hidden="true" />
+          </span>
+          {th("about_title")}
+        </h2>
 
-      <div className="mt-6 grid gap-5 md:grid-cols-3">
-        {how.length > 0 && (
-          <ExplainerColumn
-            icon={<Cog className="h-4 w-4 text-brand" />}
-            heading={th("how_title")}
-            bullets={how}
-          />
-        )}
-        {when.length > 0 && (
-          <ExplainerColumn
-            icon={<Target className="h-4 w-4 text-success" />}
-            heading={th("when_title")}
-            bullets={when}
-          />
-        )}
-        {limits.length > 0 && (
-          <ExplainerColumn
-            icon={<AlertCircle className="h-4 w-4 text-warn" />}
-            heading={th("limits_title")}
-            bullets={limits}
-          />
-        )}
+        <p className="text-sm leading-relaxed text-fg-muted sm:text-[15px]">
+          {purpose}
+        </p>
+
+        <div className="mt-7 grid gap-5 md:grid-cols-3">
+          {how.length > 0 && (
+            <ExplainerColumn
+              accent="brand"
+              icon={<Cog className="h-4 w-4" />}
+              heading={th("how_title")}
+              bullets={how}
+            />
+          )}
+          {when.length > 0 && (
+            <ExplainerColumn
+              accent="success"
+              icon={<Target className="h-4 w-4" />}
+              heading={th("when_title")}
+              bullets={when}
+            />
+          )}
+          {limits.length > 0 && (
+            <ExplainerColumn
+              accent="warn"
+              icon={<AlertCircle className="h-4 w-4" />}
+              heading={th("limits_title")}
+              bullets={limits}
+            />
+          )}
+        </div>
       </div>
     </section>
   );

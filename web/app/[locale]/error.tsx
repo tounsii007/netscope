@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import Link from "next/link";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const t = useTranslations("common");
@@ -30,16 +31,53 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-xl py-16 text-center" role="alert" aria-live="assertive">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-danger/10 text-danger">
-        <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+    <div
+      className="relative isolate mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center py-16 text-center"
+      role="alert"
+      aria-live="assertive"
+    >
+      {/* Soft danger-tinted halo behind the icon — calls attention to
+          the error without flashing red across the whole viewport. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center"
+      >
+        <div className="h-72 w-72 rounded-full bg-danger/12 blur-[100px]" />
       </div>
-      <h1 className="text-2xl font-semibold">{t("error_title")}</h1>
-      <p className="mt-2 text-sm text-fg-muted">
+
+      <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/12 text-danger ring-1 ring-danger/30 shadow-lg shadow-danger/20">
+        <AlertTriangle className="h-7 w-7" aria-hidden="true" />
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 rounded-2xl ring-1 ring-danger/40 animate-ping-slow preserve-motion"
+        />
+      </div>
+
+      <h1 className="mt-6 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+        {t("error_title")}
+      </h1>
+      <p className="mt-2 max-w-md text-sm text-fg-muted sm:text-base">
         {error.message || t("error")}
       </p>
-      {error.digest && <p className="mt-1 font-mono text-xs text-fg-subtle">ID: {error.digest}</p>}
-      <button onClick={reset} className="btn mt-6">{t("retry")}</button>
+      {error.digest && (
+        <p className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-elevated/70 px-2.5 py-1 font-mono text-[11px] text-fg-subtle">
+          ID: <span className="text-fg-muted">{error.digest}</span>
+        </p>
+      )}
+
+      <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
+        <button onClick={reset} className="btn-primary shine-on-hover group">
+          <RefreshCw
+            className="h-4 w-4 transition group-hover:rotate-180"
+            aria-hidden="true"
+          />
+          {t("retry")}
+        </button>
+        <Link href="/" className="btn-ghost gap-2">
+          <Home className="h-4 w-4" aria-hidden="true" />
+          {t("back_home")}
+        </Link>
+      </div>
     </div>
   );
 }

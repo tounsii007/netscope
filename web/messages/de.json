@@ -11,6 +11,7 @@
     "open_menu": "Menü öffnen",
     "close_menu": "Menü schließen",
     "skip_to_content": "Zum Hauptinhalt springen",
+    "primary_nav_label": "Hauptnavigation",
     "tools_menu": "Werkzeuge",
     "cat_dns": "DNS & Domain",
     "cat_network": "Netzwerk",
@@ -52,7 +53,14 @@
     "lang_pl": "Polski",
     "lang_ru": "Русский",
     "lang_uk": "Українська",
-    "lang_tr": "Türkçe"
+    "lang_tr": "Türkçe",
+    "open_search": "Suche öffnen",
+    "search_tools": "Tools durchsuchen",
+    "search_placeholder": "Tools suchen…",
+    "search_empty": "Keine passenden Tools.",
+    "search_navigate": "Navigieren",
+    "search_open": "Öffnen",
+    "search_close": "Schließen"
   },
   "auth": {
     "meta_title": "Anmelden",
@@ -68,7 +76,41 @@
     "subtitle": "Portprüfungen, IP-Analyse, DNS, WHOIS, SSL-Inspektion und Uptime-Monitoring — eine schnelle Plattform, kostenlos starten.",
     "cta_tools": "Tools ausprobieren",
     "tools_heading": "Alle Netzwerk-Tools",
-    "tools_count": "{count} Tools · kostenloses Kontingent verfügbar"
+    "tools_count": "{count} Tools · kostenloses Kontingent verfügbar",
+    "hero_tag": "Modernes UI",
+    "cta_dashboard": "Dashboard öffnen",
+    "stat_tools": "Tools",
+    "stat_langs": "Sprachen",
+    "stat_price": "Kostenlos",
+    "cat_dns_title": "DNS & Domain",
+    "cat_dns_caption": "Auflösen, Propagation, sichern, Inhaber prüfen.",
+    "cat_network_title": "Netzwerk",
+    "cat_network_caption": "Ports, IPs, Routing, Erreichbarkeit.",
+    "cat_security_title": "Sicherheit",
+    "cat_security_caption": "TLS, Blacklists, Secrets, Datenlecks.",
+    "cat_email_title": "E-Mail",
+    "cat_email_caption": "Zustellbarkeit und Authentifizierung prüfen.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Header, Stack, Inhalte, Metadaten.",
+    "features": {
+      "title": "Für Profis gebaut, für alle gemacht",
+      "subtitle": "Schnelles, datenschutzfreundliches Network-Tooling im Browser.",
+      "speed_title": "Schnell wie nie",
+      "speed_body": "Edge-Probes liefern Antworten in Millisekunden — nicht Minuten.",
+      "privacy_title": "Datenschutz zuerst",
+      "privacy_body": "Keine Tracker. Deine Abfragen werden niemals verkauft oder geteilt.",
+      "global_title": "Globale Abdeckung",
+      "global_body": "Multi-Region-Probes zeigen dir das echte Bild deines Netzwerks.",
+      "api_title": "API-bereit",
+      "api_body": "Jedes Tool bringt einen dokumentierten REST-Endpoint mit."
+    },
+    "cta": {
+      "eyebrow": "Bereit loszulegen?",
+      "title": "Alle Tools auf einem Dashboard.",
+      "subtitle": "Favoriten speichern, Uptime-Alerts erhalten, Ergebnisse teilen.",
+      "primary": "Dashboard öffnen",
+      "secondary": "Status ansehen"
+    }
   },
   "tools": {
     "port-checker": {
@@ -369,6 +411,8 @@
   "footer": {
     "tagline": "Professionelle Netzwerkdiagnose.",
     "status": "Status",
+    "security_policy": "Sicherheit",
+    "aria_label": "Fußzeile",
     "copyright": "© {year} Traceronix."
   },
   "guard": {
@@ -411,7 +455,9 @@
     "yes": "ja",
     "no": "nein",
     "error_title": "Etwas ist schiefgelaufen",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "back_home": "Zurück zur Startseite",
+    "back_to_top": "Nach oben"
   },
   "not_found": {
     "code": "404",

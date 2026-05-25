@@ -25,7 +25,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<GitBranch className="h-5 w-5" />}
+      icon={<GitBranch className="h-6 w-6" />}
+      accent="cyan"
     >
       <SubdomainsClient />
       <ToolExplainer slug={SLUG} locale={locale} />

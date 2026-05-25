@@ -6,6 +6,11 @@
  *                             useTranslations() resolves real strings instead
  *                             of throwing "MISSING_MESSAGE".
  *  • renderWithLocale(ui, l) — same, but lets you choose en | de | hi | zh.
+ *
+ *  Both wrappers also include a ToastProvider so any component that calls
+ *  `useToast()` — directly or through helpers like `copyWithToast` — gets
+ *  a real context and doesn't throw. This mirrors the production layout
+ *  which always mounts a ToastProvider at the root of [locale]/.
  */
 
 import { ReactElement } from "react";
@@ -17,6 +22,8 @@ import de from "@/messages/de.json";
 import hi from "@/messages/hi.json";
 import zh from "@/messages/zh.json";
 
+import { ToastProvider } from "@/components/toast/toast";
+
 export const MESSAGES = { en, de, hi, zh } as const;
 export type Locale = keyof typeof MESSAGES;
 
@@ -27,7 +34,7 @@ export function renderWithIntl(ui: ReactElement, opts?: RenderOptions) {
 export function renderWithLocale(ui: ReactElement, locale: Locale, opts?: RenderOptions) {
   return render(
     <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]} timeZone="UTC">
-      {ui}
+      <ToastProvider>{ui}</ToastProvider>
     </NextIntlClientProvider>,
     opts,
   );

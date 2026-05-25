@@ -11,6 +11,7 @@
     "open_menu": "Menüyü aç",
     "close_menu": "Menüyü kapat",
     "skip_to_content": "Ana içeriğe atla",
+    "primary_nav_label": "Ana gezinme",
     "tools_menu": "Araçlar",
     "cat_dns": "DNS ve domain",
     "cat_network": "Ağ",
@@ -52,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Parola"
-    }
+    },
+    "open_search": "Aramayı aç",
+    "search_tools": "Araçlarda ara",
+    "search_placeholder": "Araçlarda ara…",
+    "search_empty": "Eşleşen araç yok.",
+    "search_navigate": "Gezin",
+    "search_open": "Aç",
+    "search_close": "Kapat"
   },
   "auth": {
     "meta_title": "Giriş yap",
@@ -68,7 +76,41 @@
     "subtitle": "Port kontrolleri, IP zekâsı, DNS, WHOIS, SSL incelemesi ve uptime izleme — hızlı bir platform — ücretsiz başla.",
     "cta_tools": "Araçları dene",
     "tools_heading": "Tüm ağ araçları",
-    "tools_count": "{count} araç · ücretsiz plan dahil"
+    "tools_count": "{count} araç · ücretsiz plan dahil",
+    "hero_tag": "Modern arayüz",
+    "cta_dashboard": "Panele git",
+    "stat_tools": "Araçlar",
+    "stat_langs": "Diller",
+    "stat_price": "Ücretsiz katman",
+    "cat_dns_title": "DNS ve alan adı",
+    "cat_dns_caption": "Çözümle, yay, güvence al, sahibi öğren.",
+    "cat_network_title": "Ağ",
+    "cat_network_caption": "Portlar, IP'ler, yönlendirme, erişim.",
+    "cat_security_title": "Güvenlik",
+    "cat_security_caption": "TLS, kara listeler, sırlar, sızıntılar.",
+    "cat_email_title": "E-posta",
+    "cat_email_caption": "Teslimat ve kimlik doğrulama.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Başlıklar, stack, içerik, metaveri.",
+    "features": {
+      "title": "Mühendisler için yapıldı, herkes için hazır",
+      "subtitle": "Hızlı, gizliliğe saygılı ağ araçları tarayıcıda.",
+      "speed_title": "Hız için tasarlandı",
+      "speed_body": "Edge-yönlendirmeli sondalar — milisaniyelerde cevap.",
+      "privacy_title": "Önce gizlilik",
+      "privacy_body": "Takip pikseli yok. Sorgularınız sizinle kalır.",
+      "global_title": "Küresel kapsama",
+      "global_body": "Çok bölgeli sondalarla ağınızın gerçek görüntüsü.",
+      "api_title": "API hazır",
+      "api_body": "Her araç belgeli bir REST endpoint ile gelir."
+    },
+    "cta": {
+      "eyebrow": "Başlamaya hazır mısın?",
+      "title": "Tüm araçlar tek panelde.",
+      "subtitle": "Favorileri kaydet, uptime uyarısı al, sonuçları paylaş.",
+      "primary": "Panele git",
+      "secondary": "Durumu gör"
+    }
   },
   "tools": {
     "port-checker": {
@@ -369,6 +411,8 @@
   "footer": {
     "tagline": "Profesyonel ağ tanılaması.",
     "status": "Durum",
+    "security_policy": "Güvenlik",
+    "aria_label": "Alt bilgi",
     "copyright": "© {year} Traceronix."
   },
   "guard": {
@@ -411,7 +455,9 @@
     "yes": "evet",
     "no": "hayır",
     "error_title": "Bir şeyler ters gitti",
-    "retry": "Tekrar dene"
+    "retry": "Tekrar dene",
+    "back_home": "Ana sayfaya dön",
+    "back_to_top": "Yukarı çık"
   },
   "not_found": {
     "code": "404",

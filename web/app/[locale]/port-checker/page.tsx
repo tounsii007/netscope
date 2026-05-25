@@ -25,7 +25,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<Network className="h-5 w-5" />}
+      icon={<Network className="h-6 w-6" />}
+      accent="brand"
     >
       <PortCheckerClient />
       <ToolExplainer slug={SLUG} locale={locale} />

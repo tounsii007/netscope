@@ -25,7 +25,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     <ToolShell
       title={t("title")}
       subtitle={t("desc")}
-      icon={<Globe2 className="h-5 w-5" />}
+      icon={<Globe2 className="h-6 w-6" />}
+      accent="cyan"
     >
       <PropagationClient />
       <ToolExplainer slug={SLUG} locale={locale} />

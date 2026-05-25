@@ -11,6 +11,7 @@
     "open_menu": "Apri menu",
     "close_menu": "Chiudi menu",
     "skip_to_content": "Vai al contenuto principale",
+    "primary_nav_label": "Navigazione principale",
     "tools_menu": "Strumenti",
     "cat_dns": "DNS e dominio",
     "cat_network": "Rete",
@@ -52,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Password"
-    }
+    },
+    "open_search": "Apri ricerca",
+    "search_tools": "Cerca strumenti",
+    "search_placeholder": "Cerca strumenti…",
+    "search_empty": "Nessuno strumento trovato.",
+    "search_navigate": "Naviga",
+    "search_open": "Apri",
+    "search_close": "Chiudi"
   },
   "auth": {
     "meta_title": "Accedi",
@@ -68,7 +76,41 @@
     "subtitle": "Controlli di porte, intelligence IP, DNS, WHOIS, ispezione SSL e monitoraggio uptime — una piattaforma veloce, prova gratuita.",
     "cta_tools": "Prova gli strumenti",
     "tools_heading": "Tutti gli strumenti di rete",
-    "tools_count": "{count} strumenti · piano gratuito incluso"
+    "tools_count": "{count} strumenti · piano gratuito incluso",
+    "hero_tag": "UI moderna",
+    "cta_dashboard": "Apri la dashboard",
+    "stat_tools": "Strumenti",
+    "stat_langs": "Lingue",
+    "stat_price": "Piano gratuito",
+    "cat_dns_title": "DNS e Dominio",
+    "cat_dns_caption": "Risolvere, propagare, proteggere, identificare.",
+    "cat_network_title": "Rete",
+    "cat_network_caption": "Porte, IP, routing, raggiungibilità.",
+    "cat_security_title": "Sicurezza",
+    "cat_security_caption": "TLS, blacklist, secret, leak.",
+    "cat_email_title": "E-mail",
+    "cat_email_caption": "Recapito e autenticazione.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Header, stack, contenuti, metadati.",
+    "features": {
+      "title": "Costruito per ingegneri, pensato per tutti",
+      "subtitle": "Strumenti di rete veloci e rispettosi della privacy.",
+      "speed_title": "Fatto per la velocità",
+      "speed_body": "Sonde edge — risposte in millisecondi.",
+      "privacy_title": "Privacy prima di tutto",
+      "privacy_body": "Nessun pixel di tracciamento. Le tue query restano private.",
+      "global_title": "Copertura globale",
+      "global_body": "Sonde multi-regione per una visione reale della rete.",
+      "api_title": "API-ready",
+      "api_body": "Ogni strumento espone un endpoint REST documentato."
+    },
+    "cta": {
+      "eyebrow": "Pronto a iniziare?",
+      "title": "Tutti gli strumenti su una sola dashboard.",
+      "subtitle": "Salva preferiti, ricevi alert uptime, condividi in pochi secondi.",
+      "primary": "Apri la dashboard",
+      "secondary": "Vedi lo stato"
+    }
   },
   "tools": {
     "port-checker": {
@@ -369,6 +411,8 @@
   "footer": {
     "tagline": "Diagnostica di rete professionale.",
     "status": "Stato",
+    "security_policy": "Sicurezza",
+    "aria_label": "Piè di pagina",
     "copyright": "© {year} Traceronix."
   },
   "guard": {
@@ -411,7 +455,9 @@
     "yes": "sì",
     "no": "no",
     "error_title": "Qualcosa è andato storto",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "back_home": "Torna alla home",
+    "back_to_top": "Torna su"
   },
   "not_found": {
     "code": "404",

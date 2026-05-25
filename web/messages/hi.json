@@ -11,6 +11,7 @@
     "open_menu": "मेनू खोलें",
     "close_menu": "मेनू बंद करें",
     "skip_to_content": "मुख्य सामग्री पर जाएं",
+    "primary_nav_label": "मुख्य नेविगेशन",
     "tools_menu": "टूल्स",
     "cat_dns": "DNS और डोमेन",
     "cat_network": "नेटवर्क",
@@ -52,7 +53,14 @@
     "lang_pl": "Polski",
     "lang_ru": "Русский",
     "lang_uk": "Українська",
-    "lang_tr": "Türkçe"
+    "lang_tr": "Türkçe",
+    "open_search": "खोज खोलें",
+    "search_tools": "टूल खोजें",
+    "search_placeholder": "टूल खोजें…",
+    "search_empty": "कोई मेल नहीं।",
+    "search_navigate": "नेविगेट करें",
+    "search_open": "खोलें",
+    "search_close": "बंद करें"
   },
   "auth": {
     "meta_title": "साइन इन",
@@ -68,7 +76,41 @@
     "subtitle": "पोर्ट जांच, IP इंटेलिजेंस, DNS, WHOIS, SSL निरीक्षण और अपटाइम मॉनिटरिंग — एक तेज़ प्लेटफ़ॉर्म, मुफ़्त में शुरू करें।",
     "cta_tools": "टूल्स आज़माएं",
     "tools_heading": "सभी नेटवर्क टूल्स",
-    "tools_count": "{count} टूल्स · निःशुल्क टियर उपलब्ध"
+    "tools_count": "{count} टूल्स · निःशुल्क टियर उपलब्ध",
+    "hero_tag": "आधुनिक UI",
+    "cta_dashboard": "डैशबोर्ड खोलें",
+    "stat_tools": "टूल्स",
+    "stat_langs": "भाषाएँ",
+    "stat_price": "मुफ़्त",
+    "cat_dns_title": "DNS और डोमेन",
+    "cat_dns_caption": "रिज़ॉल्व, प्रोपगेशन, सुरक्षा, मालिक की पहचान।",
+    "cat_network_title": "नेटवर्क",
+    "cat_network_caption": "पोर्ट, IP, राउटिंग, पहुँच।",
+    "cat_security_title": "सुरक्षा",
+    "cat_security_caption": "TLS, ब्लैकलिस्ट, सीक्रेट, लीक।",
+    "cat_email_title": "ईमेल",
+    "cat_email_caption": "डिलिवरी और प्रमाणीकरण।",
+    "cat_web_title": "वेब",
+    "cat_web_caption": "हेडर, स्टैक, सामग्री, मेटाडेटा।",
+    "features": {
+      "title": "इंजीनियरों के लिए बनाया, सबके लिए तैयार",
+      "subtitle": "तेज़, निजी और सुलभ नेटवर्क टूलिंग आपके ब्राउज़र में।",
+      "speed_title": "गति के लिए बनाया गया",
+      "speed_body": "एज प्रोब्स — मिलीसेकंड में जवाब।",
+      "privacy_title": "पहले प्राइवेसी",
+      "privacy_body": "कोई ट्रैकिंग नहीं। आपकी क्वेरीज़ निजी रहती हैं।",
+      "global_title": "वैश्विक कवरेज",
+      "global_body": "मल्टी-रीजन प्रोब्स आपके नेटवर्क की असली तस्वीर देते हैं।",
+      "api_title": "API-ready",
+      "api_body": "हर टूल के साथ डॉक्युमेंटेड REST एंडपॉइंट।"
+    },
+    "cta": {
+      "eyebrow": "शुरू करने को तैयार?",
+      "title": "एक डैशबोर्ड पर सभी टूल्स।",
+      "subtitle": "फेवरिट सेव करें, अपटाइम अलर्ट पाएँ, तुरंत शेयर करें।",
+      "primary": "डैशबोर्ड खोलें",
+      "secondary": "स्थिति देखें"
+    }
   },
   "tools": {
     "port-checker": {
@@ -369,6 +411,8 @@
   "footer": {
     "tagline": "पेशेवर नेटवर्क डायग्नोस्टिक्स।",
     "status": "स्थिति",
+    "security_policy": "सुरक्षा",
+    "aria_label": "फ़ुटर",
     "copyright": "© {year} Traceronix।"
   },
   "guard": {
@@ -411,7 +455,9 @@
     "yes": "हां",
     "no": "नहीं",
     "error_title": "कुछ गलत हुआ",
-    "retry": "पुनः प्रयास करें"
+    "retry": "पुनः प्रयास करें",
+    "back_home": "होम पर वापस",
+    "back_to_top": "ऊपर जाएँ"
   },
   "not_found": {
     "code": "404",

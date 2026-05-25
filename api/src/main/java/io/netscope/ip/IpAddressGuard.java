@@ -74,6 +74,15 @@ public final class IpAddressGuard {
         // IPv6 ULA fc00::/7 (RFC 4193). Java's isSiteLocalAddress() only
         // catches the legacy fec0::/10 range, so we handle ULA explicitly.
         if (raw.length == 16 && (raw[0] & 0xfe) == 0xfc) return true;
+        // Deprecated IPv4-compatible IPv6 (::a.b.c.d, RFC 4291 §2.5.5.1).
+        // Java doesn't return isLoopbackAddress() == true for these, so
+        // ::127.0.0.1 silently slipped past the block list. Decode the
+        // embedded v4 and recurse — matches TargetValidator.isBlocked().
+        if (raw.length == 16 && isAllZero(raw, 0, 12)) {
+            byte[] v4 = new byte[]{ raw[12], raw[13], raw[14], raw[15] };
+            try { if (isBlocked(InetAddress.getByAddress(v4))) return true; }
+            catch (UnknownHostException ignored) { /* impossible — 4-byte array */ }
+        }
         // IPv4-only checks below — Java's standard isXxx() methods don't
         // know about these but the client-side guard does, so add them
         // here to keep the two sides in sync.
@@ -88,6 +97,11 @@ public final class IpAddressGuard {
             if (a >= 240) return true;
         }
         return isCloudMetadata(raw);
+    }
+
+    private static boolean isAllZero(byte[] arr, int off, int len) {
+        for (int i = off; i < off + len; i++) if (arr[i] != 0) return false;
+        return true;
     }
 
     private static boolean isCloudMetadata(byte[] raw) {

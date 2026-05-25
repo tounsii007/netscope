@@ -4,7 +4,10 @@ import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
-import { ShieldCheck, ShieldAlert } from "lucide-react";
+import {
+  ShieldCheck, ShieldAlert, Lock, AlertCircle, Calendar,
+  Clock, KeyRound, Award, Globe, Layers,
+} from "lucide-react";
 import { checkTargetGuard } from "@/lib/target-guard";
 
 export function SslClient() {
@@ -51,11 +54,15 @@ export function SslClient() {
     <div className="space-y-6">
       <form onSubmit={run} noValidate className="card" aria-label={tn("ssl")}>
         <div className="grid gap-3 md:grid-cols-[3fr_1fr_auto]">
-          <div>
+          <div className="relative">
             <label htmlFor={hostId} className="sr-only">{tc("enter_host")}</label>
+            <Lock
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
+              aria-hidden="true"
+            />
             <input
               id={hostId}
-              className="input"
+              className="input pl-9"
               value={host}
               onChange={(e) => setHost(e.target.value)}
               autoComplete="off"
@@ -72,7 +79,7 @@ export function SslClient() {
               type="number"
               min={1}
               max={65535}
-              className="input"
+              className="input text-center font-mono"
               value={port}
               onChange={(e) => setPort(+e.target.value)}
               inputMode="numeric"
@@ -84,31 +91,104 @@ export function SslClient() {
         </div>
       </form>
 
-      {err && <div className="card border-danger/50 text-danger" role="alert">{err}</div>}
+      {err && (
+        <div
+          className="flex items-start gap-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-danger/20"
+          role="alert"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{err}</span>
+        </div>
+      )}
 
       {data && (
         <div className="space-y-4" aria-live="polite">
-          <ResultCard className={healthy ? "" : "border-warn/50"}>
-            <div className="flex items-start gap-3">
-              {healthy
-                ? <ShieldCheck className="h-8 w-8 text-success" />
-                : <ShieldAlert className="h-8 w-8 text-warn" />}
-              <div className="flex-1">
-                <div className="font-mono text-lg">{data.host}:{data.port}</div>
-                <div className="mt-0.5 text-sm text-fg-muted">{healthy ? t("valid") : t("invalid")}</div>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3 text-sm">
-                  <Field label={t("field_tls")} value={data.tlsVersion} />
-                  <Field label={t("field_cipher")} value={data.cipherSuite} />
-                  <Field label={t("field_valid_from")} value={new Date(data.validFrom).toLocaleDateString()} />
-                  <Field label={t("field_valid_to")} value={new Date(data.validTo).toLocaleDateString()} />
-                  <Field label={t("field_issuer")} value={data.issuer} />
-                  <Field label={t("field_expiry")} value={
-                    <span className={data.expired ? "text-danger" : data.daysUntilExpiry < 14 ? "text-warn" : "text-success"}>
-                      {data.daysUntilExpiry}
-                    </span>
-                  } />
+          {/* Hero summary card */}
+          <ResultCard
+            className={`relative overflow-hidden border-l-4 ${
+              healthy ? "border-l-success/50" : "border-l-warn/50"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <span
+                className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ring-1 ${
+                  healthy
+                    ? "bg-success/10 text-success ring-success/30"
+                    : "bg-warn/10 text-warn ring-warn/30"
+                }`}
+              >
+                {healthy ? (
+                  <ShieldCheck className="h-7 w-7" aria-hidden="true" />
+                ) : (
+                  <ShieldAlert className="h-7 w-7" aria-hidden="true" />
+                )}
+                {healthy && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-2xl ring-1 ring-success/40 animate-ping-slow preserve-motion"
+                  />
+                )}
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <div className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-elevated/70 px-2 py-1 text-xs">
+                  <Globe className="h-3 w-3 text-violet-soft" aria-hidden="true" />
+                  <span className="font-mono text-fg">{data.host}:{data.port}</span>
+                </div>
+                <div
+                  className={`mt-2 text-lg font-semibold sm:text-xl ${
+                    healthy ? "text-success" : "text-warn"
+                  }`}
+                >
+                  {healthy ? t("valid") : t("invalid")}
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  <Field
+                    icon={<Lock className="h-3.5 w-3.5" />}
+                    label={t("field_tls")}
+                    value={data.tlsVersion}
+                  />
+                  <Field
+                    icon={<KeyRound className="h-3.5 w-3.5" />}
+                    label={t("field_cipher")}
+                    value={data.cipherSuite}
+                  />
+                  <Field
+                    icon={<Calendar className="h-3.5 w-3.5" />}
+                    label={t("field_valid_from")}
+                    value={new Date(data.validFrom).toLocaleDateString()}
+                  />
+                  <Field
+                    icon={<Calendar className="h-3.5 w-3.5" />}
+                    label={t("field_valid_to")}
+                    value={new Date(data.validTo).toLocaleDateString()}
+                  />
+                  <Field
+                    icon={<Award className="h-3.5 w-3.5" />}
+                    label={t("field_issuer")}
+                    value={data.issuer}
+                  />
+                  <Field
+                    icon={<Clock className="h-3.5 w-3.5" />}
+                    label={t("field_expiry")}
+                    value={
+                      <span
+                        className={
+                          data.expired
+                            ? "text-danger"
+                            : data.daysUntilExpiry < 14
+                              ? "text-warn"
+                              : "text-success"
+                        }
+                      >
+                        {data.daysUntilExpiry}
+                      </span>
+                    }
+                  />
                   {data.publicKeyAlgorithm && (
                     <Field
+                      icon={<KeyRound className="h-3.5 w-3.5" />}
                       label={t("field_pubkey") || "Public key"}
                       value={
                         <span>
@@ -120,8 +200,9 @@ export function SslClient() {
                     />
                   )}
                 </div>
+
                 {(data.selfSigned || (data.warnings && data.warnings.length > 0)) && (
-                  <ul className="mt-3 space-y-1 rounded border border-warn/40 bg-warn/10 p-3 text-xs text-warn">
+                  <ul className="mt-4 space-y-1.5 rounded-xl border border-warn/40 bg-warn/10 p-3 text-xs text-warn ring-1 ring-warn/20">
                     {data.selfSigned && (
                       <li className="flex items-center gap-2">
                         <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -140,39 +221,99 @@ export function SslClient() {
             </div>
           </ResultCard>
 
-          <ResultCard>
-            <h3 className="mb-3 text-sm font-semibold">{t("field_subject_alt")}</h3>
-            <div className="flex flex-wrap gap-2">
-              {data.sans.map((s) => (
-                <span key={s} className="rounded border border-border bg-bg-elevated px-2 py-0.5 text-xs font-mono">{s}</span>
-              ))}
-            </div>
-          </ResultCard>
+          {/* SANs */}
+          {data.sans.length > 0 && (
+            <ResultCard>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-brand/10 text-violet-soft ring-1 ring-violet-brand/25">
+                  <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                {t("field_subject_alt")}
+                <span className="rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-fg-muted ring-1 ring-border">
+                  {data.sans.length}
+                </span>
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {data.sans.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-lg border border-border bg-bg-elevated px-2 py-1 font-mono text-xs text-fg transition hover:border-violet-brand/40"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </ResultCard>
+          )}
 
+          {/* Chain */}
           <ResultCard>
-            <h3 className="mb-3 text-sm font-semibold">{t("chain")} ({data.chain.length})</h3>
-            <ol className="space-y-3">
-              {data.chain.map((c, i) => (
-                <li key={i} className="rounded-lg border border-border bg-bg-elevated p-3 text-xs font-mono">
-                  <div className="flex flex-wrap items-center gap-2 text-fg-muted">
-                    <span>#{i + 1} {i === 0 ? "(leaf)" : i === data.chain.length - 1 ? "(root)" : "(intermediate)"}</span>
-                    {c.publicKeyAlgorithm && (
-                      <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                        {c.publicKeyAlgorithm}
-                        {c.publicKeyBits ? ` ${c.publicKeyBits}` : ""}
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-brand/10 text-violet-soft ring-1 ring-violet-brand/25">
+                <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+              {t("chain")}
+              <span className="rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-fg-muted ring-1 ring-border">
+                {data.chain.length}
+              </span>
+            </h3>
+            <ol className="space-y-2.5">
+              {data.chain.map((c, i) => {
+                const role =
+                  i === 0
+                    ? "leaf"
+                    : i === data.chain.length - 1
+                      ? "root"
+                      : "intermediate";
+                const roleTone =
+                  role === "leaf"
+                    ? "bg-success/10 text-success ring-success/25"
+                    : role === "root"
+                      ? "bg-violet-brand/10 text-violet-soft ring-violet-brand/25"
+                      : "bg-bg-elevated text-fg-muted ring-border";
+                return (
+                  <li
+                    key={i}
+                    className="rounded-xl border border-border bg-bg-elevated/60 p-3 font-mono text-xs"
+                  >
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-bg-card px-2 py-0.5 text-[11px] font-bold text-fg ring-1 ring-border">
+                        #{i + 1}
                       </span>
-                    )}
-                    {c.selfSigned && (
-                      <span className="rounded border border-warn/40 bg-warn/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warn">
-                        {t("warn_self_signed_short") || "self-signed"}
+                      <span
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ${roleTone}`}
+                      >
+                        {role}
                       </span>
-                    )}
-                  </div>
-                  <div className="mt-1 break-all">Subject: {c.subject}</div>
-                  <div className="break-all">Issuer: {c.issuer}</div>
-                  <div>Signature: {c.sigAlg}</div>
-                </li>
-              ))}
+                      {c.publicKeyAlgorithm && (
+                        <span className="rounded-md border border-border bg-bg-card px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted">
+                          {c.publicKeyAlgorithm}
+                          {c.publicKeyBits ? ` ${c.publicKeyBits}` : ""}
+                        </span>
+                      )}
+                      {c.selfSigned && (
+                        <span className="rounded-md border border-warn/40 bg-warn/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warn">
+                          {t("warn_self_signed_short") || "self-signed"}
+                        </span>
+                      )}
+                    </div>
+                    <div className="space-y-0.5 text-fg-muted">
+                      <div className="break-all">
+                        <span className="text-fg-subtle">Subject: </span>
+                        <span className="text-fg">{c.subject}</span>
+                      </div>
+                      <div className="break-all">
+                        <span className="text-fg-subtle">Issuer: </span>
+                        <span className="text-fg">{c.issuer}</span>
+                      </div>
+                      <div>
+                        <span className="text-fg-subtle">Signature: </span>
+                        <span className="text-fg">{c.sigAlg}</span>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </ResultCard>
         </div>
@@ -181,11 +322,22 @@ export function SslClient() {
   );
 }
 
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
+function Field({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
-    <div>
-      <div className="text-xs uppercase tracking-wide text-fg-subtle">{label}</div>
-      <div className="font-mono text-sm truncate">{value}</div>
+    <div className="rounded-lg border border-border/60 bg-bg-elevated/60 px-3 py-2">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
+        <span className="text-violet-soft/80">{icon}</span>
+        {label}
+      </div>
+      <div className="mt-1 truncate font-mono text-sm text-fg">{value}</div>
     </div>
   );
 }

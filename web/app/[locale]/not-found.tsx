@@ -51,12 +51,20 @@ export default async function NotFound() {
   }).filter((x): x is { href: string; label: string } => x !== null);
 
   return (
-    <div className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-10">
-      {/* Soft ambient glow + subtle grid behind the content */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[400px] w-[400px] rounded-full bg-brand/10 blur-[120px]" />
+    <div className="relative isolate flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-10">
+      {/* Layered ambient background: orb + grid + subtle mesh. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="h-[420px] w-[420px] rounded-full bg-brand/15 blur-[120px]" />
       </div>
-      <div className="pointer-events-none absolute inset-0 -z-0 grid-bg opacity-40" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-0 grid-bg opacity-40" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 -right-32 h-72 w-72 rounded-full bg-violet-brand/20 blur-[100px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-32 -left-32 h-72 w-72 rounded-full bg-cyan-brand/20 blur-[100px]"
+      />
 
       <div className="relative z-10 flex w-full max-w-2xl flex-col items-center text-center">
         <Hero404 title={t("title")} description={t("desc")} />
@@ -72,12 +80,15 @@ export default async function NotFound() {
         )}
 
         <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
-          <Link href="/" className="btn gap-2">
-            <Home className="h-4 w-4" />
+          <Link
+            href="/"
+            className="btn-primary shine-on-hover group gap-2"
+          >
+            <Home className="h-4 w-4" aria-hidden="true" />
             {t("back")}
           </Link>
           <Link href="/port-checker" className="btn-ghost gap-2">
-            <Compass className="h-4 w-4" />
+            <Compass className="h-4 w-4" aria-hidden="true" />
             {t("explore_tools")}
           </Link>
         </div>

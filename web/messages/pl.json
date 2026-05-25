@@ -11,6 +11,7 @@
     "open_menu": "Otwórz menu",
     "close_menu": "Zamknij menu",
     "skip_to_content": "Przejdź do treści głównej",
+    "primary_nav_label": "Nawigacja główna",
     "tools_menu": "Narzędzia",
     "cat_dns": "DNS i domena",
     "cat_network": "Sieć",
@@ -52,7 +53,14 @@
       "mixed": "Mixed",
       "jwt": "JWT",
       "pwd": "Hasło"
-    }
+    },
+    "open_search": "Otwórz wyszukiwarkę",
+    "search_tools": "Szukaj narzędzi",
+    "search_placeholder": "Szukaj narzędzi…",
+    "search_empty": "Brak pasujących narzędzi.",
+    "search_navigate": "Nawiguj",
+    "search_open": "Otwórz",
+    "search_close": "Zamknij"
   },
   "auth": {
     "meta_title": "Zaloguj się",
@@ -68,7 +76,41 @@
     "subtitle": "Sprawdzanie portów, analiza IP, DNS, WHOIS, inspekcja SSL i monitoring dostępności — jedna szybka platforma — zacznij za darmo.",
     "cta_tools": "Wypróbuj narzędzia",
     "tools_heading": "Wszystkie narzędzia sieciowe",
-    "tools_count": "{count} narzędzi · z darmowym planem"
+    "tools_count": "{count} narzędzi · z darmowym planem",
+    "hero_tag": "Nowoczesny UI",
+    "cta_dashboard": "Otwórz panel",
+    "stat_tools": "Narzędzia",
+    "stat_langs": "Języki",
+    "stat_price": "Darmowy plan",
+    "cat_dns_title": "DNS i domena",
+    "cat_dns_caption": "Rozwiązywanie, propagacja, bezpieczeństwo.",
+    "cat_network_title": "Sieć",
+    "cat_network_caption": "Porty, IP, routing, dostępność.",
+    "cat_security_title": "Bezpieczeństwo",
+    "cat_security_caption": "TLS, czarne listy, sekrety, wycieki.",
+    "cat_email_title": "E-mail",
+    "cat_email_caption": "Dostarczalność i uwierzytelnianie.",
+    "cat_web_title": "Web",
+    "cat_web_caption": "Nagłówki, stack, treść, metadane.",
+    "features": {
+      "title": "Stworzone dla inżynierów, gotowe dla wszystkich",
+      "subtitle": "Szybkie i prywatne narzędzia sieciowe w przeglądarce.",
+      "speed_title": "Stworzone dla szybkości",
+      "speed_body": "Sondy edge — odpowiedzi w milisekundach.",
+      "privacy_title": "Prywatność przede wszystkim",
+      "privacy_body": "Brak pikseli śledzących. Twoje zapytania są prywatne.",
+      "global_title": "Zasięg globalny",
+      "global_body": "Sondy z wielu regionów dla realnego obrazu sieci.",
+      "api_title": "API-ready",
+      "api_body": "Każde narzędzie ma udokumentowany endpoint REST."
+    },
+    "cta": {
+      "eyebrow": "Gotowy?",
+      "title": "Wszystkie narzędzia na jednym panelu.",
+      "subtitle": "Ulubione, alerty uptime, błyskawiczne udostępnianie.",
+      "primary": "Otwórz panel",
+      "secondary": "Zobacz status"
+    }
   },
   "tools": {
     "port-checker": {
@@ -369,6 +411,8 @@
   "footer": {
     "tagline": "Profesjonalna diagnostyka sieci.",
     "status": "Status",
+    "security_policy": "Bezpieczeństwo",
+    "aria_label": "Stopka",
     "copyright": "© {year} Traceronix."
   },
   "guard": {
@@ -411,7 +455,9 @@
     "yes": "tak",
     "no": "nie",
     "error_title": "Coś poszło nie tak",
-    "retry": "Spróbuj ponownie"
+    "retry": "Spróbuj ponownie",
+    "back_home": "Powrót do strony głównej",
+    "back_to_top": "Do góry"
   },
   "not_found": {
     "code": "404",

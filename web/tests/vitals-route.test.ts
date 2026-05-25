@@ -132,4 +132,37 @@ describe("GET /api/vitals", () => {
     expect(res.status).toBe(405);
     expect((await res.json()).error).toBe("use_POST");
   });
+
+  it("returns 405 with an Allow header naming POST", () => {
+    const res = GET();
+    expect(res.headers.get("allow")).toMatch(/POST/);
+  });
+});
+
+describe("/api/vitals cache headers", () => {
+  it("emits Cache-Control: no-store on a successful POST", async () => {
+    const res = await POST(makeReq({ entries: [{ name: "LCP", value: 1 }] }));
+    expect(res.headers.get("cache-control")).toMatch(/no-store/i);
+  });
+
+  it("emits Cache-Control: no-store on a 413 (oversize body)", async () => {
+    const big = { entries: [{ name: "LCP", value: 1, page: "x".repeat(9000) }] };
+    const res = await POST(makeReq(big));
+    expect(res.status).toBe(413);
+    expect(res.headers.get("cache-control")).toMatch(/no-store/i);
+  });
+
+  it("emits Cache-Control: no-store on a 400 (malformed body)", async () => {
+    const req = new Request("http://localhost/api/vitals", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{not json",
+    });
+    const res = await POST(req);
+    expect(res.headers.get("cache-control")).toMatch(/no-store/i);
+  });
+
+  it("emits Cache-Control: no-store on a GET 405", () => {
+    expect(GET().headers.get("cache-control")).toMatch(/no-store/i);
+  });
 });
