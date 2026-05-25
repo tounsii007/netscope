@@ -9,6 +9,14 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Override the default 1000/min anonymous limit from application-test.yml
+ * down to 5 so a short burst actually trips the limiter. This works now
+ * because IntegrationTestBase no longer pins the property via
+ * @DynamicPropertySource — dynamic sources beat @TestPropertySource in
+ * Spring's environment, and the parent's override had been silently
+ * shadowing this value before.
+ */
 @TestPropertySource(properties = "netscope.rate-limit.anonymous-per-minute=5")
 class RateLimitIT extends IntegrationTestBase {
 

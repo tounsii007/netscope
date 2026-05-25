@@ -16,7 +16,12 @@ test.describe("Landing and navigation", () => {
       }}));
     await page.goto("/port-checker");
     await page.getByRole("button", { name: /Check/i }).click();
-    await expect(page.getByText("OPEN")).toBeVisible();
+    // `exact: true` scopes the match to the highlighted result span
+    // ("OPEN" on its own) and excludes the ancestor div whose visible
+    // text is "Port 443 is OPEN" — without exact mode Playwright's
+    // strict locator API counts both as hits and fails with a
+    // strict-mode violation.
+    await expect(page.getByText("OPEN", { exact: true })).toBeVisible();
   });
 
   test("404 page renders", async ({ page }) => {

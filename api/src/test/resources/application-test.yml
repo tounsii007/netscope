@@ -7,12 +7,26 @@ spring:
 
 netscope:
   cors:
-    allowed-origins: "*"
+    # CorsConfig rejects '*' (audit/F87 — no wildcard origins). Use an
+    # explicit localhost so integration tests can boot the security
+    # filter chain without tripping the wildcard validator.
+    allowed-origins: http://localhost:3000
   rate-limit:
     anonymous-per-minute: 1000
     authenticated-per-minute: 10000
   tor:
     exit-list-url: http://localhost:0/none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose every actuator endpoint in the test profile so the
+        # SecurityHeadersIT.sensitiveActuatorEndpointsDenied test can
+        # actually reach env / heapdump / mappings and observe Spring
+        # Security returning 401. Production stays with the
+        # health,prometheus allow-list in main/application.yml.
+        include: "*"
 
 logging:
   level:
