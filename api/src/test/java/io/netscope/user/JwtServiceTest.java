@@ -103,11 +103,27 @@ class JwtServiceTest {
     /* ─── invalid tokens ─────────────────────────────────────────────────── */
 
     @Test void parse_returnsNullForExpiredToken() {
-        ReflectionTestUtils.setField(svc, "ttlSeconds", -10L);  // already expired
+        // -120 (not -10) so the offset falls clearly outside the
+        // JwtService.CLOCK_SKEW_SECONDS (30s) tolerance window. The
+        // previous -10 offset would now be treated as "still valid via
+        // skew" and the test would never trip the expiry branch.
+        ReflectionTestUtils.setField(svc, "ttlSeconds", -120L);
         svc.init();
 
         String tok = svc.issue(UUID.randomUUID(), "x@y", Map.of());
         assertThat(svc.parse(tok)).isNull();
+    }
+
+    @Test void parse_acceptsTokenWithinClockSkewWindow() {
+        // Lock in the new 30-second tolerance. A token whose exp is 10
+        // seconds in the past MUST still parse — otherwise NTP drift
+        // between replicas (Fly.io multi-region in particular) would
+        // produce spurious logouts.
+        ReflectionTestUtils.setField(svc, "ttlSeconds", -10L);
+        svc.init();
+
+        String tok = svc.issue(UUID.randomUUID(), "x@y", Map.of());
+        assertThat(svc.parse(tok)).isNotNull();
     }
 
     @Test void parse_returnsNullForTamperedSignature() {
