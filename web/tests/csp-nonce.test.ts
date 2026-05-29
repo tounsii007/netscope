@@ -1,18 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildCspWithNonce, generateNonce } from "@/lib/csp";
 
 // Tests assert the production CSP shape ('strict-dynamic', no 'unsafe-inline').
-// Vitest defaults NODE_ENV to "test" — we explicitly switch to "production"
-// per test so the buildCsp's dev/prod branch evaluates the strict side.
-let savedEnv: string | undefined;
+// Vitest defaults NODE_ENV to "test" — we use vi.stubEnv to switch to
+// "production" per test, which is isolated per worker. Direct mutation
+// of process.env.NODE_ENV would leak into parallel tests when vitest
+// runs with --maxConcurrency > 1.
 beforeEach(() => {
-  savedEnv = process.env.NODE_ENV;
-  // @ts-expect-error NODE_ENV is typed readonly by @types/node; test override is intentional
-  process.env.NODE_ENV = "production";
+  vi.stubEnv("NODE_ENV", "production");
 });
 afterEach(() => {
-  // @ts-expect-error see above
-  process.env.NODE_ENV = savedEnv;
+  vi.unstubAllEnvs();
 });
 
 describe("CSP nonce generator", () => {
@@ -50,8 +48,7 @@ describe("CSP-with-nonce builder", () => {
   });
 
   it("relaxes to 'unsafe-inline' in dev mode (HMR + React devtools need it)", () => {
-    // @ts-expect-error see file-level note
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
     const csp = buildCspWithNonce("dev-nonce");
     expect(csp).toContain("'unsafe-inline'");
     expect(csp).toContain("'unsafe-eval'");
@@ -80,13 +77,11 @@ describe("CSP-with-nonce builder", () => {
   });
 
   it("honours NEXT_PUBLIC_API_URL for connect-src", () => {
-    const origURL = process.env.NEXT_PUBLIC_API_URL;
-    process.env.NEXT_PUBLIC_API_URL = "https://api.staging.example.com";
-    try {
-      const csp = buildCspWithNonce("X");
-      expect(csp).toContain("https://api.staging.example.com");
-    } finally {
-      process.env.NEXT_PUBLIC_API_URL = origURL;
-    }
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.staging.example.com");
+    const csp = buildCspWithNonce("X");
+    expect(csp).toContain("https://api.staging.example.com");
+    // No manual cleanup — vi.unstubAllEnvs() in afterEach restores both
+    // this stub AND the NODE_ENV stub from beforeEach without leaking
+    // between tests.
   });
 });
