@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.ratelimit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.ratelimit;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 

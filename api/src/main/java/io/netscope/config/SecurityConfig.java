@@ -1,7 +1,7 @@
 package io.netscope.config;
 
 import io.netscope.auth.ApiKeyFilter;
-import io.netscope.common.RateLimitFilter;
+import io.netscope.common.ratelimit.RateLimitFilter;
 import io.netscope.common.RequestIdFilter;
 import io.netscope.user.SessionFilter;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.ratelimit;
 
 import jakarta.servlet.http.HttpServletRequest;
 

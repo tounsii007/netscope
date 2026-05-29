@@ -226,7 +226,7 @@
     <appender-ref ref="ASYNC_ERROR"/>
     <appender-ref ref="CONSOLE"/>
   </logger>
-  <logger name="io.netscope.common.RateLimitFilter" level="WARN" additivity="false">
+  <logger name="io.netscope.common.ratelimit.RateLimitFilter" level="WARN" additivity="false">
     <appender-ref ref="SECURITY_FILE"/>
     <appender-ref ref="ASYNC_SERVER"/>
   </logger>
