@@ -170,7 +170,10 @@ public class SecurityConfig {
         "/api/v1/workspaces",
         "/api/v1/api-keys",
         "/api/v1/webhook",
-        "/api/v1/csp-report",
+        // CSP reports land at /api/csp-report on the Next.js frontend
+        // (see next.config.ts → "report-uri /api/csp-report") — there is
+        // no backend route at /api/v1/csp-report. The previous entry
+        // here was dead config.
         "/api/v1/log",
         "/api/v1/vitals",
         "/api/v1/ip/me",     // caller-IP dependent — must not be cached cross-user
