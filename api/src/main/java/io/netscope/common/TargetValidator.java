@@ -82,9 +82,19 @@ public class TargetValidator {
         // IDN.toASCII throws IllegalArgumentException on inputs it can't
         // canonicalise (control chars, oversized labels) — surface that
         // as a 400 instead of leaking the JDK exception.
+        //
+        // Flag = IDN.USE_STD3_ASCII_RULES (NOT ALLOW_UNASSIGNED). RFC 3490
+        // STD3 forbids any character outside [A-Za-z0-9-] in DNS labels
+        // after Punycode encoding, which is exactly the property we want
+        // for SSRF defence: hostnames an attacker controls must reduce to
+        // a canonical ASCII form OR be rejected. The earlier
+        // ALLOW_UNASSIGNED flag was the LESS-secure option — it permits
+        // currently-unassigned Unicode codepoints, exactly the surface
+        // homograph attacks target while the IDNA tables update lags
+        // the Unicode standard.
         if (!isIpLiteral(trimmed)) {
             try {
-                trimmed = IDN.toASCII(trimmed, IDN.ALLOW_UNASSIGNED);
+                trimmed = IDN.toASCII(trimmed, IDN.USE_STD3_ASCII_RULES);
             } catch (IllegalArgumentException e) {
                 throw ApiException.badRequest("invalid hostname (IDN normalisation failed)");
             }
