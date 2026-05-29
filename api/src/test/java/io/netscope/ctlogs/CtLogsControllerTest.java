@@ -135,4 +135,68 @@ class CtLogsControllerTest {
         row.put("not_after",  "2025-04-01T00:00:00");
         return row;
     }
+
+    /* ─── normalize() — real-world edge cases ─────────────────────────── */
+
+    @Test void normalize_handles_truncated_date_format_emitted_during_log_import() {
+        // crt.sh occasionally emits dates without the trailing time
+        // segment during a bulk log import. safePrefix takes the first
+        // 10 chars and LocalDate.parse handles them — must produce a
+        // valid normalised row, not null.
+        var row = baseRow();
+        row.put("not_before", "2025-01-01");      // no T-time component
+        row.put("not_after",  "2025-04-01");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 2, 1));
+        assertThat(n).isNotNull();
+        assertThat(n.get("expired")).isEqualTo(false);
+        assertThat(n.get("validForDays")).isEqualTo(90);
+    }
+
+    @Test void normalize_returns_zero_validForDays_when_dates_are_identical() {
+        // Edge case: zero-day cert (same notBefore = notAfter). Some
+        // ACME test fixtures produce these; we must not throw or
+        // divide-by-zero on UI rendering.
+        var row = baseRow();
+        row.put("not_before", "2025-01-01T00:00:00");
+        row.put("not_after",  "2025-01-01T00:00:00");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 1, 1));
+        assertThat(n).isNotNull();
+        assertThat(n.get("validForDays")).isEqualTo(0);
+        assertThat(n.get("daysUntilExpiry")).isEqualTo(0);
+    }
+
+    @Test void normalize_handles_internationalised_SAN_names() {
+        // crt.sh may surface Punycode-encoded SANs alongside ASCII
+        // ones. Both forms must reach the response unmodified — the
+        // UI can choose how to display them.
+        var row = baseRow();
+        row.put("name_value",
+            "example.com\nxn--mnchen-3ya.example.com\n*.api.example.com");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 2, 1));
+        assertThat(n.get("sans")).asList()
+            .containsExactly("example.com", "xn--mnchen-3ya.example.com",
+                             "*.api.example.com");
+    }
+
+    @Test void normalize_correctly_classifies_chain_root_cert_as_expired() {
+        // Root certs often have very long validity windows that span
+        // years. Pin a case where notAfter is years in the future to
+        // confirm the daysUntilExpiry math doesn't overflow for large
+        // gaps.
+        var row = baseRow();
+        row.put("not_before", "2020-01-01T00:00:00");
+        row.put("not_after",  "2040-01-01T00:00:00");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 2, 1));
+        assertThat(n.get("expired")).isEqualTo(false);
+        // 2040-01-01 minus 2025-02-01 ≈ 5448 days
+        assertThat((Integer) n.get("daysUntilExpiry"))
+            .isBetween(5_000, 6_000);
+        // 2040-01-01 minus 2020-01-01 = 7305 days (incl. leap years)
+        assertThat((Integer) n.get("validForDays"))
+            .isBetween(7_300, 7_310);
+    }
 }

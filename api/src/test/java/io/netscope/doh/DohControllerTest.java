@@ -39,4 +39,23 @@ class DohControllerTest {
         assertThatThrownBy(() -> ctrl.probe("example.com", "A; DROP"))
             .isInstanceOf(ApiException.class);
     }
+
+    /* ─── input-normalisation edges ──────────────────────────────────── */
+
+    @Test void rejects_domain_longer_than_label_cap() {
+        // 254 chars violates DNS spec and most upstream resolvers will
+        // refuse the query — reject early. Uses the .invalid TLD so
+        // there's no path to actual DNS even if validation regressed.
+        String tooLong = "a".repeat(254) + ".invalid";
+        assertThatThrownBy(() -> ctrl.probe(tooLong, "A"))
+            .isInstanceOf(ApiException.class);
+    }
+
+    @Test void rejects_double_dot_in_domain() {
+        // Double-dot in DNS query names is invalid per RFC 1035 (zero-
+        // length label) — the regex must reject it before reaching
+        // the parallel probe.
+        assertThatThrownBy(() -> ctrl.probe("foo..example.invalid", "A"))
+            .isInstanceOf(ApiException.class);
+    }
 }

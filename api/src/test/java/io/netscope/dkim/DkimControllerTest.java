@@ -180,4 +180,54 @@ class DkimControllerTest {
         var info = DkimController.decodeKey(spaced.toString(), "rsa");
         assertThat(info.bits()).isEqualTo(2048);
     }
+
+    /* ─── parsing-edge cases: oversized records, mixed casing, mid-rotation ───── */
+
+    @Test void parseTags_handles_record_with_tags_in_unusual_order() {
+        // RFC 6376 doesn't mandate tag order. Records emitted by some
+        // signing infrastructures put p= before v= even though the
+        // canonical example shows v= first. Both must parse cleanly.
+        var tags = DkimController.parseTags("p=ABC; k=rsa; v=DKIM1");
+        assertThat(tags)
+            .containsEntry("p", "ABC")
+            .containsEntry("k", "rsa")
+            .containsEntry("v", "DKIM1");
+    }
+
+    @Test void parseTags_tolerates_extra_whitespace_between_segments() {
+        // crt-style providers re-quote and re-space TXT chunks
+        // aggressively. The parser must not drop tags when spacing
+        // varies between separators.
+        var tags = DkimController.parseTags("  v=DKIM1  ;  k=rsa  ;  p=DEF  ;  ");
+        assertThat(tags)
+            .containsEntry("v", "DKIM1")
+            .containsEntry("k", "rsa")
+            .containsEntry("p", "DEF");
+    }
+
+    @Test void parseHashAlgs_handles_only_sha512_declared() {
+        // A few high-volume senders declare sha512 only. Spec-compliant
+        // verifiers must still attempt verification with that algorithm,
+        // so the parser MUST surface it accurately.
+        assertThat(DkimController.parseHashAlgs("sha512")).containsExactly("sha512");
+    }
+
+    @Test void parseHashAlgs_drops_empty_segments_from_malformed_colon_lists() {
+        // Defensive: a stray double-colon shouldn't surface as an empty
+        // algorithm name.
+        assertThat(DkimController.parseHashAlgs("sha256::sha512")).containsExactly("sha256", "sha512");
+    }
+
+    @Test void decodeKey_round_trips_4096_bit_rsa_key() throws Exception {
+        // Real-world senders increasingly publish 4096-bit keys.
+        // Confirm we report the bit length accurately for that case
+        // (no truncation, no overflow).
+        java.security.KeyPairGenerator kpg = java.security.KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(4096);
+        java.security.KeyPair kp = kpg.generateKeyPair();
+        String b64 = java.util.Base64.getEncoder().encodeToString(kp.getPublic().getEncoded());
+
+        var info = DkimController.decodeKey(b64, "rsa");
+        assertThat(info.bits()).isEqualTo(4096);
+    }
 }
