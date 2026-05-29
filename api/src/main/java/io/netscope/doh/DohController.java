@@ -1,8 +1,8 @@
 package io.netscope.doh;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.DomainNormaliser;
-import io.netscope.common.ToolMetrics;
+import io.netscope.common.observability.ToolMetrics;
 import io.netscope.doh.DohResolverDirectory.ResolverSpec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;

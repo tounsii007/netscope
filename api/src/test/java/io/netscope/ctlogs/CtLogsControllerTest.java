@@ -1,6 +1,6 @@
 package io.netscope.ctlogs;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CtLogsControllerTest {
 
     private final CtLogsController ctrl = new CtLogsController(
-        new io.netscope.common.ToolMetrics(
+        new io.netscope.common.observability.ToolMetrics(
             new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_empty_domain() {

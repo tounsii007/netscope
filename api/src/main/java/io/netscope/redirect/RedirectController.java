@@ -1,6 +1,6 @@
 package io.netscope.redirect;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.TargetValidator;
 import org.springframework.web.bind.annotation.*;
 

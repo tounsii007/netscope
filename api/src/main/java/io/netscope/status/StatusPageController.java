@@ -1,6 +1,6 @@
 package io.netscope.status;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.monitor.MonitorCheckRepository;
 import io.netscope.monitor.MonitorRepository;
 import io.netscope.workspace.WorkspaceMember;

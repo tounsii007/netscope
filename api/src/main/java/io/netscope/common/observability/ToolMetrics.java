@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.observability;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;

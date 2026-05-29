@@ -1,6 +1,6 @@
 package io.netscope.ssl;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.ResponseCache;
 import io.netscope.common.security.TargetValidator;
 import org.slf4j.Logger;

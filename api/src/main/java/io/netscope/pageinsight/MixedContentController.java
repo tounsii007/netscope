@@ -1,6 +1,6 @@
 package io.netscope.pageinsight;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.http.HttpUrlNormaliser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

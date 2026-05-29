@@ -1,6 +1,6 @@
 package io.netscope.ip;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

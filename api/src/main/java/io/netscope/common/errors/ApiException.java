@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.errors;
 
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;

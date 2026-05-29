@@ -1,6 +1,6 @@
 package io.netscope.dkim;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +22,7 @@ class DkimControllerTest {
     private final DkimController ctrl =
         new DkimController(
             java.util.concurrent.Executors.newSingleThreadExecutor(),
-            new io.netscope.common.ToolMetrics(
+            new io.netscope.common.observability.ToolMetrics(
                 new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_empty_domain() {

@@ -1,7 +1,7 @@
 package io.netscope.webhook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.TargetValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

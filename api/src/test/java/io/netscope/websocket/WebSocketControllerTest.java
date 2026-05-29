@@ -1,6 +1,6 @@
 package io.netscope.websocket;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.TargetValidator;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +10,7 @@ class WebSocketControllerTest {
 
     private final WebSocketController ctrl =
         new WebSocketController(new TargetValidator(),
-            new io.netscope.common.ToolMetrics(
+            new io.netscope.common.observability.ToolMetrics(
                 new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_http_scheme() {

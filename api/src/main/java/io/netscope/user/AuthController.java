@@ -2,7 +2,7 @@ package io.netscope.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.workspace.Workspace;
 import io.netscope.workspace.WorkspaceService;
 import jakarta.validation.constraints.NotBlank;

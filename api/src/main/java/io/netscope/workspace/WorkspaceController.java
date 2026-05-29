@@ -1,6 +1,6 @@
 package io.netscope.workspace;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.user.SessionContext;
 import io.netscope.user.UserRepository;
 import jakarta.validation.Valid;

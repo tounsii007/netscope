@@ -1,6 +1,6 @@
 package io.netscope.headers;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.http.HttpUrlNormaliser;
 import io.netscope.common.http.SafeHttpClient;
 import org.slf4j.Logger;

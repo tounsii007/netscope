@@ -2,9 +2,9 @@ package io.netscope.ctlogs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.DomainNormaliser;
-import io.netscope.common.ToolMetrics;
+import io.netscope.common.observability.ToolMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;

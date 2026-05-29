@@ -7,7 +7,7 @@ import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.user.SessionContext;
 import io.netscope.user.UserRepository;
 import io.netscope.workspace.Workspace;

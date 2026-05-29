@@ -1,8 +1,8 @@
 package io.netscope.websocket;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.TargetValidator;
-import io.netscope.common.ToolMetrics;
+import io.netscope.common.observability.ToolMetrics;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;

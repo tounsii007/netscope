@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.errors;
 
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;

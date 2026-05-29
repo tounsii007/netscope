@@ -1,6 +1,6 @@
 package io.netscope.email;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.BoundedDns;
 import io.netscope.common.security.TargetValidator;
 import jakarta.validation.Valid;

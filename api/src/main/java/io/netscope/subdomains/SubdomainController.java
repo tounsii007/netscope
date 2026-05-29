@@ -3,7 +3,7 @@ package io.netscope.subdomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.security.DomainNormaliser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

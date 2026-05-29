@@ -1,6 +1,6 @@
 package io.netscope.ip;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

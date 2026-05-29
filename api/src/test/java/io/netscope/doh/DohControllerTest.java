@@ -1,6 +1,6 @@
 package io.netscope.doh;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,7 +12,7 @@ class DohControllerTest {
     private final DohController ctrl =
         new DohController(
             java.util.concurrent.Executors.newSingleThreadExecutor(),
-            new io.netscope.common.ToolMetrics(
+            new io.netscope.common.observability.ToolMetrics(
                 new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_empty_domain() {
