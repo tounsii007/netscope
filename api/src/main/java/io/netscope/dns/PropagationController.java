@@ -1,6 +1,7 @@
 package io.netscope.dns;
 
 import io.netscope.common.ApiException;
+import io.netscope.common.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -42,7 +43,10 @@ public class PropagationController {
     public Map<String, Object> check(
             @PathVariable String domain,
             @RequestParam(defaultValue = "A") String type) {
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) throw ApiException.badRequest("invalid domain");
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+            throw ApiException.badRequest("invalid domain");
+        }
         Integer recordType = switch (type.toUpperCase()) {
             case "A" -> Type.A; case "AAAA" -> Type.AAAA; case "MX" -> Type.MX;
             case "TXT" -> Type.TXT; case "NS" -> Type.NS; case "CNAME" -> Type.CNAME;

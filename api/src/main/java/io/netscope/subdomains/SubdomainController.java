@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.netscope.common.ApiException;
+import io.netscope.common.DomainNormaliser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -79,7 +80,8 @@ public class SubdomainController {
     public Map<String, Object> find(@PathVariable String domain) {
         log.info("[crtsh] >>> find() entry domain='{}'", domain);
 
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
             log.warn("[crtsh] invalid domain rejected: '{}'", domain);
             throw ApiException.badRequest("invalid domain");
         }

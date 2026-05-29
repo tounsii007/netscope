@@ -2,6 +2,7 @@ package io.netscope.dns;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -53,12 +54,16 @@ public class DnsController {
             @RequestParam(defaultValue = "false") boolean includeRrsig,
             @RequestParam(defaultValue = "false") boolean dnssecSummary) {
 
+        // IDN canonicalisation BEFORE the local ASCII regex. Lets queries
+        // for münchen.de etc. resolve via xn--mnchen-3ya.de rather than
+        // hitting a 400.
+        domain = DomainNormaliser.toAscii(domain);
         // Underscore is allowed because DKIM selectors (selector1._domainkey.example.com),
         // DMARC (_dmarc.example.com), ACME HTTP-01 (_acme-challenge.example.com),
         // SRV records (_sip._tcp.example.com), and DNSSEC DS lookups all use
         // underscore-prefixed labels. RFC 1035 forbids underscore in *hostnames*,
         // but DNS query names are a strictly larger set.
-        if (!domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
+        if (domain == null || !domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 

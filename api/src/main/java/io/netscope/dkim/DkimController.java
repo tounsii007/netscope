@@ -2,6 +2,7 @@ package io.netscope.dkim;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -55,7 +56,12 @@ public class DkimController {
             @PathVariable String domain,
             @RequestParam(required = false) String selector) {
 
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        // Canonicalise IDN / Unicode hostnames to ACE form BEFORE the
+        // local ASCII regex fires. Without this, münchen.de hits a 400
+        // even though the rest of the SSRF chain already handles IDN
+        // correctly via TargetValidator.
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
         if (selector != null && !selector.matches("^[a-zA-Z0-9._-]{1,63}$")) {

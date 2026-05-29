@@ -2,6 +2,7 @@ package io.netscope.doh;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -60,7 +61,10 @@ public class DohController {
             @PathVariable String domain,
             @RequestParam(defaultValue = "A") String type) {
 
-        if (!domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
+        // IDN canonicalisation before the ASCII regex. See
+        // DomainNormaliser for the strictness policy.
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
         int recordType = parseType(type);

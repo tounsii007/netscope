@@ -92,7 +92,15 @@ public class TargetValidator {
         // currently-unassigned Unicode codepoints, exactly the surface
         // homograph attacks target while the IDNA tables update lags
         // the Unicode standard.
-        if (!isIpLiteral(trimmed)) {
+        //
+        // ASCII-only fast path: HOST_PATTERN explicitly allows underscore
+        // in labels (set by external SaaS DNS configs we sometimes have
+        // to reach), but STD3 forbids it. Running an ASCII underscore
+        // host through IDN.toASCII would 400 it here even though the
+        // downstream regex accepts it. Short-circuiting for pure-ASCII
+        // inputs preserves that behaviour while keeping the strict
+        // canonicalisation for any input that actually carries Unicode.
+        if (!isIpLiteral(trimmed) && !isPureAscii(trimmed)) {
             try {
                 trimmed = IDN.toASCII(trimmed, IDN.USE_STD3_ASCII_RULES);
             } catch (IllegalArgumentException e) {
@@ -160,5 +168,14 @@ public class TargetValidator {
 
     private boolean isIpLiteral(String s) {
         return s.matches("^[0-9a-fA-F:.]+$");
+    }
+
+    /** True iff every codepoint is ASCII (≤ 0x7F). Cheap fast path so
+     *  underscored ASCII hostnames don't trip the IDN STD3 check. */
+    private static boolean isPureAscii(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) > 0x7F) return false;
+        }
+        return true;
     }
 }

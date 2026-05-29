@@ -3,6 +3,7 @@ package io.netscope.ctlogs;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netscope.common.ApiException;
+import io.netscope.common.DomainNormaliser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,12 @@ public class CtLogsController {
             @RequestParam(defaultValue = "true") boolean includeSubdomains,
             @RequestParam(defaultValue = "false") boolean excludeExpired) {
 
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        // IDN canonicalisation BEFORE the local ASCII regex check so
+        // münchen.de et al reach crt.sh as xn--mnchen-3ya.de rather than
+        // being rejected outright. See DomainNormaliser for the policy
+        // rationale (USE_STD3_ASCII_RULES).
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 
