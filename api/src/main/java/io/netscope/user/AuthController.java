@@ -29,14 +29,27 @@ public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
+    /**
+     * Exchange request. {@code accessToken} is REQUIRED for the legacy
+     * userinfo-round-trip path. {@code idToken} is OPTIONAL and, when
+     * present (Google only — GitHub doesn't issue OIDC id_tokens),
+     * triggers the verified-signature path which skips the userinfo
+     * call entirely and trusts the cryptographically-verified claims.
+     *
+     * Prefer sending {@code idToken} from the frontend when available
+     * — it eliminates one network round-trip per login + removes the
+     * trust-anchor dependency on the TLS chain to userinfo.googleapis.com.
+     */
     public record ExchangeRequest(
         @NotBlank @Pattern(regexp = "github|google") String provider,
-        @NotBlank String accessToken
+        @NotBlank String accessToken,
+        String idToken
     ) {}
 
     private final UserRepository users;
     private final JwtService jwt;
     private final WorkspaceService workspaces;
+    private final OidcIdTokenVerifier oidc;
     private final RestClient rest = RestClient.create();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -47,18 +60,30 @@ public class AuthController {
     @Value("${netscope.oauth.google.userinfo:https://openidconnect.googleapis.com/v1/userinfo}")
     private String googleUserinfo;
 
-    public AuthController(UserRepository users, JwtService jwt, WorkspaceService workspaces) {
+    public AuthController(UserRepository users, JwtService jwt,
+                          WorkspaceService workspaces, OidcIdTokenVerifier oidc) {
         this.users = users; this.jwt = jwt; this.workspaces = workspaces;
+        this.oidc = oidc;
     }
 
     @PostMapping("/exchange")
     @Transactional
     public Map<String, Object> exchange(@org.springframework.web.bind.annotation.RequestBody ExchangeRequest req) {
-        OauthUser oauth = switch (req.provider()) {
-            case "github" -> fetchGithub(req.accessToken());
-            case "google" -> fetchGoogle(req.accessToken());
-            default -> throw ApiException.badRequest("unsupported provider");
-        };
+        OauthUser oauth;
+        // Preferred path: a verified OIDC id_token. Cryptographically
+        // proves the token came from the issuer (Google) without
+        // depending on a userinfo round-trip. Skipped for github since
+        // GitHub doesn't issue OIDC id_tokens at all.
+        if ("google".equals(req.provider())
+            && req.idToken() != null && !req.idToken().isBlank()) {
+            oauth = fetchGoogleFromIdToken(req.idToken());
+        } else {
+            oauth = switch (req.provider()) {
+                case "github" -> fetchGithub(req.accessToken());
+                case "google" -> fetchGoogle(req.accessToken());
+                default -> throw ApiException.badRequest("unsupported provider");
+            };
+        }
 
         User user = users.findByOauthProviderAndOauthSubject(req.provider(), oauth.subject())
             .orElseGet(() -> {
@@ -136,6 +161,35 @@ public class AuthController {
                 j.path("picture").asText(null),
                 j.path("email_verified").asBoolean(false));
         } catch (Exception e) { throw ApiException.sanitizedFailure(log, "Google userinfo failed", e); }
+    }
+
+    /**
+     * Extract OauthUser directly from a signature-verified Google id_token.
+     * No network call — the signature check + claim validation happens
+     * locally against a cached JWKS. Throws {@link ApiException} (400)
+     * on any verification failure, which the global handler surfaces
+     * with a correlation ID.
+     */
+    private OauthUser fetchGoogleFromIdToken(String idToken) {
+        try {
+            com.nimbusds.jwt.JWTClaimsSet claims = oidc.verify("google", idToken);
+            String sub = claims.getSubject();
+            String email = claims.getStringClaim("email");
+            if (sub == null || email == null) {
+                throw ApiException.badRequest("id_token missing sub or email claim");
+            }
+            String name = claims.getStringClaim("name");
+            String picture = claims.getStringClaim("picture");
+            Boolean verified = claims.getBooleanClaim("email_verified");
+            return new OauthUser(sub, email, name, picture,
+                Boolean.TRUE.equals(verified));
+        } catch (ApiException e) { throw e; }
+        catch (Exception e) {
+            // Verification failures are SECURITY-RELEVANT — surface
+            // them with the correlation ID pattern but keep the public
+            // message free of crypto-library internals.
+            throw ApiException.sanitizedFailure(log, "id_token verification failed", e);
+        }
     }
 
     @GetMapping("/me")
