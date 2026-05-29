@@ -25,13 +25,30 @@ const config: NextConfig = {
   async headers() {
     // Content-Security-Policy notes:
     //
-    //   This static CSP is the FALLBACK for routes that bypass the
-    //   middleware matcher — primarily static assets under /_next/
-    //   and /public/. For every HTML route the middleware sets a
-    //   stronger per-request CSP with `'nonce-<value>'` instead of
-    //   the `'unsafe-inline'` allowance below (see lib/csp.ts +
-    //   middleware.ts). Static assets don't render user input, so
-    //   the relaxed CSP on that path is benign.
+    //   Browsers ENFORCE the CSP of the HTML document — not the CSP of
+    //   the individual subresource responses. So this static CSP would
+    //   never actually constrain a script load if the rendered HTML
+    //   already carries a CSP header (which it does, from middleware.ts
+    //   with the per-request nonce).
+    //
+    //   What this entry STILL achieves:
+    //
+    //     1. Non-HTML routes that bypass the middleware matcher (the
+    //        static-asset prefix, error pages served before
+    //        middleware runs, the maintenance/503 page) get a CSP
+    //        header so external scanners + automated header-grade
+    //        tools report a non-empty policy. Without this entry the
+    //        site grades down on "missing CSP" even though the user-
+    //        visible HTML enforcement is tight.
+    //     2. Defence-in-depth: if a future bug makes the middleware
+    //        skip a request (matcher regression, edge runtime error,
+    //        Next.js update), the static CSP is the safety net that
+    //        still rejects the worst category of attack — inline
+    //        scripts from third-party origins — even though
+    //        'unsafe-inline' for our OWN content is permitted here.
+    //
+    //   It does NOT replace the dynamic CSP for HTML — that policy is
+    //   stricter (no 'unsafe-inline'). See lib/csp.ts + middleware.ts.
     //
     //   What we keep here:
     //
