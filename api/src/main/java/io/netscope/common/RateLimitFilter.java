@@ -80,7 +80,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // and clients use this for X-RateLimit-Reset to schedule retry
         // without sticking to a polled "Retry-After: 60" countdown.
         long resetEpochSec = (windowStart + 1L) * 60L;
-        String redisKey = "rl:" + identity + ":" + windowStart;
 
         // ─── Auth-endpoint tier (anti-credential-stuffing) ────────────
         // Anonymous calls to /api/v1/auth/** are extra-budgeted: they
@@ -90,20 +89,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // proven its identity.
         boolean isAuthEndpoint = apiKey == null && path.startsWith("/api/v1/auth/");
         if (isAuthEndpoint) {
-            String authKey = "rl:auth:" + clientIp(req) + ":" + windowStart;
-            Long authCount;
+            String prefix = "rl:auth:" + clientIp(req);
+            SlidingWindowResult sw;
             try {
-                authCount = redis.opsForValue().increment(authKey);
-                if (authCount != null && authCount == 1L) {
-                    redis.expire(authKey, Duration.ofSeconds(70));
-                }
+                sw = slidingWindowCheck(prefix, windowStart, nowMs, authEndpointPerMinute);
             } catch (Exception e) {
                 // fail-open: if Redis is down we never block auth — a
                 // wedged Redis must not lock people out of their account
                 chain.doFilter(req, res);
                 return;
             }
-            if (authCount != null && authCount > authEndpointPerMinute) {
+            if (sw.exceeded) {
                 writeTooManyRequests(res, authEndpointPerMinute, resetEpochSec,
                     "auth endpoint rate limit exceeded");
                 return;
@@ -111,17 +107,15 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         // ─── Global tier ──────────────────────────────────────────────
-        Long count;
+        SlidingWindowResult sw;
         try {
-            count = redis.opsForValue().increment(redisKey);
-            if (count != null && count == 1L) {
-                redis.expire(redisKey, Duration.ofSeconds(70));
-            }
+            sw = slidingWindowCheck("rl:" + identity, windowStart, nowMs, limit);
         } catch (Exception e) {
             // fail-open: if Redis is down we allow the request rather than 500 everyone
             chain.doFilter(req, res);
             return;
         }
+        Long count = sw.effectiveCount;
 
         long remaining = Math.max(0, limit - (count == null ? 0 : count));
         res.setHeader("X-RateLimit-Limit", String.valueOf(limit));
@@ -134,6 +128,56 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
         chain.doFilter(req, res);
     }
+
+    /**
+     * Weighted sliding-window check (the "Cloudflare rate limiter"
+     * algorithm). For a 1-minute window and current position 't' inside
+     * the current minute:
+     *
+     *   effective = current_count + previous_count * (1 - t / 60_000)
+     *
+     * This converges to the true sliding-window count as t → 0 and
+     * matches the fixed-window count at t → 60_000. Compared with the
+     * raw fixed-window approach, it costs ONE extra Redis GET per
+     * request and removes the classic 2× burst at minute boundaries.
+     *
+     * Both the current-minute and previous-minute counters carry a 70-
+     * second TTL so the previous-minute key is available for the full
+     * 60-second weight calculation plus a little buffer.
+     *
+     * Returns a {@link SlidingWindowResult} carrying the effective
+     * count (rounded up) and whether it exceeded {@code limit}. Throws
+     * any underlying Redis exception so the caller can fail-open.
+     */
+    SlidingWindowResult slidingWindowCheck(
+            String keyPrefix, long windowStart, long nowMs, int limit) {
+        String currentKey  = keyPrefix + ":" + windowStart;
+        String previousKey = keyPrefix + ":" + (windowStart - 1);
+
+        Long currentCount = redis.opsForValue().increment(currentKey);
+        if (currentCount != null && currentCount == 1L) {
+            redis.expire(currentKey, Duration.ofSeconds(70));
+        }
+        // The previous-minute counter is read-only here — it stays whatever
+        // value INCR left it at last minute. The 70-second TTL we set when
+        // it was incremented keeps it alive for the full sliding window.
+        String prevRaw = redis.opsForValue().get(previousKey);
+        long previousCount = 0;
+        if (prevRaw != null) {
+            try { previousCount = Long.parseLong(prevRaw); } catch (NumberFormatException ignored) {}
+        }
+
+        // Position within the current minute, 0..1.
+        double positionInWindow = (nowMs % 60_000L) / 60_000.0;
+        double weighted = (currentCount == null ? 0 : currentCount.doubleValue())
+            + previousCount * (1.0 - positionInWindow);
+        long effective = (long) Math.ceil(weighted);
+
+        return new SlidingWindowResult(effective, effective > limit);
+    }
+
+    /** Pair of values returned by the sliding-window check. */
+    record SlidingWindowResult(Long effectiveCount, boolean exceeded) {}
 
     /**
      * Centralised 429 emitter so both tiers respond consistently:
