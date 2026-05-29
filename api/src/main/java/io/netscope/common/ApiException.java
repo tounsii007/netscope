@@ -3,7 +3,8 @@ package io.netscope.common;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
-import java.util.UUID;
+import java.util.HexFormat;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ApiException extends RuntimeException {
     private final HttpStatus status;
@@ -44,9 +45,27 @@ public class ApiException extends RuntimeException {
      * </pre>
      */
     public static ApiException sanitizedFailure(Logger log, String publicMessage, Throwable cause) {
-        String correlationId = UUID.randomUUID().toString();
+        // ThreadLocalRandom-backed correlation ID instead of UUID.randomUUID().
+        // UUID.randomUUID uses SecureRandom which on Linux can block when the
+        // entropy pool is starved (cold-start of a fresh container) — exactly
+        // the moment an error storm is most likely to be in flight, so the
+        // very pattern that needs to surface IDs quickly was the one that
+        // could pin its thread. Correlation IDs are NOT a security-relevant
+        // primitive (no authority is granted by knowing one); 128 bits from
+        // ThreadLocalRandom is the same collision-resistance space at zero
+        // blocking cost.
+        String correlationId = newCorrelationId();
         log.error("[{}] {}", correlationId, publicMessage, cause);
         return new ApiException(HttpStatus.BAD_REQUEST,
             publicMessage + " (ref: " + correlationId + ")");
+    }
+
+    /** 128-bit random ID, hex-encoded, suitable for log correlation but
+     *  not for token/secret generation. Non-blocking. Package-private so
+     *  the unit test can pin the format invariant. */
+    static String newCorrelationId() {
+        byte[] bytes = new byte[16];
+        ThreadLocalRandom.current().nextBytes(bytes);
+        return HexFormat.of().formatHex(bytes);
     }
 }
