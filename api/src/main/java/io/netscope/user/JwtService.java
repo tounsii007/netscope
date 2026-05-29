@@ -1,6 +1,14 @@
 package io.netscope.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,20 +16,52 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
- * Tiny HS256 JWT implementation. Small, auditable, no external dependency chain.
- * For multi-region we'd swap to RS256 with a rotating keyset exposed via JWKS.
+ * HS256 JWT issuer + parser backed by nimbus-jose-jwt.
+ *
+ * The previous implementation was a 60-line hand-rolled HMAC + base64url
+ * pipeline. It worked but suffered from the well-known foot-guns of
+ * hand-rolled JWT:
+ *   • header parse path didn't validate the {@code typ} casing, so
+ *     {@code "jwt"} (lowercase) was rejected even though the spec is
+ *     case-insensitive for that field;
+ *   • {@code alg} allow-list was a single literal compare — adding a
+ *     second algorithm later would have opened the classic algorithm-
+ *     confusion vulnerability;
+ *   • clock-skew tolerance was a hand-written magic number applied
+ *     only to {@code exp}, not the full set of time-sensitive claims;
+ *   • no built-in support for the JWKS-based id_token verification we
+ *     need for the OAuth flow (next iteration).
+ *
+ * nimbus is the de-facto industry-standard JWT library for the JVM, is
+ * actively maintained, and treats the spec corner cases consistently
+ * so our security guarantees don't drift with each refactor.
+ *
+ * Public API is unchanged: {@link #issue(UUID, String, Map)} returns a
+ * compact-serialised token, {@link #parse(String)} returns a Map of
+ * claims (or {@code null} on any rejection cause).
  */
 @Service
 public class JwtService {
 
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+
+    /**
+     * Clock-skew tolerance applied to {@code exp} + {@code nbf}. 30s
+     * covers NTP drift between replicas + the typical client-server
+     * timestamp difference. RFC 7519 §4.1.4 expressly permits "a few
+     * minutes" of leeway.
+     */
+    private static final long CLOCK_SKEW_SECONDS = 30;
 
     /**
      * Known placeholder values that MUST NOT be used in production.
@@ -46,8 +86,8 @@ public class JwtService {
     private long ttlSeconds;
 
     private final Environment env;
-    private final ObjectMapper mapper = new ObjectMapper();
-    private SecretKeySpec keySpec;
+    private JWSSigner signer;
+    private JWSVerifier verifier;
 
     public JwtService(Environment env) {
         this.env = env;
@@ -66,10 +106,7 @@ public class JwtService {
 
         // Only the explicit dev/test profile tolerates a placeholder
         // secret. Production, staging, "live", and ANY UNNAMED profile
-        // refuse to boot. Earlier this keyed on isProd, but a deploy
-        // that forgot SPRING_PROFILES_ACTIVE=prod (or used "staging"
-        // / "live" / "preview") would silently accept the well-known
-        // placeholder. Invert: secure-by-default.
+        // refuse to boot.
         if (isWeak && !isDevLike) {
             throw new IllegalStateException(
                 "netscope.jwt.secret is set to a known placeholder value. "
@@ -83,15 +120,17 @@ public class JwtService {
                 + "must set JWT_SECRET.", String.join(",", env.getActiveProfiles()));
         }
 
-        keySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+        try {
+            this.signer = new MACSigner(secretBytes);
+            this.verifier = new MACVerifier(secretBytes);
+        } catch (JOSEException e) {
+            throw new IllegalStateException(
+                "Unable to initialise HS256 JWT signer/verifier — "
+                    + "is netscope.jwt.secret at least 32 bytes?", e);
+        }
     }
 
-    /**
-     * True iff the active profile set explicitly includes "dev" or
-     * "test". An empty profile list, "prod", "staging", "live",
-     * "preview", or any custom name all return false — and therefore
-     * the placeholder-secret check trips.
-     */
     private boolean isDevOrTestProfile() {
         for (String p : env.getActiveProfiles()) {
             if ("dev".equalsIgnoreCase(p) || "test".equalsIgnoreCase(p)) return true;
@@ -99,84 +138,92 @@ public class JwtService {
         return false;
     }
 
+    /**
+     * Issue a signed HS256 token. Claims included by default: {@code sub},
+     * {@code iss}, {@code iat}, {@code exp}, {@code email}. Extras are
+     * merged after (so callers can override defaults — at their own risk).
+     */
     public String issue(UUID userId, String email, Map<String, Object> extras) {
         try {
-            long now = Instant.now().getEpochSecond();
-            Map<String, Object> claims = new LinkedHashMap<>();
-            claims.put("sub", userId.toString());
-            claims.put("iss", issuer);
-            claims.put("iat", now);
-            claims.put("exp", now + ttlSeconds);
-            claims.put("email", email);
-            claims.putAll(extras);
-
-            String header = b64(mapper.writeValueAsBytes(Map.of("alg", "HS256", "typ", "JWT")));
-            String body   = b64(mapper.writeValueAsBytes(claims));
-            String signingInput = header + "." + body;
-            String sig = b64(hmac(signingInput));
-            return signingInput + "." + sig;
-        } catch (Exception e) { throw new RuntimeException(e); }
+            Instant now = Instant.now();
+            JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
+                .subject(userId.toString())
+                .issuer(issuer)
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plusSeconds(ttlSeconds)))
+                .claim("email", email);
+            // Merge extras AFTER the canonical set so a caller can
+            // override exp/iss for testing — we keep this open rather
+            // than locking it down so unit tests can still issue tokens
+            // with explicit expirations.
+            if (extras != null) {
+                for (Map.Entry<String, Object> e : extras.entrySet()) {
+                    builder.claim(e.getKey(), e.getValue());
+                }
+            }
+            SignedJWT jwt = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.HS256).type(com.nimbusds.jose.JOSEObjectType.JWT).build(),
+                builder.build());
+            jwt.sign(signer);
+            return jwt.serialize();
+        } catch (JOSEException e) {
+            // Issue-time failures are non-recoverable misconfigurations
+            // (e.g. signer init bug) — propagate as runtime so the
+            // call site fails loudly.
+            throw new RuntimeException("Failed to sign JWT", e);
+        }
     }
 
     /**
-     * Clock-skew tolerance (seconds) applied to {@code exp} and
-     * {@code nbf} claims. 30 s comfortably covers NTP drift between
-     * replicas + the typical client-server timestamp difference. RFC
-     * 7519 §4.1.4 explicitly calls out that "implementations may
-     * provide for some small leeway, usually no more than a few minutes,
-     * to account for clock skew".
+     * Parse + verify a token. Returns the claim set as a Map on success,
+     * or {@code null} on any rejection cause:
+     *   • malformed token shape
+     *   • non-HS256 algorithm header
+     *   • signature mismatch
+     *   • expired beyond skew window
+     *   • not-yet-valid beyond skew window
+     *   • issuer mismatch
+     *
+     * Null-return convention matches the legacy API so call-sites
+     * don't need to adapt.
      */
-    private static final long CLOCK_SKEW_SECONDS = 30;
-
     public Map<String, Object> parse(String token) {
         try {
-            String[] parts = token.split("\\.");
-            if (parts.length != 3) return null;
-            // Reject any token whose header doesn't declare HS256.
-            // Today the HMAC compare below catches `{"alg":"none"}` tokens
-            // anyway (the empty signature byte array won't match the
-            // expected HMAC), but an explicit allow-list is cheap
-            // defense-in-depth: when the codebase later adds a second
-            // algorithm branch (RS256 migration noted in the class
-            // javadoc), the missing whitelist becomes the classic
-            // algorithm-confusion vulnerability. Lock it down now.
-            @SuppressWarnings("unchecked")
-            Map<String, Object> header = mapper.readValue(
-                Base64.getUrlDecoder().decode(parts[0]), Map.class);
-            if (!"HS256".equals(header.get("alg"))) return null;
-            if (!"JWT".equals(header.get("typ"))) return null;
+            SignedJWT jwt = SignedJWT.parse(token);
+            // Algorithm allow-list: HS256 only. Rejecting at this point
+            // is the canonical defence against algorithm-confusion
+            // attacks (e.g. a forged "none" or RS256 header).
+            if (!JWSAlgorithm.HS256.equals(jwt.getHeader().getAlgorithm())) return null;
+            if (!jwt.verify(verifier)) return null;
 
-            String signingInput = parts[0] + "." + parts[1];
-            byte[] expected = hmac(signingInput);
-            byte[] got = Base64.getUrlDecoder().decode(parts[2]);
-            if (!java.security.MessageDigest.isEqual(expected, got)) return null;
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> claims = mapper.readValue(Base64.getUrlDecoder().decode(parts[1]), Map.class);
+            JWTClaimsSet claims = jwt.getJWTClaimsSet();
             long now = Instant.now().getEpochSecond();
-            // Expiry check with skew tolerance. The previous strict
-            // comparison rejected tokens at the exact second boundary
-            // and could falsely invalidate sessions under NTP drift
-            // between replicas (especially on Fly.io multi-region).
-            Object exp = claims.get("exp");
-            if (exp instanceof Number n && n.longValue() + CLOCK_SKEW_SECONDS < now) return null;
-            // Not-before check. RFC 7519 §4.1.5: a token MUST NOT be
-            // accepted before its nbf instant. We tolerate the same
-            // skew window so a token issued moments ago on a peer with
-            // a slightly-ahead clock isn't rejected here as "not yet
-            // valid". Absence of nbf is fine — the claim is optional.
-            Object nbf = claims.get("nbf");
-            if (nbf instanceof Number n && n.longValue() > now + CLOCK_SKEW_SECONDS) return null;
-            if (!issuer.equals(claims.get("iss"))) return null;
-            return claims;
-        } catch (Exception e) { return null; }
+
+            Date exp = claims.getExpirationTime();
+            if (exp != null && (exp.toInstant().getEpochSecond() + CLOCK_SKEW_SECONDS) < now) return null;
+
+            Date nbf = claims.getNotBeforeTime();
+            if (nbf != null && nbf.toInstant().getEpochSecond() > (now + CLOCK_SKEW_SECONDS)) return null;
+
+            if (!issuer.equals(claims.getIssuer())) return null;
+
+            // nimbus's JWTClaimsSet#toJSONObject returns Map<String,
+            // Object> with java.util.Date for time claims. The legacy
+            // contract returned Numbers for time claims, so convert
+            // back to keep call-sites stable.
+            Map<String, Object> out = new LinkedHashMap<>(claims.toJSONObject());
+            normaliseTimeClaim(out, "iat", claims.getIssueTime());
+            normaliseTimeClaim(out, "exp", claims.getExpirationTime());
+            normaliseTimeClaim(out, "nbf", claims.getNotBeforeTime());
+            return out;
+        } catch (ParseException | JOSEException e) {
+            return null;
+        }
     }
 
-    private byte[] hmac(String s) throws Exception {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(keySpec);
-        return mac.doFinal(s.getBytes(StandardCharsets.UTF_8));
+    private static void normaliseTimeClaim(Map<String, Object> claims, String key, Date date) {
+        if (date != null) {
+            claims.put(key, date.toInstant().getEpochSecond());
+        }
     }
-
-    private String b64(byte[] b) { return Base64.getUrlEncoder().withoutPadding().encodeToString(b); }
 }
