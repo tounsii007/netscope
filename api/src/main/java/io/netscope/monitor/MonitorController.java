@@ -2,7 +2,7 @@ package io.netscope.monitor;
 
 import io.netscope.auth.ApiKeyContext;
 import io.netscope.common.ApiException;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.springframework.data.domain.Page;

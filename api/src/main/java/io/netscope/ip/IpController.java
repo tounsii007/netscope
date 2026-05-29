@@ -1,6 +1,6 @@
 package io.netscope.ip;
 
-import io.netscope.common.ClientIpResolver;
+import io.netscope.common.security.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 import ua_parser.Client;

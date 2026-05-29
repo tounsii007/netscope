@@ -1,7 +1,7 @@
 package io.netscope.webhook;
 
 import io.netscope.common.ApiException;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import io.netscope.testsupport.NoOpJpaRepository;
 import io.netscope.workspace.WorkspaceMember;
 import io.netscope.workspace.WorkspaceService;

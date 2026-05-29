@@ -1,6 +1,6 @@
 package io.netscope.scan;
 
-import io.netscope.common.ClientIpResolver;
+import io.netscope.common.security.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

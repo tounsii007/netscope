@@ -2,7 +2,7 @@ package io.netscope.dkim;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
-import io.netscope.common.DomainNormaliser;
+import io.netscope.common.security.DomainNormaliser;
 import io.netscope.common.ToolMetrics;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;

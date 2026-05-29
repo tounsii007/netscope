@@ -2,7 +2,7 @@ package io.netscope.monitor;
 
 import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;

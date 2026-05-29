@@ -2,7 +2,7 @@ package io.netscope.email;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

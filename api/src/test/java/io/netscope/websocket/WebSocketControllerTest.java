@@ -1,7 +1,7 @@
 package io.netscope.websocket;
 
 import io.netscope.common.ApiException;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

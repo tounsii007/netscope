@@ -2,7 +2,7 @@ package io.netscope.reach;
 
 import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.*;
 

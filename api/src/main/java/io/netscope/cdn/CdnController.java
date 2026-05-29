@@ -2,7 +2,7 @@ package io.netscope.cdn;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.SafeHttpClient;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.security.TargetValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;

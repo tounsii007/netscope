@@ -1,6 +1,6 @@
 package io.netscope.audit;
 
-import io.netscope.common.ClientIpResolver;
+import io.netscope.common.security.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Async;

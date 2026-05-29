@@ -2,7 +2,7 @@ package io.netscope.ipv6;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
-import io.netscope.common.DomainNormaliser;
+import io.netscope.common.security.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;

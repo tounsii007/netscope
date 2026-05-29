@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.security;
 
 import org.springframework.stereotype.Component;
 
