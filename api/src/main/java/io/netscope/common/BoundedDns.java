@@ -2,6 +2,8 @@ package io.netscope.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xbill.DNS.Cache;
+import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
@@ -83,6 +85,15 @@ public final class BoundedDns {
                     resolver.setTimeout(effective);
                 }
                 lookup.setResolver(resolver);
+                // Bypass dnsjava's process-wide Lookup.defaultCache. For
+                // single-shot lookups it's neutral; for the cross-resolver
+                // probes (DoH/DoT tester), the default cache returned the
+                // FIRST resolver's answer for every subsequent resolver
+                // call with the same name+type — defeating the whole
+                // "compare answers across providers" point. A fresh per-
+                // call empty cache means every Lookup actually queries
+                // its resolver.
+                lookup.setCache(new Cache(DClass.IN));
                 return lookup.run();
             } catch (Exception e) {
                 log.debug("DNS lookup failed for {}/{}: {}", name, type, e.getMessage());

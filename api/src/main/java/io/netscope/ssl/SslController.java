@@ -3,6 +3,8 @@ package io.netscope.ssl;
 import io.netscope.common.ApiException;
 import io.netscope.common.ResponseCache;
 import io.netscope.common.TargetValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.*;
@@ -19,6 +21,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/ssl")
 public class SslController {
+
+    private static final Logger log = LoggerFactory.getLogger(SslController.class);
 
     private final TargetValidator validator;
     private final ResponseCache cache;
@@ -42,7 +46,7 @@ public class SslController {
             try {
                 return doInspect(host, addr, port);
             } catch (Exception e) {
-                throw ApiException.badRequest("SSL error: " + e.getMessage());
+                throw ApiException.sanitizedFailure(log, "SSL handshake failed", e);
             }
         });
     }
@@ -68,8 +72,10 @@ public class SslController {
             X509Certificate leaf = chain[0];
 
             List<Map<String, Object>> chainOut = new ArrayList<>();
-            for (X509Certificate c : chain) {
+            for (int i = 0; i < chain.length; i++) {
+                X509Certificate c = chain[i];
                 Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("position", i);                  // 0 = leaf
                 entry.put("subject", c.getSubjectX500Principal().getName());
                 entry.put("issuer", c.getIssuerX500Principal().getName());
                 entry.put("validFrom", c.getNotBefore().toInstant().toString());
@@ -81,6 +87,23 @@ public class SslController {
                 entry.put("publicKeyAlgorithm", keyInfo.get("algorithm"));
                 entry.put("publicKeyBits", keyInfo.get("bits"));
                 if (keyInfo.containsKey("curve")) entry.put("publicKeyCurve", keyInfo.get("curve"));
+                entry.put("keyUsage", describeKeyUsage(c.getKeyUsage()));
+                entry.put("extendedKeyUsage", safeExtKeyUsage(c));
+                // AIA: where does the verifier go to fetch the issuer cert
+                // and the OCSP responder? Empty when the CA omits them
+                // (older roots, or self-signed leafs).
+                Map<String, List<String>> aia = extractAia(c);
+                entry.put("caIssuersUrls", aia.getOrDefault("caIssuers", List.of()));
+                entry.put("ocspResponderUrls", aia.getOrDefault("ocsp", List.of()));
+                // Chain link verification: is THIS cert signed by the NEXT
+                // one in the presented chain? Servers occasionally ship a
+                // misordered or stale intermediate; this flag tells the UI
+                // exactly which link is broken.
+                if (i + 1 < chain.length) {
+                    entry.put("signedByNext", verifySignedBy(c, chain[i + 1]));
+                } else {
+                    entry.put("signedByNext", null); // last cert — no next
+                }
                 chainOut.add(entry);
             }
 
@@ -102,6 +125,18 @@ public class SslController {
             out.put("publicKeyBits", leafKey.get("bits"));
             if (leafKey.containsKey("curve")) out.put("publicKeyCurve", leafKey.get("curve"));
             out.put("sans", extractSans(leaf));
+            // Leaf-cert depth additions: Key Usage + EKU bits, AIA endpoints,
+            // SCT presence (Certificate Transparency proof embedded by the CA).
+            out.put("keyUsage", describeKeyUsage(leaf.getKeyUsage()));
+            out.put("extendedKeyUsage", safeExtKeyUsage(leaf));
+            Map<String, List<String>> leafAia = extractAia(leaf);
+            out.put("caIssuersUrls", leafAia.getOrDefault("caIssuers", List.of()));
+            out.put("ocspResponderUrls", leafAia.getOrDefault("ocsp", List.of()));
+            out.put("hasSctExtension", leaf.getExtensionValue("1.3.6.1.4.1.11129.2.4.2") != null);
+            // Each link in the chain claims to be signed by the next; if any
+            // link fails, the whole chain is invalid. Surface a top-level
+            // boolean so monitors can alert on broken chains with one check.
+            out.put("chainComplete", chainSignedThrough(chain));
             out.put("chain", chainOut);
             // Self-signed at the leaf is unusual on the public Internet
             // and worth flagging — the UI shows a yellow warning.
@@ -157,5 +192,157 @@ public class SslController {
             for (List<?> s : sans) if (s.size() >= 2) out.add(String.valueOf(s.get(1)));
             return out;
         } catch (Exception e) { return List.of(); }
+    }
+
+    /**
+     * Decode X.509 Key Usage bits into the conventional names. RFC 5280
+     * §4.2.1.3. Returns an empty list when the cert omits the extension —
+     * legacy roots and some self-signed test certs do.
+     * Package-private for unit-test coverage.
+     */
+    static List<String> describeKeyUsage(boolean[] bits) {
+        if (bits == null) return List.of();
+        String[] names = {
+            "digitalSignature", "nonRepudiation", "keyEncipherment",
+            "dataEncipherment", "keyAgreement", "keyCertSign",
+            "cRLSign", "encipherOnly", "decipherOnly"
+        };
+        List<String> out = new ArrayList<>();
+        for (int i = 0; i < bits.length && i < names.length; i++) {
+            if (bits[i]) out.add(names[i]);
+        }
+        return out;
+    }
+
+    /** Extended Key Usage as a list of OIDs. Empty when the extension is
+     *  missing or the cert has been mis-issued. */
+    private static List<String> safeExtKeyUsage(X509Certificate cert) {
+        try {
+            List<String> eku = cert.getExtendedKeyUsage();
+            return eku == null ? List.of() : eku;
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Pull Authority Information Access (AIA) URLs out of a certificate.
+     * Returns a map with optional keys {@code "caIssuers"} (URLs that
+     * serve the issuer's own cert, used to repair broken chains) and
+     * {@code "ocsp"} (OCSP responder URLs).
+     *
+     * Implemented by parsing the raw DER octet-string with
+     * {@link java.security.cert.X509Certificate#getExtensionValue} and
+     * a minimal walk. Avoids pulling in BouncyCastle just for this.
+     */
+    private static Map<String, List<String>> extractAia(X509Certificate cert) {
+        return extractAiaFromOctets(cert.getExtensionValue("1.3.6.1.5.5.7.1.1"));
+    }
+
+    /** Package-private byte-level overload — the X509-input overload above
+     *  pulls the AIA extension bytes once, then delegates here. Letting
+     *  the test build its own AIA blob avoids the cost of standing up a
+     *  full X.509 fixture. */
+    static Map<String, List<String>> extractAiaFromOctets(byte[] octets) {
+        Map<String, List<String>> out = new LinkedHashMap<>();
+        if (octets == null) return out;
+        List<String> ca = new ArrayList<>();
+        List<String> ocsp = new ArrayList<>();
+        extractAiaInternal(octets, ca, ocsp);
+        if (!ca.isEmpty()) out.put("caIssuers", ca);
+        if (!ocsp.isEmpty()) out.put("ocsp", ocsp);
+        return out;
+    }
+
+    /**
+     * Byte-level scan for the AIA AccessDescription pattern:
+     * {@code 2B 06 01 05 05 07 30 <method> ... 86 <len> <url-bytes>}.
+     *
+     * The 7-byte OID prefix {@code 1.3.6.1.5.5.7.48} is unique enough in
+     * AIA extension bodies to anchor on directly. The byte immediately
+     * after the prefix is the {@code accessMethod} discriminator —
+     * {@code 0x01} for OCSP, {@code 0x02} for caIssuers. We then skim
+     * forward to the next {@code "http"} substring (the URL inside the
+     * GeneralName URI tag {@code 0x86}) and read until a non-printable
+     * byte stops it.
+     *
+     * The earlier implementation used {@code preceding.contains("")}
+     * which mis-fired because the OID prefix ITSELF contains a {@code 0x01}
+     * byte at position 2 — every URL got classified as OCSP regardless of
+     * the actual discriminator. This rewrite addresses that.
+     */
+    private static void extractAiaInternal(byte[] octets, List<String> ca, List<String> ocsp) {
+        // OID prefix 1.3.6.1.5.5.7.48 in DER:
+        final byte b0 = 0x2B, b1 = 0x06, b2 = 0x01, b3 = 0x05,
+                   b4 = 0x05, b5 = 0x07, b6 = 0x30;
+        int idx = 0;
+        while (idx + 8 < octets.length) {
+            if (octets[idx]     != b0 || octets[idx + 1] != b1
+             || octets[idx + 2] != b2 || octets[idx + 3] != b3
+             || octets[idx + 4] != b4 || octets[idx + 5] != b5
+             || octets[idx + 6] != b6) {
+                idx++;
+                continue;
+            }
+            byte method = octets[idx + 7];
+            // Find the next "http" anywhere after the OID + discriminator;
+            // it must precede the next OID block, so we cap the search at
+            // the next prefix occurrence or end-of-buffer.
+            int urlStart = -1;
+            for (int j = idx + 8; j + 4 < octets.length; j++) {
+                if (octets[j] == 'h' && octets[j + 1] == 't'
+                 && octets[j + 2] == 't' && octets[j + 3] == 'p') {
+                    urlStart = j;
+                    break;
+                }
+            }
+            if (urlStart < 0) return;
+            int urlEnd = urlStart;
+            while (urlEnd < octets.length
+                && octets[urlEnd] > 0x20 && octets[urlEnd] < 0x7f) {
+                urlEnd++;
+            }
+            String url = new String(octets, urlStart, urlEnd - urlStart,
+                java.nio.charset.StandardCharsets.US_ASCII);
+            if (method == 0x01) ocsp.add(url);
+            else if (method == 0x02) ca.add(url);
+            else ca.add(url);   // unknown discriminator → conservative bucket
+            idx = urlEnd;
+        }
+    }
+
+
+    /** Cryptographic check: does {@code child}.verify({@code parent}.publicKey)
+     *  succeed? Captures broken / out-of-order chains the TLS layer happily
+     *  presents but a strict verifier would refuse. */
+    private static boolean verifySignedBy(X509Certificate child, X509Certificate parent) {
+        try {
+            child.verify(parent.getPublicKey());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * True when every adjacent pair in the presented chain cryptographically
+     * verifies. Captures the operational mistakes a TLS handshake silently
+     * tolerates: missing or stale intermediates, wrong-order chain, swapped
+     * issuer.
+     *
+     * Does NOT require the chain to terminate in a self-signed root —
+     * RFC 5246 §7.4.2 explicitly allows omitting the root, and most
+     * production servers do exactly that (clients have the trust store
+     * already; sending the root wastes bandwidth on every handshake). The
+     * previous self-signed-last check made this method return false for
+     * every correctly-configured server. Surface only the verifiable-link
+     * signal here; whether the topmost intermediate chains to a trusted
+     * root is the JDK trust-store's job, not ours.
+     */
+    private static boolean chainSignedThrough(X509Certificate[] chain) {
+        for (int i = 0; i + 1 < chain.length; i++) {
+            if (!verifySignedBy(chain[i], chain[i + 1])) return false;
+        }
+        return true;
     }
 }

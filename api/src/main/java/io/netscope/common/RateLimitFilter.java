@@ -1,5 +1,6 @@
 package io.netscope.common;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.HexFormat;
+import java.util.Map;
 
 /**
  * Fixed-window rate limiter backed by Redis INCR + EXPIRE. Works across pods.
@@ -45,6 +47,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private int authEndpointPerMinute;
 
     private final StringRedisTemplate redis;
+    /** Shared Jackson mapper for the 429 body. Single instance keeps the
+     *  per-request cost negligible and lets us produce correctly-escaped
+     *  JSON instead of hand-concatenating strings (which would break the
+     *  moment the {@code reason} text grew a quote or backslash). */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public RateLimitFilter(StringRedisTemplate redis) { this.redis = redis; }
 
@@ -146,8 +153,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
         res.setHeader("X-RateLimit-Remaining", "0");
         res.setHeader("X-RateLimit-Reset", String.valueOf(resetEpochSec));
         res.setContentType("application/json");
-        res.getWriter().write(
-            "{\"error\":\"Too Many Requests\",\"message\":\"" + reason + "\"}");
+        // Jackson-serialise the body so any reason text with quotes,
+        // backslashes, control chars, or unicode is escaped correctly.
+        // The prior hand-concatenated form would have produced invalid
+        // JSON the moment a reason contained a " character.
+        MAPPER.writeValue(res.getWriter(),
+            Map.of("error", "Too Many Requests", "message", reason));
     }
 
     /**

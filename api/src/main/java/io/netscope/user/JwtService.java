@@ -118,6 +118,16 @@ public class JwtService {
         } catch (Exception e) { throw new RuntimeException(e); }
     }
 
+    /**
+     * Clock-skew tolerance (seconds) applied to {@code exp} and
+     * {@code nbf} claims. 30 s comfortably covers NTP drift between
+     * replicas + the typical client-server timestamp difference. RFC
+     * 7519 §4.1.4 explicitly calls out that "implementations may
+     * provide for some small leeway, usually no more than a few minutes,
+     * to account for clock skew".
+     */
+    private static final long CLOCK_SKEW_SECONDS = 30;
+
     public Map<String, Object> parse(String token) {
         try {
             String[] parts = token.split("\\.");
@@ -143,8 +153,20 @@ public class JwtService {
 
             @SuppressWarnings("unchecked")
             Map<String, Object> claims = mapper.readValue(Base64.getUrlDecoder().decode(parts[1]), Map.class);
+            long now = Instant.now().getEpochSecond();
+            // Expiry check with skew tolerance. The previous strict
+            // comparison rejected tokens at the exact second boundary
+            // and could falsely invalidate sessions under NTP drift
+            // between replicas (especially on Fly.io multi-region).
             Object exp = claims.get("exp");
-            if (exp instanceof Number n && n.longValue() < Instant.now().getEpochSecond()) return null;
+            if (exp instanceof Number n && n.longValue() + CLOCK_SKEW_SECONDS < now) return null;
+            // Not-before check. RFC 7519 §4.1.5: a token MUST NOT be
+            // accepted before its nbf instant. We tolerate the same
+            // skew window so a token issued moments ago on a peer with
+            // a slightly-ahead clock isn't rejected here as "not yet
+            // valid". Absence of nbf is fine — the claim is optional.
+            Object nbf = claims.get("nbf");
+            if (nbf instanceof Number n && n.longValue() > now + CLOCK_SKEW_SECONDS) return null;
             if (!issuer.equals(claims.get("iss"))) return null;
             return claims;
         } catch (Exception e) { return null; }

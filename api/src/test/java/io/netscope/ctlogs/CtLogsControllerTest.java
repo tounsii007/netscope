@@ -1,0 +1,136 @@
+package io.netscope.ctlogs;
+
+import io.netscope.common.ApiException;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * Input-validation tests for CtLogsController.
+ *
+ * Live crt.sh queries are reserved for the integration suite (network-
+ * dependent, occasionally rate-limited). Here we verify only the
+ * deterministic input-rejection paths.
+ */
+class CtLogsControllerTest {
+
+    private final CtLogsController ctrl = new CtLogsController();
+
+    @Test void rejects_empty_domain() {
+        assertThatThrownBy(() -> ctrl.search("", true, false))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining("invalid domain");
+    }
+
+    @Test void rejects_domain_with_protocol() {
+        assertThatThrownBy(() -> ctrl.search("https://example.com", true, false))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining("invalid domain");
+    }
+
+    @Test void rejects_domain_with_wildcard_injection() {
+        // The controller builds the crt.sh query string from the user input.
+        // Reject any character that would let the caller inject an extra
+        // SQL-like wildcard or escape the q= parameter.
+        assertThatThrownBy(() -> ctrl.search("example.com%25--", true, false))
+            .isInstanceOf(ApiException.class);
+    }
+
+    @Test void rejects_overlong_domain() {
+        assertThatThrownBy(() -> ctrl.search("a".repeat(254), true, false))
+            .isInstanceOf(ApiException.class);
+    }
+
+    /* ─── normalize() — date math + SAN expansion ─────────────────────── */
+
+    @Test void normalize_splits_newline_delimited_sans_into_array() {
+        var row = new java.util.HashMap<String, Object>();
+        row.put("id", 1L);
+        row.put("serial_number", "abc");
+        row.put("common_name", "example.com");
+        row.put("name_value", "example.com\napi.example.com\n*.example.com");
+        row.put("issuer_name", "Let's Encrypt");
+        row.put("issuer_ca_id", 42);
+        row.put("not_before", "2025-01-01T00:00:00");
+        row.put("not_after", "2025-04-01T00:00:00");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 2, 1));
+        assertThat(n.get("sans")).asList()
+            .containsExactly("example.com", "api.example.com", "*.example.com");
+    }
+
+    @Test void normalize_deduplicates_repeated_sans() {
+        var row = baseRow();
+        row.put("name_value", "example.com\nexample.com\napi.example.com");
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 2, 1));
+        // Order preserved (LinkedHashSet semantics) + duplicates removed.
+        assertThat(n.get("sans")).asList()
+            .containsExactly("example.com", "api.example.com");
+    }
+
+    @Test void normalize_flags_expired_when_notAfter_before_today() {
+        var row = baseRow();
+        row.put("not_before", "2024-01-01T00:00:00");
+        row.put("not_after",  "2024-04-01T00:00:00");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 1, 15));
+        assertThat(n.get("expired")).isEqualTo(true);
+        assertThat(n.get("daysUntilExpiry")).isEqualTo(-289); // 2024-04-01 → 2025-01-15
+    }
+
+    @Test void normalize_computes_positive_days_until_expiry_when_active() {
+        var row = baseRow();
+        row.put("not_before", "2025-01-01T00:00:00");
+        row.put("not_after",  "2025-04-01T00:00:00");
+
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 1, 15));
+        assertThat(n.get("expired")).isEqualTo(false);
+        assertThat(n.get("daysUntilExpiry")).isEqualTo(76);
+        assertThat(n.get("validForDays")).isEqualTo(90);
+    }
+
+    @Test void normalize_survives_malformed_dates_by_returning_null() {
+        // crt.sh occasionally emits truncated rows during a log import —
+        // we must skip them rather than fail the whole response.
+        var row = baseRow();
+        row.put("not_before", "not-a-date");
+        var n = CtLogsController.normalize(row, java.time.LocalDate.now());
+        assertThat(n).isNull();
+    }
+
+    @Test void normalize_returns_null_when_dates_are_null() {
+        // Distinct from the malformed-string case above: when the upstream
+        // omits the date field entirely the previous safePrefix(null, 10)
+        // substituted "1970-01-01" and the row landed in the result as
+        // "expired by ~55 years". Skip instead.
+        var row = baseRow();
+        row.put("not_before", null);
+        assertThat(CtLogsController.normalize(row, java.time.LocalDate.now())).isNull();
+
+        row = baseRow();
+        row.put("not_after", null);
+        assertThat(CtLogsController.normalize(row, java.time.LocalDate.now())).isNull();
+    }
+
+    @Test void normalize_handles_null_name_value() {
+        var row = baseRow();
+        row.put("name_value", null);
+        var n = CtLogsController.normalize(row, java.time.LocalDate.of(2025, 2, 1));
+        assertThat(n.get("sans")).asList().isEmpty();
+    }
+
+    /** Skeleton row with placeholder valid dates — individual tests
+     *  override the fields they care about. */
+    private static java.util.Map<String, Object> baseRow() {
+        var row = new java.util.HashMap<String, Object>();
+        row.put("id", 1L);
+        row.put("serial_number", "abc");
+        row.put("common_name", "example.com");
+        row.put("name_value", "example.com");
+        row.put("issuer_name", "Let's Encrypt");
+        row.put("issuer_ca_id", 42);
+        row.put("not_before", "2025-01-01T00:00:00");
+        row.put("not_after",  "2025-04-01T00:00:00");
+        return row;
+    }
+}

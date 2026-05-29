@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.netscope.common.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
@@ -16,6 +18,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/bgp")
 public class BgpController {
+
+    private static final Logger log = LoggerFactory.getLogger(BgpController.class);
 
     // Lazy-init: building a RestClient at field-init time triggers HTTP-stack
     // setup that can fail in restricted test environments (and is wasted work
@@ -64,7 +68,7 @@ public class BgpController {
             out.put("bgpState", history.path("data").path("bgp_state"));
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("RIPE lookup failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "RIPE lookup failed", e);
         }
     }
 
@@ -90,7 +94,7 @@ public class BgpController {
             out.put("neighbourCount", neighbours.path("data").path("neighbours").size());
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("RIPE lookup failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "RIPE lookup failed", e);
         }
     }
 

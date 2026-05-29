@@ -3,6 +3,8 @@ package io.netscope.tech;
 import io.netscope.common.ApiException;
 import io.netscope.common.SafeHttpClient;
 import io.netscope.common.TargetValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,6 +21,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/tech")
 public class TechStackController {
+
+    private static final Logger log = LoggerFactory.getLogger(TechStackController.class);
 
     private record Sig(String tech, String category, String where, String pattern) {}
 
@@ -133,7 +137,7 @@ public class TechStackController {
             out.put("totalDetected", byCategory.values().stream().mapToInt(Set::size).sum());
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("fetch failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "Tech stack fetch failed", e);
         }
     }
 }

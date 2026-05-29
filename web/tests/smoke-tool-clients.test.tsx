@@ -19,9 +19,12 @@ import { BgpClient }          from "@/app/[locale]/bgp/client";
 import { BlacklistClient }    from "@/app/[locale]/blacklist/client";
 import { CdnClient }          from "@/app/[locale]/cdn-detector/client";
 import { CookieClient }       from "@/app/[locale]/cookies/client";
+import { CtLogsClient }       from "@/app/[locale]/ct-logs/client";
+import { DkimClient }         from "@/app/[locale]/dkim/client";
 import { DnsClient }          from "@/app/[locale]/dns-lookup/client";
 import { PropagationClient }  from "@/app/[locale]/dns-propagation/client";
 import { DnssecClient }       from "@/app/[locale]/dnssec/client";
+import { DohClient }          from "@/app/[locale]/doh/client";
 import { EmailAuthClient }    from "@/app/[locale]/email-auth/client";
 import { EmailVerifyClient }  from "@/app/[locale]/email-verify/client";
 import { HeadersClient }      from "@/app/[locale]/http-headers/client";
@@ -34,15 +37,19 @@ import { RedirectsClient }    from "@/app/[locale]/redirects/client";
 import { SslClient }          from "@/app/[locale]/ssl-check/client";
 import { SubdomainsClient }   from "@/app/[locale]/subdomains/client";
 import { TechClient }         from "@/app/[locale]/tech-stack/client";
+import { WebSocketClient }    from "@/app/[locale]/websocket/client";
 
 const clients = [
   ["BgpClient",         <BgpClient />],
   ["BlacklistClient",   <BlacklistClient />],
   ["CdnClient",         <CdnClient />],
   ["CookieClient",      <CookieClient />],
+  ["CtLogsClient",      <CtLogsClient />],
+  ["DkimClient",        <DkimClient />],
   ["DnsClient",         <DnsClient />],
   ["PropagationClient", <PropagationClient />],
   ["DnssecClient",      <DnssecClient />],
+  ["DohClient",         <DohClient />],
   ["EmailAuthClient",   <EmailAuthClient />],
   ["EmailVerifyClient", <EmailVerifyClient />],
   ["HeadersClient",     <HeadersClient />],
@@ -55,6 +62,7 @@ const clients = [
   ["SslClient",         <SslClient />],
   ["SubdomainsClient",  <SubdomainsClient />],
   ["TechClient",        <TechClient />],
+  ["WebSocketClient",   <WebSocketClient />],
 ] as const;
 
 describe("Tool client smoke tests", () => {

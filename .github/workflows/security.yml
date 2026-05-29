@@ -43,13 +43,13 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
       - name: Build Java
-        if: matrix.language == 'java-kotlin'
+        if: matrix.language == 'java'
         run: cd api && mvn -B -DskipTests package
       - name: Run CodeQL analysis
         uses: github/codeql-action/analyze@v4

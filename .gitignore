@@ -50,3 +50,8 @@ GeoLite2-*.mmdb
 
 # Claude Code agent workspace (worktrees, MCP state, local settings)
 .claude/
+
+# Build artefacts
+cli/cli.exe
+sdk/typescript/dist/
+*.tsbuildinfo

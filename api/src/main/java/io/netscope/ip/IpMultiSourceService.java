@@ -82,11 +82,16 @@ public class IpMultiSourceService {
 
         // Bounded pool: we have ~5 sources, no point in more threads. Daemon
         // so JVM shutdown is clean.
-        this.executor = Executors.newFixedThreadPool(8, r -> {
-            Thread t = new Thread(r, "ip-multi-source");
-            t.setDaemon(true);
-            return t;
-        });
+        // Virtual-thread per task: every geo-API call is I/O-bound and
+        // spends ~99% of its lifetime blocked on a TCP read. Pooling
+        // platform threads (the previous fixedThreadPool(8)) wasted
+        // ~7 OS threads per active probe AND artificially throttled
+        // concurrent users to 8 in-flight aggregates — under a small
+        // burst the pool's task queue would balloon and add HEAD-of-
+        // line latency to subsequent lookups. Virtual threads remove
+        // both problems with no behavioural change.
+        this.executor = Executors.newThreadPerTaskExecutor(
+            Thread.ofVirtual().name("ip-multi-source-", 0).factory());
     }
 
     /**
@@ -152,8 +157,14 @@ public class IpMultiSourceService {
         } catch (Exception e) {
             log.warn("[ip-multi] source '{}' failed: {} - {}",
                 f.name(), e.getClass().getSimpleName(), e.getMessage());
+            // Surface only the exception class name to the API consumer.
+            // The detail message frequently embeds the geo-provider's
+            // upstream IP, the API-key fragment from the URL, or
+            // Cloudflare's ray ID — none of which the user needs to see.
+            // Operators get the full reason via the structured warn log
+            // line above.
             return SourceResult.fail(f.name(), f.url(ip),
-                e.getClass().getSimpleName() + ": " + e.getMessage(),
+                e.getClass().getSimpleName(),
                 System.currentTimeMillis() - t0);
         }
     }

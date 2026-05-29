@@ -1,6 +1,8 @@
 package io.netscope.pageinsight;
 
 import io.netscope.common.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -10,6 +12,8 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/api/v1/opengraph")
 public class OpenGraphController {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenGraphController.class);
 
     private static final Pattern META = Pattern.compile(
         "<meta\\s+[^>]*?(?:name|property)=[\"']([^\"']+)[\"'][^>]*?content=[\"']([^\"']*)[\"']",
@@ -62,7 +66,7 @@ public class OpenGraphController {
             out.put("warnings", warnings);
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("fetch failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "OpenGraph fetch failed", e);
         }
     }
 

@@ -25,15 +25,15 @@ const config: NextConfig = {
   async headers() {
     // Content-Security-Policy notes:
     //
-    //   script-src / style-src include 'unsafe-inline' because Next.js
-    //   injects inline bootstrap scripts (hydration, runtime config)
-    //   and Tailwind injects inline <style> tags. A proper fix
-    //   requires a per-request nonce generated in middleware and
-    //   threaded through `headers().get('x-nonce')` in every layout
-    //   plus every `<Script>` and Tailwind output — tracked separately
-    //   as a larger refactor.
+    //   This static CSP is the FALLBACK for routes that bypass the
+    //   middleware matcher — primarily static assets under /_next/
+    //   and /public/. For every HTML route the middleware sets a
+    //   stronger per-request CSP with `'nonce-<value>'` instead of
+    //   the `'unsafe-inline'` allowance below (see lib/csp.ts +
+    //   middleware.ts). Static assets don't render user input, so
+    //   the relaxed CSP on that path is benign.
     //
-    //   What we can tighten without a downstream rewrite:
+    //   What we keep here:
     //
     //     • frame-src 'none' — make the implicit "no iframes" explicit
     //       (frame-ancestors blocks being framed; frame-src blocks

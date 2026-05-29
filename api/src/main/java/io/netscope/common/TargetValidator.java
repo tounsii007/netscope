@@ -2,6 +2,7 @@ package io.netscope.common;
 
 import org.springframework.stereotype.Component;
 
+import java.net.IDN;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -67,6 +68,27 @@ public class TargetValidator {
             throw ApiException.badRequest("target is required");
         }
         String trimmed = target.trim().toLowerCase();
+        // Normalise IDN / Unicode hostnames to ASCII Compatible Encoding
+        // (Punycode) before the pattern check. Without this:
+        //   1. Legitimate non-ASCII domains (münchen.de, παράδειγμα.gr)
+        //      were rejected outright even though they are real.
+        //   2. Homograph-confusable inputs (cyrillic "а" mimicking latin
+        //      "a", e.g. "аpple.com") looked legitimate to the regex but
+        //      resolved via the resolver to a completely different host.
+        //      IDN.toASCII converts BOTH to their canonical xn--… form,
+        //      which the downstream resolver and the homograph host both
+        //      agree on — the canonical form then goes through the same
+        //      validation as any other ASCII host.
+        // IDN.toASCII throws IllegalArgumentException on inputs it can't
+        // canonicalise (control chars, oversized labels) — surface that
+        // as a 400 instead of leaking the JDK exception.
+        if (!isIpLiteral(trimmed)) {
+            try {
+                trimmed = IDN.toASCII(trimmed, IDN.ALLOW_UNASSIGNED);
+            } catch (IllegalArgumentException e) {
+                throw ApiException.badRequest("invalid hostname (IDN normalisation failed)");
+            }
+        }
         if (!HOST_PATTERN.matcher(trimmed).matches() && !isIpLiteral(trimmed)) {
             throw ApiException.badRequest("invalid hostname or IP");
         }

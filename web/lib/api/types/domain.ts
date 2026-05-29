@@ -35,3 +35,33 @@ export type TechResult = {
   host: string; status: number; totalDetected: number;
   technologies: Record<string, string[]>;
 };
+
+/**
+ * Certificate Transparency log entry as surfaced by crt.sh after
+ * normalisation (newline-split SANs become arrays, ISO dates parsed,
+ * expiry computed). Issuer aggregation is rolled up at the result level
+ * so the UI can render "X distinct CAs issued for this domain" without
+ * re-walking the array.
+ */
+export type CtLogsResult = {
+  domain: string;
+  includeSubdomains: boolean;
+  totalReturned: number;
+  truncated: boolean;
+  issuerSummary: Record<string, number>;
+  certificates: Array<{
+    id: number;
+    serial: string;
+    commonName: string | null;
+    nameValue: string | null;
+    issuerCaName: string;
+    issuerCaId: number;
+    notBefore: string;
+    notAfter: string;
+    validForDays: number;
+    expired: boolean;
+    daysUntilExpiry: number;
+    sans: string[];
+  }>;
+  durationMs?: number;
+};

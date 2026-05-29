@@ -7,6 +7,8 @@ import io.netscope.workspace.Workspace;
 import io.netscope.workspace.WorkspaceService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public record ExchangeRequest(
         @NotBlank @Pattern(regexp = "github|google") String provider,
@@ -104,7 +108,7 @@ public class AuthController {
             return new OauthUser(j.path("id").asText(), email,
                 j.path("name").asText(null), j.path("avatar_url").asText(null), true);
         } catch (ApiException e) { throw e; }
-        catch (Exception e) { throw ApiException.badRequest("GitHub userinfo failed: " + e.getMessage()); }
+        catch (Exception e) { throw ApiException.sanitizedFailure(log, "GitHub userinfo failed", e); }
     }
 
     private String fetchGithubPrimaryEmail(String token) {
@@ -131,7 +135,7 @@ public class AuthController {
                 j.path("name").asText(null),
                 j.path("picture").asText(null),
                 j.path("email_verified").asBoolean(false));
-        } catch (Exception e) { throw ApiException.badRequest("Google userinfo failed: " + e.getMessage()); }
+        } catch (Exception e) { throw ApiException.sanitizedFailure(log, "Google userinfo failed", e); }
     }
 
     @GetMapping("/me")

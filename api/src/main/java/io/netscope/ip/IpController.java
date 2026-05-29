@@ -14,11 +14,16 @@ public class IpController {
 
     private final IpService ipService;
     private final IpMultiSourceService multiService;
-    private final Parser uaParser = new Parser();
+    /** Injected from {@link io.netscope.config.UaConfig} so the heavy
+     *  classpath-YAML load happens once at startup and tests can override
+     *  with @MockBean to avoid the 1.2 MB load entirely. */
+    private final Parser uaParser;
 
-    public IpController(IpService ipService, IpMultiSourceService multiService) {
+    public IpController(IpService ipService, IpMultiSourceService multiService,
+                        Parser uaParser) {
         this.ipService = ipService;
         this.multiService = multiService;
+        this.uaParser = uaParser;
     }
 
     @GetMapping("/{ip}")

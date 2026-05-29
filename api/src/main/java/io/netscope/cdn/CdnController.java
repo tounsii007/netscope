@@ -3,6 +3,8 @@ package io.netscope.cdn;
 import io.netscope.common.ApiException;
 import io.netscope.common.SafeHttpClient;
 import io.netscope.common.TargetValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.InetAddress;
@@ -19,6 +21,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/cdn")
 public class CdnController {
+
+    private static final Logger log = LoggerFactory.getLogger(CdnController.class);
 
     private record Signal(String cdn, String where, String pattern) {}
 
@@ -84,7 +88,7 @@ public class CdnController {
             out.put("status", res.statusCode());
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("detection failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "CDN detection failed", e);
         }
     }
 }

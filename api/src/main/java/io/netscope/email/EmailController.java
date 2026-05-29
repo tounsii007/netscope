@@ -140,8 +140,14 @@ public class EmailController {
         try {
             mxAddr = validator.resolveAndValidate(mxNormalised);
         } catch (ApiException e) {
+            // Stable opaque reason code. The previous response echoed the
+            // validator's getMessage() ("address is reserved or internal"
+            // / "could not resolve") which is small leakage but lets a
+            // caller distinguish "your MX resolves to private space" from
+            // "your MX doesn't resolve at all" — a fingerprint we don't
+            // need to give away.
             out.put("accepted", false);
-            out.put("error", "mx blocked: " + e.getMessage());
+            out.put("error", "mx_unreachable_or_internal");
             return out;
         }
         long deadline = System.currentTimeMillis() + SMTP_PROBE_TOTAL_MS;
@@ -162,8 +168,19 @@ public class EmailController {
             out.put("code", code);
             out.put("accepted", code >= 200 && code < 300);
         } catch (Exception e) {
+            // Map raw transport/protocol errors to a small stable set of
+            // reason codes. The previous response embedded the JDK
+            // exception class name + message, leaking the SMTP server's
+            // banner, TLS chain hostname, and JVM internals to anyone
+            // who could trigger an SMTP failure for an arbitrary domain
+            // — easy reconnaissance primitive for mapping infrastructure.
+            String reason = "smtp_error";
+            if (e instanceof java.net.SocketTimeoutException) reason = "smtp_timeout";
+            else if (e instanceof java.net.ConnectException) reason = "smtp_refused";
+            else if (e instanceof java.net.UnknownHostException) reason = "smtp_unknown_host";
+            else if (e instanceof IOException) reason = "smtp_io_error";
             out.put("accepted", false);
-            out.put("error", e.getClass().getSimpleName() + ": " + e.getMessage());
+            out.put("error", reason);
         }
         return out;
     }

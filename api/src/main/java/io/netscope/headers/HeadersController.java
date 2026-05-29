@@ -3,6 +3,8 @@ package io.netscope.headers;
 import io.netscope.common.ApiException;
 import io.netscope.common.HttpUrlNormaliser;
 import io.netscope.common.SafeHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -18,6 +20,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/headers")
 public class HeadersController {
+
+    private static final Logger log = LoggerFactory.getLogger(HeadersController.class);
 
     private record Rule(String header, int weight, String good, String detail) {}
 
@@ -91,7 +95,7 @@ public class HeadersController {
             out.put("rawHeaders", headers);
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("fetch failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "Header fetch failed", e);
         }
     }
 

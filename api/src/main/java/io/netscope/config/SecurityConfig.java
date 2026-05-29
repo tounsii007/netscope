@@ -108,18 +108,37 @@ public class SecurityConfig {
                 // isolation). Cheap defensive measure that helps
                 // mitigate cross-origin sidechannel attacks.
                 .addHeaderWriter((req, res) -> res.setHeader("Origin-Agent-Cluster", "?1"))
-                // Cache-Control: no-store on every API response. We
-                // never want a shared proxy / CDN to cache an API
-                // payload — even a 200 may carry per-user data, an
-                // ephemeral rate-limit budget header, or a once-only
-                // token. Static assets are served from /static/** via
-                // the frontend, not from /api/**, so no false positive.
+                // Cache-Control per endpoint:
+                //
+                //   • Mutating + user-state surfaces (auth, billing,
+                //     monitor, user, workspaces, api-keys, webhooks) stay
+                //     on `no-store, Pragma: no-cache` — these responses
+                //     can carry session-bound data or one-shot tokens
+                //     that MUST NOT be cached by anything between us
+                //     and the user.
+                //
+                //   • Idempotent public lookup endpoints (DNS / IP /
+                //     SSL / CT logs / DoH / DKIM / whois / headers /
+                //     opengraph / robots / mixed-content) emit
+                //     `private, max-age=120, stale-while-revalidate=300`
+                //     so the same SPA tab re-clicking the same target
+                //     gets an instant response. `private` is
+                //     deliberate — shared proxies / CDNs must NOT
+                //     cache because each response still ships the
+                //     caller's own X-RateLimit-* triplet and mixing
+                //     those across users would leak ratelimit state.
+                //
+                //   • Anything not in the above two lists keeps the
+                //     conservative `no-store` default.
+                //
+                // Static assets are served from /_next/static/** via the
+                // frontend, not from /api/**, so this never collides with
+                // the long-cache policy on hashed-name assets.
                 .addHeaderWriter((req, res) -> {
-                    String p = req.getRequestURI();
-                    if (p != null && p.startsWith("/api/")) {
-                        res.setHeader("Cache-Control", "no-store");
-                        res.setHeader("Pragma", "no-cache");
-                    }
+                    String cc = resolveCacheControl(req.getRequestURI());
+                    if (cc == null) return;
+                    res.setHeader("Cache-Control", cc);
+                    if ("no-store".equals(cc)) res.setHeader("Pragma", "no-cache");
                 })
                 // X-Permitted-Cross-Domain-Policies: none.
                 // Mirrors the frontend (next.config.ts) — disables
@@ -131,6 +150,100 @@ public class SecurityConfig {
                 .addHeaderWriter((req, res) -> res.setHeader("X-Permitted-Cross-Domain-Policies", "none"))
             );
         return http.build();
+    }
+
+    /**
+     * Path prefixes that carry per-user state or accept mutations.
+     * Anything matching these MUST NOT be cached anywhere — even a 200
+     * may include a one-shot token or session-bound payload.
+     *
+     * Kept package-private so the unit test in
+     * {@code CacheControlPolicyTest} can exercise the classification
+     * directly without bringing up Spring.
+     */
+    static final String[] MUTATING_PREFIXES = {
+        "/api/v1/auth/",
+        "/api/v1/billing/",
+        "/api/v1/monitor",
+        "/api/v1/user",
+        "/api/v1/users",
+        "/api/v1/workspaces",
+        "/api/v1/api-keys",
+        "/api/v1/webhook",
+        "/api/v1/csp-report",
+        "/api/v1/log",
+        "/api/v1/vitals",
+        "/api/v1/ip/me",     // caller-IP dependent — must not be cached cross-user
+        "/api/v1/websocket", // probe RTT is time-sensitive
+    };
+
+    /**
+     * Path prefixes that are GET-shaped, idempotent, and identical
+     * across callers for a given input. Eligible for short-term private
+     * (browser-only) caching to make tab re-clicks instant.
+     */
+    static final String[] IDEMPOTENT_LOOKUP_PREFIXES = {
+        "/api/v1/dns/",
+        "/api/v1/dns-propagation/",
+        "/api/v1/dnssec/",
+        "/api/v1/doh/",
+        "/api/v1/dkim/",
+        "/api/v1/ip/",         // /ip/{ip} — NOT /ip/me (caught by mutating list above)
+        "/api/v1/ssl/",
+        "/api/v1/ssl-grade/",
+        "/api/v1/ct-logs/",
+        "/api/v1/whois/",
+        "/api/v1/subdomains/",
+        "/api/v1/cdn/",
+        "/api/v1/tech/",
+        "/api/v1/blacklist/",
+        "/api/v1/bgp/",
+        "/api/v1/ipv6/",
+        "/api/v1/headers",
+        "/api/v1/redirect",
+        "/api/v1/cookies",
+        "/api/v1/opengraph",
+        "/api/v1/robots/",
+        "/api/v1/mixed-content",
+        "/api/v1/email-auth/",
+    };
+
+    static boolean isMutatingOrUserState(String path) {
+        for (String p : MUTATING_PREFIXES) {
+            if (path.startsWith(p)) return true;
+        }
+        return false;
+    }
+
+    static boolean isIdempotentLookup(String path) {
+        // /ip/me hits the mutating list ABOVE first; this only matches
+        // /ip/{ip-literal} lookups. Same precedence in the caller.
+        for (String p : IDEMPOTENT_LOOKUP_PREFIXES) {
+            if (path.startsWith(p)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Decide the {@code Cache-Control} value for an API request path.
+     * Extracted as a package-private static method so the
+     * {@code CacheControlPolicyTest} can lock the FULL classification
+     * pipeline (precedence + fallback) rather than each helper in
+     * isolation. Returns {@code null} for non-/api/ paths so the
+     * caller knows to skip the header entirely.
+     *
+     *   • mutating + user-state surfaces  → {@code "no-store"}
+     *   • idempotent lookup surfaces      → {@code "private, max-age=120, stale-while-revalidate=300"}
+     *   • everything else under /api/     → {@code "no-store"} (conservative default)
+     *   • outside /api/                   → {@code null}
+     */
+    static String resolveCacheControl(String path) {
+        if (path == null || !path.startsWith("/api/")) return null;
+        if (isMutatingOrUserState(path)) return "no-store";
+        if (isIdempotentLookup(path)) {
+            return "private, max-age=120, stale-while-revalidate=300";
+        }
+        return "no-store";
     }
 
     @Bean

@@ -27,6 +27,14 @@
     <description>NetScope REST API</description>
 
     <properties>
+        <!--
+            Source/target bytecode release stays at 21 even though CI +
+            Dockerfile both run JDK 25. This is intentional: the
+            <release> directive doubles as a guardrail so a casual
+            commit can't sneak in a JDK 22-25-only API (foreign-function,
+            pattern matching for sealed types, etc.) without an
+            explicit pom bump. Build VM and run VM remain in sync at 25.
+        -->
         <java.version>21</java.version>
         <!-- Bumped to 42.7.11 to clear GHSA-98qh-xjc8-98pq + GHSA-hq9p-pm7w-8p54 -->
         <postgresql.version>42.7.11</postgresql.version>

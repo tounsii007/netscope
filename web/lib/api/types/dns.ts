@@ -46,6 +46,28 @@ export type DnssecResult = {
   warnings: string[];
 };
 
+/**
+ * Result of the DoH/DoT cross-resolver probe — answers and latency from
+ * each of the five public encrypted-DNS providers, plus a top-level
+ * consistency boolean (true when every reachable resolver returned the
+ * same sorted answer set).
+ */
+export type DohResult = {
+  domain: string;
+  type: string;
+  totalDurationMs: number;
+  consistent: boolean;
+  distinctAnswerSets: number;
+  resolvers: Array<{
+    name: string;
+    dohEndpoint: string;
+    dotHost: string;
+    doh: { ok: boolean; latencyMs: number; answerCount?: number; error?: string };
+    dot: { reachable: boolean; port: number; latencyMs: number; error?: string };
+    answers: string[];
+  }>;
+};
+
 export type PropagationResult = {
   domain: string;
   type: string;

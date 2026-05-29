@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
-        with: { distribution: temurin, java-version: "21", cache: maven }
+        with: { distribution: temurin, java-version: "25", cache: maven }
       - name: Unit + integration tests
         run: mvn -B verify
       - name: Upload JaCoCo coverage
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
       - uses: actions/setup-java@v5
-        with: { distribution: temurin, java-version: "21", cache: maven }
+        with: { distribution: temurin, java-version: "25", cache: maven }
       - name: Mutation testing
         run: mvn -B test org.pitest:pitest-maven:mutationCoverage
       - uses: actions/upload-artifact@v7

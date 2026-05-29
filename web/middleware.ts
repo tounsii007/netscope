@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { type NextRequest, NextResponse } from "next/server";
 import { rateLimit, currentLimit } from "./lib/rate-limit";
+import { buildCspWithNonce, generateNonce } from "./lib/csp";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -9,8 +10,16 @@ const intlMiddleware = createMiddleware(routing);
  * Combined Next.js middleware:
  *   1. Per-IP rate limiting (cheap 429 before hitting upstream)
  *   2. next-intl locale detection & routing
- *   3. x-pathname forwarding so the localised 404 can echo the URL
- *   4. Structured access logging (one JSON line per non-static request)
+ *   3. CSP nonce — fresh value per request, attached to the response
+ *      Content-Security-Policy AND surfaced via the `x-nonce` request
+ *      header so the layout can read it via `headers().get('x-nonce')`
+ *      and pass it to every <Script> + inline style tag. This is the
+ *      "drop 'unsafe-inline' from script-src" pre-req — the static
+ *      CSP in next.config.ts stays as a fallback for any route the
+ *      middleware doesn't intercept (e.g. static assets that bypass
+ *      the matcher).
+ *   4. x-pathname forwarding so the localised 404 can echo the URL
+ *   5. Structured access logging (one JSON line per non-static request)
  *
  * Order matters: rate limit FIRST so abusers don't even cost us a
  * locale-routing decision.
@@ -59,10 +68,35 @@ export default function middleware(req: NextRequest) {
     }
   }
 
-  // ─── 2. next-intl ─────────────────────────────────────────────────
+  // ─── 2. CSP nonce ─────────────────────────────────────────────────
+  // Generate once per request. The nonce is propagated through both:
+  //   • the REQUEST headers (so the rendered layout can read it via
+  //     `headers().get('x-nonce')` and thread it into <Script nonce={n}>);
+  //   • the RESPONSE Content-Security-Policy header (so the browser
+  //     enforces 'nonce-<value>' on script-src and style-src instead of
+  //     the static CSP's 'unsafe-inline').
+  //
+  // For the REQUEST-header side we mutate `req.headers` in place
+  // BEFORE delegating to intlMiddleware. The canonical
+  // `NextResponse.next({ request: { headers } })` pattern would be
+  // cleaner but isn't reachable here because intlMiddleware
+  // constructs its own NextResponse internally. Mutating in place is
+  // documented as working in Next.js 13+ — verified end-to-end via
+  // the layout's `headers().get('x-nonce')` call.
+  //
+  // Static assets bypass the matcher below, so they still inherit the
+  // 'unsafe-inline'-bearing static CSP from next.config.ts. That's
+  // fine — static assets are content-hashed and HTML routes are the
+  // XSS surface.
+  const nonce = generateNonce();
+  req.headers.set("x-nonce", nonce);
+
+  // ─── 3. next-intl ─────────────────────────────────────────────────
   const res = intlMiddleware(req);
   if (res instanceof NextResponse) {
     res.headers.set("x-pathname", path);
+    res.headers.set("x-nonce", nonce);
+    res.headers.set("Content-Security-Policy", buildCspWithNonce(nonce));
     // Surface remaining quota to the client so clients can self-throttle.
     if (rl) {
       res.headers.set("X-RateLimit-Limit",     String(limit));
@@ -71,7 +105,7 @@ export default function middleware(req: NextRequest) {
     }
   }
 
-  // ─── 3. Access log (non-static only) ──────────────────────────────
+  // ─── 4. Access log (non-static only) ──────────────────────────────
   // mwMs is the time spent in middleware only — rate-limit decision,
   // intl routing, header rewriting. It is NOT the total response
   // time: the actual route handler runs AFTER middleware returns,

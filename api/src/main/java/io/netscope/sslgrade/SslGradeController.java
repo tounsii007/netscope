@@ -3,6 +3,8 @@ package io.netscope.sslgrade;
 import io.netscope.common.ApiException;
 import io.netscope.common.ResponseCache;
 import io.netscope.common.TargetValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.*;
@@ -22,6 +24,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/ssl-grade")
 public class SslGradeController {
+
+    private static final Logger log = LoggerFactory.getLogger(SslGradeController.class);
 
     private final TargetValidator validator;
     private final ResponseCache cache;
@@ -117,7 +121,7 @@ public class SslGradeController {
                 return out;
             }
         } catch (Exception e) {
-            throw ApiException.badRequest("SSL probe failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "SSL probe failed", e);
         }
     }
 

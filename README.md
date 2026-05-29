@@ -1,10 +1,11 @@
 # Traceronix — Network Diagnostics & IP Intelligence Platform
 
-Production-ready SaaS for developers, DevOps and security engineers. **25 network
+Production-ready SaaS for developers, DevOps and security engineers. **29 network
 diagnostic tools** in one fast, free, no-login web app — from Port Checker and
 DNS Propagation across 15+ global resolvers to JWT decoding, BGP/ASN routing
-inspection, IPv6 readiness scoring, multi-source IP geolocation comparison and
-much more.
+inspection, IPv6 readiness scoring, multi-source IP geolocation comparison,
+DKIM key fetching, Certificate Transparency log search, DoH/DoT cross-resolver
+testing, WebSocket probing — and much more.
 
 [![Tests](https://img.shields.io/badge/tests-vitest-success)]()
 [![Locales](https://img.shields.io/badge/locales-11-blue)]()
@@ -16,10 +17,10 @@ much more.
 
 | Layer        | Technology                                                       |
 | ------------ | ---------------------------------------------------------------- |
-| Frontend     | Next.js 15 (App Router) · React 19 · TypeScript · TailwindCSS    |
+| Frontend     | Next.js 16 (App Router) · React 19 · TypeScript · TailwindCSS    |
 | i18n         | next-intl 4 — 11 locales (EN-US, DE, FR, ES, IT, PL, RU, UK, TR, HI, ZH) |
 | Maps         | react-leaflet + OpenStreetMap                                    |
-| Backend      | Spring Boot 3.4 · Java 21 · Maven                                |
+| Backend      | Spring Boot 3.5 · Java 21 · Maven                                |
 | Database     | PostgreSQL 16 (Flyway migrations)                                |
 | Cache / RL   | Redis 7 (result cache + Bucket4j rate limiter)                   |
 | Net libs     | dnsjava · BouncyCastle · ICMP via NIO                            |
@@ -31,19 +32,19 @@ much more.
 
 ---
 
-## Tools (25)
+## Tools (29)
 
 ### DNS & Domain
-DNS Lookup · DNS Propagation (15+ resolvers) · DNSSEC Validator · WHOIS/RDAP · Subdomain Finder (CT logs)
+DNS Lookup (22 record types incl. DNSSEC/RRSIG/SVCB/HTTPS) · DNS Propagation (15+ resolvers) · DNSSEC Validator · **DoH/DoT Tester** (5 resolvers) · WHOIS/RDAP · Subdomain Finder (CT logs) · **CT Log Search** (mis-issuance detection)
 
 ### Network
-Port Checker · IP Lookup (multi-source compare) · IPv6 Readiness · BGP/ASN · CDN Detector · Reachability
+Port Checker · IP Lookup (multi-source compare) · IPv6 Readiness · BGP/ASN · CDN Detector · Reachability · **WebSocket Probe** (handshake + RTT)
 
 ### Security
-SSL/TLS Inspector · IP Blacklist (20+ DNSBLs) · JWT Decoder · Password Leak (HIBP k-anonymity) · Mixed Content
+SSL/TLS Inspector (full chain + KU/EKU + AIA + SCT) · IP Blacklist (20+ DNSBLs) · JWT Decoder · Password Leak (HIBP k-anonymity) · Mixed Content
 
 ### Email
-Email Verifier · SPF/DKIM/DMARC
+Email Verifier · SPF/DKIM/DMARC Audit · **DKIM Key Fetcher** (per-selector key + algorithm + weakness warnings)
 
 ### Web Analysis
 HTTP Security Headers (A+→F grade) · Tech Stack Detector · Redirect Tracer · OpenGraph Preview · Cookies & GDPR · Robots & Sitemap · Dashboard (My IP)

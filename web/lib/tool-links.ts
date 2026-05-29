@@ -34,4 +34,8 @@ export const TOOL_LINKS: { href: string; key: string }[] = [
   { href: "/mixed-content",  key: "mixed"       },
   { href: "/jwt",            key: "jwt"         },
   { href: "/password-leak",  key: "pwd"         },
+  { href: "/dkim",           key: "dkim"        },
+  { href: "/ct-logs",        key: "ct_logs"     },
+  { href: "/doh",            key: "doh"         },
+  { href: "/websocket",      key: "websocket"   },
 ];

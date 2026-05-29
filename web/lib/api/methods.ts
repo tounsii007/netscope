@@ -1,11 +1,12 @@
 import { request } from "@/lib/api/request";
 import type {
   BgpAsnResult, BgpIpResult, BlacklistResult, CdnResult, CookieResult,
-  DnssecResult, DnsResult, EmailAuthResult, EmailVerifyResult,
-  HeadersResult, IpMultiSourceResult, IpResult, Ipv6Result, MixedResult,
-  OgResult, PortCheckResult, PortScanResult, PropagationResult,
-  ReachResult, RedirectResult, RobotsResult, SslResult, SubdomainsResult,
-  TechResult, WhoisResult,
+  CtLogsResult, DkimResult, DnssecResult, DnsResult, DohResult,
+  EmailAuthResult, EmailVerifyResult, HeadersResult, IpMultiSourceResult,
+  IpResult, Ipv6Result, MixedResult, OgResult, PortCheckResult,
+  PortScanResult, PropagationResult, ReachResult, RedirectResult,
+  RobotsResult, SslResult, SubdomainsResult, TechResult, WebSocketResult,
+  WhoisResult,
 } from "@/lib/api/types";
 
 /**
@@ -107,6 +108,42 @@ export const api = {
     request<RobotsResult>(`/api/v1/robots/${encodeURIComponent(host)}`, { signal: opts.signal }),
   mixedContent: (url: string, opts: { signal?: AbortSignal } = {}) =>
     request<MixedResult>(`/api/v1/mixed-content?url=${encodeURIComponent(url)}`, { signal: opts.signal }),
+
+  // — Encrypted DNS / Certificate Transparency / DKIM / WebSocket —
+  // Four newer probes that don't fit cleanly into the older domain groups.
+  // Each one accepts the same { signal } opt-bag as the rest so callers can
+  // cancel in-flight requests on user re-submit.
+  dkim: (domain: string, selector?: string, opts: { signal?: AbortSignal } = {}) =>
+    request<DkimResult>(
+      `/api/v1/dkim/${encodeURIComponent(domain)}${
+        selector ? `?selector=${encodeURIComponent(selector)}` : ""
+      }`,
+      { signal: opts.signal },
+    ),
+  ctLogs: (
+    domain: string,
+    includeSubdomains = true,
+    excludeExpired = false,
+    opts: { signal?: AbortSignal } = {},
+  ) =>
+    request<CtLogsResult>(
+      `/api/v1/ct-logs/${encodeURIComponent(domain)}?includeSubdomains=${
+        includeSubdomains
+      }&excludeExpired=${excludeExpired}`,
+      { signal: opts.signal },
+    ),
+  doh: (domain: string, type = "A", opts: { signal?: AbortSignal } = {}) =>
+    request<DohResult>(
+      `/api/v1/doh/${encodeURIComponent(domain)}?type=${encodeURIComponent(type)}`,
+      { signal: opts.signal },
+    ),
+  websocket: (url: string, subprotocol?: string, opts: { signal?: AbortSignal } = {}) =>
+    request<WebSocketResult>(
+      `/api/v1/websocket?url=${encodeURIComponent(url)}${
+        subprotocol ? `&subprotocol=${encodeURIComponent(subprotocol)}` : ""
+      }`,
+      { signal: opts.signal },
+    ),
 
   // — IPv6 / BGP —
   ipv6: (domain: string) =>

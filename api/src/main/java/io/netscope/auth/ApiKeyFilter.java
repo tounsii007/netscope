@@ -1,5 +1,6 @@
 package io.netscope.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netscope.audit.SecurityAuditService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +26,10 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     private static final Set<String> PRIVATE_PREFIXES = Set.of(
         "/api/v1/monitor", "/api/v1/bulk", "/api/v1/private"
     );
+    /** Shared Jackson mapper so the 401 response body is always
+     *  well-formed JSON. Hand-concatenating would break the moment the
+     *  message text grew a quote or backslash. */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ApiKeyService service;
     private final SecurityAuditService audit;
@@ -56,7 +61,8 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                     req, null, Map.of("path", path));
                 res.setStatus(401);
                 res.setContentType("application/json");
-                res.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"valid X-API-Key required\"}");
+                MAPPER.writeValue(res.getWriter(),
+                    Map.of("error", "Unauthorized", "message", "valid X-API-Key required"));
                 return;
             }
             chain.doFilter(req, res);

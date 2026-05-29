@@ -127,6 +127,41 @@ export class NetScope {
       }),
   };
 
+  /**
+   * Encrypted DNS, Certificate Transparency, DKIM key fetch, and
+   * WebSocket probe. Grouped together because they all answer "is the
+   * thing I published reachable / well-formed" — not "did it return
+   * data I should ingest into a pipeline".
+   */
+  readonly dkim = {
+    fetch: (domain: string, selector?: string) =>
+      this.request<DkimResult>(
+        `/api/v1/dkim/${enc(domain)}${selector ? `?selector=${enc(selector)}` : ""}`,
+      ),
+  };
+
+  readonly ctLogs = {
+    search: (domain: string, opts: { includeSubdomains?: boolean; excludeExpired?: boolean } = {}) => {
+      const inc = opts.includeSubdomains ?? true;
+      const exp = opts.excludeExpired ?? false;
+      return this.request<CtLogsResult>(
+        `/api/v1/ct-logs/${enc(domain)}?includeSubdomains=${inc}&excludeExpired=${exp}`,
+      );
+    },
+  };
+
+  readonly doh = {
+    probe: (domain: string, type = "A") =>
+      this.request<DohResult>(`/api/v1/doh/${enc(domain)}?type=${enc(type)}`),
+  };
+
+  readonly websocket = {
+    probe: (url: string, subprotocol?: string) =>
+      this.request<WebSocketResult>(
+        `/api/v1/websocket?url=${enc(url)}${subprotocol ? `&subprotocol=${enc(subprotocol)}` : ""}`,
+      ),
+  };
+
   readonly monitors = {
     create: (r: MonitorCreate) => this.request<Monitor>("/api/v1/monitor", { method: "POST", body: JSON.stringify(r) }),
     list: () => this.request<Monitor[]>("/api/v1/monitor"),
@@ -199,6 +234,80 @@ export interface MonitorCheck {
   error?: string; checkedAt: string;
 }
 export interface Page<T> { content: T[]; totalElements: number; totalPages: number; number: number; size: number }
+
+export interface DkimResult {
+  domain: string;
+  selector: string | null;
+  triedSelectors: string[];
+  result: {
+    queriedHost?: string;
+    present: boolean;
+    rawRecord?: string;
+    tags?: Record<string, string>;
+    keyType?: string;
+    keyAlgorithm?: string;
+    keySize?: number;
+    publicKeyBase64?: string;
+    hashAlgorithms?: string[];
+    serviceType?: string;
+    flags?: string;
+    revoked?: boolean;
+    warnings?: string[];
+  };
+}
+
+export interface CtLogsResult {
+  domain: string;
+  includeSubdomains: boolean;
+  totalReturned: number;
+  truncated: boolean;
+  issuerSummary: Record<string, number>;
+  certificates: Array<{
+    id: number;
+    serial: string;
+    commonName: string | null;
+    nameValue: string | null;
+    issuerCaName: string;
+    issuerCaId: number;
+    notBefore: string;
+    notAfter: string;
+    validForDays: number;
+    expired: boolean;
+    daysUntilExpiry: number;
+    sans: string[];
+  }>;
+}
+
+export interface DohResult {
+  domain: string;
+  type: string;
+  totalDurationMs: number;
+  consistent: boolean;
+  distinctAnswerSets: number;
+  resolvers: Array<{
+    name: string;
+    dohEndpoint: string;
+    dotHost: string;
+    doh: { ok: boolean; latencyMs: number; answerCount?: number; error?: string };
+    dot: { reachable: boolean; port: number; latencyMs: number; error?: string };
+    answers: string[];
+  }>;
+}
+
+export interface WebSocketResult {
+  url: string;
+  host: string;
+  scheme: string;
+  ok: boolean;
+  totalDurationMs: number;
+  handshakeLatencyMs?: number;
+  pingRttMs?: number;
+  subprotocol?: string;
+  closeStatusCode?: number | null;
+  closeReason?: string | null;
+  error?: string;
+  detail?: string;
+}
 
 // ---- helpers ----
 function enc(v: string) { return encodeURIComponent(v); }
