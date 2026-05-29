@@ -15,7 +15,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class DkimControllerTest {
 
-    private final DkimController ctrl = new DkimController();
+    // Tests cover input validation + helper parsing — none of them exercise
+    // the parallel probe path, so any ExecutorService implementation works.
+    // newSingleThreadExecutor keeps the test deterministic and never spawns
+    // virtual threads in the JUnit JVM.
+    private final DkimController ctrl =
+        new DkimController(java.util.concurrent.Executors.newSingleThreadExecutor());
 
     @Test void rejects_empty_domain() {
         assertThatThrownBy(() -> ctrl.lookup("", null))

@@ -3,6 +3,7 @@ package io.netscope.doh;
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
 import io.netscope.common.DomainNormaliser;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -53,8 +54,14 @@ public class DohController {
         new ResolverSpec("nextdns",    "https://dns.nextdns.io",              "45.90.28.165")
     );
 
-    private final ExecutorService pool = Executors.newThreadPerTaskExecutor(
-        Thread.ofVirtual().name("doh-", 0).factory());
+    /** Injected from {@link io.netscope.config.ExecutorsConfig#dohProbeExecutor}
+     *  so the executor is drained on Spring shutdown rather than leaked
+     *  at JVM exit. */
+    private final ExecutorService pool;
+
+    public DohController(@Qualifier("dohProbeExecutor") ExecutorService dohProbeExecutor) {
+        this.pool = dohProbeExecutor;
+    }
 
     @GetMapping("/{domain}")
     public Map<String, Object> probe(

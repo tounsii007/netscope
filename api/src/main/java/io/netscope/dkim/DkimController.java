@@ -3,6 +3,7 @@ package io.netscope.dkim;
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
 import io.netscope.common.DomainNormaliser;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -14,7 +15,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Standalone DKIM key fetcher and analyser.
@@ -43,13 +43,15 @@ public class DkimController {
         "s1", "s2", "mail", "default", "dkim", "smtpapi", "mandrill"
     );
 
-    /** Virtual-thread executor for the parallel selector probe. Sized
-     *  to the selector list — at 13 in-flight DNS queries per request
-     *  the cost is negligible, and each thread terminates the moment
-     *  its BoundedDns call returns. */
-    private final ExecutorService probePool =
-        Executors.newThreadPerTaskExecutor(
-            Thread.ofVirtual().name("dkim-probe-", 0).factory());
+    /** Injected from {@link io.netscope.config.ExecutorsConfig#dkimProbeExecutor}.
+     *  Lifecycle (Spring shutdown) and naming are owned there so the
+     *  executor is cleanly drained on application stop instead of leaking
+     *  virtual threads at JVM exit. */
+    private final ExecutorService probePool;
+
+    public DkimController(@Qualifier("dkimProbeExecutor") ExecutorService dkimProbeExecutor) {
+        this.probePool = dkimProbeExecutor;
+    }
 
     @GetMapping("/{domain}")
     public Map<String, Object> lookup(

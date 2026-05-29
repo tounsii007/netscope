@@ -7,7 +7,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DohControllerTest {
 
-    private final DohController ctrl = new DohController();
+    // Same rationale as DkimControllerTest — input-validation tests never
+    // dispatch to the executor, so any ExecutorService stub works.
+    private final DohController ctrl =
+        new DohController(java.util.concurrent.Executors.newSingleThreadExecutor());
 
     @Test void rejects_empty_domain() {
         assertThatThrownBy(() -> ctrl.probe("", "A"))
