@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.http;
 
 /**
  * Normalises user-supplied URL inputs.

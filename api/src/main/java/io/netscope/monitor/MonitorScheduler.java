@@ -1,7 +1,7 @@
 package io.netscope.monitor;
 
-import io.netscope.common.HttpUrlNormaliser;
-import io.netscope.common.SafeHttpClient;
+import io.netscope.common.http.HttpUrlNormaliser;
+import io.netscope.common.http.SafeHttpClient;
 import io.netscope.common.security.TargetValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

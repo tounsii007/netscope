@@ -1,7 +1,7 @@
 package io.netscope.pageinsight;
 
 import io.netscope.common.ApiException;
-import io.netscope.common.SafeHttpClient;
+import io.netscope.common.http.SafeHttpClient;
 import io.netscope.common.security.TargetValidator;
 import org.springframework.web.bind.annotation.*;
 

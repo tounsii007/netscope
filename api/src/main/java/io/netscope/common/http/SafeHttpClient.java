@@ -1,4 +1,4 @@
-package io.netscope.common;
+package io.netscope.common.http;
 
 import org.springframework.stereotype.Component;
 

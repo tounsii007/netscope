@@ -1,7 +1,7 @@
 package io.netscope.pageinsight;
 
-import io.netscope.common.HttpUrlNormaliser;
-import io.netscope.common.SafeHttpClient;
+import io.netscope.common.http.HttpUrlNormaliser;
+import io.netscope.common.http.SafeHttpClient;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
