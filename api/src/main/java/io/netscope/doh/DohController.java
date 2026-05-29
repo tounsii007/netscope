@@ -1,63 +1,39 @@
 package io.netscope.doh;
 
 import io.netscope.common.ApiException;
-import io.netscope.common.BoundedDns;
 import io.netscope.common.DomainNormaliser;
 import io.netscope.common.ToolMetrics;
+import io.netscope.doh.DohResolverDirectory.ResolverSpec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import org.xbill.DNS.*;
-import org.xbill.DNS.Record;
+import org.xbill.DNS.Type;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
- * DNS-over-HTTPS / DNS-over-TLS resolver tester.
+ * DNS-over-HTTPS / DNS-over-TLS tester. Resolves one (name, type) tuple
+ * against the five providers listed in {@link DohResolverDirectory} in
+ * parallel, then assembles a consistency view across them.
  *
- * Resolves a single (name, type) tuple against five public encrypted-DNS
- * providers in parallel — Cloudflare, Google, Quad9, AdGuard and NextDNS —
- * and returns each resolver's verbatim answer, latency and a consistency
- * check across the providers. Useful for:
+ * Substantive logic delegated to:
+ *   • {@link DohResolverDirectory} — the catalogue of providers
+ *   • {@link DohResolverProbe}     — a single DoH lookup
+ *   • {@link DotReachability}      — the TCP/853 port check
  *
- *   • Confirming a domain resolves identically across the public encrypted-
- *     DNS landscape — split-horizon DNS or geo-targeted answers stand out.
- *   • Diagnosing whether a DoH/DoT outage is provider-side or local.
- *   • Verifying that a recursive resolver under test can in fact be reached
- *     over TLS on port 853 (DoT reachability check).
- *
- * Trade-off vs the existing /dns-propagation tool: that one fans out across
- * 15+ classic UDP recursors to surface caching artefacts; this one focuses
- * on encrypted transports + a per-provider answer comparison.
+ * This controller owns the parallel-fan-out orchestration and the
+ * cross-resolver consistency check.
  */
 @RestController
 @RequestMapping("/api/v1/doh")
 public class DohController {
 
-    /** Per-query budget. Each DoH probe runs inside this cap; we then sum
-     *  via the global executor's await with a slightly larger ceiling. */
     private static final Duration PROBE_TIMEOUT = Duration.ofSeconds(4);
-    /** Whole-request budget. Even with 5 resolvers in parallel we never
-     *  hold the connection longer than this. */
     private static final Duration TOTAL_BUDGET = Duration.ofSeconds(8);
-    /** Default DoT port — RFC 7858. */
-    private static final int DOT_PORT = 853;
 
-    private static final List<ResolverSpec> RESOLVERS = List.of(
-        new ResolverSpec("cloudflare", "https://cloudflare-dns.com/dns-query", "1.1.1.1"),
-        new ResolverSpec("google",     "https://dns.google/dns-query",        "8.8.8.8"),
-        new ResolverSpec("quad9",      "https://dns.quad9.net/dns-query",     "9.9.9.9"),
-        new ResolverSpec("adguard",    "https://dns.adguard-dns.com/dns-query", "94.140.14.14"),
-        new ResolverSpec("nextdns",    "https://dns.nextdns.io",              "45.90.28.165")
-    );
-
-    /** Injected from {@link io.netscope.config.ExecutorsConfig#dohProbeExecutor}
-     *  so the executor is drained on Spring shutdown rather than leaked
-     *  at JVM exit. */
     private final ExecutorService pool;
     private final ToolMetrics metrics;
 
@@ -75,9 +51,6 @@ public class DohController {
     }
 
     private Map<String, Object> probeInternal(String domain, String type) {
-
-        // IDN canonicalisation before the ASCII regex. See
-        // DomainNormaliser for the strictness policy.
         domain = DomainNormaliser.toAscii(domain);
         if (domain == null || !domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
@@ -86,8 +59,9 @@ public class DohController {
 
         long start = System.currentTimeMillis();
         List<Future<Map<String, Object>>> futures = new ArrayList<>();
-        for (ResolverSpec r : RESOLVERS) {
-            futures.add(pool.submit(() -> probeOne(r, domain, recordType)));
+        for (ResolverSpec r : DohResolverDirectory.ALL) {
+            String domainCapture = domain;
+            futures.add(pool.submit(() -> probeOne(r, domainCapture, recordType)));
         }
 
         List<Map<String, Object>> perResolver = new ArrayList<>();
@@ -96,18 +70,7 @@ public class DohController {
             catch (Exception ignored) { /* one slow resolver doesn't sink the rest */ }
         }
 
-        // Consistency check: every reachable resolver must return the same
-        // sorted, normalised answer set. If anyone diverges, flag it.
-        Set<String> answerSets = new LinkedHashSet<>();
-        for (Map<String, Object> r : perResolver) {
-            @SuppressWarnings("unchecked")
-            List<String> answers = (List<String>) r.get("answers");
-            if (answers != null && !answers.isEmpty()) {
-                List<String> sorted = new ArrayList<>(answers);
-                Collections.sort(sorted);
-                answerSets.add(String.join("|", sorted));
-            }
-        }
+        Set<String> answerSets = collectDistinctAnswerSets(perResolver);
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("domain", domain);
@@ -119,66 +82,32 @@ public class DohController {
         return out;
     }
 
-    private Map<String, Object> probeOne(ResolverSpec spec, String domain, int recordType) {
+    private static Map<String, Object> probeOne(ResolverSpec spec, String domain, int recordType) {
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("name", spec.name());
         r.put("dohEndpoint", spec.dohUrl());
         r.put("dotHost", spec.dotHost());
 
-        // ── DoH query ────────────────────────────────────────────────────
-        long t0 = System.currentTimeMillis();
-        try {
-            DohResolver resolver = new DohResolver(spec.dohUrl());
-            resolver.setTimeout(PROBE_TIMEOUT);
-            // dnsjava's DohResolver internally pools an HttpClient; we still
-            // wrap in BoundedDns for the outer barrier guarantee.
-            Record[] records = BoundedDns.run(domain, recordType, resolver);
-            long elapsed = System.currentTimeMillis() - t0;
-            r.put("doh", Map.of(
-                "ok", records != null,
-                "latencyMs", elapsed,
-                "answerCount", records == null ? 0 : records.length
-            ));
-            if (records != null) {
-                List<String> answers = new ArrayList<>();
-                for (Record rec : records) answers.add(rec.rdataToString());
-                r.put("answers", answers);
-            } else {
-                r.put("answers", List.of());
-            }
-        } catch (Exception e) {
-            r.put("doh", Map.of(
-                "ok", false,
-                "latencyMs", System.currentTimeMillis() - t0,
-                "error", e.getClass().getSimpleName()
-            ));
-            r.put("answers", List.of());
-        }
-
-        // ── DoT port-reachability probe ──────────────────────────────────
-        // We don't actually run a TLS handshake here — surfacing port-open
-        // status is enough to tell the user whether their network blocks
-        // outbound 853. A real TLS-handshake test would belong in a
-        // separate probe with cert-chain inspection.
-        long t1 = System.currentTimeMillis();
-        try (Socket s = new Socket()) {
-            s.connect(new InetSocketAddress(spec.dotHost(), DOT_PORT),
-                (int) PROBE_TIMEOUT.toMillis());
-            r.put("dot", Map.of(
-                "reachable", true,
-                "port", DOT_PORT,
-                "latencyMs", System.currentTimeMillis() - t1
-            ));
-        } catch (Exception e) {
-            r.put("dot", Map.of(
-                "reachable", false,
-                "port", DOT_PORT,
-                "latencyMs", System.currentTimeMillis() - t1,
-                "error", e.getClass().getSimpleName()
-            ));
-        }
-
+        DohResolverProbe.Result doh = DohResolverProbe.query(
+            spec.dohUrl(), domain, recordType, PROBE_TIMEOUT);
+        r.put("doh", doh.doh());
+        r.put("answers", doh.answers());
+        r.put("dot", DotReachability.probe(spec.dotHost(), PROBE_TIMEOUT));
         return r;
+    }
+
+    private static Set<String> collectDistinctAnswerSets(List<Map<String, Object>> perResolver) {
+        Set<String> answerSets = new LinkedHashSet<>();
+        for (Map<String, Object> r : perResolver) {
+            @SuppressWarnings("unchecked")
+            List<String> answers = (List<String>) r.get("answers");
+            if (answers != null && !answers.isEmpty()) {
+                List<String> sorted = new ArrayList<>(answers);
+                Collections.sort(sorted);
+                answerSets.add(String.join("|", sorted));
+            }
+        }
+        return answerSets;
     }
 
     private static int parseType(String t) {
@@ -193,15 +122,5 @@ public class DohController {
             case "CAA"   -> Type.CAA;
             default -> throw ApiException.badRequest("unsupported DNS record type: " + t);
         };
-    }
-
-    /** Bundles a provider's DoH URL with its corresponding DoT IP address. */
-    private record ResolverSpec(String name, String dohUrl, String dotHost) {
-        // Validate at construction so a misconfigured static list fails at
-        // class-load rather than first-request.
-        ResolverSpec {
-            Objects.requireNonNull(name); Objects.requireNonNull(dohUrl);
-            URI.create(dohUrl); // throws if malformed
-        }
     }
 }
