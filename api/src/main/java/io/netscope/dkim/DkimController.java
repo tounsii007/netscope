@@ -3,6 +3,7 @@ package io.netscope.dkim;
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
 import io.netscope.common.DomainNormaliser;
+import io.netscope.common.ToolMetrics;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
@@ -48,15 +49,22 @@ public class DkimController {
      *  executor is cleanly drained on application stop instead of leaking
      *  virtual threads at JVM exit. */
     private final ExecutorService probePool;
+    private final ToolMetrics metrics;
 
-    public DkimController(@Qualifier("dkimProbeExecutor") ExecutorService dkimProbeExecutor) {
+    public DkimController(@Qualifier("dkimProbeExecutor") ExecutorService dkimProbeExecutor,
+                          ToolMetrics metrics) {
         this.probePool = dkimProbeExecutor;
+        this.metrics = metrics;
     }
 
     @GetMapping("/{domain}")
     public Map<String, Object> lookup(
             @PathVariable String domain,
             @RequestParam(required = false) String selector) {
+        return metrics.record("dkim", "lookup", () -> lookupInternal(domain, selector));
+    }
+
+    private Map<String, Object> lookupInternal(String domain, String selector) {
 
         // Canonicalise IDN / Unicode hostnames to ACE form BEFORE the
         // local ASCII regex fires. Without this, münchen.de hits a 400

@@ -20,7 +20,10 @@ class DkimControllerTest {
     // newSingleThreadExecutor keeps the test deterministic and never spawns
     // virtual threads in the JUnit JVM.
     private final DkimController ctrl =
-        new DkimController(java.util.concurrent.Executors.newSingleThreadExecutor());
+        new DkimController(
+            java.util.concurrent.Executors.newSingleThreadExecutor(),
+            new io.netscope.common.ToolMetrics(
+                new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_empty_domain() {
         assertThatThrownBy(() -> ctrl.lookup("", null))

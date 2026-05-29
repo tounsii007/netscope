@@ -14,7 +14,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class CtLogsControllerTest {
 
-    private final CtLogsController ctrl = new CtLogsController();
+    private final CtLogsController ctrl = new CtLogsController(
+        new io.netscope.common.ToolMetrics(
+            new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_empty_domain() {
         assertThatThrownBy(() -> ctrl.search("", true, false))

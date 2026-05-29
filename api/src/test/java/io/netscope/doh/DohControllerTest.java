@@ -10,7 +10,10 @@ class DohControllerTest {
     // Same rationale as DkimControllerTest — input-validation tests never
     // dispatch to the executor, so any ExecutorService stub works.
     private final DohController ctrl =
-        new DohController(java.util.concurrent.Executors.newSingleThreadExecutor());
+        new DohController(
+            java.util.concurrent.Executors.newSingleThreadExecutor(),
+            new io.netscope.common.ToolMetrics(
+                new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_empty_domain() {
         assertThatThrownBy(() -> ctrl.probe("", "A"))

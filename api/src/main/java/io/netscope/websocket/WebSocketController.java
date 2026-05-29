@@ -2,6 +2,7 @@ package io.netscope.websocket;
 
 import io.netscope.common.ApiException;
 import io.netscope.common.TargetValidator;
+import io.netscope.common.ToolMetrics;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -56,15 +57,21 @@ public class WebSocketController {
         .connectTimeout(STEP_TIMEOUT)
         .build();
 
-    public WebSocketController(TargetValidator validator) {
+    private final ToolMetrics metrics;
+
+    public WebSocketController(TargetValidator validator, ToolMetrics metrics) {
         this.validator = validator;
+        this.metrics = metrics;
     }
 
     @GetMapping
     public Map<String, Object> probe(
             @RequestParam String url,
             @RequestParam(required = false) String subprotocol) {
+        return metrics.record("websocket", "probe", () -> probeInternal(url, subprotocol));
+    }
 
+    private Map<String, Object> probeInternal(String url, String subprotocol) {
         // Validate subprotocol FIRST so a malformed token returns 400
         // without paying the cost of DNS resolution / SSRF lookup. This
         // also means unit tests can exercise the subprotocol-rejection

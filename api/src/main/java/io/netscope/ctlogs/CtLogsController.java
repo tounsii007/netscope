@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netscope.common.ApiException;
 import io.netscope.common.DomainNormaliser;
+import io.netscope.common.ToolMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -62,13 +63,23 @@ public class CtLogsController {
         .followRedirects(HttpClient.Redirect.NORMAL)
         .build();
     private final ObjectMapper mapper = new ObjectMapper();
+    private final ToolMetrics metrics;
+
+    public CtLogsController(ToolMetrics metrics) {
+        this.metrics = metrics;
+    }
 
     @GetMapping("/{domain}")
     public Map<String, Object> search(
             @PathVariable String domain,
             @RequestParam(defaultValue = "true") boolean includeSubdomains,
             @RequestParam(defaultValue = "false") boolean excludeExpired) {
+        return metrics.record("ct-logs", "search",
+            () -> searchInternal(domain, includeSubdomains, excludeExpired));
+    }
 
+    private Map<String, Object> searchInternal(String domain,
+            boolean includeSubdomains, boolean excludeExpired) {
         // IDN canonicalisation BEFORE the local ASCII regex check so
         // münchen.de et al reach crt.sh as xn--mnchen-3ya.de rather than
         // being rejected outright. See DomainNormaliser for the policy

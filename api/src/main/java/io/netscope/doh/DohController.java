@@ -3,6 +3,7 @@ package io.netscope.doh;
 import io.netscope.common.ApiException;
 import io.netscope.common.BoundedDns;
 import io.netscope.common.DomainNormaliser;
+import io.netscope.common.ToolMetrics;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
@@ -58,15 +59,22 @@ public class DohController {
      *  so the executor is drained on Spring shutdown rather than leaked
      *  at JVM exit. */
     private final ExecutorService pool;
+    private final ToolMetrics metrics;
 
-    public DohController(@Qualifier("dohProbeExecutor") ExecutorService dohProbeExecutor) {
+    public DohController(@Qualifier("dohProbeExecutor") ExecutorService dohProbeExecutor,
+                         ToolMetrics metrics) {
         this.pool = dohProbeExecutor;
+        this.metrics = metrics;
     }
 
     @GetMapping("/{domain}")
     public Map<String, Object> probe(
             @PathVariable String domain,
             @RequestParam(defaultValue = "A") String type) {
+        return metrics.record("doh", "probe", () -> probeInternal(domain, type));
+    }
+
+    private Map<String, Object> probeInternal(String domain, String type) {
 
         // IDN canonicalisation before the ASCII regex. See
         // DomainNormaliser for the strictness policy.

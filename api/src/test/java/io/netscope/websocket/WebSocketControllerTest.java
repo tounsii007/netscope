@@ -9,7 +9,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class WebSocketControllerTest {
 
     private final WebSocketController ctrl =
-        new WebSocketController(new TargetValidator());
+        new WebSocketController(new TargetValidator(),
+            new io.netscope.common.ToolMetrics(
+                new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
 
     @Test void rejects_http_scheme() {
         assertThatThrownBy(() -> ctrl.probe("https://example.com", null))
