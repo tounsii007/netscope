@@ -1,4 +1,5 @@
 package io.netscope.common;
+import io.netscope.common.http.HttpUrlNormaliser;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

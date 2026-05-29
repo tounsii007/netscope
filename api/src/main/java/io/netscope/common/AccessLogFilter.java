@@ -1,4 +1,5 @@
 package io.netscope.common;
+import io.netscope.common.security.ClientIpResolver;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,4 +1,5 @@
 package io.netscope.common;
+import io.netscope.common.observability.ToolMetrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
