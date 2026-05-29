@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import "../globals.css";
@@ -56,9 +57,31 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
   const dir = locale === "ar" ? "rtl" : "ltr";
   const t = await getTranslations({ locale, namespace: "nav" });
+  // Read the per-request CSP nonce that middleware.ts attached to the
+  // request headers. Next.js's App Router auto-threads the nonce into
+  // every framework-injected <script> tag in the SSR HTML whenever the
+  // response Content-Security-Policy header carries 'nonce-{value}'
+  // (which our middleware ensures). Reading it here:
+  //   1. Documents the contract — future contributors see that this
+  //      file participates in nonce-based CSP and can pass `nonce={n}`
+  //      to any future <Script> they add.
+  //   2. Ensures the `headers()` call is part of this layout's
+  //      reactive tree, so Next.js knows to recompute the rendered
+  //      output per request (avoids accidental static-rendering of
+  //      what is fundamentally per-request output).
+  // The value is intentionally NOT validated for shape; if middleware
+  // is misconfigured and omits the header, all inline framework scripts
+  // will lack a nonce and the browser will block them — preferable
+  // failure mode to silently rendering a page with no CSP enforcement.
+  const reqHeaders = await headers();
+  const nonce = reqHeaders.get("x-nonce") ?? undefined;
   return (
     <html lang={locale} dir={dir} className={`dark ${inter.variable} ${mono.variable}`}>
       <head>
+        {/* Nonce-carrying meta tag for the few legacy browsers + scrapers
+            that prefer reading nonce out of <meta http-equiv> rather
+            than the response header. Cheap belt + braces. */}
+        {nonce ? <meta httpEquiv="x-csp-nonce" content={nonce} /> : null}
         {/*
           Preconnect to the four cross-origin asset hosts we hit from
           almost every page so the browser parallelises DNS + TCP +
