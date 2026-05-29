@@ -73,10 +73,22 @@ public class DkimController {
             return out;
         }
 
-        // Probe every known selector in PARALLEL. The previous serial
-        // loop took ~3s × 13 = ~39s worst case (timeout per BoundedDns
-        // call) for a domain that publishes none of them; parallel
-        // fan-out caps the wall-clock at ~3s instead.
+        // Probe every known selector in PARALLEL but RETURN STREAMING:
+        // walk the futures in canonical (DEFAULT_SELECTORS) order, await
+        // each one in turn, return the moment a present=true probe
+        // resolves. Cancel the remaining futures so the slow tail can't
+        // hold a virtual thread forever.
+        //
+        // Latency model:
+        //   • Best  case — first selector resolves → ~50ms (matches the
+        //                  old serial fast-path; the previous "wait-for-
+        //                  all" rewrite regressed this to ~3s).
+        //   • Worst case — every selector misses    → ~3s (BoundedDns cap),
+        //                  not the 13×3=39s of the serial version.
+        //
+        // Determinism: we walk canonical order on the AWAIT side too, so
+        // two domains publishing the same set of selectors always return
+        // the same canonical "winner" across calls.
         List<CompletableFuture<Map.Entry<String, Map<String, Object>>>> futures =
             new ArrayList<>(DEFAULT_SELECTORS.size());
         for (String s : DEFAULT_SELECTORS) {
@@ -84,28 +96,38 @@ public class DkimController {
                 () -> Map.entry(s, fetchOne(domain, s)), probePool));
         }
 
-        // Wait for all probes to complete — BoundedDns already enforces
-        // its own per-call cap so we don't need an outer barrier. Then
-        // pick the FIRST (in DEFAULT_SELECTORS order) that came back
-        // present; that's the deterministic "winner" so two domains
-        // publishing the same set of selectors always return the same
-        // canonical selector across calls.
-        Map<String, Map<String, Object>> bySelector = new LinkedHashMap<>();
-        for (CompletableFuture<Map.Entry<String, Map<String, Object>>> f : futures) {
+        List<String> tried = new ArrayList<>(futures.size());
+        Map<String, Object> winningResult = null;
+        String winningSelector = null;
+        for (int i = 0; i < futures.size(); i++) {
+            String selectorAtI = DEFAULT_SELECTORS.get(i);
             try {
-                Map.Entry<String, Map<String, Object>> e = f.get();
-                bySelector.put(e.getKey(), e.getValue());
-            } catch (Exception ignored) { /* one bad probe doesn't sink the rest */ }
-        }
-        List<String> tried = new ArrayList<>(bySelector.keySet());
-        for (String s : DEFAULT_SELECTORS) {
-            Map<String, Object> r = bySelector.get(s);
-            if (r != null && Boolean.TRUE.equals(r.get("present"))) {
-                out.put("selector", s);
-                out.put("result", r);
-                out.put("triedSelectors", tried);
-                return out;
+                Map.Entry<String, Map<String, Object>> e = futures.get(i).get();
+                tried.add(e.getKey());
+                if (Boolean.TRUE.equals(e.getValue().get("present"))) {
+                    winningResult = e.getValue();
+                    winningSelector = e.getKey();
+                    // Cancel every still-pending probe — they can't change
+                    // the answer at this point (canonical order means we
+                    // already prefer this one).
+                    for (int j = i + 1; j < futures.size(); j++) {
+                        futures.get(j).cancel(true);
+                    }
+                    break;
+                }
+            } catch (Exception ignored) {
+                // Treat as "tried but probe errored". Record the selector
+                // name we attempted so the response's triedSelectors list
+                // matches what the caller actually asked for.
+                tried.add(selectorAtI);
             }
+        }
+
+        if (winningResult != null) {
+            out.put("selector", winningSelector);
+            out.put("result", winningResult);
+            out.put("triedSelectors", tried);
+            return out;
         }
         out.put("selector", null);
         out.put("result", Map.of(
