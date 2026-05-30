@@ -79,7 +79,9 @@ public final class DnsRecordDescriber {
     private static void addDs(Map<String, Object> m, DSRecord ds) {
         m.put("keyTag", ds.getFootprint());
         m.put("algorithm", ds.getAlgorithm());
-        m.put("digestType", ds.getDigestType());
+        // dnsjava 3.x renamed the accessor to getDigestID(); the response
+        // field stays "digestType" so the UI / SDK contract is unchanged.
+        m.put("digestType", ds.getDigestID());
         m.put("digest", bytesToHex(ds.getDigest()));
     }
 

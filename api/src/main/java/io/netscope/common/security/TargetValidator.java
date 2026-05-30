@@ -1,4 +1,5 @@
 package io.netscope.common.security;
+import io.netscope.common.errors.ApiException;
 
 import org.springframework.stereotype.Component;
 
