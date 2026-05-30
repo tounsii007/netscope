@@ -52,7 +52,13 @@ public class DohController {
 
     private Map<String, Object> probeInternal(String domain, String type) {
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
+        // The negative lookahead (?!.*\.\.) rejects "foo..bar.com" —
+        // a zero-length DNS label that RFC 1035 §3.1 forbids and that
+        // every public resolver refuses anyway. Without it the bare
+        // character class still let the input through to the parallel
+        // probe, which then burned 15 resolver round-trips on an input
+        // that could never resolve.
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
         int recordType = parseType(type);

@@ -171,9 +171,12 @@ public class SecurityConfig {
         "/api/v1/api-keys",
         "/api/v1/webhook",
         // CSP reports land at /api/csp-report on the Next.js frontend
-        // (see next.config.ts → "report-uri /api/csp-report") — there is
-        // no backend route at /api/v1/csp-report. The previous entry
-        // here was dead config.
+        // (see next.config.ts → "report-uri /api/csp-report"). The
+        // backend currently has no /api/v1/csp-report route, but the
+        // entry stays in the mutating list as defense-in-depth: if a
+        // future backend consumer is added, an absent classifier would
+        // let the CDN cache attacker-supplied report bodies.
+        "/api/v1/csp-report",
         "/api/v1/log",
         "/api/v1/vitals",
         "/api/v1/ip/me",     // caller-IP dependent — must not be cached cross-user

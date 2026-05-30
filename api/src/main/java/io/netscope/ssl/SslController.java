@@ -299,7 +299,8 @@ public class SslController {
             if (urlStart < 0) return;
             int urlEnd = urlStart;
             while (urlEnd < octets.length
-                && octets[urlEnd] > 0x20 && octets[urlEnd] < 0x7f) {
+                && octets[urlEnd] > 0x20 && octets[urlEnd] < 0x7f
+                && !isOidPrefixAt(octets, urlEnd, b0, b1, b2, b3, b4, b5, b6)) {
                 urlEnd++;
             }
             String url = new String(octets, urlStart, urlEnd - urlStart,
@@ -309,6 +310,22 @@ public class SslController {
             else ca.add(url);   // unknown discriminator → conservative bucket
             idx = urlEnd;
         }
+    }
+
+    /** True iff the 7-byte AIA OID prefix begins at {@code pos}. Used to
+     *  cut a URL extraction short when a second AccessDescription is
+     *  concatenated right after the first without a length-delimited
+     *  separator. The byte {@code 0x2B} ({@code '+'}) is a valid URL
+     *  character on its own, so the scanner cannot stop on it
+     *  unconditionally — only when it sits at the start of the full
+     *  OID-prefix byte run. */
+    private static boolean isOidPrefixAt(byte[] o, int pos,
+            byte b0, byte b1, byte b2, byte b3, byte b4, byte b5, byte b6) {
+        return pos + 7 <= o.length
+            && o[pos]     == b0 && o[pos + 1] == b1
+            && o[pos + 2] == b2 && o[pos + 3] == b3
+            && o[pos + 4] == b4 && o[pos + 5] == b5
+            && o[pos + 6] == b6;
     }
 
 

@@ -102,6 +102,19 @@ public class TargetValidator {
         // inputs preserves that behaviour while keeping the strict
         // canonicalisation for any input that actually carries Unicode.
         if (!isIpLiteral(trimmed) && !isPureAscii(trimmed)) {
+            // Defence-in-depth BEFORE IDN.toASCII:
+            // newer JDKs (≥21 on IDNA 2008 tables, ≥25 demonstrably) silently
+            // map several attack-relevant codepoints — zero-width no-break
+            // space (U+FEFF), em-dash (U+2014), right-to-left override
+            // (U+202E) — into "valid" Punycode output instead of raising on
+            // STD3. Reject any non-ASCII codepoint whose Unicode general
+            // category is outside the letter/digit/combining-mark whitelist
+            // before IDN ever sees it. Cyrillic / CJK / Hindi letters still
+            // canonicalise normally; format-class and dash-punctuation
+            // codepoints don't.
+            if (hasNonHostCodepoint(trimmed)) {
+                throw ApiException.badRequest("invalid hostname (illegal codepoint)");
+            }
             try {
                 trimmed = IDN.toASCII(trimmed, IDN.USE_STD3_ASCII_RULES);
             } catch (IllegalArgumentException e) {
@@ -178,5 +191,62 @@ public class TargetValidator {
             if (s.charAt(i) > 0x7F) return false;
         }
         return true;
+    }
+
+    /**
+     * True iff {@code s} contains a non-ASCII codepoint whose Unicode
+     * general category falls outside the letter/digit/combining-mark
+     * set legitimate IDN hostnames use. Catches the classes IDN.toASCII
+     * silently maps through:
+     *
+     *   • {@code Cf} — format (BOM U+FEFF, ZWJ, ZWNJ, RTL override)
+     *   • {@code Cc} — control characters
+     *   • {@code Cn} — unassigned codepoints (homograph attack surface
+     *                  expands as Unicode adds new chars before IDNA
+     *                  tables catch up)
+     *   • {@code Co} — private-use codepoints
+     *   • {@code Pd / Pi / Pf / Po / Ps / Pe / Pc} — punctuation in
+     *                  any flavour other than the ASCII '.', '-', '_'
+     *                  the host pattern already allows
+     *   • {@code Zs / Zl / Zp} — non-ASCII whitespace separators
+     *
+     * Allowed (legitimate IDN labels in non-Latin scripts):
+     *
+     *   • {@code Ll/Lu/Lt/Lm/Lo} — letters (Latin, Cyrillic, CJK, …)
+     *   • {@code Nd/Nl/No}       — number characters
+     *   • {@code Mn/Mc}          — combining marks (needed for Arabic,
+     *                              Devanagari, …)
+     *
+     * ASCII bytes never reach this method — {@link #isPureAscii} short-
+     * circuits the caller — so the ASCII `.`, `-`, `_` exemption isn't
+     * needed here.
+     */
+    static boolean hasNonHostCodepoint(String s) {
+        for (int i = 0; i < s.length(); ) {
+            int cp = s.codePointAt(i);
+            i += Character.charCount(cp);
+            // ASCII label characters the host pattern explicitly allows.
+            // These would otherwise classify as OTHER_PUNCTUATION ('.'),
+            // DASH_PUNCTUATION ('-'), or CONNECTOR_PUNCTUATION ('_') and
+            // get falsely rejected for mixed ASCII+Unicode hostnames
+            // (e.g. "münchen.de" — the '.' is ASCII OTHER_PUNCTUATION).
+            if (cp == '.' || cp == '-' || cp == '_') continue;
+            switch (Character.getType(cp)) {
+                case Character.LOWERCASE_LETTER:
+                case Character.UPPERCASE_LETTER:
+                case Character.TITLECASE_LETTER:
+                case Character.MODIFIER_LETTER:
+                case Character.OTHER_LETTER:
+                case Character.DECIMAL_DIGIT_NUMBER:
+                case Character.LETTER_NUMBER:
+                case Character.OTHER_NUMBER:
+                case Character.NON_SPACING_MARK:
+                case Character.COMBINING_SPACING_MARK:
+                    continue;
+                default:
+                    return true;
+            }
+        }
+        return false;
     }
 }
