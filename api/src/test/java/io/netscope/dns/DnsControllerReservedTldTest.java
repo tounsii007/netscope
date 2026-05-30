@@ -35,7 +35,11 @@ class DnsControllerReservedTldTest {
         "host.localhost"
     })
     void rejectsReservedTlds(String domain) {
-        assertThatThrownBy(() -> controller.lookup(domain, "A"))
+        // DnsController.lookup signature is (domain, type, includeRrsig,
+        // dnssecSummary) — pass the two boolean defaults explicitly so
+        // the test pins the gate, not the convenience overload Spring
+        // synthesises from @RequestParam defaults.
+        assertThatThrownBy(() -> controller.lookup(domain, "A", false, false))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining("never resolves publicly");
     }
@@ -47,7 +51,7 @@ class DnsControllerReservedTldTest {
         // BoundedDns.run() call and returns empty records → no throw.
         // We assert we don't trip the reserved-TLD gate here.
         try {
-            controller.lookup("example.com", "A");
+            controller.lookup("example.com", "A", false, false);
             // If we reach this line, no exception was thrown — the gate
             // didn't reject "example.com" (correct: .com is not reserved).
         } catch (ApiException e) {
@@ -81,7 +85,7 @@ class DnsControllerReservedTldTest {
         // the regex still rejects underscore. Network failures are fine
         // here — we only care that the syntax gate doesn't block it.
         try {
-            controller.lookup(domain, "TXT");
+            controller.lookup(domain, "TXT", false, false);
         } catch (ApiException e) {
             assert !"invalid domain".equals(e.getMessage())
                 : domain + " should not be rejected as 'invalid domain' — underscore is required for DKIM/DMARC/ACME";
