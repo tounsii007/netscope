@@ -9,7 +9,7 @@ import {
   Clock, KeyRound, Award, Globe, Layers,
 } from "lucide-react";
 import { checkTargetGuard } from "@/lib/target-guard";
-import { CertField } from "./cert-field";
+import { CertField } from "./_pieces/cert-field";
 
 export function SslClient() {
   const t = useTranslations("ssl");
