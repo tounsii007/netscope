@@ -249,6 +249,30 @@
                     <execution>
                         <id>prepare-agent</id>
                         <goals><goal>prepare-agent</goal></goals>
+                        <configuration>
+                            <!--
+                                JaCoCo 0.8.12 + JDK 25 emits
+                                IllegalClassFormatException for several
+                                JDK-internal classes (java/sql/*,
+                                java/net/http/WebSocket$Listener,
+                                com/sun/tools/attach/VirtualMachine)
+                                because the agent's bytecode rewriter
+                                doesn't yet understand the new class-
+                                file shape. The exceptions don't fail
+                                the build but they pollute CI logs by
+                                the thousands and historically masked
+                                real instrumentation errors. Tell the
+                                agent to skip these namespaces — none
+                                of them is part of our coverage target
+                                anyway.
+                            -->
+                            <excludes>
+                                <exclude>com/sun/**</exclude>
+                                <exclude>sun/**</exclude>
+                                <exclude>java/**</exclude>
+                                <exclude>jdk/**</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
