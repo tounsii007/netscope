@@ -203,7 +203,20 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>6.0.0</version>
+            <!-- Pinned to the last 5.x release. rest-assured 6.0.0 (the
+                 dependabot bump on 2026-05-14 that broke CI) flips the
+                 default body-mapper to Jackson 3 (`tools.jackson.databind`),
+                 which is incompatible with Spring Boot 3.5's managed
+                 Jackson 2 (`com.fasterxml.jackson.databind`). Symptom in
+                 CI was every SsrfProtectionIT case throwing
+                   NoClassDefFoundError: Could not initialize class io.restassured.RestAssured
+                   Caused by: NoClassDefFoundError:
+                   io/restassured/path/json/mapper/factory/Jackson3ObjectMapperFactory
+                 at class-init time. Moving back to a Jackson-2-default
+                 release restores green CI; the upgrade to 6.x can land
+                 once Spring Boot pulls Jackson 3, or via an explicit
+                 rest-assured-jackson2 mapper config. -->
+            <version>5.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
