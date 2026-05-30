@@ -106,8 +106,13 @@ describe("POST /api/csp-report", () => {
     await POST(makeRequest(body) as never);
     const arg = vi.mocked(logger.warn).mock.calls[0]?.[1] as Record<string, unknown>;
     const sample = arg.sample as string;
-    expect(sample.length).toBeLessThanOrEqual(2_010); // 2_000 + truncation marker
-    expect(sample.endsWith("…[truncated]")).toBe(true);
+    // 2 000 base cap + the literal "…[truncated]" suffix appended by the
+    // route. The suffix is 12 characters (ellipsis + bracketed word), so
+    // computing the bound from the suffix length keeps the test honest if
+    // someone tweaks the marker without touching MAX_FIELD_LEN.
+    const TRUNC_MARKER = "…[truncated]";
+    expect(sample.length).toBeLessThanOrEqual(2_000 + TRUNC_MARKER.length);
+    expect(sample.endsWith(TRUNC_MARKER)).toBe(true);
   });
 });
 

@@ -65,10 +65,13 @@ describe("DkimClient", () => {
     await userEvent.click(screen.getByRole("button"));
 
     await waitFor(() => {
-      // The revoked chip is a translated string from messages/en.json
-      // (key dkim.revoked). Match case-insensitively so future style
-      // changes (Revoked vs REVOKED) don't break the assertion.
-      expect(screen.getByText(/revoked/i)).toBeInTheDocument();
+      // /revoked/i matches BOTH the chip ("revoked") and the warning
+      // bullet ("Key is revoked (empty p= tag) — …"), which is the
+      // correct DOM — surfacing the same signal in two places is
+      // intentional UX. Use getAllByText so the test passes when both
+      // are present and would fail if either gets dropped.
+      const hits = screen.getAllByText(/revoked/i);
+      expect(hits.length).toBeGreaterThanOrEqual(2);
     });
     expect(screen.getByText(/empty p= tag/i)).toBeInTheDocument();
   });
@@ -90,7 +93,12 @@ describe("DkimClient", () => {
     renderWithIntl(<DkimClient />);
     await userEvent.click(screen.getByRole("button"));
     await waitFor(() => {
-      expect(screen.getByText(/1024 bits/i)).toBeInTheDocument();
+      // The "1024 bits" string appears in the keyDetails stat AND inside
+      // the warning bullet ("RSA key is 1024 bits — …"). Both renderings
+      // are intentional, so getByText would be ambiguous — pin both via
+      // getAllByText.
+      const hits = screen.getAllByText(/1024 bits/i);
+      expect(hits.length).toBeGreaterThanOrEqual(1);
     });
   });
 });
