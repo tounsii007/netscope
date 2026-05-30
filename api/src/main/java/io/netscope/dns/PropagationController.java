@@ -43,11 +43,15 @@ public class PropagationController {
     public Map<String, Object> check(
             @PathVariable String domain,
             @RequestParam(defaultValue = "A") String type) {
-        domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        // Capture the normalised value into a fresh effectively-final
+        // local so the lambda below can close over it. Reassigning
+        // @PathVariable would otherwise leak through to the lambda and
+        // fail "captured locals must be effectively final".
+        final String resolvedDomain = DomainNormaliser.toAscii(domain);
+        if (resolvedDomain == null || !resolvedDomain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
-        Integer recordType = switch (type.toUpperCase()) {
+        final Integer recordType = switch (type.toUpperCase()) {
             case "A" -> Type.A; case "AAAA" -> Type.AAAA; case "MX" -> Type.MX;
             case "TXT" -> Type.TXT; case "NS" -> Type.NS; case "CNAME" -> Type.CNAME;
             default -> throw ApiException.badRequest("unsupported type");
@@ -55,7 +59,8 @@ public class PropagationController {
 
         long start = System.currentTimeMillis();
         List<CompletableFuture<Map<String, Object>>> futures = RESOLVERS.stream()
-            .map(r -> CompletableFuture.supplyAsync(() -> query(r, domain, recordType, type.toUpperCase()), exec))
+            .map(r -> CompletableFuture.supplyAsync(
+                () -> query(r, resolvedDomain, recordType, type.toUpperCase()), exec))
             .toList();
 
         // Hard ceiling on the whole batch — even if every resolver is a tarpit,
@@ -82,7 +87,7 @@ public class PropagationController {
         });
 
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("domain", domain);
+        out.put("domain", resolvedDomain);
         out.put("type", type.toUpperCase());
         out.put("resolverCount", RESOLVERS.size());
         out.put("uniqueAnswers", unique.size());

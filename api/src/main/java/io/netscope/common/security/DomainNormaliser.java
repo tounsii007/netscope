@@ -1,4 +1,5 @@
 package io.netscope.common.security;
+import io.netscope.common.errors.ApiException;
 
 import java.net.IDN;
 
@@ -42,6 +43,15 @@ public final class DomainNormaliser {
         // them at this canonicalisation step. Each controller's own
         // regex enforces its actual character-class policy.
         if (isPureAscii(s)) return s;
+        // Pre-filter codepoints that IDN.toASCII in JDK 21+ silently maps
+        // through despite the STD3 flag — BOM (U+FEFF), em-dash (U+2014),
+        // right-to-left override (U+202E), etc. Reuses the same Unicode-
+        // category whitelist {@link TargetValidator} applies on its IDN
+        // path so the two domain-input surfaces can't disagree on what
+        // qualifies as a "valid" hostname codepoint.
+        if (TargetValidator.hasNonHostCodepoint(s)) {
+            throw ApiException.badRequest("invalid domain (illegal codepoint)");
+        }
         try {
             return IDN.toASCII(s, IDN.USE_STD3_ASCII_RULES);
         } catch (IllegalArgumentException e) {

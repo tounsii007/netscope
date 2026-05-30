@@ -78,7 +78,7 @@ export function WebSocketClient() {
               <dt className="text-fg-muted">{t("handshake_latency")}</dt>
               <dd>{data.handshakeLatencyMs} ms</dd>
               <dt className="text-fg-muted">{t("ping_rtt")}</dt>
-              <dd>{data.pingRttMs >= 0 ? `${data.pingRttMs} ms` : t("no_pong")}</dd>
+              <dd>{data.pingRttMs != null && data.pingRttMs >= 0 ? `${data.pingRttMs} ms` : t("no_pong")}</dd>
               <dt className="text-fg-muted">{t("subprotocol_negotiated")}</dt>
               <dd className="font-mono">{data.subprotocol || "—"}</dd>
               {data.closeStatusCode != null && (

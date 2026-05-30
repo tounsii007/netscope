@@ -37,10 +37,23 @@ public class CtLogsController {
     private static final int MAX_RESULTS = 200;
     private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(15);
 
-    private final HttpClient http = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(5))
-        .followRedirects(HttpClient.Redirect.NORMAL)
-        .build();
+    /**
+     * Lazy holder for the shared HttpClient. The JLS guarantees the
+     * nested class is initialised on first reference, which means the
+     * underlying NIO selector (and the WEPoll loopback pipe it sets up
+     * on JDK 25 / Windows) is built only when a CT-log lookup actually
+     * fires — not at controller instantiation. That keeps the pure-unit
+     * test suite that exercises {@link #normalize} able to instantiate
+     * the controller without paying for selector setup in environments
+     * where the WEPoll loopback pipe can't open.
+     */
+    private static final class Http {
+        static final HttpClient CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+    }
+
     private final ObjectMapper mapper = new ObjectMapper();
     private final ToolMetrics metrics;
 
@@ -103,7 +116,7 @@ public class CtLogsController {
             boolean includeSubdomains, long start) {
         String url = CtLogQuery.build(domain, includeSubdomains);
         try {
-            HttpResponse<String> res = http.send(
+            HttpResponse<String> res = Http.CLIENT.send(
                 HttpRequest.newBuilder(URI.create(url))
                     .timeout(HTTP_TIMEOUT)
                     .header("User-Agent", "NetScope/1.0 (CT-Logs probe)")

@@ -88,7 +88,7 @@ export function DkimClient() {
                 <div className="mb-3">
                   <div className="text-xs font-semibold text-fg-muted mb-1">
                     <Key className="inline h-3 w-3 mr-1" />
-                    {t("raw_record_at", { host: data.result.queriedHost })}
+                    {t("raw_record_at", { host: data.result.queriedHost ?? "" })}
                   </div>
                   <pre className="overflow-auto rounded-md bg-bg-elevated p-3 font-mono text-xs break-all whitespace-pre-wrap">
                     {data.result.rawRecord}

@@ -1,5 +1,8 @@
-package io.netscope.common;
-import io.netscope.common.errors.ApiException;
+package io.netscope.common.errors;
+// Lives in the same package as ApiException so the package-private
+// newCorrelationId() accessor remains testable without widening
+// its visibility. The accessor is intentionally not exported — only
+// sanitizedFailure() and friends should call it from production code.
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;

@@ -46,16 +46,26 @@ public class WebSocketController {
     private static final Duration STEP_TIMEOUT = Duration.ofSeconds(4);
 
     private final TargetValidator validator;
+
     /** Shared HttpClient. Re-using one instance across probes keeps the
      *  per-request cost flat — the previous per-probe
      *  {@code HttpClient.newBuilder().build()} leaked a NIO selector
      *  thread per call (HttpClient is AutoCloseable in JDK 21 but the
      *  controller never called close()). A single shared instance is
      *  safe: HttpClient is documented as thread-safe and reusing it
-     *  is the recommended idiom. */
-    private final HttpClient httpClient = HttpClient.newBuilder()
-        .connectTimeout(STEP_TIMEOUT)
-        .build();
+     *  is the recommended idiom.
+     *
+     *  Holder-class indirection: lazy class init means the underlying
+     *  NIO selector is built on first probe, not at controller
+     *  construction. The input-validation unit tests instantiate the
+     *  controller without ever calling probe(), so they no longer pay
+     *  for selector setup — which is the path that fails to open a
+     *  loopback pipe in sandboxed JDK 25 / Windows test envs. */
+    private static final class Http {
+        static final HttpClient CLIENT = HttpClient.newBuilder()
+            .connectTimeout(STEP_TIMEOUT)
+            .build();
+    }
 
     private final ToolMetrics metrics;
 
@@ -86,7 +96,7 @@ public class WebSocketController {
         URI uri = parseAndValidate(url);
 
         long t0 = System.currentTimeMillis();
-        var builder = httpClient.newWebSocketBuilder()
+        var builder = Http.CLIENT.newWebSocketBuilder()
             .connectTimeout(STEP_TIMEOUT)
             .header("User-Agent", "NetScope/1.0 (WS probe)");
         if (subprotocol != null && !subprotocol.isBlank()) {

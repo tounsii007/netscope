@@ -1,5 +1,6 @@
 package io.netscope.common;
 import io.netscope.common.errors.ApiException;
+import io.netscope.common.errors.GlobalExceptionHandler;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
