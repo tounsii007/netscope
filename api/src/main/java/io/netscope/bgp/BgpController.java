@@ -33,6 +33,16 @@ public class BgpController {
     // our heap via a giant streamed body.
     private static final long MAX_RIPE_BODY_BYTES = 256L * 1024L;
 
+    /** TCP connect timeout to RIPE Stat. 5 s is the standard across the
+     *  HTTP-using controllers; mirrors {@code SafeHttpClient} + the
+     *  other geo/network clients. */
+    private static final Duration RIPE_CONNECT_TIMEOUT = Duration.ofSeconds(5);
+
+    /** Read timeout per RIPE request. 10 s lets a single slow lookup
+     *  complete without pinning the worker; the per-controller circuit
+     *  breaker handles the failure-aggregation policy on top. */
+    private static final Duration RIPE_READ_TIMEOUT = Duration.ofSeconds(10);
+
     // Lazy-init: building a RestClient at field-init time triggers HTTP-stack
     // setup that can fail in restricted test environments (and is wasted work
     // for instances that never see traffic). Cached after first call.
@@ -49,12 +59,12 @@ public class BgpController {
                     // recipe: JDK HttpClient + explicit connect/read timeouts
                     // wrapped in a JdkClientHttpRequestFactory.
                     HttpClient httpClient = HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofSeconds(5))
+                        .connectTimeout(RIPE_CONNECT_TIMEOUT)
                         .followRedirects(HttpClient.Redirect.NORMAL)
                         .version(HttpClient.Version.HTTP_1_1)
                         .build();
                     var rf = new JdkClientHttpRequestFactory(httpClient);
-                    rf.setReadTimeout(Duration.ofSeconds(10));
+                    rf.setReadTimeout(RIPE_READ_TIMEOUT);
                     r = rest = RestClient.builder()
                         .requestFactory(rf)
                         .defaultHeader("User-Agent", "NetScope/1.0")

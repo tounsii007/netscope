@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useFormatDate } from "@/lib/format-date";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import {
@@ -17,6 +18,7 @@ export function SslClient() {
   const tp = useTranslations("ports");
   const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
+  const fmt = useFormatDate();
   const hostId = useId();
   const portId = useId();
   const [host, setHost] = useState("github.com");
@@ -158,12 +160,12 @@ export function SslClient() {
                   <CertField
                     icon={<Calendar className="h-3.5 w-3.5" />}
                     label={t("field_valid_from")}
-                    value={new Date(data.validFrom).toLocaleDateString()}
+                    value={fmt.short(data.validFrom)}
                   />
                   <CertField
                     icon={<Calendar className="h-3.5 w-3.5" />}
                     label={t("field_valid_to")}
-                    value={new Date(data.validTo).toLocaleDateString()}
+                    value={fmt.short(data.validTo)}
                   />
                   <CertField
                     icon={<Award className="h-3.5 w-3.5" />}
