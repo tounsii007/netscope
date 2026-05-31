@@ -34,6 +34,11 @@ public class SubdomainController {
 
     private static final Logger log = LoggerFactory.getLogger(SubdomainController.class);
 
+    /** Redis cache TTL for the per-domain subdomain result. 1 h keeps the
+     *  load on crt.sh / CertSpotter low while still surfacing recently-
+     *  added subdomains within the hour. */
+    private static final Duration CACHE_TTL = Duration.ofHours(1);
+
     /**
      * Hard cap on the number of subdomains we keep in memory / return to the
      * client. Popular targets like example.com / google.com / facebook.com
@@ -145,7 +150,7 @@ public class SubdomainController {
 
     private void writeCache(String domain, Map<String, Object> out) {
         try {
-            redis.opsForValue().set("subs:" + domain, mapper.writeValueAsString(out), Duration.ofHours(1));
+            redis.opsForValue().set("subs:" + domain, mapper.writeValueAsString(out), CACHE_TTL);
             log.info("[crtsh] cached result for domain='{}'", domain);
         } catch (Exception e) {
             log.warn("[crtsh] redis SET failed (returning anyway): {} - {}",

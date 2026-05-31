@@ -20,6 +20,28 @@ public class RobotsController {
 
     private static final Pattern LOC = Pattern.compile("<loc>([^<]+)</loc>", Pattern.CASE_INSENSITIVE);
 
+    /** F-RD2-06: hard wall-clock budget so an attacker-controlled robots.txt
+     *  can't keep us looping through sitemap fetches indefinitely. */
+    private static final Duration ANALYZE_BUDGET = Duration.ofSeconds(30);
+
+    /** Timeout for the single robots.txt fetch — quick because the file is
+     *  always small + cacheable on the origin. */
+    private static final Duration ROBOTS_FETCH_TIMEOUT = Duration.ofSeconds(8);
+
+    /** Timeout for each sitemap fetch — slightly longer because sitemap
+     *  XML can be larger and sometimes generated on demand. */
+    private static final Duration SITEMAP_FETCH_TIMEOUT = Duration.ofSeconds(10);
+
+    /** Cap on the raw robots.txt body bytes the API echoes back to callers.
+     *  Anything longer is almost certainly noise from a misconfigured CMS. */
+    private static final int ROBOTS_RAW_PREVIEW_CHARS = 10_000;
+
+    /** Cap on the number of Sitemap: entries we follow per robots.txt. */
+    private static final int SITEMAP_MAX_ENTRIES = 20;
+
+    /** Cap on the URL count surfaced per sitemap response. */
+    private static final int SITEMAP_MAX_URLS = 500;
+
     private final SafeHttpClient http;
     private final TargetValidator validator;
 
@@ -38,7 +60,7 @@ public class RobotsController {
         // F-RD2-06: hard wall-clock budget so an attacker-controlled robots.txt
         // can't keep us looping through sitemap fetches indefinitely.
         long startNanos = System.nanoTime();
-        long budgetNanos = Duration.ofSeconds(30).toNanos();
+        long budgetNanos = ANALYZE_BUDGET.toNanos();
         List<Map<String, Object>> sitemaps = new ArrayList<>();
         boolean truncated = false;
         for (String sm : sitemapUrls) {
@@ -62,13 +84,14 @@ public class RobotsController {
         String url = "https://" + host + "/robots.txt";
         try {
             HttpResponse<String> res = http.send(
-                HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(8)).GET().build(),
+                HttpRequest.newBuilder(URI.create(url)).timeout(ROBOTS_FETCH_TIMEOUT).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
             out.put("url", url);
             out.put("status", res.statusCode());
             if (res.statusCode() >= 200 && res.statusCode() < 300) {
                 String body = res.body() == null ? "" : res.body();
-                out.put("raw", body.length() > 10_000 ? body.substring(0, 10_000) : body);
+                out.put("raw", body.length() > ROBOTS_RAW_PREVIEW_CHARS
+                    ? body.substring(0, ROBOTS_RAW_PREVIEW_CHARS) : body);
                 parseRobots(body, out);
             } else {
                 out.put("error", "HTTP " + res.statusCode());
@@ -102,7 +125,7 @@ public class RobotsController {
         out.put("rules", agents);
         // F-RD2-06: dedup + cap sitemap entries — robots.txt is attacker-controlled
         // and we don't want to iterate an unbounded list downstream.
-        out.put("sitemaps", sitemaps.stream().distinct().limit(20).collect(Collectors.toList()));
+        out.put("sitemaps", sitemaps.stream().distinct().limit(SITEMAP_MAX_ENTRIES).collect(Collectors.toList()));
 
         List<String> warnings = new ArrayList<>();
         if (sitemaps.isEmpty()) warnings.add("No Sitemap: directive — crawlers may miss content");
@@ -118,14 +141,14 @@ public class RobotsController {
             URI uri = URI.create(url);
             validator.resolveAndValidate(uri.getHost());
             HttpResponse<String> res = http.send(
-                HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(10)).GET().build(),
+                HttpRequest.newBuilder(uri).timeout(SITEMAP_FETCH_TIMEOUT).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
             out.put("status", res.statusCode());
             if (res.statusCode() >= 200 && res.statusCode() < 300) {
                 String body = res.body() == null ? "" : res.body();
                 List<String> urls = new ArrayList<>();
                 Matcher m = LOC.matcher(body);
-                while (m.find() && urls.size() < 500) urls.add(m.group(1).trim());
+                while (m.find() && urls.size() < SITEMAP_MAX_URLS) urls.add(m.group(1).trim());
                 out.put("urlCount", urls.size());
                 out.put("sample", urls.subList(0, Math.min(20, urls.size())));
                 out.put("isIndex", body.contains("<sitemapindex"));

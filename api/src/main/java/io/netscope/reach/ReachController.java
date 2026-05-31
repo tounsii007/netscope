@@ -22,6 +22,15 @@ public class ReachController {
 
     public record ReachRequest(@NotBlank String target, Integer port, String method) {}
 
+    /** HEAD-probe timeout for the reachability check. 8 s lets a server
+     *  with slow TCP-handshake warm-up complete while still failing
+     *  fast on dead targets. */
+    private static final Duration HTTP_PROBE_TIMEOUT = Duration.ofSeconds(8);
+
+    /** Default HTTPS port — used when the caller did not specify one
+     *  on the tcp/auto check. */
+    private static final int DEFAULT_TCP_PORT = 443;
+
     private final TargetValidator validator;
     private final SafeHttpClient http;
 
@@ -42,7 +51,7 @@ public class ReachController {
             out.put("http", httpCheck(req.target()));
         }
         if ("auto".equals(method) || "tcp".equals(method)) {
-            out.put("tcp", tcpCheck(addr, req.port() == null ? 443 : req.port()));
+            out.put("tcp", tcpCheck(addr, req.port() == null ? DEFAULT_TCP_PORT : req.port()));
         }
         if ("auto".equals(method) || "ping".equals(method)) {
             out.put("ping", pingCheck(addr));
@@ -56,7 +65,7 @@ public class ReachController {
         try {
             HttpResponse<Void> res = http.send(
                 HttpRequest.newBuilder(URI.create(url))
-                    .timeout(Duration.ofSeconds(8)).HEAD().build(),
+                    .timeout(HTTP_PROBE_TIMEOUT).HEAD().build(),
                 HttpResponse.BodyHandlers.discarding());
             return Map.of("ok", true, "status", res.statusCode(),
                 "latencyMs", System.currentTimeMillis() - start);

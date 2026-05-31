@@ -20,6 +20,12 @@ public class PageFetcher {
 
     public static final int MAX_BODY = 500_000;
 
+    /** Page-fetch timeout — slightly longer than the boundary 10 s used
+     *  elsewhere because HTML pages can have render-blocking server-side
+     *  generation (server-side analytics, third-party tracker injection)
+     *  that legitimately takes 8-10 s. */
+    private static final Duration FETCH_TIMEOUT = Duration.ofSeconds(12);
+
     private final SafeHttpClient http;
     public PageFetcher(SafeHttpClient http) { this.http = http; }
 
@@ -29,7 +35,7 @@ public class PageFetcher {
         url = HttpUrlNormaliser.ensureHttpScheme(url);
         URI uri = URI.create(url);
         HttpResponse<String> res = http.send(
-            HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(12))
+            HttpRequest.newBuilder(uri).timeout(FETCH_TIMEOUT)
                 .header("User-Agent", "NetScope/1.0").GET().build(),
             HttpResponse.BodyHandlers.ofString());
         String body = res.body() == null ? "" : res.body();

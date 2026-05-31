@@ -89,6 +89,16 @@ public class TechStackController {
         new Sig("Crisp", "widget", "body", "client.crisp.chat")
     );
 
+    /** Page-fetch timeout. 10 s lets WordPress sites with heavy plugin
+     *  initialisation respond while still failing fast on tarpits. */
+    private static final Duration FETCH_TIMEOUT = Duration.ofSeconds(10);
+
+    /** Cap on the page-body bytes we keep in memory + scan for signatures.
+     *  200 KB covers every reasonable site's HTML; anything bigger is
+     *  caught by SafeHttpClient's 2 MB ceiling first, but the in-process
+     *  truncation here keeps the regex scan bounded too. */
+    private static final int MAX_BODY_SCAN_CHARS = 200_000;
+
     private final SafeHttpClient http;
     private final TargetValidator validator;
     public TechStackController(SafeHttpClient http, TargetValidator v) {
@@ -107,7 +117,7 @@ public class TechStackController {
         String url = "https://" + host + "/";
         try {
             HttpResponse<String> res = http.send(
-                HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10))
+                HttpRequest.newBuilder(URI.create(url)).timeout(FETCH_TIMEOUT)
                     .header("User-Agent", "NetScope/1.0").GET().build(),
                 HttpResponse.BodyHandlers.ofString());
 
@@ -115,7 +125,7 @@ public class TechStackController {
             res.headers().map().forEach((k, v) ->
                 headers.put(k.toLowerCase(), String.join(", ", v).toLowerCase()));
             String body = res.body() == null ? "" : res.body().toLowerCase();
-            if (body.length() > 200_000) body = body.substring(0, 200_000);
+            if (body.length() > MAX_BODY_SCAN_CHARS) body = body.substring(0, MAX_BODY_SCAN_CHARS);
 
             Map<String, Set<String>> byCategory = new TreeMap<>();
             for (Sig s : SIGS) {

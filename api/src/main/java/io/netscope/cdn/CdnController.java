@@ -50,6 +50,10 @@ public class CdnController {
         new Signal("GitHub Pages", "header", "server=github.com")
     );
 
+    /** HEAD-probe timeout. 8 s is generous enough for the slowest CDNs
+     *  while still being well below the rate-limit window. */
+    private static final Duration PROBE_TIMEOUT = Duration.ofSeconds(8);
+
     private final TargetValidator validator;
     private final SafeHttpClient http;
 
@@ -64,7 +68,7 @@ public class CdnController {
         try {
             HttpResponse<Void> res = http.send(
                 HttpRequest.newBuilder(URI.create("https://" + host + "/"))
-                    .timeout(Duration.ofSeconds(8))
+                    .timeout(PROBE_TIMEOUT)
                     .header("User-Agent", "NetScope/1.0").GET().build(),
                 HttpResponse.BodyHandlers.discarding());
 
