@@ -128,7 +128,12 @@ public class WebhookDeliveryWorker {
             d.setStatusCode(0);
             d.setResponseBody("blocked: webhook URL resolves to a private/internal address");
             d.setDeadAt(Instant.now());
-            log.warn("Blocked SSRF attempt via webhook {} → {}", wh.getId(), wh.getUrl());
+            // F-RD2-01: webhook URLs are bearer-equivalent credentials (Slack/Discord
+            // embed the auth token in the path), so they must NEVER reach retention-
+            // bound log files. Log only the UUID + a scrubbed fingerprint that
+            // preserves operator visibility without exposing the token.
+            log.warn("Blocked SSRF attempt via webhook {} ({})", wh.getId(),
+                scrubbedUrlFingerprint(wh.getUrl()));
             deliveries.save(d);
             return;
         }
@@ -250,13 +255,52 @@ public class WebhookDeliveryWorker {
         return port < 0 ? host : host + ":" + port;
     }
 
+    /**
+     * F-RD2-01 / F-RD2-02 — Returns a log-safe fingerprint of a webhook URL.
+     *
+     * <p>Slack and Discord webhook URLs embed the auth token directly in the
+     * path (e.g. {@code https://hooks.slack.com/services/T08XXXX/B0YYYY/zzzz}),
+     * so the full URL is a bearer-equivalent credential and must never be
+     * persisted to retention-bound log files. This helper keeps the scheme,
+     * host, and at most the first 8 path characters — enough for operators to
+     * tell Slack from Discord (and rough-correlate within a tenant) without
+     * exposing the token.
+     *
+     * <p>Returns {@code "<malformed>"} if the URL can't be parsed, and
+     * {@code "<null>"} if it's null/blank.
+     */
+    static String scrubbedUrlFingerprint(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) return "<null>";
+        try {
+            URI uri = new URI(rawUrl);
+            String scheme = uri.getScheme();
+            String host   = uri.getHost();
+            if (scheme == null || host == null) return "<malformed>";
+            String path = uri.getRawPath();
+            if (path == null || path.isEmpty() || "/".equals(path)) {
+                return scheme + "://" + host + "/";
+            }
+            // Trim the path to at most 8 chars after the leading '/' so we
+            // never bleed into a Slack/Discord token segment.
+            String trimmed = path.length() > 9 ? path.substring(0, 9) + "..." : path;
+            return scheme + "://" + host + trimmed;
+        } catch (URISyntaxException e) {
+            return "<malformed>";
+        }
+    }
+
     private void scheduleRetry(WebhookDelivery d, Webhook wh, String reason) {
         int next = d.getAttempt() + 1;
         d.setAttempt(next);
         d.setResponseBody(reason);
         if (next >= MAX_ATTEMPTS) {
             d.setDeadAt(Instant.now());
-            log.warn("Webhook {} dead after {} attempts", wh.getUrl(), next);
+            // F-RD2-02: webhook URLs are bearer-equivalent credentials (Slack/Discord
+            // embed the auth token in the path), so they must NEVER reach retention-
+            // bound log files. The UUID alone is enough to cross-reference with the
+            // webhooks table; fingerprint included only for at-a-glance debugging.
+            log.warn("Webhook {} dead after {} attempts ({})", wh.getId(), next,
+                scrubbedUrlFingerprint(wh.getUrl()));
         } else {
             d.setNextRetryAt(Instant.now().plus(BACKOFF[Math.min(next - 1, BACKOFF.length - 1)]));
         }

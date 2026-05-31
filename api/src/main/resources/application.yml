@@ -166,6 +166,13 @@ resilience4j:
         slidingWindowSize: 20
         failureRateThreshold: 50
         waitDurationInOpenState: 30s
+      # F-RD2-04: BgpController -> stat.ripe.net. RIPE Stat is reliable
+      # but the read-timeout-protected RestClient still benefits from a
+      # breaker so we stop hammering it on partial outages.
+      ripe:
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
   timelimiter:
     instances:
       ipinfo:
@@ -174,6 +181,8 @@ resilience4j:
         timeoutDuration: 15s
       rdap:
         timeoutDuration: 8s
+      ripe:
+        timeoutDuration: 10s
 
 springdoc:
   swagger-ui:

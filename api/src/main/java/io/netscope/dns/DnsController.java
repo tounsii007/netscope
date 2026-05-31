@@ -59,8 +59,14 @@ public class DnsController {
         Map<String, List<Map<String, Object>>> rrsigByType = new LinkedHashMap<>();
         long start = System.currentTimeMillis();
 
-        for (String t : type.toUpperCase().split(",")) {
-            t = t.trim();
+        // F-RD2-07: dedup + cap requested types (default is 5: A,AAAA,MX,TXT,NS;
+        // 8 is well above any legitimate use and bounds the per-request DNS fanout).
+        for (String t : Arrays.stream(type.toUpperCase().split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .limit(8)
+                .toList()) {
             Integer rt = TYPES.get(t);
             if (rt == null) continue;
             collectType(domain, t, rt, records, detailed);
