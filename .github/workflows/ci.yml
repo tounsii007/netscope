@@ -7,6 +7,11 @@ on:
     branches: [master, main]
   workflow_dispatch:
 
+# Least-privilege token: jobs only read the repo and upload artifacts via
+# actions/upload-artifact (no extra scope needed).
+permissions:
+  contents: read
+
 # Cancel in-flight runs for the same ref so a force-push doesn't queue
 # four redundant builds.
 concurrency:

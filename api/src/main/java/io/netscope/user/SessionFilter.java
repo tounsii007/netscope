@@ -34,7 +34,17 @@ public class SessionFilter extends OncePerRequestFilter {
             if (auth != null && auth.startsWith("Bearer ")) {
                 Map<String, Object> claims = jwt.parse(auth.substring(7));
                 if (claims != null) {
-                    UUID userId = UUID.fromString(String.valueOf(claims.get("sub")));
+                    // F-RD3-02: a malformed sub (non-UUID) used to bubble
+                    // an IllegalArgumentException out of this filter as a
+                    // 500. Treat it as "no session" and let downstream auth
+                    // return a clean 401 instead of leaking an internal error.
+                    UUID userId;
+                    try {
+                        userId = UUID.fromString(String.valueOf(claims.get("sub")));
+                    } catch (IllegalArgumentException e) {
+                        chain.doFilter(req, res);
+                        return;
+                    }
                     String email = String.valueOf(claims.get("email"));
                     SessionContext.set(new SessionContext.Session(userId, email));
                 }

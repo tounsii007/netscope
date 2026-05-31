@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/robots")
@@ -34,13 +35,25 @@ public class RobotsController {
         List<String> sitemapUrls = (List<String>) robots.getOrDefault("sitemaps", List.of());
         if (sitemapUrls.isEmpty()) sitemapUrls = List.of("https://" + host + "/sitemap.xml");
 
+        // F-RD2-06: hard wall-clock budget so an attacker-controlled robots.txt
+        // can't keep us looping through sitemap fetches indefinitely.
+        long startNanos = System.nanoTime();
+        long budgetNanos = Duration.ofSeconds(30).toNanos();
         List<Map<String, Object>> sitemaps = new ArrayList<>();
-        for (String sm : sitemapUrls) sitemaps.add(fetchSitemap(sm));
+        boolean truncated = false;
+        for (String sm : sitemapUrls) {
+            if (System.nanoTime() - startNanos > budgetNanos) {
+                truncated = true;
+                break;
+            }
+            sitemaps.add(fetchSitemap(sm));
+        }
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("host", host);
         out.put("robots", robots);
         out.put("sitemaps", sitemaps);
+        if (truncated) out.put("note", "truncated due to time budget");
         return out;
     }
 
@@ -87,7 +100,9 @@ public class RobotsController {
             }
         }
         out.put("rules", agents);
-        out.put("sitemaps", sitemaps);
+        // F-RD2-06: dedup + cap sitemap entries — robots.txt is attacker-controlled
+        // and we don't want to iterate an unbounded list downstream.
+        out.put("sitemaps", sitemaps.stream().distinct().limit(20).collect(Collectors.toList()));
 
         List<String> warnings = new ArrayList<>();
         if (sitemaps.isEmpty()) warnings.add("No Sitemap: directive — crawlers may miss content");

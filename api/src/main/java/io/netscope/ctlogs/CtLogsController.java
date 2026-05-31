@@ -74,7 +74,7 @@ public class CtLogsController {
             boolean includeSubdomains, boolean excludeExpired) {
 
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 

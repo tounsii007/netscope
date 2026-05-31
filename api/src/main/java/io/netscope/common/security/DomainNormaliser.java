@@ -46,10 +46,10 @@ public final class DomainNormaliser {
         // Pre-filter codepoints that IDN.toASCII in JDK 21+ silently maps
         // through despite the STD3 flag — BOM (U+FEFF), em-dash (U+2014),
         // right-to-left override (U+202E), etc. Reuses the same Unicode-
-        // category whitelist {@link TargetValidator} applies on its IDN
+        // category whitelist {@link HostnameNormaliser} applies on its IDN
         // path so the two domain-input surfaces can't disagree on what
         // qualifies as a "valid" hostname codepoint.
-        if (TargetValidator.hasNonHostCodepoint(s)) {
+        if (HostnameNormaliser.hasNonHostCodepoint(s)) {
             throw ApiException.badRequest("invalid domain (illegal codepoint)");
         }
         try {

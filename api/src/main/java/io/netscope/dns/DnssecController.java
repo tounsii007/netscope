@@ -21,7 +21,7 @@ public class DnssecController {
     @GetMapping("/{domain}")
     public Map<String, Object> check(@PathVariable String domain) {
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 

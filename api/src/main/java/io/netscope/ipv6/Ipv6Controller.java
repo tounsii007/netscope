@@ -20,7 +20,7 @@ public class Ipv6Controller {
     @GetMapping("/{domain}")
     public Map<String, Object> score(@PathVariable String domain) {
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 
