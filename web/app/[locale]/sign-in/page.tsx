@@ -66,7 +66,20 @@ export default async function SignIn() {
             </div>
 
             <div className="mt-7 space-y-2.5">
-              <form action={async () => { "use server"; await signIn("github", { redirectTo: "/app" }); }}>
+              {/*
+               * F-FE-06: the previous redirectTo target "/app" does not
+               * resolve to any route in this Next.js tree — all real
+               * pages live under app/[locale]/. Sending the user there
+               * after a successful OAuth round-trip produced a localized
+               * 404 ("Page not found"), making the sign-in flow appear
+               * broken even though auth itself succeeded. The actual
+               * post-auth landing page is /dashboard (next-intl rewrites
+               * unprefixed paths to the active locale because
+               * routing.ts uses localePrefix: "as-needed"). The target
+               * must ALSO appear in AllowedCallbackPaths in auth.ts —
+               * see the F-FE-07 note there.
+               */}
+              <form action={async () => { "use server"; await signIn("github", { redirectTo: "/dashboard" }); }}>
                 <button
                   type="submit"
                   className="group flex w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-bg-elevated px-4 py-3 text-sm font-medium text-fg transition hover:border-fg-muted hover:bg-bg-card"
@@ -75,7 +88,7 @@ export default async function SignIn() {
                   {t("continue_github")}
                 </button>
               </form>
-              <form action={async () => { "use server"; await signIn("google", { redirectTo: "/app" }); }}>
+              <form action={async () => { "use server"; await signIn("google", { redirectTo: "/dashboard" }); }}>
                 <button
                   type="submit"
                   className="group flex w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-bg-elevated px-4 py-3 text-sm font-medium text-fg transition hover:border-fg-muted hover:bg-bg-card"

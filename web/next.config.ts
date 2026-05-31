@@ -71,7 +71,11 @@ const config: NextConfig = {
       "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080") + " api.pwnedpasswords.com",
       "frame-src 'none'",
       "frame-ancestors 'none'",
-      "base-uri 'self'",
+      // F-FE-04: base-uri 'none' — we never render <base>, so allow zero
+      // sources. 'self' would still permit a `<base href="/evil/">` tag
+      // injected via HTML injection to rebase every relative URL on the
+      // page (script/img/form actions) onto an attacker-chosen path.
+      "base-uri 'none'",
       "form-action 'self'",
       "object-src 'none'",
       "upgrade-insecure-requests",

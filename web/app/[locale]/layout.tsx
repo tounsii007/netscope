@@ -57,31 +57,45 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
   const dir = locale === "ar" ? "rtl" : "ltr";
   const t = await getTranslations({ locale, namespace: "nav" });
-  // Read the per-request CSP nonce that middleware.ts attached to the
-  // request headers. Next.js's App Router auto-threads the nonce into
+  // Per-request CSP nonce: middleware.ts attaches a fresh value to the
+  // request headers AND surfaces it on the response Content-Security-
+  // Policy header. Next.js's App Router auto-threads the nonce onto
   // every framework-injected <script> tag in the SSR HTML whenever the
-  // response Content-Security-Policy header carries 'nonce-{value}'
-  // (which our middleware ensures). Reading it here:
-  //   1. Documents the contract — future contributors see that this
-  //      file participates in nonce-based CSP and can pass `nonce={n}`
-  //      to any future <Script> they add.
-  //   2. Ensures the `headers()` call is part of this layout's
-  //      reactive tree, so Next.js knows to recompute the rendered
-  //      output per request (avoids accidental static-rendering of
-  //      what is fundamentally per-request output).
-  // The value is intentionally NOT validated for shape; if middleware
-  // is misconfigured and omits the header, all inline framework scripts
-  // will lack a nonce and the browser will block them — preferable
-  // failure mode to silently rendering a page with no CSP enforcement.
-  const reqHeaders = await headers();
-  const nonce = reqHeaders.get("x-nonce") ?? undefined;
+  // response CSP carries 'nonce-{value}' (which middleware ensures), so
+  // this layout does NOT need to forward the value to a <meta> tag,
+  // <Script nonce={…}>, or any DOM-visible carrier.
+  //
+  // F-FE-03: previously the nonce was published to the DOM via
+  // <meta http-equiv="x-csp-nonce" content={nonce}>, which let any
+  // same-origin script (including a compromised dependency or a
+  // successful XSS) read it back and mint nonce-attributed <script>
+  // tags — defeating 'strict-dynamic'. That tag has been removed; see
+  // the head element below.
+  //
+  // We still call headers() here to keep this layout's render reactive
+  // (Next.js treats any `headers()` access as a per-request signal that
+  // disables static rendering for the tree). Without it, the layout
+  // could be statically optimised and lose the per-request scope its
+  // nested components rely on.
+  await headers();
   return (
     <html lang={locale} dir={dir} className={`dark ${inter.variable} ${mono.variable}`}>
       <head>
-        {/* Nonce-carrying meta tag for the few legacy browsers + scrapers
-            that prefer reading nonce out of <meta http-equiv> rather
-            than the response header. Cheap belt + braces. */}
-        {nonce ? <meta httpEquiv="x-csp-nonce" content={nonce} /> : null}
+        {/* F-FE-03: The previous <meta http-equiv="x-csp-nonce"> tag
+            published the per-request nonce into the DOM, where any
+            successful XSS injection (or any same-origin script,
+            including a compromised dependency) could simply read it via
+            document.querySelector('meta[http-equiv="x-csp-nonce"]') and
+            mint nonce-attributed <script> tags — defeating the entire
+            'strict-dynamic' + nonce CSP we ship in prod.
+            The nonce reaches client code through the proper channel:
+            Next.js auto-threads it onto framework-injected <script>
+            tags whenever the response Content-Security-Policy header
+            carries 'nonce-…' (which middleware.ts ensures). Any custom
+            <Script nonce={nonce}> in this layout also receives it via
+            the server-side `headers()` read above. There is no
+            legitimate consumer that needs to recover the nonce from
+            the DOM. */}
         {/*
           Preconnect to the four cross-origin asset hosts we hit from
           almost every page so the browser parallelises DNS + TCP +
