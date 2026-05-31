@@ -46,8 +46,15 @@ public class SafeHttpClient {
      */
     public static final int MAX_BODY_BYTES = 2_000_000;
 
+    /** TCP connect timeout for any outbound call routed through here. */
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
+
+    /** Default per-redirect-hop read timeout. Callers can override via
+     *  {@code req.timeout()} on the outgoing {@link HttpRequest}. */
+    private static final Duration DEFAULT_HOP_TIMEOUT = Duration.ofSeconds(10);
+
     private final HttpClient client = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(5))
+        .connectTimeout(CONNECT_TIMEOUT)
         .followRedirects(HttpClient.Redirect.NEVER)
         .version(HttpClient.Version.HTTP_2)
         .build();
@@ -81,7 +88,7 @@ public class SafeHttpClient {
                 URI next = req.uri().resolve(location);
                 if (next.getHost() == null) return res;
                 req = HttpRequest.newBuilder(next)
-                    .timeout(req.timeout().orElse(Duration.ofSeconds(10)))
+                    .timeout(req.timeout().orElse(DEFAULT_HOP_TIMEOUT))
                     .header("User-Agent", "NetScope/1.0")
                     .method(req.method(), HttpRequest.BodyPublishers.noBody())
                     .build();
