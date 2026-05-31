@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -36,6 +37,11 @@ public class PropagationController {
         new Resolver("AdGuard","CY",        "94.140.14.14"),
         new Resolver("NextDNS","Global",    "45.90.28.0")
     );
+
+    /** Per-resolver DNS query timeout. 3 s is tight on purpose — any
+     *  resolver slower than that is unhealthy enough that its answer
+     *  isn't worth waiting on when 14 others are racing alongside. */
+    private static final Duration RESOLVER_TIMEOUT = Duration.ofSeconds(3);
 
     private final ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
 
@@ -105,7 +111,7 @@ public class PropagationController {
         long start = System.currentTimeMillis();
         try {
             SimpleResolver sr = new SimpleResolver(r.ip());
-            sr.setTimeout(java.time.Duration.ofSeconds(3));
+            sr.setTimeout(RESOLVER_TIMEOUT);
             Lookup lookup = new Lookup(domain, rt);
             lookup.setResolver(sr);
             Record[] recs = lookup.run();

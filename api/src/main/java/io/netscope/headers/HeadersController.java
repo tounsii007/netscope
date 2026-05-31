@@ -36,6 +36,10 @@ public class HeadersController {
         new Rule("cross-origin-resource-policy", 5, "",      "Prevents cross-origin loading of your resources.")
     );
 
+    /** HEAD/GET request timeout for the header probe. 10 s lets slow
+     *  WordPress installs respond while still failing fast on tarpits. */
+    private static final Duration PROBE_TIMEOUT = Duration.ofSeconds(10);
+
     private final SafeHttpClient http;
 
     public HeadersController(SafeHttpClient http) { this.http = http; }
@@ -48,7 +52,7 @@ public class HeadersController {
 
         try {
             HttpResponse<Void> res = http.send(
-                HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(10))
+                HttpRequest.newBuilder(uri).timeout(PROBE_TIMEOUT)
                     .header("User-Agent", "NetScope/1.0").GET().build(),
                 HttpResponse.BodyHandlers.discarding());
 

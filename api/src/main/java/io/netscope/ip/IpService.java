@@ -32,6 +32,20 @@ public class IpService {
      */
     private static final long MAX_IPINFO_BODY_BYTES = 256L * 1024L;
 
+    /** TCP connect + socket-read timeout for the ipinfo.io call. 5 s is well
+     *  above p99 from any AWS region and well below the breaker's failure-
+     *  rate sliding window. */
+    private static final Duration IPINFO_CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration IPINFO_READ_TIMEOUT    = Duration.ofSeconds(5);
+
+    /** Redis cache TTL per resolved IP. 12 h matches the upstream's hint
+     *  that geo data is stable on the scale of half a day. */
+    private static final Duration IP_CACHE_TTL = Duration.ofHours(12);
+
+    /** Total budget for the Tor-exit-list refresh fetch. The list is ~1 MB;
+     *  10 s is comfortable for that download even over a saturated link. */
+    private static final Duration TOR_LIST_FETCH_TIMEOUT = Duration.ofSeconds(10);
+
     private final StringRedisTemplate redis;
     private final ObjectMapper mapper = new ObjectMapper();
     /**
@@ -49,10 +63,10 @@ public class IpService {
 
     private static RestClient buildIpinfoRestClient() {
         HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
+            .connectTimeout(IPINFO_CONNECT_TIMEOUT)
             .build();
         var rf = new JdkClientHttpRequestFactory(httpClient);
-        rf.setReadTimeout(Duration.ofSeconds(5));
+        rf.setReadTimeout(IPINFO_READ_TIMEOUT);
         return RestClient.builder()
             .requestFactory(rf)
             .defaultHeader("User-Agent", "NetScope/1.0 (ip-geo-lookup)")
@@ -102,7 +116,7 @@ public class IpService {
         enrichTechnical(addr, result);
 
         try {
-            redis.opsForValue().set("ip:" + canonical, mapper.writeValueAsString(result), Duration.ofHours(12));
+            redis.opsForValue().set("ip:" + canonical, mapper.writeValueAsString(result), IP_CACHE_TTL);
         } catch (Exception ignored) {}
 
         return result;
@@ -292,7 +306,7 @@ public class IpService {
         java.util.concurrent.CompletableFuture.runAsync(() -> {
             try {
                 HttpResponse<String> res = http.send(
-                    HttpRequest.newBuilder(URI.create(torListUrl)).timeout(Duration.ofSeconds(10)).build(),
+                    HttpRequest.newBuilder(URI.create(torListUrl)).timeout(TOR_LIST_FETCH_TIMEOUT).build(),
                     HttpResponse.BodyHandlers.ofString());
                 Set<String> fresh = ConcurrentHashMap.newKeySet();
                 for (String line : res.body().split("\n")) {

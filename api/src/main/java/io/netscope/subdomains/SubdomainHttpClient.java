@@ -22,6 +22,13 @@ import java.time.Duration;
  */
 final class SubdomainHttpClient {
 
+    /** TCP connect timeout to crt.sh / CertSpotter. */
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
+
+    /** Read timeout — generous because the CT-log queries can take a while
+     *  to materialise on the upstream side. */
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(20);
+
     private volatile RestClient rest;
 
     RestClient get() {
@@ -30,12 +37,12 @@ final class SubdomainHttpClient {
             synchronized (this) {
                 if ((r = rest) == null) {
                     HttpClient http = HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofSeconds(5))
+                        .connectTimeout(CONNECT_TIMEOUT)
                         .followRedirects(HttpClient.Redirect.NORMAL)
                         .version(HttpClient.Version.HTTP_1_1)
                         .build();
                     var rf = new JdkClientHttpRequestFactory(http);
-                    rf.setReadTimeout(Duration.ofSeconds(20));
+                    rf.setReadTimeout(READ_TIMEOUT);
                     r = rest = RestClient.builder()
                         .requestFactory(rf)
                         .defaultHeader("User-Agent", "curl/8.18.0")
