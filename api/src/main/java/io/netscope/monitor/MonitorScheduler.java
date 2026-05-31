@@ -65,6 +65,16 @@ public class MonitorScheduler {
      *  few ticks even at 100k+ rows. */
     private static final int SCHED_PAGE_SIZE = 500;
 
+    /** Buffer subtracted from the monitor's intervalSec to compute the Redis
+     *  setIfAbsent TTL. Lets the next tick re-acquire the lock just before
+     *  the previous run's TTL expires, instead of racing the boundary. */
+    private static final int LOCK_TTL_BUFFER_SECONDS = 5;
+
+    /** Per-check HTTP request timeout. 10 s matches HeadersController +
+     *  RobotsController so a monitored HTTP target gets the same response-
+     *  window everywhere. */
+    private static final Duration HTTP_CHECK_TIMEOUT = Duration.ofSeconds(10);
+
     @Scheduled(fixedDelay = 30_000)
     public void tick() {
         // Page through enabled monitors instead of loading the whole
@@ -82,7 +92,8 @@ public class MonitorScheduler {
             if (batch.isEmpty()) break;
             for (Monitor m : batch) {
                 String lockKey = "mon:lock:" + m.getId();
-                Boolean acquired = redis.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(m.getIntervalSec() - 5));
+                Boolean acquired = redis.opsForValue().setIfAbsent(lockKey, "1",
+                    Duration.ofSeconds(m.getIntervalSec() - LOCK_TTL_BUFFER_SECONDS));
                 if (Boolean.TRUE.equals(acquired)) {
                     exec.submit(() -> runCheck(m));
                 }
@@ -129,7 +140,7 @@ public class MonitorScheduler {
         URI pinned = pinHostToAddress(original, addr);
         String hostHeader = hostHeaderValue(original);
         HttpResponse<Void> res = http.send(
-            HttpRequest.newBuilder(pinned).timeout(Duration.ofSeconds(10))
+            HttpRequest.newBuilder(pinned).timeout(HTTP_CHECK_TIMEOUT)
                 .header("User-Agent", "NetScope-Monitor/1.0")
                 .header("Host", hostHeader)
                 .GET().build(),
