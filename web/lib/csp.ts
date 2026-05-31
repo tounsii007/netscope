@@ -59,7 +59,26 @@ export function buildCspWithNonce(nonce: string): string {
   // allowances.
   const isDev = process.env.NODE_ENV !== "production";
   const scriptExtras = isDev ? " 'unsafe-inline' 'unsafe-eval'" : " 'strict-dynamic'";
-  const styleExtras  = isDev ? " 'unsafe-inline'" : "";
+  // F-FE-02: style-src must include 'unsafe-inline' in prod too. CSP nonces
+  // only authorise <style nonce=…> blocks — they do NOT cover inline
+  // style="…" attributes, and React/Tailwind/3rd-party components ship a
+  // non-trivial amount of those (Leaflet inlines positioning styles, the
+  // toast/scroll-progress components compute transform values per-frame,
+  // etc.). Without 'unsafe-inline' the prod page renders broken layouts.
+  //
+  // Trade-off accepted: 'unsafe-inline' on style-src lets an XSS injection
+  // set style="…" but NOT execute scripts. React still escapes content
+  // bound into JSX, so the realistic exploit surface is CSS-injection
+  // tricks (e.g. background-image: url(...) data exfil, position:fixed
+  // overlay phishing). That is materially less severe than script
+  // execution, and we accept it for this iteration.
+  //
+  // Follow-up (tracked separately): enumerate every inline style="…" the
+  // app actually renders, replace dynamic ones with class+CSS-var or
+  // <style nonce={n}> blocks, then migrate to 'unsafe-hashes' + an
+  // explicit hash-source allowlist (Option A) which is tight enough to
+  // drop 'unsafe-inline' here.
+  const styleExtras  = isDev ? " 'unsafe-inline'" : " 'unsafe-inline'";
   return [
     "default-src 'self'",
     // strict-dynamic (prod) lets any script the nonce'd bootstrap

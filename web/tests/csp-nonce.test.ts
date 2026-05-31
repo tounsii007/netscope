@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildCspWithNonce, generateNonce } from "@/lib/csp";
 
-// Tests assert the production CSP shape ('strict-dynamic', no 'unsafe-inline').
+// Tests assert the production CSP shape: script-src uses 'strict-dynamic' +
+// nonce (NEVER 'unsafe-inline'); style-src keeps 'unsafe-inline' as a
+// pragmatic Option B from F-FE-02 (every inline style="…" attribute
+// otherwise breaks in production because nonces only apply to <style> tags,
+// not style attributes). Follow-up: enumerate hashes for the small set of
+// dynamic style values and migrate to Option A ('unsafe-hashes' + sha256-…).
 // Vitest defaults NODE_ENV to "test" — we use vi.stubEnv to switch to
 // "production" per test, which is isolated per worker. Direct mutation
 // of process.env.NODE_ENV would leak into parallel tests when vitest
@@ -36,15 +41,21 @@ describe("CSP-with-nonce builder", () => {
   it("substitutes 'unsafe-inline' with 'nonce-<value>' for script-src", () => {
     const csp = buildCspWithNonce("ABCDEF1234");
     expect(csp).toMatch(/script-src 'self' 'nonce-ABCDEF1234' 'strict-dynamic'/);
-    expect(csp).not.toContain("'unsafe-inline'");
+    // script-src MUST NOT carry 'unsafe-inline' — the 'strict-dynamic' +
+    // nonce pair is the whole point of the CSP hardening. Use a directive-
+    // local check so style-src's pragmatic 'unsafe-inline' (F-FE-02 Option
+    // B) doesn't false-positive this assertion.
+    const scriptSrc = csp.match(/script-src [^;]*/)?.[0] ?? "";
+    expect(scriptSrc).not.toContain("'unsafe-inline'");
   });
 
-  it("substitutes 'unsafe-inline' with 'nonce-<value>' for style-src", () => {
+  it("includes 'unsafe-inline' on style-src for inline style=\"…\" attributes (F-FE-02)", () => {
     const csp = buildCspWithNonce("XYZ789");
-    // Production builds drop 'unsafe-inline' for styles entirely; only
-    // the nonce + 'self' + the Google Fonts CSS host remain.
-    expect(csp).toMatch(/style-src 'self' 'nonce-XYZ789' fonts\.googleapis\.com/);
-    expect(csp).not.toContain("'unsafe-inline'");
+    // Nonces only apply to <style> tags, not style="…" attributes. Without
+    // 'unsafe-inline' on style-src, every React component using style={{}}
+    // renders broken in production. F-FE-02 documents the trade-off and
+    // chose Option B (allow inline styles) over Option A (hash allowlist).
+    expect(csp).toMatch(/style-src 'self' 'nonce-XYZ789' 'unsafe-inline' fonts\.googleapis\.com/);
   });
 
   it("relaxes to 'unsafe-inline' in dev mode (HMR + React devtools need it)", () => {
@@ -59,7 +70,8 @@ describe("CSP-with-nonce builder", () => {
   it("keeps the existing security directives unchanged", () => {
     const csp = buildCspWithNonce("NONCE1");
     // Sanity: every directive from the static next.config.ts CSP must
-    // still be present (less the two 'unsafe-inline' allowances).
+    // still be present (less the script-src 'unsafe-inline' allowance —
+    // style-src keeps 'unsafe-inline' per F-FE-02 Option B).
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");

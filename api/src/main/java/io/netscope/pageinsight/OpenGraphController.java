@@ -1,6 +1,7 @@
 package io.netscope.pageinsight;
 
 import io.netscope.common.errors.ApiException;
+import io.netscope.common.http.HttpUrlNormaliser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,12 @@ public class OpenGraphController {
             Map<String, String> meta = new LinkedHashMap<>();
             scan(META, body, meta);
             scan(META_REV, body, meta);
+            // F-FE-01: scrub URL-bearing meta keys *before* they're echoed back
+            // in allMeta or used to populate image/url fields. Any non-http(s)
+            // scheme — javascript:, data:, file:, scheme-relative — is dropped.
+            // We strip from the source map so both the typed top-level fields
+            // and the catch-all allMeta object stay safe.
+            scrubUrlMetaKeys(meta, f.url().toString());
 
             String title = meta.getOrDefault("og:title",
                 meta.getOrDefault("twitter:title", firstGroup(TITLE, body)));
@@ -53,12 +60,21 @@ public class OpenGraphController {
             if (image == null) warnings.add("No og:image — previews will be bare");
             if (!meta.containsKey("twitter:card")) warnings.add("No twitter:card — Twitter preview may be small");
 
+            // F-FE-01: any URL we echo back into the JSON response that a client
+            // might paste into <img src>, <a href>, link rel=icon, etc. must be
+            // restricted to {http, https}. Attacker pages can otherwise smuggle
+            // javascript:/data:/file: payloads through us via og:image,
+            // twitter:image, og:url, or even a malicious <link rel=icon href=…>.
+            // og:image / twitter:image were already resolved + allowlisted in
+            // scrubUrlMetaKeys above; safeUrl() here is a defensive belt-and-
+            // braces for the favicon (which comes from <link rel=icon>, not a
+            // meta tag) and for the page URL itself.
             Map<String, Object> out = new LinkedHashMap<>();
-            out.put("url", f.url().toString());
+            out.put("url", safeUrl(f.url().toString()));
             out.put("title", title);
             out.put("description", description);
-            out.put("image", image == null ? null : resolve(f.url().toString(), image));
-            out.put("favicon", favicon);
+            out.put("image", safeUrl(image));
+            out.put("favicon", safeUrl(favicon));
             out.put("siteName", meta.get("og:site_name"));
             out.put("type", meta.get("og:type"));
             out.put("twitterCard", meta.get("twitter:card"));
@@ -89,5 +105,37 @@ public class OpenGraphController {
         if (ref == null) return null;
         try { return java.net.URI.create(base).resolve(ref).toString(); }
         catch (Exception e) { return ref; }
+    }
+
+    /**
+     * F-FE-01: scheme allowlist for any URL field we echo back to the client.
+     * Returns the URL unchanged if it's {@code http://} / {@code https://},
+     * otherwise null — callers should treat a dropped field as "no value".
+     */
+    private static String safeUrl(String url) {
+        return HttpUrlNormaliser.isHttpUrl(url) ? url : null;
+    }
+
+    /**
+     * F-FE-01: URL-bearing meta keys that, if echoed verbatim from a malicious
+     * page, become a vector for client-side XSS / data-exfiltration. We resolve
+     * each against the fetched page URL (so relative refs become absolute) and
+     * drop any value whose scheme isn't on the {http, https} allowlist.
+     */
+    private static final Set<String> URL_META_KEYS = Set.of(
+        "og:image", "og:image:url", "og:image:secure_url",
+        "og:url", "og:video", "og:video:url", "og:video:secure_url",
+        "og:audio", "og:audio:url", "og:audio:secure_url",
+        "twitter:image", "twitter:image:src", "twitter:url", "twitter:player"
+    );
+
+    private void scrubUrlMetaKeys(Map<String, String> meta, String base) {
+        for (String key : URL_META_KEYS) {
+            String raw = meta.get(key);
+            if (raw == null) continue;
+            String resolved = resolve(base, raw);
+            if (!HttpUrlNormaliser.isHttpUrl(resolved)) meta.remove(key);
+            else meta.put(key, resolved);
+        }
     }
 }
