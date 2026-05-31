@@ -2,6 +2,8 @@ package io.netscope.blacklist;
 
 import io.netscope.common.errors.ApiException;
 import io.netscope.common.BoundedDns;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -15,6 +17,7 @@ import java.util.concurrent.*;
  * the IP and looking up A records. A result (any) means the IP is listed.
  * Purely DNS-based so no API keys required.
  */
+@Tag(name = "IP", description = "Queries 20+ well-known DNSBLs by reversing the IP and looking up A records")
 @RestController
 @RequestMapping("/api/v1/blacklist")
 public class BlacklistController {
@@ -31,6 +34,7 @@ public class BlacklistController {
 
     private final ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
 
+    @Operation(summary = "Check IPv4 against 20 public DNSBLs")
     @GetMapping("/{ip}")
     public Map<String, Object> check(@PathVariable String ip) {
         if (!ip.matches("^(\\d{1,3}\\.){3}\\d{1,3}$"))

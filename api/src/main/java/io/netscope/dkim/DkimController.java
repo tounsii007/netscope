@@ -57,7 +57,7 @@ public class DkimController {
 
     private Map<String, Object> lookupInternal(String domain, String selector) {
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
         if (selector != null && !selector.matches("^[a-zA-Z0-9._-]{1,63}$")) {

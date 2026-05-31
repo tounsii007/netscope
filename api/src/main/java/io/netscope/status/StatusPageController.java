@@ -3,6 +3,7 @@ package io.netscope.status;
 import io.netscope.common.errors.ApiException;
 import io.netscope.monitor.MonitorCheckRepository;
 import io.netscope.monitor.MonitorRepository;
+import io.netscope.user.SessionContext;
 import io.netscope.workspace.WorkspaceMember;
 import io.netscope.workspace.WorkspaceService;
 import jakarta.validation.Valid;
@@ -70,7 +71,18 @@ public class StatusPageController {
 
     @PostMapping("/{id}/incidents")
     public StatusPageIncident createIncident(@PathVariable UUID id, @Valid @RequestBody IncidentRequest req) {
-        StatusPage p = pages.findById(id).orElseThrow(() -> ApiException.notFound("page not found"));
+        // F-RD4-03 (LOW): atomic owner check — collapse the two-step
+        // findById → requireRole into a single SQL query that returns
+        // empty for both "doesn't exist" and "exists in another workspace".
+        // Previously a cross-tenant attacker could distinguish 404 vs 403
+        // and confirm a status-page UUID belongs to some workspace they
+        // don't have access to — including pages with publicAccess=false
+        // that are otherwise invisible. See MonitorController for the same
+        // idiom applied to API-key-scoped resources.
+        StatusPage p = pages.findByIdAndCallerUserId(id, SessionContext.requireUserId())
+            .orElseThrow(() -> ApiException.notFound("page not found"));
+        // Second pass: OWNER/ADMIN role check. Runs only after the 404
+        // path is closed, so MEMBER-vs-ADMIN can't be probed cross-tenant.
         workspaces.requireRole(p.getWorkspaceId(), WorkspaceMember.Role.OWNER, WorkspaceMember.Role.ADMIN);
         StatusPageIncident inc = new StatusPageIncident();
         inc.setStatusPageId(id);
@@ -84,8 +96,16 @@ public class StatusPageController {
     // Public read for status page — NO auth, used by the unauth'd status page route.
     @GetMapping("/public/{slug}")
     public Map<String, Object> publicView(@PathVariable String slug) {
-        StatusPage p = pages.findBySlug(slug).orElseThrow(() -> ApiException.notFound("status page not found"));
-        if (!p.isPublicAccess()) throw ApiException.forbidden("status page is private");
+        // F-RD4-04 (LOW): existence-safe lookup. Previously this was a
+        // two-step findBySlug → check isPublicAccess that returned 403
+        // "status page is private" for slugs that existed but were
+        // private — letting an anonymous attacker enumerate slugs and
+        // confirm which private pages (and therefore workspaces) exist.
+        // Collapsed into a single query that returns empty for both
+        // "no such slug" and "exists but private", and the response uses
+        // the same generic 404 message in either case.
+        StatusPage p = pages.findBySlugAndPublicAccessTrue(slug)
+            .orElseThrow(() -> ApiException.notFound("status page not found"));
 
         // Public endpoint — no auth required. Push the LIMIT into the DB
         // so we don't pull a year of incidents into Java just to keep

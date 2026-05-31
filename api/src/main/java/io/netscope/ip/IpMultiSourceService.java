@@ -13,6 +13,7 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.net.InetAddress;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -85,8 +86,30 @@ public class IpMultiSourceService {
 
     public Map<String, Object> lookup(String ip) {
         if (!isValidIp(ip)) throw ApiException.badRequest("invalid IP");
+        // F-02: enforce the same reserved/loopback/RFC1918/CGNAT/cloud-metadata
+        // block that /lookup applies via IpService.lookup(). Without this, a
+        // direct call to /api/v1/ip/{ip}/sources can fan-out queries for
+        // 169.254.169.254, 127.0.0.1, 10.x, etc. to every upstream geo provider
+        // — bypassing the policy IpAddressGuard exists to enforce. Symmetric
+        // with IpService.lookup(); both endpoints MUST agree on what is
+        // queryable, otherwise the multi-source path becomes a trivial bypass.
+        //
+        // F-RD4-09: reuse the InetAddress that parseAndGuard already produced
+        // and derive the canonical textual form from it. Without this, every
+        // downstream step (cache key, upstream URL, response payload) sees
+        // whatever literal the caller happened to type — "::1", "0:0:0:0:0:0:0:1",
+        // "0000:0000:0000:0000:0000:0000:0000:0001" all refer to the same host
+        // but were treated as distinct inputs before. Canonicalising here
+        // collapses them to one shape for the rest of the method.
+        InetAddress addr = IpAddressGuard.parseAndGuard(ip);
+        String canonicalIp = addr.getHostAddress();
 
-        String cacheKey = "ip-multi:" + ip;
+        // F-RD4-08: cache key is keyed on the canonical form, not the raw user
+        // input. Otherwise the same logical IP fragments across multiple Redis
+        // slots (e.g. "::1" vs "0000:0000:...:0001" miss each other), which
+        // both wastes the 12 h TTL and burns extra fan-out at the upstream
+        // geo providers on every alternate spelling.
+        String cacheKey = "ip-multi:" + canonicalIp;
         Map<String, Object> cachedHit = readCache(cacheKey);
         if (cachedHit != null) return cachedHit;
 
@@ -94,12 +117,12 @@ public class IpMultiSourceService {
         List<IpSourceFetcher> all = IpSourceRegistry.build(rest, mapper, ipinfoToken, ipGeolocationKey);
 
         List<CompletableFuture<IpSourceResult>> futures = all.stream()
-            .map(f -> CompletableFuture.supplyAsync(() -> runOne(f, ip), executor))
+            .map(f -> CompletableFuture.supplyAsync(() -> runOne(f, canonicalIp), executor))
             .toList();
         List<IpSourceResult> results = futures.stream().map(CompletableFuture::join).toList();
 
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("ip", ip);
+        out.put("ip", canonicalIp);
         out.put("durationMs", System.currentTimeMillis() - start);
         out.put("sources", results);
         out.put("sourceCount", results.size());

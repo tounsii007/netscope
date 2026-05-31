@@ -23,6 +23,9 @@ on:
         required: true
         default: "https://staging.traceronix.io"
 
+permissions:
+  contents: read
+
 concurrency:
   group: load-test-${{ inputs.scenario }}
   cancel-in-progress: false   # never cancel a running load test mid-flight

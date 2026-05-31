@@ -3,6 +3,7 @@ package io.netscope.workspace;
 import io.netscope.common.errors.ApiException;
 import io.netscope.user.SessionContext;
 import io.netscope.user.User;
+import io.netscope.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +17,11 @@ public class WorkspaceService {
 
     private final WorkspaceRepository workspaces;
     private final WorkspaceMemberRepository members;
+    private final UserRepository users;
     private final SecureRandom random = new SecureRandom();
 
-    public WorkspaceService(WorkspaceRepository w, WorkspaceMemberRepository m) {
-        this.workspaces = w; this.members = m;
+    public WorkspaceService(WorkspaceRepository w, WorkspaceMemberRepository m, UserRepository u) {
+        this.workspaces = w; this.members = m; this.users = u;
     }
 
     @Transactional
@@ -66,6 +68,16 @@ public class WorkspaceService {
     @Transactional
     public WorkspaceMember invite(UUID workspaceId, UUID userId, WorkspaceMember.Role role) {
         requireRole(workspaceId, WorkspaceMember.Role.OWNER, WorkspaceMember.Role.ADMIN);
+        // F-RD3-06 (HIGH): service-layer mirror of the controller-side check.
+        // If anything ever bypasses the controller (internal call site,
+        // future REST endpoint, batch import job, etc.), the same
+        // unverified-invitee rule still applies — closes email-takeover +
+        // invite-hijack at the inner boundary too.
+        User invitee = users.findById(userId)
+            .orElseThrow(() -> ApiException.notFound("invitee user not found"));
+        if (!invitee.isEmailVerified()) {
+            throw ApiException.badRequest("invitee has not verified their email yet");
+        }
         if (members.findByWorkspaceIdAndUserId(workspaceId, userId).isPresent())
             throw ApiException.badRequest("already a member");
         return members.save(new WorkspaceMember(workspaceId, userId, role));

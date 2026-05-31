@@ -121,6 +121,16 @@ netscope:
     secret: ${JWT_SECRET:change-me-in-production-must-be-32-characters-minimum}
     issuer: ${JWT_ISSUER:https://netscope.io}
     ttl-seconds: ${JWT_TTL:3600}
+  oauth:
+    google:
+      # ⚠ SECURITY (F-RD3-05 + F-RD3-01): client-id is the audience
+      # pinned during OIDC id_token verification. If unset/blank,
+      # OidcIdTokenVerifier REFUSES to boot outside the dev/test
+      # profile — leaving it blank in prod would accept id_tokens
+      # from any Google OAuth application and enable account
+      # takeover. To set the real value:
+      #   export NETSCOPE_GOOGLE_CLIENT_ID="123456789-abc.apps.googleusercontent.com"
+      client-id: ${NETSCOPE_GOOGLE_CLIENT_ID:}
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
@@ -166,6 +176,13 @@ resilience4j:
         slidingWindowSize: 20
         failureRateThreshold: 50
         waitDurationInOpenState: 30s
+      # F-RD2-04: BgpController -> stat.ripe.net. RIPE Stat is reliable
+      # but the read-timeout-protected RestClient still benefits from a
+      # breaker so we stop hammering it on partial outages.
+      ripe:
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
   timelimiter:
     instances:
       ipinfo:
@@ -174,6 +191,8 @@ resilience4j:
         timeoutDuration: 15s
       rdap:
         timeoutDuration: 8s
+      ripe:
+        timeoutDuration: 10s
 
 springdoc:
   swagger-ui:

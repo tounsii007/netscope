@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -157,6 +158,17 @@ public class JwtService {
             // than locking it down so unit tests can still issue tokens
             // with explicit expirations.
             if (extras != null) {
+                // F-RD3-02: reject reserved claim names so a future
+                // caller can't accidentally (or maliciously) overwrite
+                // the canonical sub/iss/exp/iat/nbf via extras and
+                // produce a token whose identity claim disagrees with
+                // the canonical subject we just set above.
+                for (String reserved : List.of("sub", "iss", "exp", "iat", "nbf")) {
+                    if (extras.containsKey(reserved)) {
+                        throw new IllegalArgumentException(
+                            "JwtService.issue extras must not contain reserved claim: " + reserved);
+                    }
+                }
                 for (Map.Entry<String, Object> e : extras.entrySet()) {
                     builder.claim(e.getKey(), e.getValue());
                 }
@@ -207,6 +219,13 @@ public class JwtService {
 
             if (!issuer.equals(claims.getIssuer())) return null;
 
+            // F-RD3-02: require a non-blank sub. A token without an
+            // identifiable subject can't be mapped to a SessionContext
+            // and would otherwise propagate "null"/"" downstream where
+            // it gets stringified and crashes UUID parsing.
+            String sub = claims.getSubject();
+            if (sub == null || sub.isBlank()) return null;
+
             // nimbus's JWTClaimsSet#toJSONObject returns Map<String,
             // Object> with java.util.Date for time claims. The legacy
             // contract returned Numbers for time claims, so convert
@@ -215,6 +234,10 @@ public class JwtService {
             normaliseTimeClaim(out, "iat", claims.getIssueTime());
             normaliseTimeClaim(out, "exp", claims.getExpirationTime());
             normaliseTimeClaim(out, "nbf", claims.getNotBeforeTime());
+            // F-RD3-02 defence-in-depth: pin "sub" to the validated
+            // subject in case a buggy/malicious extras merge or a
+            // toJSONObject quirk produced a different value in the map.
+            out.put("sub", sub);
             return out;
         } catch (ParseException | JOSEException e) {
             return null;

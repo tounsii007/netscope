@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { JwtClient } from "@/app/[locale]/jwt/client";
-import { renderWithIntl, screen, userEvent, fireEvent } from "./test-utils";
+import { renderWithIntl, screen, fireEvent } from "./test-utils";
 
 /**
  * Adversarial / DoS tests for the client-side JWT decoder.

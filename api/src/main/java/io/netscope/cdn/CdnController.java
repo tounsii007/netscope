@@ -3,6 +3,8 @@ package io.netscope.cdn;
 import io.netscope.common.errors.ApiException;
 import io.netscope.common.http.SafeHttpClient;
 import io.netscope.common.security.TargetValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import java.util.*;
  * Heuristic CDN/WAF detection using response headers, cookies, CNAME hints,
  * and the 'server' banner. Not perfect, but matches what cdnfinder / whatcms do.
  */
+@Tag(name = "Web", description = "Heuristic CDN/WAF detection using response headers, cookies, CNAME hints, and the 'server' banner")
 @RestController
 @RequestMapping("/api/v1/cdn")
 public class CdnController {
@@ -54,6 +57,7 @@ public class CdnController {
         this.validator = v; this.http = http;
     }
 
+    @Operation(summary = "Detect CDN and WAF from response headers")
     @GetMapping("/{host}")
     public Map<String, Object> detect(@PathVariable String host) {
         InetAddress addr = validator.resolveAndValidate(host);

@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Adversarial SSRF tests for {@link WebhookController#validateWebhookUrl(String)}
- * and {@link WebhookDeliveryWorker#isSsrfSafeUrl(String)}.
+ * and {@link WebhookDeliveryWorker#resolveSafeAddress(String)}.
  *
  * Before the fix, the URL-validation regex was:
  *   url.startsWith("https://") || url.startsWith("http://localhost")
@@ -160,8 +160,8 @@ class WebhookSsrfTest {
         "",
         "://malformed",
     })
-    void worker_isSsrfSafeUrl_rejects_dangerous_urls(String dangerous) {
-        assertThat(worker().isSsrfSafeUrl(dangerous)).isFalse();
+    void worker_resolveSafeAddress_rejects_dangerous_urls(String dangerous) {
+        assertThat(worker().resolveSafeAddress(dangerous)).isNull();
     }
 
     @ParameterizedTest
@@ -171,24 +171,24 @@ class WebhookSsrfTest {
         "https://example.com/endpoint",
         "https://example.com:8080/v1/webhook",  // uncommon port still allowed
     })
-    void worker_isSsrfSafeUrl_accepts_legitimate_urls(String safe) {
-        assertThat(worker().isSsrfSafeUrl(safe)).isTrue();
+    void worker_resolveSafeAddress_accepts_legitimate_urls(String safe) {
+        assertThat(worker().resolveSafeAddress(safe)).isNotNull();
     }
 
-    @Test void worker_isSsrfSafeUrl_handles_null() {
-        assertThat(worker().isSsrfSafeUrl(null)).isFalse();
+    @Test void worker_resolveSafeAddress_handles_null() {
+        assertThat(worker().resolveSafeAddress(null)).isNull();
     }
 
-    @Test void worker_isSsrfSafeUrl_handles_blank() {
-        assertThat(worker().isSsrfSafeUrl("")).isFalse();
-        assertThat(worker().isSsrfSafeUrl("   ")).isFalse();
+    @Test void worker_resolveSafeAddress_handles_blank() {
+        assertThat(worker().resolveSafeAddress("")).isNull();
+        assertThat(worker().resolveSafeAddress("   ")).isNull();
     }
 
     /* ─── stubs ──────────────────────────────────────────────────────────── */
 
     static class AllowAllWorkspace extends WorkspaceService {
         AllowAllWorkspace() {
-            super(null, null);
+            super(null, null, null);
         }
         @Override public io.netscope.workspace.Workspace requireRole(UUID id, WorkspaceMember.Role... roles) {
             return null;

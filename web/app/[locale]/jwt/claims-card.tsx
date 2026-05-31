@@ -1,8 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, AlertTriangle, Clock, User2, ShieldCheck } from "lucide-react";
 import { ResultCard } from "@/components/tool-shell";
+
+/**
+ * Current unix-seconds, refreshed every 30 s so `expired` / `notYetValid`
+ * flip on their own without the user having to re-paste. Wrapping
+ * `Date.now()` in state keeps render pure (react-hooks/purity).
+ */
+function useNow() {
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    const id = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
 
 /**
  * Human-readable summary of the standard JWT claims (iat / exp / nbf /
@@ -16,7 +31,7 @@ export function ClaimsCard({
   payload: Record<string, unknown>;
 }) {
   const t = useTranslations("jwt");
-  const now = Math.floor(Date.now() / 1000);
+  const now = useNow();
 
   const exp = typeof payload.exp === "number" ? payload.exp : null;
   const iat = typeof payload.iat === "number" ? payload.iat : null;
