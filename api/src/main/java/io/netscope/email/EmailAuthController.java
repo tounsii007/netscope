@@ -24,7 +24,7 @@ public class EmailAuthController {
         // IDN canonicalisation before the ASCII regex. See
         // DomainNormaliser for the strictness policy.
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
 

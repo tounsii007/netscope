@@ -62,7 +62,7 @@ public class SubdomainController {
         log.info("[crtsh] >>> find() entry domain='{}'", domain);
 
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             log.warn("[crtsh] invalid domain rejected: '{}'", domain);
             throw ApiException.badRequest("invalid domain");
         }

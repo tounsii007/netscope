@@ -85,6 +85,14 @@ public class IpMultiSourceService {
 
     public Map<String, Object> lookup(String ip) {
         if (!isValidIp(ip)) throw ApiException.badRequest("invalid IP");
+        // F-02: enforce the same reserved/loopback/RFC1918/CGNAT/cloud-metadata
+        // block that /lookup applies via IpService.lookup(). Without this, a
+        // direct call to /api/v1/ip/{ip}/sources can fan-out queries for
+        // 169.254.169.254, 127.0.0.1, 10.x, etc. to every upstream geo provider
+        // — bypassing the policy IpAddressGuard exists to enforce. Symmetric
+        // with IpService.lookup(); both endpoints MUST agree on what is
+        // queryable, otherwise the multi-source path becomes a trivial bypass.
+        IpAddressGuard.parseAndGuard(ip);
 
         String cacheKey = "ip-multi:" + ip;
         Map<String, Object> cachedHit = readCache(cacheKey);

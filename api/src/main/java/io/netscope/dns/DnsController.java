@@ -49,7 +49,7 @@ public class DnsController {
             @RequestParam(defaultValue = "false") boolean dnssecSummary) {
 
         domain = DomainNormaliser.toAscii(domain);
-        if (domain == null || !domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
         rejectReservedTld(domain);

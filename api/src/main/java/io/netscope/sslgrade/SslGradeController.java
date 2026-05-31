@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.*;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
@@ -38,20 +39,34 @@ public class SslGradeController {
     @SuppressWarnings("unchecked")
     public Map<String, Object> grade(@PathVariable String host,
                                      @RequestParam(defaultValue = "443") int port) {
-        validator.resolveAndValidate(host);
+        // F-01: SSRF + DNS-rebinding defense. Resolve once here via the
+        // validator and pass the validated InetAddress down to compute(),
+        // so the eventual socket.connect() does NOT do a second DNS
+        // lookup. A low-TTL attacker resolver could otherwise return a
+        // public IP first (passes validate) and 127.0.0.1 second (the
+        // socket would target the loopback service and leak the TLS
+        // chain back to the user).
+        InetAddress addr = validator.resolveAndValidate(host);
         return cache.get("sslgrade", host + ":" + port, Map.class, Duration.ofMinutes(30),
-            () -> compute(host, port));
+            () -> compute(host, addr, port));
     }
 
-    private Map<String, Object> compute(String host, int port) {
+    private Map<String, Object> compute(String host, InetAddress addr, int port) {
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
             ctx.init(null, null, null);
             SSLSocketFactory f = ctx.getSocketFactory();
 
             try (SSLSocket s = (SSLSocket) f.createSocket()) {
-                s.connect(new InetSocketAddress(host, port), 5000);
+                // F-01: connect by the already-validated InetAddress, not
+                // by hostname — otherwise InetSocketAddress(host, port)
+                // would trigger a second DNS lookup at connect time and
+                // re-open the TOCTOU window the validator just closed.
+                s.connect(new InetSocketAddress(addr, port), 5000);
                 s.setSoTimeout(5000);
+                // Keep the original hostname as the SNI value so the
+                // server returns the correct virtual-host certificate
+                // even when we dialled the validated InetAddress.
                 SSLParameters p = s.getSSLParameters();
                 p.setServerNames(List.of(new SNIHostName(host)));
                 s.setSSLParameters(p);
