@@ -188,7 +188,7 @@ class WebhookSsrfTest {
 
     static class AllowAllWorkspace extends WorkspaceService {
         AllowAllWorkspace() {
-            super(null, null);
+            super(null, null, null);
         }
         @Override public io.netscope.workspace.Workspace requireRole(UUID id, WorkspaceMember.Role... roles) {
             return null;

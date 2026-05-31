@@ -3,8 +3,11 @@ package io.netscope.user;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netscope.common.errors.ApiException;
+import io.netscope.common.security.ClientIpResolver;
 import io.netscope.workspace.Workspace;
 import io.netscope.workspace.WorkspaceService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.slf4j.Logger;
@@ -39,17 +42,27 @@ public class AuthController {
      * Prefer sending {@code idToken} from the frontend when available
      * — it eliminates one network round-trip per login + removes the
      * trust-anchor dependency on the TLS chain to userinfo.googleapis.com.
+     *
+     * F-RD3-03: {@code ticket} is the one-shot sign-in ticket the
+     * frontend received from POST /api/v1/auth/start. It binds this
+     * /exchange call to a backend-initiated sign-in attempt — without
+     * it (or with a stale, replayed, or IP-mismatched one) the exchange
+     * is rejected before any OAuth verification happens. Closes the
+     * bearer-replay window where a captured access_token/id_token could
+     * be POSTed straight to /exchange and mint a netscope JWT.
      */
     public record ExchangeRequest(
         @NotBlank @Pattern(regexp = "github|google") String provider,
         @NotBlank String accessToken,
-        String idToken
+        String idToken,
+        @NotBlank String ticket
     ) {}
 
     private final UserRepository users;
     private final JwtService jwt;
     private final WorkspaceService workspaces;
     private final OidcIdTokenVerifier oidc;
+    private final SignInTicketService tickets;
     private final RestClient rest = RestClient.create();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -59,16 +72,48 @@ public class AuthController {
     private String githubEmails;
     @Value("${netscope.oauth.google.userinfo:https://openidconnect.googleapis.com/v1/userinfo}")
     private String googleUserinfo;
+    @Value("${netscope.oauth.google.client-id:}")
+    private String googleClientId;
 
     public AuthController(UserRepository users, JwtService jwt,
-                          WorkspaceService workspaces, OidcIdTokenVerifier oidc) {
+                          WorkspaceService workspaces, OidcIdTokenVerifier oidc,
+                          SignInTicketService tickets) {
         this.users = users; this.jwt = jwt; this.workspaces = workspaces;
-        this.oidc = oidc;
+        this.oidc = oidc; this.tickets = tickets;
     }
 
     @PostMapping("/exchange")
     @Transactional
-    public Map<String, Object> exchange(@org.springframework.web.bind.annotation.RequestBody ExchangeRequest req) {
+    public Map<String, Object> exchange(
+            @Valid @org.springframework.web.bind.annotation.RequestBody ExchangeRequest req,
+            HttpServletRequest http) {
+
+        // F-RD3-03: redeem the one-shot ticket BEFORE touching the OAuth
+        // provider. Closes the bearer-replay window: a captured
+        // access_token/id_token is useless against /exchange without a
+        // matching, unconsumed, IP-bound ticket minted at /auth/start.
+        // verifyAndConsume() throws IllegalArgumentException on any
+        // failure (bad sig, expired, IP mismatch, already-redeemed) —
+        // map that to 401 so a leaked-ticket probe doesn't get a 400
+        // that might mislead a caller into thinking the request shape
+        // is the problem.
+        SignInTicketService.Redeemed redeemed;
+        try {
+            redeemed = tickets.verifyAndConsume(
+                req.ticket(), ClientIpResolver.clientIp(http));
+        } catch (IllegalArgumentException e) {
+            log.warn("Sign-in ticket rejected: {}", e.getMessage());
+            throw new ApiException(
+                org.springframework.http.HttpStatus.UNAUTHORIZED,
+                "Sign-in ticket invalid or expired. Restart the sign-in.");
+        }
+        // F-RD3-04 plumb-through: the nonce the frontend forwarded to
+        // the OIDC provider (and Google echoed back into the id_token)
+        // came FROM the ticket. We use it as the expected-nonce on the
+        // id_token verification path so a token whose nonce doesn't
+        // match THIS sign-in attempt is rejected.
+        String expectedNonce = redeemed.nonce();
+
         OauthUser oauth;
         // Preferred path: a verified OIDC id_token. Cryptographically
         // proves the token came from the issuer (Google) without
@@ -76,13 +121,29 @@ public class AuthController {
         // GitHub doesn't issue OIDC id_tokens at all.
         if ("google".equals(req.provider())
             && req.idToken() != null && !req.idToken().isBlank()) {
-            oauth = fetchGoogleFromIdToken(req.idToken());
+            oauth = fetchGoogleFromIdToken(req.idToken(), expectedNonce);
         } else {
             oauth = switch (req.provider()) {
                 case "github" -> fetchGithub(req.accessToken());
                 case "google" -> fetchGoogle(req.accessToken());
                 default -> throw ApiException.badRequest("unsupported provider");
             };
+        }
+
+        // F-RD3-06 (HIGH): refuse first-time sign-ins where the OAuth provider
+        // has NOT verified the email. Otherwise an attacker who controls an
+        // OAuth account with an arbitrary unverified email could provision a
+        // brand-new netscope user bound to a victim's address, then accept a
+        // pending workspace invite addressed to that victim (email-takeover
+        // + invite-hijack). Existing bindings keep working — we only gate
+        // *creation* on a verified email, so already-onboarded users who
+        // somehow lost their verified flag at the IdP can still log back in.
+        boolean existing = users.findByOauthProviderAndOauthSubject(
+            req.provider(), oauth.subject()).isPresent();
+        if (!oauth.emailVerified() && !existing) {
+            throw ApiException.forbidden(
+                "Sign-in requires a verified email at the OAuth provider. " +
+                "Verify your email with Google/GitHub and retry.");
         }
 
         User user = users.findByOauthProviderAndOauthSubject(req.provider(), oauth.subject())
@@ -169,10 +230,29 @@ public class AuthController {
      * locally against a cached JWKS. Throws {@link ApiException} (400)
      * on any verification failure, which the global handler surfaces
      * with a correlation ID.
+     *
+     * F-RD3-03 + F-RD3-04: {@code expectedNonce} is the nonce minted at
+     * /api/v1/auth/start and carried inside the one-shot ticket the
+     * caller already redeemed. The verifier rejects any id_token whose
+     * {@code nonce} claim doesn't match, closing the captured-id_token
+     * replay window.
      */
-    private OauthUser fetchGoogleFromIdToken(String idToken) {
+    private OauthUser fetchGoogleFromIdToken(String idToken, String expectedNonce) {
         try {
-            com.nimbusds.jwt.JWTClaimsSet claims = oidc.verify("google", idToken);
+            com.nimbusds.jwt.JWTClaimsSet claims = oidc.verify("google", idToken, expectedNonce);
+            // F-RD3-05 (CRITICAL) + F-RD3-01 (HIGH): defensive belt-and-
+            // braces aud re-check. The nimbus verifier already enforces
+            // aud when client_id is configured, but if the verifier is
+            // ever reconfigured to skip aud (e.g. a future change passes
+            // null again), this check still rejects mismatched tokens.
+            // Skipped only when client_id itself is blank (= dev/test
+            // profile, per the startup guard in OidcIdTokenVerifier).
+            if (googleClientId != null && !googleClientId.isBlank()) {
+                java.util.List<String> aud = claims.getAudience();
+                if (aud == null || !aud.contains(googleClientId)) {
+                    throw ApiException.forbidden("id_token audience mismatch");
+                }
+            }
             String sub = claims.getSubject();
             String email = claims.getStringClaim("email");
             if (sub == null || email == null) {

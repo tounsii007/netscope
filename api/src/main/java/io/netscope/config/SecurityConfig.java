@@ -48,6 +48,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers(
                 "/api/v1/billing/webhook",           // Stripe sends raw body with its own signature
                 "/api/v1/status-pages/public/**",    // public, no session
+                // F-RD3-03: /api/v1/auth/** is permitAll because callers
+                // are unauthenticated by definition (signing in). CSRF
+                // protection for /exchange is provided by the one-shot
+                // sign-in ticket minted at /auth/start — it binds the
+                // exchange to a backend-initiated sign-in attempt and
+                // closes the bearer-replay window.
                 "/api/v1/auth/**"
             ).disable())
             .cors(Customizer.withDefaults())
@@ -60,6 +66,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/v1/billing/webhook").permitAll()
                 .requestMatchers("/api/v1/status-pages/public/**").permitAll()
+                // F-RD3-03: covers /api/v1/auth/start (one-shot ticket
+                // mint — caller is unauthenticated by definition) AND
+                // /api/v1/auth/exchange (ticket-bound JWT mint). The
+                // ticket itself is the proof-of-intent for /exchange.
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .anyRequest().permitAll() // fine-grained auth handled by ApiKey/Session filters
             )

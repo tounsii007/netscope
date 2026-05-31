@@ -121,6 +121,16 @@ netscope:
     secret: ${JWT_SECRET:change-me-in-production-must-be-32-characters-minimum}
     issuer: ${JWT_ISSUER:https://netscope.io}
     ttl-seconds: ${JWT_TTL:3600}
+  oauth:
+    google:
+      # ⚠ SECURITY (F-RD3-05 + F-RD3-01): client-id is the audience
+      # pinned during OIDC id_token verification. If unset/blank,
+      # OidcIdTokenVerifier REFUSES to boot outside the dev/test
+      # profile — leaving it blank in prod would accept id_tokens
+      # from any Google OAuth application and enable account
+      # takeover. To set the real value:
+      #   export NETSCOPE_GOOGLE_CLIENT_ID="123456789-abc.apps.googleusercontent.com"
+      client-id: ${NETSCOPE_GOOGLE_CLIENT_ID:}
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:}

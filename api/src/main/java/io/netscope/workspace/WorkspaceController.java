@@ -49,6 +49,14 @@ public class WorkspaceController {
     public WorkspaceMember invite(@PathVariable UUID id, @Valid @RequestBody InviteRequest req) {
         var user = users.findByEmail(req.email())
             .orElseThrow(() -> ApiException.notFound("user with that email has not signed up yet"));
+        // F-RD3-06 (HIGH): belt-and-braces — even if AuthController.exchange
+        // ever leaks an unverified-email account through (e.g. a future code
+        // path bypasses the verified-email gate), we refuse to attach that
+        // account to a workspace via invite. The combination of the two
+        // checks closes the email-takeover + invite-hijack window.
+        if (!user.isEmailVerified()) {
+            throw ApiException.badRequest("invitee has not verified their email yet");
+        }
         WorkspaceMember.Role role;
         try { role = WorkspaceMember.Role.valueOf(req.role().toUpperCase()); }
         catch (Exception e) { throw ApiException.badRequest("role must be ADMIN or MEMBER"); }
