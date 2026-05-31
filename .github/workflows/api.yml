@@ -4,6 +4,13 @@ on:
   push: { branches: [main], paths: ["api/**", ".github/workflows/api.yml"] }
   pull_request: { paths: ["api/**"] }
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
