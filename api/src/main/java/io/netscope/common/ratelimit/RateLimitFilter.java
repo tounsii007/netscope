@@ -52,6 +52,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
+        // F-RD5-02: CORS preflight (OPTIONS) is browser-mandated and
+        // unauthenticated by spec — the browser sends it before the
+        // actual cross-origin request, with no credentials and no body.
+        // Counting it against the auth-endpoint bucket would let any
+        // cross-origin page burn the credential-stuffing budget just
+        // by triggering preflights, locking real sign-in attempts out.
+        // SecurityConfig already permitAll's OPTIONS; skip the limiter
+        // here so the bucket reflects real auth traffic only.
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+            chain.doFilter(req, res);
+            return;
+        }
+
         String path = req.getRequestURI();
         if (!path.startsWith("/api/")) { chain.doFilter(req, res); return; }
 
