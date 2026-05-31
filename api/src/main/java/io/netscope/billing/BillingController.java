@@ -14,6 +14,8 @@ import io.netscope.workspace.Workspace;
 import io.netscope.workspace.WorkspaceMember;
 import io.netscope.workspace.WorkspaceRepository;
 import io.netscope.workspace.WorkspaceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ import java.util.UUID;
  * per-hour counter in Postgres. A nightly job pushes the sum to Stripe using
  * the usage-records API if a subscription is metered.
  */
+@Tag(name = "Account", description = "Stripe checkout, customer portal, and webhook endpoints for workspace billing")
 @RestController
 @RequestMapping("/api/v1/billing")
 public class BillingController {
@@ -59,6 +62,7 @@ public class BillingController {
         this.workspaces = workspaces; this.wsService = wsService; this.users = users;
     }
 
+    @Operation(summary = "Create Stripe Checkout session for a price")
     @PostMapping("/checkout")
     public Map<String, Object> checkout(@Valid @RequestBody CheckoutRequest req) {
         Workspace w = wsService.requireRole(req.workspaceId(), WorkspaceMember.Role.OWNER);
@@ -101,6 +105,7 @@ public class BillingController {
         }
     }
 
+    @Operation(summary = "Create Stripe customer portal session")
     @PostMapping("/portal")
     public Map<String, Object> portal(@Valid @RequestBody PortalRequest req) {
         Workspace w = wsService.requireRole(req.workspaceId(), WorkspaceMember.Role.OWNER);
@@ -124,6 +129,7 @@ public class BillingController {
         }
     }
 
+    @Operation(summary = "Receive Stripe webhook events")
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(
             @RequestBody String payload,

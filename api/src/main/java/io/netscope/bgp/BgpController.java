@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.netscope.common.errors.ApiException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.*;
  * Wraps RIPE Stat's public data APIs (CC BY 4.0) to return BGP prefixes,
  * upstream ASNs, and announcement history for any IP or ASN.
  */
+@Tag(name = "IP", description = "BGP prefix, upstream ASN, and announcement history lookups via RIPE Stat")
 @RestController
 @RequestMapping("/api/v1/bgp")
 public class BgpController {
@@ -39,6 +42,7 @@ public class BgpController {
     }
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Operation(summary = "Lookup BGP prefix and ASNs for an IP")
     @GetMapping("/ip/{ip}")
     @CircuitBreaker(name = "ripe", fallbackMethod = "ipFallback")
     public Map<String, Object> ip(@PathVariable String ip) {
@@ -72,6 +76,7 @@ public class BgpController {
         }
     }
 
+    @Operation(summary = "Get ASN overview and announced prefix sample")
     @GetMapping("/asn/{asn}")
     @CircuitBreaker(name = "ripe", fallbackMethod = "asnFallback")
     public Map<String, Object> asn(@PathVariable String asn) {
