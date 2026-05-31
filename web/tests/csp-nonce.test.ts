@@ -13,6 +13,11 @@ import { buildCspWithNonce, generateNonce } from "@/lib/csp";
 // runs with --maxConcurrency > 1.
 beforeEach(() => {
   vi.stubEnv("NODE_ENV", "production");
+  // F-RD5-01: production NODE_ENV requires NEXT_PUBLIC_API_URL to be a
+  // valid https origin. Stub a default so per-test cases that don't
+  // override it still get a build-validated value, mirroring the
+  // production deployment contract.
+  vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.traceronix.io");
 });
 afterEach(() => {
   vi.unstubAllEnvs();

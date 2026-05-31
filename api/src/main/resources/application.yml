@@ -40,6 +40,20 @@ server:
     keep-alive-timeout: 30s
     threads:
       max: 400
+    # ⚠ SECURITY (F-RD5-04): Tomcat's default `internal-proxies` regex trusts
+    # ALL RFC1918 addresses (10/8, 172.16/12, 192.168/16) plus 169.254/16 +
+    # 127/8. On any deployment where the app is reachable directly from a peer
+    # in those ranges (compromised sidecar, misconfigured ingress, SSRF pivot,
+    # shared VPC), an attacker can spoof X-Forwarded-For and bypass the
+    # per-IP rate limiter / poison access logs.
+    #
+    # Boot default = loopback only. Production MUST override with the actual
+    # trusted-proxy CIDR via the env var below (e.g. the ingress controller
+    # service CIDR, or Cloudflare's published IP ranges). Setting it to a wide
+    # range — or back to the Tomcat default — re-opens this finding.
+    #   export SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES='10\.42\.0\.\d{1,3}'
+    remoteip:
+      internal-proxies: ${SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES:^(127\.0\.0\.1|::1|0:0:0:0:0:0:0:1)$}
   error:
     include-message: never
     include-stacktrace: never

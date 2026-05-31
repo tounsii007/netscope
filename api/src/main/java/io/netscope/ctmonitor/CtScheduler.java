@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
 import org.springframework.data.domain.PageRequest;
@@ -100,6 +102,23 @@ public class CtScheduler {
         } while (batch.size() == PAGE_SIZE);
     }
 
+    /**
+     * F-RD5-06 (HIGH) — per-subscription tick runs in its own
+     * {@code REQUIRES_NEW} transaction so that observation INSERTs and the
+     * guarded watermark UPDATE either both commit or both roll back. Without
+     * this, a crash between {@code obs.save(o)} and the watermark advance
+     * would persist the new observation but leave the watermark unchanged,
+     * causing the same cert to re-fire as "new" on the next tick.
+     *
+     * <p>The {@code REQUIRES_NEW} boundary keeps per-subscription state
+     * isolated from any ambient transaction the @Scheduled tick() might be
+     * carrying (it doesn't today, but explicit is safer than assumed). The
+     * fixed-delay scheduler also runs on every replica — see
+     * {@link CtSubscriptionRepository#advanceWatermark} for the cross-replica
+     * race-safety story; this {@code @Transactional} only handles the
+     * intra-tx atomicity.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @CircuitBreaker(name = "crtsh", fallbackMethod = "fallback")
     public void poll(CtSubscription s) {
         try {
@@ -126,6 +145,12 @@ public class CtScheduler {
             // On first-run we don't alert on existing certs — we just record the high water mark
             boolean isFirstRun = s.getLastSeenId() == null;
             long newHighWater = maxId;
+            // Stage observations + events until AFTER the guarded watermark
+            // UPDATE confirms we own this advance. If a sibling replica beat
+            // us to it, we discard staged events instead of double-publishing.
+            // F-RD5-06.
+            List<CtObservation> stagedObs = new ArrayList<>();
+            List<WebhookPublisher.DomainEvent> stagedEvents = new ArrayList<>();
             for (JsonNode n : fresh) {
                 long id = n.path("id").asLong(0);
                 newHighWater = Math.max(newHighWater, id);
@@ -137,17 +162,43 @@ public class CtScheduler {
                     splitSans(n.path("name_value").asText("")),
                     parseTs(n.path("not_before").asText()),
                     parseTs(n.path("not_after").asText()));
-                obs.save(o);
-                events.publishEvent(new WebhookPublisher.DomainEvent(
+                stagedObs.add(o);
+                stagedEvents.add(new WebhookPublisher.DomainEvent(
                     s.getWorkspaceId(), "ct.new_cert", Map.of(
                         "domain", s.getDomain(), "subject", o.getSubject(),
                         "sans", o.getSans(), "notBefore", o.getNotBefore(),
                         "notAfter", o.getNotAfter(), "crtshId", id)));
             }
 
-            s.setLastSeenId(newHighWater);
-            s.setLastCheckedAt(Instant.now());
-            subs.save(s);
+            // F-RD5-06 (HIGH) — guarded UPDATE … WHERE lastSeenId < :newSeen.
+            // Replaces the racy read-modify-write (findCurrent → setSeen →
+            // save). Two replicas calling this concurrently see the same
+            // baseline lastSeenId, but only one's UPDATE matches the WHERE
+            // clause; the other gets rowcount=0 and silently drops its
+            // observations and events. Also prevents watermark rollback
+            // when a stale-cache replica computes a LOWER newHighWater than
+            // the winning replica already committed.
+            int updated = subs.advanceWatermark(s.getId(), newHighWater, Instant.now());
+            if (updated == 0) {
+                // Another replica already advanced past us (or to the same
+                // mark). Drop staged work — the winning replica owns these
+                // observations and events. The (subscription_id, crtsh_id)
+                // unique index would catch INSERT collisions, but explicit
+                // is cheaper than catching constraint violations.
+                if (!stagedObs.isEmpty()) {
+                    log.debug("CT watermark race-drop for {}: {} observations skipped",
+                        s.getDomain(), stagedObs.size());
+                }
+                return;
+            }
+
+            // We own the advance — persist observations and publish events
+            // inside this same REQUIRES_NEW tx so either both commit or
+            // neither does. Event publication is via Spring's event bus,
+            // which the @TransactionalEventListener consumers downstream
+            // handle on commit; if our tx rolls back, no webhooks fire.
+            for (CtObservation o : stagedObs) obs.save(o);
+            for (WebhookPublisher.DomainEvent ev : stagedEvents) events.publishEvent(ev);
         } catch (Exception e) {
             log.warn("CT poll failed for {}: {}", s.getDomain(), e.getMessage());
         }

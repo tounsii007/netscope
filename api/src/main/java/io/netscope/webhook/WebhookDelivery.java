@@ -24,6 +24,14 @@ public class WebhookDelivery {
     @Column(name = "dead_at") private Instant deadAt;
     @Column(name = "created_at") private Instant createdAt = Instant.now();
 
+    /* F-RD5-05 — Worker lease columns. See V6__webhook_lease.sql for the
+     * rationale and WebhookDeliveryWorker for the lifecycle. workerId is the
+     * ULID of the pod that currently owns dispatch; leasedUntil is the wall-
+     * clock instant after which the lease expires and another pod may claim
+     * the row. */
+    @Column(name = "worker_id") private String workerId;
+    @Column(name = "leased_until") private Instant leasedUntil;
+
     public WebhookDelivery() {}
     public WebhookDelivery(UUID webhookId, String eventType, Map<String, Object> payload) {
         this.webhookId = webhookId; this.eventType = eventType; this.payload = payload;
@@ -38,4 +46,8 @@ public class WebhookDelivery {
     public Instant getNextRetryAt() { return nextRetryAt; } public void setNextRetryAt(Instant t) { this.nextRetryAt = t; }
     public void setSucceededAt(Instant t) { this.succeededAt = t; }
     public void setDeadAt(Instant t) { this.deadAt = t; }
+    public String getWorkerId() { return workerId; }
+    public void setWorkerId(String w) { this.workerId = w; }
+    public Instant getLeasedUntil() { return leasedUntil; }
+    public void setLeasedUntil(Instant t) { this.leasedUntil = t; }
 }
