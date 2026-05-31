@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
@@ -22,9 +23,12 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -34,10 +38,50 @@ import java.util.concurrent.Semaphore;
  * thread pool. Retries with exponential backoff (1 m, 5 m, 30 m, 2 h, 6 h,
  * 24 h). After 6 failed attempts the delivery is marked dead and stops retrying.
  *
+ * <h2>Race-safety in a multi-pod deployment (F-RD5-05)</h2>
+ *
+ * The previous design wrapped {@link #tick()} in a single {@code @Transactional}
+ * boundary that also covered the dispatch loop. That looked safe — the pickup
+ * query holds {@code SELECT … FOR UPDATE SKIP LOCKED} — but the row locks were
+ * released the moment {@code tick()} returned. Returning happened immediately
+ * after the rows were SUBMITTED to the virtual-thread pool, not after the HTTP
+ * POSTs completed. A second pod's next {@code tick()} 5 s later could observe
+ * the same rows as still-pending and POST them again, producing duplicate
+ * deliveries to customer endpoints.
+ *
+ * <p>The fix is a lease handoff:
+ * <ol>
+ *   <li>{@link #acquireBatch()} runs in its own short {@code REQUIRES_NEW} tx.
+ *       It performs
+ *       <pre>
+ *       SELECT … FOR UPDATE SKIP LOCKED LIMIT N
+ *       </pre>
+ *       to atomically claim N free rows, stamps each row's {@code worker_id}
+ *       and {@code leased_until}, and commits. Two pods running this
+ *       concurrently see disjoint sets — SKIP LOCKED skips rows that the
+ *       other pod's tx already has under lock. The row lock is released on
+ *       commit, but the lease (worker_id + leased_until > now) keeps the
+ *       row hidden from the other pod's next {@link #acquireBatch()}.
+ *   <li>{@link #send(WebhookDelivery)} runs WITHOUT a tx, so the row lock
+ *       is not held across the HTTP POST.
+ *   <li>On result, {@link #finaliseSent}, {@link #finaliseRetry}, or
+ *       {@link #finaliseDead} runs in another {@code REQUIRES_NEW} tx and
+ *       performs a guarded UPDATE checking {@code worker_id = :ourId}. If
+ *       the lease expired and another pod re-picked the row, our UPDATE
+ *       returns 0 affected rows and we silently drop our result — the other
+ *       pod will commit its own outcome.
+ * </ol>
+ *
  * Crash protection:
- *  - Semaphore(200) caps concurrent in-flight HTTP calls — prevents unbounded
- *    virtual-thread accumulation when target endpoints are slow/unreachable.
- *    At 10 s timeout × 200 threads = max 200 concurrent blocked calls at any time.
+ * <ul>
+ *   <li>Semaphore(200) caps concurrent in-flight HTTP calls — prevents
+ *       unbounded virtual-thread accumulation when target endpoints are
+ *       slow/unreachable. At 10 s timeout × 200 threads = max 200 concurrent
+ *       blocked calls at any time.</li>
+ *   <li>If the pod crashes mid-dispatch, its leases stay in the DB but
+ *       expire after {@link #LEASE_TTL}; another pod picks the rows up
+ *       cleanly after that delay.</li>
+ * </ul>
  */
 @Component
 public class WebhookDeliveryWorker {
@@ -59,10 +103,29 @@ public class WebhookDeliveryWorker {
     private static final int MAX_ATTEMPTS = 6;
     /** Hard cap on concurrent outbound webhook POSTs. Prevents runaway thread accumulation. */
     private static final int MAX_CONCURRENT = 200;
+    /**
+     * F-RD5-05 lease TTL. Must exceed worst-case send() wall-clock so a
+     * healthy worker's lease cannot expire mid-POST and let another pod
+     * re-pick the same row. send() upper bound:
+     *   5 s connect-timeout + 10 s request-timeout + scheduler/GC slack.
+     * 90 s gives generous headroom and is short enough that a crashed pod's
+     * orphaned rows are reclaimed within ~1.5 minutes.
+     */
+    private static final Duration LEASE_TTL = Duration.ofSeconds(90);
+    private static final int BATCH_SIZE = 50;
     private static final Duration[] BACKOFF = {
         Duration.ofMinutes(1), Duration.ofMinutes(5), Duration.ofMinutes(30),
         Duration.ofHours(2), Duration.ofHours(6), Duration.ofHours(24)
     };
+
+    /**
+     * F-RD5-05 — Per-pod worker id. Generated once at construction; stamped
+     * into webhook_deliveries.worker_id at lease time and checked at
+     * finalisation time so that a stale lease (we crashed; another pod
+     * picked the row up; we came back and tried to finalise) cannot
+     * overwrite the row.
+     */
+    private final String workerId = "wh-" + UUID.randomUUID();
 
     private final WebhookDeliveryRepository deliveries;
     private final WebhookRepository webhooks;
@@ -98,14 +161,17 @@ public class WebhookDeliveryWorker {
     }
 
     @Scheduled(fixedDelay = 5_000)
-    @Transactional   // Holds the SELECT FOR UPDATE SKIP LOCKED lock during dispatch
     public void tick() {
-        var pending = deliveries.pending(Instant.now(), PageRequest.of(0, 50));
-        for (WebhookDelivery d : pending) {
+        // F-RD5-05: NO @Transactional here. The pickup tx is short-lived and
+        // commits BEFORE send() runs. The acquired batch carries a lease
+        // (worker_id + leased_until) that excludes other pods from picking up
+        // the same rows even though the row lock has been released.
+        List<UUID> batch = acquireBatch();
+        for (UUID id : batch) {
             exec.submit(() -> {
                 try {
                     concurrencyLimit.acquire();   // blocks if 200 already in-flight
-                    try { send(d); }
+                    try { dispatch(id); }
                     finally { concurrencyLimit.release(); }
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
@@ -114,9 +180,67 @@ public class WebhookDeliveryWorker {
         }
     }
 
+    /**
+     * F-RD5-05 — Atomically claim up to {@link #BATCH_SIZE} pending rows by
+     * stamping each with this worker's id and a lease expiry. Runs in its
+     * own short {@code REQUIRES_NEW} tx so the row locks acquired by
+     * {@link WebhookDeliveryRepository#pending} are released on commit; the
+     * lease columns take over as the exclusion mechanism for the remainder
+     * of the dispatch.
+     *
+     * <p>Uses PostgreSQL's {@code FOR UPDATE SKIP LOCKED} (via the
+     * {@code jakarta.persistence.lock.timeout = -2} hint on the pickup
+     * query): if pod-A holds rows 1..50 under lock, pod-B's
+     * concurrent call returns rows 51..100 immediately instead of waiting.
+     * Without SKIP LOCKED, all but one pod would block until commit and
+     * then re-execute the same query, defeating the point of horizontal
+     * scaling.
+     *
+     * <p>Returns the row IDs only — the entity is re-fetched per row in
+     * {@link #dispatch} to avoid holding stale references across the
+     * tx boundary.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected List<UUID> acquireBatch() {
+        Instant now = Instant.now();
+        List<WebhookDelivery> picked =
+            deliveries.pending(now, PageRequest.of(0, BATCH_SIZE));
+        if (picked.isEmpty()) return List.of();
+        Instant leaseExpiry = now.plus(LEASE_TTL);
+        List<UUID> ids = new ArrayList<>(picked.size());
+        for (WebhookDelivery d : picked) {
+            d.setWorkerId(workerId);
+            d.setLeasedUntil(leaseExpiry);
+            ids.add(d.getId());
+        }
+        // saveAll() flushes the lease writes; tx commit releases the row
+        // locks. From this point on, the rows are invisible to other
+        // pods' pending() calls because leased_until > now() for the
+        // next LEASE_TTL seconds.
+        deliveries.saveAll(picked);
+        return ids;
+    }
+
+    /**
+     * Outside-of-tx dispatch step. Re-loads the row (the lease tx already
+     * committed; another pod can no longer steal it), runs send(), and
+     * routes the result through one of the guarded finalise paths.
+     */
+    private void dispatch(UUID id) {
+        Optional<WebhookDelivery> maybe = deliveries.findById(id);
+        if (maybe.isEmpty()) return;   // deleted between pickup and dispatch
+        WebhookDelivery d = maybe.get();
+        send(d);
+    }
+
     private void send(WebhookDelivery d) {
         Optional<Webhook> maybe = webhooks.findById(d.getWebhookId());
-        if (maybe.isEmpty()) { d.setDeadAt(Instant.now()); deliveries.save(d); return; }
+        if (maybe.isEmpty()) {
+            // Parent webhook gone — finalise dead so the lease releases and
+            // the row stops appearing in future pending() queries.
+            finaliseDead(d, 0, "webhook deleted", null);
+            return;
+        }
         Webhook wh = maybe.get();
 
         // Defence-in-depth SSRF check at delivery time. WebhookController validates
@@ -125,16 +249,15 @@ public class WebhookDeliveryWorker {
         // in principle be tampered with. Re-validate here.
         InetAddress validated = resolveSafeAddress(wh.getUrl());
         if (validated == null) {
-            d.setStatusCode(0);
-            d.setResponseBody("blocked: webhook URL resolves to a private/internal address");
-            d.setDeadAt(Instant.now());
             // F-RD2-01: webhook URLs are bearer-equivalent credentials (Slack/Discord
             // embed the auth token in the path), so they must NEVER reach retention-
             // bound log files. Log only the UUID + a scrubbed fingerprint that
             // preserves operator visibility without exposing the token.
             log.warn("Blocked SSRF attempt via webhook {} ({})", wh.getId(),
                 scrubbedUrlFingerprint(wh.getUrl()));
-            deliveries.save(d);
+            finaliseDead(d, 0,
+                "blocked: webhook URL resolves to a private/internal address",
+                null);
             return;
         }
 
@@ -172,19 +295,81 @@ public class WebhookDeliveryWorker {
             }
             HttpResponse<String> res = http().send(reqB.build(), HttpResponse.BodyHandlers.ofString());
 
-            d.setStatusCode(res.statusCode());
-            d.setResponseBody(res.body());
             if (res.statusCode() >= 200 && res.statusCode() < 300) {
-                d.setSucceededAt(Instant.now());
-                wh.setLastSuccessAt(Instant.now());
-                webhooks.save(wh);
+                finaliseSent(d, wh, res.statusCode(), res.body());
             } else {
-                scheduleRetry(d, wh, "HTTP " + res.statusCode());
+                handleRetry(d, wh, res.statusCode(),
+                    truncate("HTTP " + res.statusCode() + ": " + res.body()));
             }
         } catch (Exception e) {
-            scheduleRetry(d, wh, e.getClass().getSimpleName());
+            handleRetry(d, wh, null, e.getClass().getSimpleName());
         }
-        deliveries.save(d);
+    }
+
+    /* F-RD5-05 — guarded finalisation helpers. Each runs in a fresh
+     * REQUIRES_NEW tx and uses an UPDATE … WHERE worker_id = :ours guard,
+     * so a stale lease (we crashed and came back after another pod
+     * already finalised the row) cannot overwrite the row. */
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void finaliseSent(WebhookDelivery d, Webhook wh, int statusCode, String body) {
+        int rows = deliveries.finaliseSucceeded(
+            d.getId(), workerId, Instant.now(), statusCode, truncate(body));
+        if (rows == 0) {
+            // Lost the race: another pod picked the row up after our lease
+            // expired and has already committed its own outcome. Discard
+            // our result.
+            log.info("Stale-lease drop on success for delivery {}", d.getId());
+            return;
+        }
+        wh.setLastSuccessAt(Instant.now());
+        webhooks.save(wh);
+    }
+
+    private void handleRetry(WebhookDelivery d, Webhook wh, Integer statusCode, String reason) {
+        int next = d.getAttempt() + 1;
+        if (next >= MAX_ATTEMPTS) {
+            // F-RD2-02: webhook URLs are bearer-equivalent credentials (Slack/Discord
+            // embed the auth token in the path), so they must NEVER reach retention-
+            // bound log files. The UUID alone is enough to cross-reference with the
+            // webhooks table; fingerprint included only for at-a-glance debugging.
+            log.warn("Webhook {} dead after {} attempts ({})", wh.getId(), next,
+                scrubbedUrlFingerprint(wh.getUrl()));
+            finaliseDead(d, next, truncate(reason), null);
+            recordWebhookFailure(wh);
+            return;
+        }
+        Instant nextRetry = Instant.now()
+            .plus(BACKOFF[Math.min(next - 1, BACKOFF.length - 1)]);
+        finaliseScheduledRetry(d, next, statusCode, truncate(reason), nextRetry);
+        recordWebhookFailure(wh);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void finaliseScheduledRetry(WebhookDelivery d, int attempt,
+                                          Integer statusCode, String reason, Instant nextRetryAt) {
+        int rows = deliveries.finaliseRetry(
+            d.getId(), workerId, attempt, statusCode, reason, nextRetryAt);
+        if (rows == 0) {
+            log.info("Stale-lease drop on retry for delivery {}", d.getId());
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void finaliseDead(WebhookDelivery d, int attempt,
+                                String reason, Integer statusCode) {
+        int rows = deliveries.finaliseDead(
+            d.getId(), workerId, Instant.now(), attempt,
+            statusCode, truncate(reason));
+        if (rows == 0) {
+            log.info("Stale-lease drop on dead for delivery {}", d.getId());
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void recordWebhookFailure(Webhook wh) {
+        wh.setLastFailureAt(Instant.now());
+        webhooks.save(wh);
     }
 
     /**
@@ -289,23 +474,11 @@ public class WebhookDeliveryWorker {
         }
     }
 
-    private void scheduleRetry(WebhookDelivery d, Webhook wh, String reason) {
-        int next = d.getAttempt() + 1;
-        d.setAttempt(next);
-        d.setResponseBody(reason);
-        if (next >= MAX_ATTEMPTS) {
-            d.setDeadAt(Instant.now());
-            // F-RD2-02: webhook URLs are bearer-equivalent credentials (Slack/Discord
-            // embed the auth token in the path), so they must NEVER reach retention-
-            // bound log files. The UUID alone is enough to cross-reference with the
-            // webhooks table; fingerprint included only for at-a-glance debugging.
-            log.warn("Webhook {} dead after {} attempts ({})", wh.getId(), next,
-                scrubbedUrlFingerprint(wh.getUrl()));
-        } else {
-            d.setNextRetryAt(Instant.now().plus(BACKOFF[Math.min(next - 1, BACKOFF.length - 1)]));
-        }
-        wh.setLastFailureAt(Instant.now());
-        webhooks.save(wh);
+    /** WebhookDelivery.setResponseBody enforces ≤500 chars but the JPQL UPDATE
+     *  path skips that setter, so we truncate at the call site instead. */
+    private static String truncate(String s) {
+        if (s == null) return null;
+        return s.length() < 500 ? s : s.substring(0, 500);
     }
 
     private String hmac(String secret, String body) throws Exception {

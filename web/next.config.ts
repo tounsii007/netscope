@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { validatedApiOrigin } from "./lib/api-origin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+// F-RD5-01: Validate NEXT_PUBLIC_API_URL at build time before splicing
+// it into the CSP `connect-src` directive. A trailing slash, embedded
+// path, query, fragment, or non-http(s) scheme would either expand the
+// policy beyond what we intend or produce a malformed CSP the browser
+// silently drops in full (fail-open: every external script then loads).
+// `validatedApiOrigin` throws here, surfacing the misconfiguration as
+// a hard build error instead of a runtime "CSP looked fine in review,
+// turned off in prod" surprise. See lib/api-origin.ts.
+const apiOrigin = validatedApiOrigin();
 
 const config: NextConfig = {
   reactStrictMode: true,
@@ -43,9 +54,16 @@ const config: NextConfig = {
     //     2. Defence-in-depth: if a future bug makes the middleware
     //        skip a request (matcher regression, edge runtime error,
     //        Next.js update), the static CSP is the safety net that
-    //        still rejects the worst category of attack — inline
-    //        scripts from third-party origins — even though
-    //        'unsafe-inline' for our OWN content is permitted here.
+    //        still rejects inline + third-party scripts entirely.
+    //        F-RD5-03: script-src no longer includes 'unsafe-inline'
+    //        here — the routes this static fallback applies to
+    //        (/_next/static/**, error pages served before middleware
+    //        runs, maintenance/503) are static-only and never need
+    //        inline scripts, so dropping it tightens the safety net
+    //        with zero functional cost. style-src keeps 'unsafe-inline'
+    //        per F-FE-02 Option B (PR #40) — styled-components &
+    //        next/font emit inline <style> tags during SSR that we
+    //        cannot nonce on the static path.
     //
     //   It does NOT replace the dynamic CSP for HTML — that policy is
     //   stricter (no 'unsafe-inline'). See lib/csp.ts + middleware.ts.
@@ -64,11 +82,18 @@ const config: NextConfig = {
     //   hydration on browsers that enforce it (Chromium-based).
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      // F-RD5-03: no 'unsafe-inline' — see commentary above.
+      "script-src 'self'",
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
       "font-src 'self' fonts.gstatic.com",
       "img-src 'self' data: blob: *.openstreetmap.org *.cartocdn.com tile.openstreetmap.org basemaps.cartocdn.com flagcdn.com",
-      "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080") + " api.pwnedpasswords.com",
+      // F-RD5-01: `apiOrigin` is the validated canonical origin from
+      // `validatedApiOrigin()` above — guaranteed to be a bare
+      // `scheme://host[:port]` with no path/query/fragment, no
+      // userinfo, https only in prod. Splicing the raw env var would
+      // let a misconfigured value smuggle extra CSP tokens or expand
+      // the directive past origin granularity.
+      "connect-src 'self' " + apiOrigin + " api.pwnedpasswords.com",
       "frame-src 'none'",
       "frame-ancestors 'none'",
       // F-FE-04: base-uri 'none' — we never render <base>, so allow zero

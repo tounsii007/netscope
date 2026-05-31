@@ -24,7 +24,12 @@
  *     static CSP. If you add a new third-party fetch destination, add
  *     it in BOTH this file and next.config.ts so static and dynamic
  *     responses agree.
+ *   • F-RD5-01: the API origin spliced into connect-src is validated
+ *     via {@link validatedApiOrigin} so a stray path/query/scheme in
+ *     NEXT_PUBLIC_API_URL can't smuggle extra CSP tokens or break the
+ *     directive (which would fail-open).
  */
+import { validatedApiOrigin } from "./api-origin";
 
 /** Generate a cryptographically strong base64 nonce (128 bits). */
 export function generateNonce(): string {
@@ -47,7 +52,12 @@ export function generateNonce(): string {
  * static routes, breaks on dynamic" production bug.
  */
 export function buildCspWithNonce(nonce: string): string {
-  const apiOrigin = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+  // F-RD5-01: validate every call so a runtime env reload (Next.js dev
+  // server hot-reloads .env files) can never sneak in a bogus value
+  // mid-session. Throws synchronously — middleware will 500 instead of
+  // silently shipping a malformed CSP, which is the desired failure
+  // mode.
+  const apiOrigin = validatedApiOrigin();
   const n = `'nonce-${nonce}'`;
   // Dev mode: Next.js's HMR runtime injects inline <script> tags that
   // don't carry our nonce, and the React dev tools eval-load further
