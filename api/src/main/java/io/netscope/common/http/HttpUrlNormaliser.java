@@ -38,4 +38,40 @@ public final class HttpUrlNormaliser {
         if (lower.startsWith("http://") || lower.startsWith("https://")) return url;
         return "https://" + url;
     }
+
+    /**
+     * Allowlist check for URL fields we pass straight back to the browser
+     * (e.g. og:image, og:url, twitter:image). Only {@code http://} and
+     * {@code https://} are accepted; everything else — {@code javascript:},
+     * {@code data:}, {@code file:}, scheme-relative {@code //evil.example},
+     * etc. — is rejected.
+     *
+     * <p>F-FE-01: previously OpenGraphController echoed the raw attacker-
+     * controlled meta-tag value into the JSON response, which let a page
+     * with {@code <meta property="og:image" content="javascript:alert(1)">}
+     * smuggle a dangerous URL into any client that rendered it into an
+     * {@code <img src>} (or worse, an {@code href}) without re-checking.
+     *
+     * <p>Whitespace is trimmed; null / empty / scheme-relative / opaque
+     * inputs all return {@code false}.
+     */
+    public static boolean isHttpUrl(String url) {
+        if (url == null) return false;
+        String trimmed = url.trim();
+        if (trimmed.isEmpty()) return false;
+        // Reject scheme-relative ("//evil.example/x") — without an
+        // explicit scheme the browser inherits the parent page's, which
+        // means our JSON response can't safely commit to either http or
+        // https on the client's behalf.
+        if (trimmed.startsWith("//")) return false;
+        try {
+            java.net.URI uri = java.net.URI.create(trimmed);
+            String scheme = uri.getScheme();
+            if (scheme == null) return false;
+            scheme = scheme.toLowerCase();
+            return scheme.equals("http") || scheme.equals("https");
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 }
