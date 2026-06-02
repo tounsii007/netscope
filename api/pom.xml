@@ -39,12 +39,21 @@
         -->
         <netty.version>4.1.133.Final</netty.version>
         <!--
-            Spring Boot 3.5.14 BOM still pins Tomcat below 10.1.54.
-            10.1.54 brings the fixes for CVE-2026-29145 (auth bypass,
-            CRITICAL), CVE-2026-34483 + CVE-2026-34487 (info disclosure,
-            HIGH). Override until the BOM catches up.
+            Spring Boot 3.5.14 BOM still pins Tomcat below 10.1.55.
+            Bumped 10.1.54 -> 10.1.55: the 10.1.54 we previously pinned
+            now carries a fresh batch of fixed CRITICAL/HIGH CVEs that
+            the Trivy image scan (api.yml docker job) gates on —
+            CVE-2026-41293 (improper input validation, CRITICAL),
+            CVE-2026-43512 (coyote digest-auth bypass, CRITICAL),
+            CVE-2026-43515 (improper authorization, CRITICAL),
+            CVE-2026-41284 (unbounded resource allocation, HIGH),
+            CVE-2026-42498 (auth-header exposure over WebSocket, HIGH),
+            CVE-2026-43513 (LockOutRealm case-sensitivity, HIGH).
+            All fixed in 10.1.55 (the 10.1.x patch release; 9.0.118 /
+            11.0.22 are the sibling-line fixes). Override until the BOM
+            catches up.
         -->
-        <tomcat.version>10.1.54</tomcat.version>
+        <tomcat.version>10.1.55</tomcat.version>
     </properties>
 
     <dependencies>
