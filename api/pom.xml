@@ -16,7 +16,7 @@
             JPA, Redis, validation, actuator, AOP, security, OAuth2
             RS) — no application code changes needed.
         -->
-        <version>3.5.14</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
@@ -45,14 +45,14 @@
             JAR carries the fixed version. Drop this override once the
             BOM catches up (Spring Boot 3.5.13+).
         -->
-        <netty.version>4.1.133.Final</netty.version>
+        <netty.version>4.2.15.Final</netty.version>
         <!--
             Spring Boot 3.5.14 BOM still pins Tomcat below 10.1.54.
             10.1.54 brings the fixes for CVE-2026-29145 (auth bypass,
             CRITICAL), CVE-2026-34483 + CVE-2026-34487 (info disclosure,
             HIGH). Override until the BOM catches up.
         -->
-        <tomcat.version>10.1.54</tomcat.version>
+        <tomcat.version>11.0.22</tomcat.version>
     </properties>
 
     <dependencies>
@@ -76,9 +76,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- Spring Boot 4 removed spring-boot-starter-aop (the artifact is
+             gone from the 4.x BOM / Maven Central → 404). AOP is still used
+             (io.netscope.scan.ScanAuditAspect: @Aspect/@Around + org.aspectj.*).
+             Replaced with spring-aspects, which provides the AspectJ
+             integration and pulls aspectjweaver transitively; both are
+             version-managed by the Boot 4 / Spring Framework 7 BOM. -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -91,12 +97,15 @@
         <dependency>
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
-            <version>29.0.0</version>
+            <!-- 29.0.0 → 33.0.0: latest STABLE major. versions:use-latest-versions
+                 defaulted to 33.1.0-alpha.1 (an alpha); pinned to the newest
+                 non-prerelease release instead. -->
+            <version>33.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
-            <version>2.3.0</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -124,21 +133,21 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>10.0.2</version>
+            <version>10.9.1</version>
         </dependency>
 
         <!-- DNS -->
         <dependency>
             <groupId>dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
-            <version>3.6.3</version>
+            <version>3.6.5</version>
         </dependency>
 
         <!-- GeoIP (MaxMind) -->
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
-            <version>4.2.1</version>
+            <version>5.1.0</version>
         </dependency>
 
         <!-- Rate Limiting -->
@@ -163,7 +172,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.7.0</version>
+            <version>3.0.3</version>
         </dependency>
 
         <dependency>
@@ -197,26 +206,30 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
+            <!-- Held at the latest 3.x STABLE. The entire 4.0.0 line is still
+                 beta (4.0.0-beta.36 is what use-latest-versions grabbed); not
+                 shipping a pre-release into CI. -->
             <version>3.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <!-- Pinned to the last 5.x release. rest-assured 6.0.0 (the
-                 dependabot bump on 2026-05-14 that broke CI) flips the
-                 default body-mapper to Jackson 3 (`tools.jackson.databind`),
-                 which is incompatible with Spring Boot 3.5's managed
-                 Jackson 2 (`com.fasterxml.jackson.databind`). Symptom in
-                 CI was every SsrfProtectionIT case throwing
-                   NoClassDefFoundError: Could not initialize class io.restassured.RestAssured
-                   Caused by: NoClassDefFoundError:
-                   io/restassured/path/json/mapper/factory/Jackson3ObjectMapperFactory
-                 at class-init time. Moving back to a Jackson-2-default
-                 release restores green CI; the upgrade to 6.x can land
-                 once Spring Boot pulls Jackson 3, or via an explicit
-                 rest-assured-jackson2 mapper config. -->
-            <version>5.5.0</version>
+            <!-- 5.5.0 → 6.0.0 (major). rest-assured 6.0.0 defaults its
+                 body-mapper to Jackson 3 (`tools.jackson.databind`). It was
+                 previously pinned to 5.x because Spring Boot 3.5 managed only
+                 Jackson 2, so 6.0.0 hit
+                   NoClassDefFoundError: io/restassured/path/json/mapper/factory/Jackson3ObjectMapperFactory
+                 at RestAssured class-init in every SsrfProtectionIT.
+                 The old comment said "the upgrade to 6.x can land once Spring
+                 Boot pulls Jackson 3" — Spring Boot 4.1.0's BOM now manages
+                 jackson-bom 3.1.4 (tools.jackson) alongside jackson-2-bom
+                 2.21.4, so that precondition is satisfied and 6.0.0 is the
+                 intended target. NOTE: this is test-scoped and the original
+                 failure was a runtime class-init error that compile-only
+                 verification cannot catch — confirm the SsrfProtectionIT suite
+                 is green in CI; if it regresses, fall back to 5.5.7. -->
+            <version>6.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

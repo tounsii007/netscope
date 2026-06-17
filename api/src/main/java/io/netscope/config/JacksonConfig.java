@@ -1,15 +1,28 @@
 package io.netscope.config;
 
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.jackson.autoconfigure.JsonFactoryBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.core.StreamReadConstraints;
 
 /**
  * Jackson StreamReadConstraints — caps how big a JSON payload can be
  * BEFORE it lands on the heap.
  *
- * Defaults (Spring Boot 3.5 / Jackson 2.18):
+ * Spring Boot 4 migration note: Boot 4's web stack now defaults to
+ * Jackson 3 (tools.jackson.*), so this customizer was ported from the
+ * old Jackson-2 {@code Jackson2ObjectMapperBuilderCustomizer} (package
+ * {@code org.springframework.boot.autoconfigure.jackson}, removed in
+ * Boot 4) to a {@link JsonFactoryBuilderCustomizer}. Boot 4's
+ * {@code JacksonAutoConfiguration} collects all
+ * {@code JsonFactoryBuilderCustomizer} beans when it builds the shared
+ * {@code JsonFactory}, so applying the constraints here keeps the
+ * F-RD2-08 cap on the SAME mapper the request path uses. In Jackson 3
+ * stream-read constraints are a first-class TokenStreamFactory option
+ * (TSFBuilder#streamReadConstraints), so no per-mapper postConfigurer
+ * is needed.
+ *
+ * Defaults (Jackson 3.1):
  *   maxStringLength   = 20 MB
  *   maxNestingDepth   = 1000
  *   maxNumberLength   = 1000
@@ -38,13 +51,12 @@ import org.springframework.context.annotation.Configuration;
 public class JacksonConfig {
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer streamReadConstraints() {
-        return builder -> builder.postConfigurer(om ->
-            om.getFactory().setStreamReadConstraints(
-                StreamReadConstraints.builder()
-                    .maxStringLength(64_000)       // 64 KB per JSON string
-                    .maxNestingDepth(64)           // far above legitimate nesting
-                    .maxNumberLength(100)          // any sane numeric value
-                    .build()));
+    public JsonFactoryBuilderCustomizer streamReadConstraints() {
+        return builder -> builder.streamReadConstraints(
+            StreamReadConstraints.builder()
+                .maxStringLength(64_000)       // 64 KB per JSON string
+                .maxNestingDepth(64)           // far above legitimate nesting
+                .maxNumberLength(100)          // any sane numeric value
+                .build());
     }
 }
