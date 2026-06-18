@@ -356,16 +356,16 @@
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <!--
-                    Bumped 1.17.1 → 1.19.1 (and the JUnit-5 plugin
+                    Bumped 1.17.1 → 1.25.5 (and the JUnit-5 plugin
                     1.2.1 → 1.2.2). 1.17.x's coverage-minion fork was
                     incompatible with Spring Boot 3.5 / Spring 6.2 on
                     the JDK-21 runner — fails with
                     "Coverage generation minion exited abnormally!
                     (UNKNOWN_ERROR)" right after the BOM resolution.
-                    1.18+ fixed that class-loader interaction; 1.19.1
+                    1.18+ fixed that class-loader interaction; 1.25.5
                     is the current release.
                 -->
-                <version>1.19.1</version>
+                <version>1.25.5</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.pitest</groupId>
