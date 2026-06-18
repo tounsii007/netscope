@@ -33,7 +33,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Upload coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: web/coverage/lcov.info
           flags: frontend
