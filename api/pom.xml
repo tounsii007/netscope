@@ -272,14 +272,14 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
                         <goals><goal>prepare-agent</goal></goals>
                         <configuration>
                             <!--
-                                JaCoCo 0.8.12 + JDK 25 emits
+                                JaCoCo 0.8.15 + JDK 25 emits
                                 IllegalClassFormatException for several
                                 JDK-internal classes (java/sql/*,
                                 java/net/http/WebSocket$Listener,
