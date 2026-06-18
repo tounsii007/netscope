@@ -1,10 +1,12 @@
 package io.netscope.dns;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.security.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -36,14 +38,26 @@ public class PropagationController {
         new Resolver("NextDNS","Global",    "45.90.28.0")
     );
 
+    /** Per-resolver DNS query timeout. 3 s is tight on purpose — any
+     *  resolver slower than that is unhealthy enough that its answer
+     *  isn't worth waiting on when 14 others are racing alongside. */
+    private static final Duration RESOLVER_TIMEOUT = Duration.ofSeconds(3);
+
     private final ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
 
     @GetMapping("/{domain}")
     public Map<String, Object> check(
             @PathVariable String domain,
             @RequestParam(defaultValue = "A") String type) {
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) throw ApiException.badRequest("invalid domain");
-        Integer recordType = switch (type.toUpperCase()) {
+        // Capture the normalised value into a fresh effectively-final
+        // local so the lambda below can close over it. Reassigning
+        // @PathVariable would otherwise leak through to the lambda and
+        // fail "captured locals must be effectively final".
+        final String resolvedDomain = DomainNormaliser.toAscii(domain);
+        if (resolvedDomain == null || !resolvedDomain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+            throw ApiException.badRequest("invalid domain");
+        }
+        final Integer recordType = switch (type.toUpperCase()) {
             case "A" -> Type.A; case "AAAA" -> Type.AAAA; case "MX" -> Type.MX;
             case "TXT" -> Type.TXT; case "NS" -> Type.NS; case "CNAME" -> Type.CNAME;
             default -> throw ApiException.badRequest("unsupported type");
@@ -51,7 +65,8 @@ public class PropagationController {
 
         long start = System.currentTimeMillis();
         List<CompletableFuture<Map<String, Object>>> futures = RESOLVERS.stream()
-            .map(r -> CompletableFuture.supplyAsync(() -> query(r, domain, recordType, type.toUpperCase()), exec))
+            .map(r -> CompletableFuture.supplyAsync(
+                () -> query(r, resolvedDomain, recordType, type.toUpperCase()), exec))
             .toList();
 
         // Hard ceiling on the whole batch — even if every resolver is a tarpit,
@@ -78,7 +93,7 @@ public class PropagationController {
         });
 
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("domain", domain);
+        out.put("domain", resolvedDomain);
         out.put("type", type.toUpperCase());
         out.put("resolverCount", RESOLVERS.size());
         out.put("uniqueAnswers", unique.size());
@@ -96,7 +111,7 @@ public class PropagationController {
         long start = System.currentTimeMillis();
         try {
             SimpleResolver sr = new SimpleResolver(r.ip());
-            sr.setTimeout(java.time.Duration.ofSeconds(3));
+            sr.setTimeout(RESOLVER_TIMEOUT);
             Lookup lookup = new Lookup(domain, rt);
             lookup.setResolver(sr);
             Record[] recs = lookup.run();

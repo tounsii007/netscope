@@ -4,67 +4,54 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.netscope.common.ApiException;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.http.SafeHttpClient;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
 
-import java.net.http.HttpClient;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 
 /**
  * Uses RDAP (RFC 7483) — the modern replacement for WHOIS. Returns structured JSON.
  *
- * Why the underlying HttpClient is built explicitly:
- *   • {@code rdap.org} replies with HTTP 302 redirects to the TLD-specific
- *     RDAP server (e.g. {@code rdap.verisign.com/com/v1/domain/cloudflare.com}
- *     for .com, {@code rdap.denic.de} for .de, etc.). Java's {@link HttpClient}
- *     defaults to {@code Redirect.NEVER}, so Spring's RestClient.create()
- *     returned a null body and parsing exploded with
- *     "argument \"content\" is null" — surfacing as the user-visible
- *     "RDAP lookup failed".
- *   • Explicit connect+request timeout caps a tarpit RDAP server at 10 s.
- *   • Lazy-init avoids HTTP-stack initialisation in restricted test
- *     environments (and is wasted work if this controller is never called).
+ * Redirect handling: {@code rdap.org} replies with HTTP 302s to the TLD-specific
+ * RDAP server (e.g. {@code rdap.verisign.com} for .com, {@code rdap.denic.de}
+ * for .de). We delegate to {@link SafeHttpClient}, which follows up to 5
+ * redirects and re-runs {@code TargetValidator.resolveAndValidate} on every
+ * hop — closing the SSRF gap that {@code HttpClient.Redirect.NORMAL} would
+ * leave open (an attacker-influenced redirect chain could otherwise land on
+ * 127.0.0.1 or cloud-metadata IPs). See F-06 in
+ * {@code docs/security-review-2026q2.md}.
  */
 @RestController
 @RequestMapping("/api/v1/whois")
 public class WhoisController {
 
-    private volatile RestClient rest;
-    private RestClient rest() {
-        RestClient r = rest;
-        if (r == null) {
-            synchronized (this) {
-                if ((r = rest) == null) {
-                    HttpClient http = HttpClient.newBuilder()
-                        .followRedirects(HttpClient.Redirect.NORMAL)
-                        .connectTimeout(Duration.ofSeconds(5))
-                        .build();
-                    var factory = new JdkClientHttpRequestFactory(http);
-                    factory.setReadTimeout(Duration.ofSeconds(10));
-                    r = rest = RestClient.builder()
-                        .requestFactory(factory)
-                        .defaultHeader("Accept",     "application/rdap+json, application/json")
-                        .defaultHeader("User-Agent", "NetScope/1.0")
-                        .build();
-                }
-            }
-        }
-        return r;
-    }
+    private final SafeHttpClient http;
     private final ObjectMapper mapper = new ObjectMapper();
+
+    public WhoisController(SafeHttpClient http) { this.http = http; }
 
     @GetMapping("/{domain}")
     public Map<String, Object> lookup(@PathVariable String domain) {
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) {
+        if (!domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
         try {
-            String body = rest().get()
-                .uri("https://rdap.org/domain/{d}", domain)
-                .retrieve().body(String.class);
+            // F-06: route through SafeHttpClient so each redirect hop is
+            // re-validated against the SSRF allow-list (rdap.org → TLD RDAP
+            // server can be attacker-influenced for unknown TLDs).
+            HttpResponse<String> res = http.send(
+                HttpRequest.newBuilder(URI.create("https://rdap.org/domain/" + domain))
+                    .timeout(Duration.ofSeconds(10))
+                    .header("Accept",     "application/rdap+json, application/json")
+                    .header("User-Agent", "NetScope/1.0")
+                    .GET().build(),
+                HttpResponse.BodyHandlers.ofString());
+            String body = res.body();
             // Defence in depth: even with redirects enabled, an RDAP server
             // can legitimately return 200 OK with an empty body for an
             // unregistered domain. Surface that as a clear 404 instead of

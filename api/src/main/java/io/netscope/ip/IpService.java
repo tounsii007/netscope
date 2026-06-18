@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -22,10 +23,56 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class IpService {
 
+    /**
+     * F-RD2-03: hard cap on the ipinfo.io response body. The endpoint
+     * is documented to return ~1 KB JSON; anything an order of
+     * magnitude larger is either a misbehaving upstream, an attacker
+     * proxying through a compromised CDN, or a hijacked DNS pointing
+     * us at a tarpit. Reject before we deserialise.
+     */
+    private static final long MAX_IPINFO_BODY_BYTES = 256L * 1024L;
+
+    /** TCP connect + socket-read timeout for the ipinfo.io call. 5 s is well
+     *  above p99 from any AWS region and well below the breaker's failure-
+     *  rate sliding window. */
+    private static final Duration IPINFO_CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration IPINFO_READ_TIMEOUT    = Duration.ofSeconds(5);
+
+    /** Redis cache TTL per resolved IP. 12 h matches the upstream's hint
+     *  that geo data is stable on the scale of half a day. */
+    private static final Duration IP_CACHE_TTL = Duration.ofHours(12);
+
+    /** Total budget for the Tor-exit-list refresh fetch. The list is ~1 MB;
+     *  10 s is comfortable for that download even over a saturated link. */
+    private static final Duration TOR_LIST_FETCH_TIMEOUT = Duration.ofSeconds(10);
+
     private final StringRedisTemplate redis;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final RestClient rest = RestClient.create();
+    /**
+     * F-RD2-03: previously {@code RestClient.create()} — the default
+     * factory honours no connect/read timeouts, so an ipinfo.io hang
+     * would pin the calling HTTP worker indefinitely. Resilience4j's
+     * {@code @TimeLimiter} only works on async return types, so the
+     * sync {@code @CircuitBreaker} path here MUST enforce its own
+     * deadlines at the transport layer. 5 s each is well above the
+     * p99 latency from any AWS region and well below the breaker
+     * sliding-window failure-rate window.
+     */
+    private final RestClient rest = buildIpinfoRestClient();
     private final HttpClient http = HttpClient.newHttpClient();
+
+    private static RestClient buildIpinfoRestClient() {
+        HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(IPINFO_CONNECT_TIMEOUT)
+            .build();
+        var rf = new JdkClientHttpRequestFactory(httpClient);
+        rf.setReadTimeout(IPINFO_READ_TIMEOUT);
+        return RestClient.builder()
+            .requestFactory(rf)
+            .defaultHeader("User-Agent", "NetScope/1.0 (ip-geo-lookup)")
+            .defaultHeader("Accept", "application/json")
+            .build();
+    }
 
     @Value("${netscope.geoip.ipinfo-token:}")
     private String ipinfoToken;
@@ -69,7 +116,7 @@ public class IpService {
         enrichTechnical(addr, result);
 
         try {
-            redis.opsForValue().set("ip:" + canonical, mapper.writeValueAsString(result), Duration.ofHours(12));
+            redis.opsForValue().set("ip:" + canonical, mapper.writeValueAsString(result), IP_CACHE_TTL);
         } catch (Exception ignored) {}
 
         return result;
@@ -138,13 +185,39 @@ public class IpService {
      * the pipeline never expected — F-grade bug masked as defensive
      * programming.
      */
+    // F-RD2-03 compromise: keep the synchronous return type so the
+    // existing callers (IpService.lookup + IpServiceCircuitBreakerTest)
+    // don't need rewriting. @TimeLimiter only fires on a
+    // CompletionStage-returning method, so instead we enforce the
+    // 5 s deadline at the HTTP transport layer (see {@link
+    // #buildIpinfoRestClient}) and bound the response body before
+    // parsing. The CircuitBreaker still trips on transport-timeout
+    // exceptions thrown from .retrieve().
     @CircuitBreaker(name = "ipinfo", fallbackMethod = "fetchFallback")
     public Map<String, Object> fetchFromIpinfo(String ip) {
         try {
             String url = ipinfoBaseUrl + "/" + ip + "/json"
                 + (ipinfoToken.isBlank() ? "" : "?token=" + ipinfoToken);
-            String body = rest.get().uri(url).retrieve().body(String.class);
-            JsonNode j = mapper.readTree(body);
+            // F-RD2-03: fetch as ResponseEntity<byte[]> so we can
+            // (a) check Content-Length upfront and short-circuit on
+            // oversized payloads without buffering them, and
+            // (b) reject the actual returned body if the server
+            // either omitted Content-Length or lied about it.
+            var entity = rest.get().uri(url).retrieve().toEntity(byte[].class);
+            long declared = entity.getHeaders().getContentLength();
+            if (declared > MAX_IPINFO_BODY_BYTES) {
+                throw new RuntimeException(
+                    "geoip response too large: " + declared + " bytes");
+            }
+            byte[] raw = entity.getBody();
+            if (raw == null || raw.length == 0) {
+                throw new RuntimeException("geoip response empty");
+            }
+            if (raw.length > MAX_IPINFO_BODY_BYTES) {
+                throw new RuntimeException(
+                    "geoip response too large: " + raw.length + " bytes");
+            }
+            JsonNode j = mapper.readTree(raw);
             Map<String, Object> out = new LinkedHashMap<>();
             out.put("ip", ip);
             out.put("hostname", j.path("hostname").asText(null));
@@ -233,7 +306,7 @@ public class IpService {
         java.util.concurrent.CompletableFuture.runAsync(() -> {
             try {
                 HttpResponse<String> res = http.send(
-                    HttpRequest.newBuilder(URI.create(torListUrl)).timeout(Duration.ofSeconds(10)).build(),
+                    HttpRequest.newBuilder(URI.create(torListUrl)).timeout(TOR_LIST_FETCH_TIMEOUT).build(),
                     HttpResponse.BodyHandlers.ofString());
                 Set<String> fresh = ConcurrentHashMap.newKeySet();
                 for (String line : res.body().split("\n")) {

@@ -57,6 +57,19 @@ const ENDPOINT_MIX = [
     path: () => `/api/v1/subdomains/${pick(DOMAINS)}`, method: "GET" },
   { weight:  2, name: "bgp",         nameTag: "/api/v1/bgp/ip/:ip",
     path: () => `/api/v1/bgp/ip/${randIp()}`, method: "GET" },
+  // ─── Tools added in the 29-tools sprint ──────────────────────────
+  // Lower weights than the established tools — these endpoints either
+  // hit external services (crt.sh, public DoH providers) that we don't
+  // want to flood under stress, or have their own internal probe pools
+  // (DKIM parallel) whose pool sizes matter more than raw QPS.
+  { weight:  3, name: "dkim",        nameTag: "/api/v1/dkim/:domain",
+    path: () => `/api/v1/dkim/${pick(DOMAINS)}`, method: "GET" },
+  { weight:  2, name: "doh",         nameTag: "/api/v1/doh/:domain",
+    path: () => `/api/v1/doh/${pick(DOMAINS)}?type=A`, method: "GET" },
+  { weight:  2, name: "ctlogs",      nameTag: "/api/v1/ct-logs/:domain",
+    // crt.sh is the slowest upstream we have — keep includeSubdomains
+    // false in load tests so we don't unintentionally DoS them.
+    path: () => `/api/v1/ct-logs/${pick(DOMAINS)}?includeSubdomains=false`, method: "GET" },
 ];
 
 const HOSTS   = ["google.com", "cloudflare.com", "github.com", "amazon.com", "wikipedia.org", "stackoverflow.com"];

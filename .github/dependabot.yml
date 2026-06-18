@@ -7,6 +7,13 @@ updates:
     groups:
       spring: { patterns: ["org.springframework*", "spring-boot*"] }
       test:   { patterns: ["*junit*", "*testcontainers*"] }
+    ignore:
+      # Spring Boot 4 drops spring-boot-starter-aop from default BOM in some
+      # configs and breaks API surfaces — manual migration required.
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework.cloud:*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
     directory: /web
     schedule: { interval: weekly }

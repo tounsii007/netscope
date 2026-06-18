@@ -1,8 +1,12 @@
 package io.netscope.cdn;
 
-import io.netscope.common.ApiException;
-import io.netscope.common.SafeHttpClient;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.http.SafeHttpClient;
+import io.netscope.common.security.TargetValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.InetAddress;
@@ -16,9 +20,12 @@ import java.util.*;
  * Heuristic CDN/WAF detection using response headers, cookies, CNAME hints,
  * and the 'server' banner. Not perfect, but matches what cdnfinder / whatcms do.
  */
+@Tag(name = "Web", description = "Heuristic CDN/WAF detection using response headers, cookies, CNAME hints, and the 'server' banner")
 @RestController
 @RequestMapping("/api/v1/cdn")
 public class CdnController {
+
+    private static final Logger log = LoggerFactory.getLogger(CdnController.class);
 
     private record Signal(String cdn, String where, String pattern) {}
 
@@ -43,6 +50,10 @@ public class CdnController {
         new Signal("GitHub Pages", "header", "server=github.com")
     );
 
+    /** HEAD-probe timeout. 8 s is generous enough for the slowest CDNs
+     *  while still being well below the rate-limit window. */
+    private static final Duration PROBE_TIMEOUT = Duration.ofSeconds(8);
+
     private final TargetValidator validator;
     private final SafeHttpClient http;
 
@@ -50,13 +61,14 @@ public class CdnController {
         this.validator = v; this.http = http;
     }
 
+    @Operation(summary = "Detect CDN and WAF from response headers")
     @GetMapping("/{host}")
     public Map<String, Object> detect(@PathVariable String host) {
         InetAddress addr = validator.resolveAndValidate(host);
         try {
             HttpResponse<Void> res = http.send(
                 HttpRequest.newBuilder(URI.create("https://" + host + "/"))
-                    .timeout(Duration.ofSeconds(8))
+                    .timeout(PROBE_TIMEOUT)
                     .header("User-Agent", "NetScope/1.0").GET().build(),
                 HttpResponse.BodyHandlers.discarding());
 
@@ -84,7 +96,7 @@ public class CdnController {
             out.put("status", res.statusCode());
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("detection failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "CDN detection failed", e);
         }
     }
 }

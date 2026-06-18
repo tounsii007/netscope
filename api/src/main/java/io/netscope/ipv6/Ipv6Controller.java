@@ -1,7 +1,8 @@
 package io.netscope.ipv6;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.security.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -18,7 +19,10 @@ public class Ipv6Controller {
 
     @GetMapping("/{domain}")
     public Map<String, Object> score(@PathVariable String domain) {
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) throw ApiException.badRequest("invalid domain");
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
+            throw ApiException.badRequest("invalid domain");
+        }
 
         boolean apex6 = hasAaaa(domain);
         boolean apex4 = hasA(domain);

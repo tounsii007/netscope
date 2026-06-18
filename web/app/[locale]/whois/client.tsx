@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useFormatDate } from "@/lib/format-date";
 import { api, type WhoisResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { RecentTargets } from "@/components/recent-targets";
@@ -18,6 +19,7 @@ export function WhoisClient() {
   const t = useTranslations("whois");
   const tc = useTranslations("common");
   const tn = useTranslations("nav.tools");
+  const fmt = useFormatDate();
   const [domain, setDomain] = useState("cloudflare.com");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -160,7 +162,7 @@ export function WhoisClient() {
                 >
                   <span className="text-fg-subtle">{k}</span>
                   <span className="text-fg">
-                    {v ? new Date(v).toLocaleDateString() : <span className="text-fg-subtle">—</span>}
+                    {v ? fmt.short(v) : <span className="text-fg-subtle">—</span>}
                   </span>
                 </div>
               ))}

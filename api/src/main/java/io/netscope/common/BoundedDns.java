@@ -112,6 +112,18 @@ public final class BoundedDns {
                     resolver.setTimeout(effective);
                 }
                 lookup.setResolver(resolver);
+                // Bypass dnsjava's process-wide Lookup.defaultCache. For
+                // single-shot lookups it's neutral; for the cross-resolver
+                // probes (DoH/DoT tester), the default cache returned the
+                // FIRST resolver's answer for every subsequent resolver
+                // call with the same name+type — defeating the whole
+                // "compare answers across providers" point.
+                //
+                // setCache(null) is dnsjava's documented "do not cache at
+                // all" mode and allocates nothing per call. The earlier
+                // `new Cache(DClass.IN)` approach worked but added
+                // unnecessary heap churn under high DNS load.
+                lookup.setCache(null);
                 return lookup.run();
             } catch (Exception e) {
                 log.debug("DNS lookup failed for {}/{}: {}", name, type, e.getMessage());

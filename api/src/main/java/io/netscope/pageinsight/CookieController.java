@@ -1,6 +1,8 @@
 package io.netscope.pageinsight;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -14,6 +16,8 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/api/v1/cookies")
 public class CookieController {
+
+    private static final Logger log = LoggerFactory.getLogger(CookieController.class);
 
     private record Tracker(String name, String category, String pattern) {}
 
@@ -91,7 +95,7 @@ public class CookieController {
             out.put("gdprRiskScore", Math.min(100, (int)(trackers.size() * 15 + insecureCookies * 10 + noSameSite * 5)));
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("fetch failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "Cookie scan fetch failed", e);
         }
     }
 

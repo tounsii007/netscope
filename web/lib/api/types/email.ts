@@ -23,6 +23,34 @@ export type EmailAuthResult = {
   score: number;
 };
 
+/**
+ * Standalone DKIM key-fetch result. Distinct from {@link EmailAuthResult}
+ * which only reports DKIM presence as part of a combined SPF/DMARC audit;
+ * this surfaces the key bytes + algorithm + size + warnings about weak or
+ * revoked configurations.
+ */
+export type DkimResult = {
+  domain: string;
+  selector: string | null;
+  triedSelectors: string[];
+  result: {
+    queriedHost?: string;
+    present: boolean;
+    rawRecord?: string;
+    tags?: Record<string, string>;
+    keyType?: string;
+    keyAlgorithm?: string;
+    keySize?: number;
+    publicKeyBase64?: string;
+    hashAlgorithms?: string[];
+    serviceType?: string;
+    flags?: string;
+    notes?: string;
+    revoked?: boolean;
+    warnings?: string[];
+  };
+};
+
 export type BlacklistResult = {
   ip: string; totalChecked: number; listedCount: number; clean: boolean;
   reputationScore: number; durationMs: number;

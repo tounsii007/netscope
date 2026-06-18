@@ -16,7 +16,7 @@
             JPA, Redis, validation, actuator, AOP, security, OAuth2
             RS) — no application code changes needed.
         -->
-        <version>3.5.14</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
@@ -27,6 +27,14 @@
     <description>NetScope REST API</description>
 
     <properties>
+        <!--
+            Source/target bytecode release stays at 21 even though CI +
+            Dockerfile both run JDK 25. This is intentional: the
+            <release> directive doubles as a guardrail so a casual
+            commit can't sneak in a JDK 22-25-only API (foreign-function,
+            pattern matching for sealed types, etc.) without an
+            explicit pom bump. Build VM and run VM remain in sync at 25.
+        -->
         <java.version>21</java.version>
         <!-- Bumped to 42.7.11 to clear GHSA-98qh-xjc8-98pq + GHSA-hq9p-pm7w-8p54 -->
         <postgresql.version>42.7.11</postgresql.version>
@@ -37,7 +45,7 @@
             JAR carries the fixed version. Drop this override once the
             BOM catches up (Spring Boot 3.5.13+).
         -->
-        <netty.version>4.1.133.Final</netty.version>
+        <netty.version>4.2.15.Final</netty.version>
         <!--
             Spring Boot 3.5.14 BOM still pins Tomcat below 10.1.55.
             Bumped 10.1.54 -> 10.1.55: the 10.1.54 we previously pinned
@@ -53,7 +61,13 @@
             11.0.22 are the sibling-line fixes). Override until the BOM
             catches up.
         -->
-        <tomcat.version>10.1.55</tomcat.version>
+        <!--
+            Spring Boot 4.1.0 manages Tomcat 11.x. main's Boot-3-era
+            10.1.55 pin is superseded — keep the upgrade side's 11.0.22
+            override (carries the same fixed CVEs that 10.1.55 did, on
+            the 11.x line) until the BOM catches up.
+        -->
+        <tomcat.version>11.0.22</tomcat.version>
     </properties>
 
     <dependencies>
@@ -77,9 +91,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- Spring Boot 4 removed spring-boot-starter-aop (the artifact is
+             gone from the 4.x BOM / Maven Central → 404). AOP is still used
+             (io.netscope.scan.ScanAuditAspect: @Aspect/@Around + org.aspectj.*).
+             Replaced with spring-aspects, which provides the AspectJ
+             integration and pulls aspectjweaver transitively; both are
+             version-managed by the Boot 4 / Spring Framework 7 BOM. -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -92,12 +112,15 @@
         <dependency>
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
-            <version>29.0.0</version>
+            <!-- 29.0.0 → 33.0.0: latest STABLE major. versions:use-latest-versions
+                 defaulted to 33.1.0-alpha.1 (an alpha); pinned to the newest
+                 non-prerelease release instead. -->
+            <version>33.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
-            <version>2.3.0</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -118,18 +141,28 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
+        <!-- JWT — battle-tested HS256 + JWKS-verified OIDC id_token parsing.
+             Replaces a previous 60-line hand-rolled HMAC implementation that
+             didn't validate token typ/headers nor enforce key size
+             post-construction. -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>10.9.1</version>
+        </dependency>
+
         <!-- DNS -->
         <dependency>
             <groupId>dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
-            <version>3.6.3</version>
+            <version>3.6.5</version>
         </dependency>
 
         <!-- GeoIP (MaxMind) -->
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
-            <version>4.2.1</version>
+            <version>5.1.0</version>
         </dependency>
 
         <!-- Rate Limiting -->
@@ -154,7 +187,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.7.0</version>
+            <version>3.0.3</version>
         </dependency>
 
         <dependency>
@@ -170,37 +203,54 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.20.4</version>
+            <version>1.21.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.20.4</version>
+            <version>1.21.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.redis</groupId>
             <artifactId>testcontainers-redis</artifactId>
-            <version>2.2.2</version>
+            <version>2.2.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.10.0</version>
+            <!-- Held at the latest 3.x STABLE. The entire 4.0.0 line is still
+                 beta (4.0.0-beta.36 is what use-latest-versions grabbed); not
+                 shipping a pre-release into CI. -->
+            <version>3.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>5.5.0</version>
+            <!-- 5.5.0 → 6.0.0 (major). rest-assured 6.0.0 defaults its
+                 body-mapper to Jackson 3 (`tools.jackson.databind`). It was
+                 previously pinned to 5.x because Spring Boot 3.5 managed only
+                 Jackson 2, so 6.0.0 hit
+                   NoClassDefFoundError: io/restassured/path/json/mapper/factory/Jackson3ObjectMapperFactory
+                 at RestAssured class-init in every SsrfProtectionIT.
+                 The old comment said "the upgrade to 6.x can land once Spring
+                 Boot pulls Jackson 3" — Spring Boot 4.1.0's BOM now manages
+                 jackson-bom 3.1.4 (tools.jackson) alongside jackson-2-bom
+                 2.21.4, so that precondition is satisfied and 6.0.0 is the
+                 intended target. NOTE: this is test-scoped and the original
+                 failure was a runtime class-init error that compile-only
+                 verification cannot catch — confirm the SsrfProtectionIT suite
+                 is green in CI; if it regresses, fall back to 5.5.7. -->
+            <version>6.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.2.2</version>
+            <version>4.3.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -227,6 +277,30 @@
                     <execution>
                         <id>prepare-agent</id>
                         <goals><goal>prepare-agent</goal></goals>
+                        <configuration>
+                            <!--
+                                JaCoCo 0.8.12 + JDK 25 emits
+                                IllegalClassFormatException for several
+                                JDK-internal classes (java/sql/*,
+                                java/net/http/WebSocket$Listener,
+                                com/sun/tools/attach/VirtualMachine)
+                                because the agent's bytecode rewriter
+                                doesn't yet understand the new class-
+                                file shape. The exceptions don't fail
+                                the build but they pollute CI logs by
+                                the thousands and historically masked
+                                real instrumentation errors. Tell the
+                                agent to skip these namespaces — none
+                                of them is part of our coverage target
+                                anyway.
+                            -->
+                            <excludes>
+                                <exclude>com/sun/**</exclude>
+                                <exclude>sun/**</exclude>
+                                <exclude>java/**</exclude>
+                                <exclude>jdk/**</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -296,7 +370,7 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>1.2.2</version>
+                        <version>1.2.3</version>
                     </dependency>
                 </dependencies>
                 <configuration>

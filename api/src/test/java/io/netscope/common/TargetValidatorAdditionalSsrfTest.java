@@ -1,4 +1,6 @@
 package io.netscope.common;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.security.TargetValidator;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

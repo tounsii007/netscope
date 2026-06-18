@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class EmailControllerTest {
 
-    private final EmailController ctrl = new EmailController(new io.netscope.common.TargetValidator());
+    private final EmailController ctrl = new EmailController(new io.netscope.common.security.TargetValidator());
 
     private Map<String, Object> verify(String email) {
         return ctrl.verify(new EmailController.VerifyRequest(email, false));

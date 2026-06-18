@@ -1,7 +1,7 @@
 package io.netscope.redirect;
 
-import io.netscope.common.ApiException;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.security.TargetValidator;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -31,9 +31,16 @@ public class RedirectController {
      */
     private static final long MAX_TOTAL_MS = 30_000;
 
+    /** Connect timeout for the underlying HttpClient. */
+    private static final Duration CLIENT_CONNECT_TIMEOUT = Duration.ofSeconds(5);
+
+    /** Per-hop request timeout. 8 s leaves room under MAX_TOTAL_MS (30 s) for
+     *  ~3-4 slow-but-completed hops before the cumulative cap trips. */
+    private static final Duration HOP_REQUEST_TIMEOUT = Duration.ofSeconds(8);
+
     private final TargetValidator validator;
     private final HttpClient client = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(5))
+        .connectTimeout(CLIENT_CONNECT_TIMEOUT)
         .followRedirects(HttpClient.Redirect.NEVER).build();
 
     public RedirectController(TargetValidator v) { this.validator = v; }
@@ -74,7 +81,7 @@ public class RedirectController {
 
             try {
                 HttpResponse<Void> res = client.send(
-                    HttpRequest.newBuilder(current).timeout(Duration.ofSeconds(8))
+                    HttpRequest.newBuilder(current).timeout(HOP_REQUEST_TIMEOUT)
                         .header("User-Agent", "NetScope/1.0").GET().build(),
                     HttpResponse.BodyHandlers.discarding());
                 hop.put("status", res.statusCode());

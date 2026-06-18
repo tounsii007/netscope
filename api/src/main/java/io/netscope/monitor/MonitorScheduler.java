@@ -1,18 +1,20 @@
 package io.netscope.monitor;
 
-import io.netscope.common.HttpUrlNormaliser;
-import io.netscope.common.SafeHttpClient;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.http.HttpUrlNormaliser;
+import io.netscope.common.http.SafeHttpClient;
+import io.netscope.common.security.TargetValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -30,6 +32,20 @@ import java.util.concurrent.Executors;
 public class MonitorScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(MonitorScheduler.class);
+
+    static {
+        // F-RD4-07 DNS-rebinding defence: httpCheck() sets an explicit Host
+        // header so the upstream still routes to the correct virtual host
+        // after we rewrite the URI to the validated IP literal. JDK's
+        // HttpClient blocks "Host" as a "restricted" header unless this
+        // system property opts in. Must be set before the first time the
+        // shared HttpClient sees a request that carries the header.
+        String existing = System.getProperty("jdk.httpclient.allowRestrictedHeaders", "");
+        if (!existing.toLowerCase().contains("host")) {
+            String merged = existing.isBlank() ? "host" : existing + ",host";
+            System.setProperty("jdk.httpclient.allowRestrictedHeaders", merged);
+        }
+    }
 
     private final MonitorRepository monitors;
     private final MonitorCheckRepository checks;
@@ -49,6 +65,16 @@ public class MonitorScheduler {
      *  few ticks even at 100k+ rows. */
     private static final int SCHED_PAGE_SIZE = 500;
 
+    /** Buffer subtracted from the monitor's intervalSec to compute the Redis
+     *  setIfAbsent TTL. Lets the next tick re-acquire the lock just before
+     *  the previous run's TTL expires, instead of racing the boundary. */
+    private static final int LOCK_TTL_BUFFER_SECONDS = 5;
+
+    /** Per-check HTTP request timeout. 10 s matches HeadersController +
+     *  RobotsController so a monitored HTTP target gets the same response-
+     *  window everywhere. */
+    private static final Duration HTTP_CHECK_TIMEOUT = Duration.ofSeconds(10);
+
     @Scheduled(fixedDelay = 30_000)
     public void tick() {
         // Page through enabled monitors instead of loading the whole
@@ -66,7 +92,8 @@ public class MonitorScheduler {
             if (batch.isEmpty()) break;
             for (Monitor m : batch) {
                 String lockKey = "mon:lock:" + m.getId();
-                Boolean acquired = redis.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(m.getIntervalSec() - 5));
+                Boolean acquired = redis.opsForValue().setIfAbsent(lockKey, "1",
+                    Duration.ofSeconds(m.getIntervalSec() - LOCK_TTL_BUFFER_SECONDS));
                 if (Boolean.TRUE.equals(acquired)) {
                     exec.submit(() -> runCheck(m));
                 }
@@ -92,13 +119,79 @@ public class MonitorScheduler {
 
     private void httpCheck(Monitor m, long start) throws Exception {
         String url = HttpUrlNormaliser.ensureHttpScheme(m.getTarget());
+        URI original = URI.create(url);
+        String host = original.getHost();
+        if (host == null) {
+            saveFailure(m, "url missing host: " + url);
+            return;
+        }
+        // F-RD4-07: close the DNS-rebinding TOCTOU window between this
+        // scheduler tick and the HttpClient's connect-time resolution.
+        // resolveAndValidate() vouches for the InetAddress; we then dial
+        // that IP literal directly so the JDK skips the second DNS
+        // lookup. A low-TTL attacker resolver could otherwise return a
+        // public IP on lookup #1 (passes validate) and 127.0.0.1 /
+        // 169.254.169.254 on lookup #2 (the socket would target the
+        // loopback / cloud-metadata service and persist the result in
+        // monitor_checks for sustained recon). The original hostname is
+        // restored via the Host header so vhost routing / TLS SNI
+        // upstream still works.
+        InetAddress addr = validator.resolveAndValidate(host);
+        URI pinned = pinHostToAddress(original, addr);
+        String hostHeader = hostHeaderValue(original);
         HttpResponse<Void> res = http.send(
-            HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10))
-                .header("User-Agent", "NetScope-Monitor/1.0").GET().build(),
+            HttpRequest.newBuilder(pinned).timeout(HTTP_CHECK_TIMEOUT)
+                .header("User-Agent", "NetScope-Monitor/1.0")
+                .header("Host", hostHeader)
+                .GET().build(),
             HttpResponse.BodyHandlers.discarding());
         int ms = (int) (System.currentTimeMillis() - start);
         boolean up = res.statusCode() >= 200 && res.statusCode() < 400;
         checks.save(new MonitorCheck(m.getId(), up, ms, res.statusCode(), up ? null : "HTTP " + res.statusCode()));
+    }
+
+    /**
+     * F-RD4-07: replace the hostname in {@code original} with the literal
+     * IP form of {@code addr}, preserving scheme, port, path, query, and
+     * fragment. IPv6 literals are bracketed per RFC 3986 §3.2.2 and any
+     * zone-id ("%eth0") is stripped — it's meaningless across hosts and
+     * breaks URI parsing.
+     */
+    private static URI pinHostToAddress(URI original, InetAddress addr) throws URISyntaxException {
+        String literal = addr.getHostAddress();
+        if (addr instanceof Inet6Address) {
+            int pct = literal.indexOf('%');
+            if (pct >= 0) literal = literal.substring(0, pct);
+            literal = "[" + literal + "]";
+        }
+        StringBuilder authority = new StringBuilder();
+        if (original.getRawUserInfo() != null) {
+            authority.append(original.getRawUserInfo()).append('@');
+        }
+        authority.append(literal);
+        if (original.getPort() != -1) {
+            authority.append(':').append(original.getPort());
+        }
+        StringBuilder out = new StringBuilder();
+        out.append(original.getScheme()).append("://").append(authority);
+        String rawPath = original.getRawPath();
+        String rawQuery = original.getRawQuery();
+        String rawFragment = original.getRawFragment();
+        if (rawPath != null && !rawPath.isEmpty()) out.append(rawPath);
+        if (rawQuery != null) out.append('?').append(rawQuery);
+        if (rawFragment != null) out.append('#').append(rawFragment);
+        return new URI(out.toString());
+    }
+
+    /**
+     * Builds the {@code Host} request header from the original URL so the
+     * upstream server still routes by hostname (and TLS SNI / vhost
+     * selection keeps working) after we pinned the URI to the IP literal.
+     */
+    private static String hostHeaderValue(URI original) {
+        String host = original.getHost();
+        int port = original.getPort();
+        return port < 0 ? host : host + ":" + port;
     }
 
     private void tcpCheck(Monitor m, long start) throws Exception {

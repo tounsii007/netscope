@@ -1,126 +1,134 @@
 package io.netscope.dns;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.security.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 
 import java.util.*;
 
+/**
+ * DNS lookup HTTP boundary. The substantive logic lives in:
+ *
+ *   • {@link DnsRecordDescriber} — per-record-type detail extraction
+ *   • {@link DnsRrsigSummary}    — RRSIG-row reduction
+ *   • {@link DnssecChainSummary} — DS + DNSKEY presence + algorithm list
+ *
+ * This controller validates the input, walks the requested record
+ * types, optionally pairs each type with its RRSIG, and assembles the
+ * response envelope.
+ */
 @RestController
 @RequestMapping("/api/v1/dns")
 public class DnsController {
 
-    private static final Map<String, Integer> TYPES = Map.of(
-        "A", Type.A, "AAAA", Type.AAAA, "MX", Type.MX, "TXT", Type.TXT,
-        "CNAME", Type.CNAME, "NS", Type.NS, "SOA", Type.SOA, "CAA", Type.CAA
+    /** Record types this endpoint will resolve. Extends the "basic"
+     *  set to cover SRV (service discovery), TLSA (DANE), SVCB/HTTPS
+     *  (RFC 9460), DS/DNSKEY/RRSIG/NSEC/NSEC3 (DNSSEC), CDS/CDNSKEY. */
+    private static final Map<String, Integer> TYPES = Map.ofEntries(
+        Map.entry("A", Type.A), Map.entry("AAAA", Type.AAAA),
+        Map.entry("MX", Type.MX), Map.entry("TXT", Type.TXT),
+        Map.entry("CNAME", Type.CNAME), Map.entry("NS", Type.NS),
+        Map.entry("SOA", Type.SOA), Map.entry("CAA", Type.CAA),
+        Map.entry("SRV", Type.SRV), Map.entry("PTR", Type.PTR),
+        Map.entry("TLSA", Type.TLSA),
+        Map.entry("SVCB", Type.SVCB), Map.entry("HTTPS", Type.HTTPS),
+        Map.entry("DS", Type.DS), Map.entry("DNSKEY", Type.DNSKEY),
+        Map.entry("RRSIG", Type.RRSIG),
+        Map.entry("NSEC", Type.NSEC), Map.entry("NSEC3", Type.NSEC3),
+        Map.entry("CDS", Type.CDS), Map.entry("CDNSKEY", Type.CDNSKEY)
     );
 
-    /**
-     * Lookup endpoint. Backwards-compatible: every existing client keeps
-     * receiving `records` as a `Map<type, List<value>>`. The new
-     * `recordsDetailed` map carries the full record metadata — TTL,
-     * DNS class, name, and (for MX) the parsed preference — for UI
-     * components that want to render that information without re-parsing
-     * `rdataToString()` on the client.
-     */
     @GetMapping("/{domain}")
     public Map<String, Object> lookup(
             @PathVariable String domain,
-            @RequestParam(defaultValue = "A,AAAA,MX,TXT,NS") String type) {
+            @RequestParam(defaultValue = "A,AAAA,MX,TXT,NS") String type,
+            @RequestParam(defaultValue = "false") boolean includeRrsig,
+            @RequestParam(defaultValue = "false") boolean dnssecSummary) {
 
-        // Underscore is allowed because DKIM selectors (selector1._domainkey.example.com),
-        // DMARC (_dmarc.example.com), ACME HTTP-01 (_acme-challenge.example.com),
-        // SRV records (_sip._tcp.example.com), and DNSSEC DS lookups all use
-        // underscore-prefixed labels. RFC 1035 forbids underscore in *hostnames*,
-        // but DNS query names are a strictly larger set.
-        if (!domain.matches("^[a-zA-Z0-9._-]{1,253}$")) {
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9._-]{1,253}$")) {
             throw ApiException.badRequest("invalid domain");
         }
-
-        // Reject the same reserved-TLD set the client-side guard rejects
-        // — diagnosing .local / .test / .invalid on a public tool is
-        // pointless and just produces empty answers.
-        String lower = domain.toLowerCase();
-        int dotIdx = lower.lastIndexOf('.');
-        if (dotIdx > 0) {
-            String tld = lower.substring(dotIdx + 1);
-            if (RESERVED_TLDS.contains(tld)) {
-                throw ApiException.forbidden("reserved TLD '" + tld + "' never resolves publicly");
-            }
-        }
+        rejectReservedTld(domain);
 
         Map<String, List<String>> records = new LinkedHashMap<>();
-        Map<String, List<Map<String, Object>>> recordsDetailed = new LinkedHashMap<>();
+        Map<String, List<Map<String, Object>>> detailed = new LinkedHashMap<>();
+        Map<String, List<Map<String, Object>>> rrsigByType = new LinkedHashMap<>();
         long start = System.currentTimeMillis();
 
-        for (String t : type.toUpperCase().split(",")) {
-            t = t.trim();
+        // F-RD2-07: dedup + cap requested types (default is 5: A,AAAA,MX,TXT,NS;
+        // 8 is well above any legitimate use and bounds the per-request DNS fanout).
+        for (String t : Arrays.stream(type.toUpperCase().split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .limit(8)
+                .toList()) {
             Integer rt = TYPES.get(t);
             if (rt == null) continue;
-            List<String> values = new ArrayList<>();
-            List<Map<String, Object>> detailed = new ArrayList<>();
-            // Bounded — never blocks more than ~3 s per record type even if the
-            // remote nameserver is a tarpit. Returns null on timeout/error.
-            Record[] result = BoundedDns.run(domain, rt);
-            if (result != null) {
-                for (Record r : result) {
-                    String rdata = r.rdataToString();
-                    values.add(rdata);
-                    detailed.add(detailOf(r, rdata));
-                }
-            }
-            records.put(t, values);
-            recordsDetailed.put(t, detailed);
+            collectType(domain, t, rt, records, detailed);
+            if (includeRrsig && rt != Type.RRSIG) collectRrsigFor(domain, t, rt, rrsigByType);
         }
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("domain", domain);
         out.put("records", records);
-        out.put("recordsDetailed", recordsDetailed);
+        out.put("recordsDetailed", detailed);
+        if (includeRrsig) out.put("rrsig", rrsigByType);
+        if (dnssecSummary) out.put("dnssec", DnssecChainSummary.of(domain));
         out.put("durationMs", System.currentTimeMillis() - start);
         return out;
     }
 
-    /**
-     * Per-record metadata. We always emit `value` (the rdata string),
-     * `ttl` (seconds), `dnsClass` ("IN" for the public Internet); MX
-     * records additionally carry the numeric `preference` parsed out so
-     * the UI can sort and label the priority instead of showing the
-     * combined "10 mx.example.com." string.
-     */
-    private static Map<String, Object> detailOf(Record r, String rdata) {
-        Map<String, Object> m = new LinkedHashMap<>();
-        m.put("value", rdata);
-        m.put("ttl", r.getTTL());
-        m.put("dnsClass", DClass.string(r.getDClass()));
-        if (r instanceof MXRecord mx) {
-            m.put("preference", mx.getPriority());
-            m.put("exchange", mx.getTarget().toString(true));
-        } else if (r instanceof SOARecord soa) {
-            m.put("primaryNs", soa.getHost().toString(true));
-            m.put("adminEmail", soa.getAdmin().toString(true));
-            m.put("serial", soa.getSerial());
-            m.put("refresh", soa.getRefresh());
-            m.put("retry", soa.getRetry());
-            m.put("expire", soa.getExpire());
-            m.put("minimum", soa.getMinimum());
-        } else if (r instanceof CAARecord caa) {
-            m.put("flags", caa.getFlags());
-            m.put("tag", caa.getTag());
-            m.put("caaValue", caa.getValue());
+    private static void collectType(String domain, String label, int recordType,
+            Map<String, List<String>> records,
+            Map<String, List<Map<String, Object>>> detailed) {
+        List<String> values = new ArrayList<>();
+        List<Map<String, Object>> entries = new ArrayList<>();
+        Record[] result = BoundedDns.run(domain, recordType);
+        if (result != null) {
+            for (Record r : result) {
+                String rdata = r.rdataToString();
+                values.add(rdata);
+                entries.add(DnsRecordDescriber.describe(r, rdata));
+            }
         }
-        return m;
+        records.put(label, values);
+        detailed.put(label, entries);
+    }
+
+    private static void collectRrsigFor(String domain, String label, int recordType,
+            Map<String, List<Map<String, Object>>> rrsigByType) {
+        Record[] sigs = BoundedDns.run(domain, Type.RRSIG);
+        if (sigs == null) return;
+        List<Map<String, Object>> mapped = new ArrayList<>();
+        for (Record r : sigs) {
+            if (r instanceof RRSIGRecord sig && sig.getTypeCovered() == recordType) {
+                mapped.add(DnsRrsigSummary.of(sig));
+            }
+        }
+        if (!mapped.isEmpty()) rrsigByType.put(label, mapped);
     }
 
     /**
-     * Reserved TLDs the public DNS lookup must never query — RFC 6761
-     * sentinel zones plus the de-facto enterprise / home-router
-     * conventions. Mirrors the client-side guard (`web/lib/target-guard.ts`).
+     * RFC 6761 reserved TLDs the public DNS lookup must never query.
+     * Mirrors the client-side guard ({@code web/lib/target-guard/}).
      */
     private static final Set<String> RESERVED_TLDS = Set.of(
         "local", "localhost", "test", "invalid", "example",
         "internal", "lan", "home", "corp"
     );
+
+    private static void rejectReservedTld(String domain) {
+        int dotIdx = domain.lastIndexOf('.');
+        if (dotIdx <= 0) return;
+        String tld = domain.substring(dotIdx + 1).toLowerCase();
+        if (RESERVED_TLDS.contains(tld)) {
+            throw ApiException.forbidden(
+                "reserved TLD '" + tld + "' never resolves publicly");
+        }
+    }
 }

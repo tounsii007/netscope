@@ -15,6 +15,32 @@ export type PortScanResult = {
   results: PortCheckResult[];
 };
 
+/**
+ * WebSocket handshake probe result. On success the upgrade completed and
+ * we measured ping/pong RTT (servers that don't reply to client pings
+ * report -1 here, which the UI renders as "no pong"). On failure the
+ * handshake threw — the error class name and the original message are
+ * surfaced for diagnosis.
+ */
+export type WebSocketResult = {
+  url: string;
+  host: string;
+  scheme: string;
+  ok: boolean;
+  totalDurationMs: number;
+  /** Only present when ok = true. */
+  handshakeLatencyMs?: number;
+  /** -1 when the server didn't pong the probe. */
+  pingRttMs?: number;
+  /** Empty string when no Sec-WebSocket-Protocol was negotiated. */
+  subprotocol?: string;
+  closeStatusCode?: number | null;
+  closeReason?: string | null;
+  /** Only present when ok = false. */
+  error?: string;
+  detail?: string;
+};
+
 export type ReachResult = {
   target: string; resolvedIp: string;
   http?: { ok: boolean; status?: number; latencyMs?: number; error?: string };

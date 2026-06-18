@@ -1,4 +1,6 @@
 package io.netscope.common;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.errors.GlobalExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;

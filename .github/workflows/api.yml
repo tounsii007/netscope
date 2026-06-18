@@ -4,18 +4,25 @@ on:
   push: { branches: [main], paths: ["api/**", ".github/workflows/api.yml"] }
   pull_request: { paths: ["api/**"] }
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: api } }
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
-        with: { distribution: temurin, java-version: "21", cache: maven }
+        with: { distribution: temurin, java-version: "25", cache: maven }
       - name: Unit + integration tests
         run: mvn -B verify
       - name: Upload JaCoCo coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: api/target/site/jacoco/jacoco.xml
           flags: backend
@@ -31,10 +38,10 @@ jobs:
     if: github.event_name == 'pull_request'
     defaults: { run: { working-directory: api } }
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
       - uses: actions/setup-java@v5
-        with: { distribution: temurin, java-version: "21", cache: maven }
+        with: { distribution: temurin, java-version: "25", cache: maven }
       - name: Mutation testing
         run: mvn -B test org.pitest:pitest-maven:mutationCoverage
       - uses: actions/upload-artifact@v7
@@ -48,10 +55,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: docker/setup-buildx-action@v3
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./api
           push: false

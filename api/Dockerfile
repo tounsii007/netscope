@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3-eclipse-temurin-25 AS build
 WORKDIR /src
 COPY pom.xml ./
 RUN mvn -B dependency:go-offline
@@ -9,7 +9,7 @@ RUN mvn -B -DskipTests package
 # variant, which clears most of the OS-level CVEs Trivy was surfacing.
 # `apt-get upgrade` afterwards pulls any security updates that landed
 # between the image's last rebuild and this build.
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:25-jre-noble
 WORKDIR /app
 RUN apt-get update \
  && apt-get upgrade -y \

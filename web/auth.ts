@@ -29,6 +29,49 @@ import { logger } from "@/lib/logger";
 
 const EXCHANGE_TIMEOUT_MS = 5_000;
 
+/**
+ * F-FE-07: explicit allowlist of paths that the NextAuth `redirect`
+ * callback will honor as a post-sign-in destination. The
+ * `/api/auth/[...nextauth]` catch-all route accepts arbitrary
+ * `callbackUrl` query params, and while the same-origin gate (F-FE-05,
+ * below) already blocks cross-origin redirects, an attacker on the
+ * same origin can still steer a freshly-authenticated user toward an
+ * unintended page (e.g. an obscure admin-debug surface, or a deep
+ * link that confuses the user about which app they just logged into).
+ *
+ * The check is applied to the URL's *pathname* and is locale-aware:
+ * next-intl prefixes non-default locales (e.g. `/de/dashboard`), so
+ * we strip a leading `/{locale}` segment before comparing against the
+ * allowlist. Keep this list small — every entry is a route a
+ * post-auth redirect can land on.
+ *
+ * Anything not on the list falls back to `baseUrl`, which itself goes
+ * through next-intl's default-locale routing.
+ */
+const ALLOWED_CALLBACK_PATHS = new Set<string>([
+  "/",
+  "/dashboard",
+  "/sign-in",
+]);
+
+const KNOWN_LOCALES = new Set<string>([
+  "en", "de", "fr", "es", "it", "pl", "ru", "uk", "tr", "hi", "zh",
+]);
+
+/** Strip a leading `/{locale}` segment if it matches a known locale. */
+function stripLocale(pathname: string): string {
+  const m = /^\/([a-z]{2})(\/|$)/.exec(pathname);
+  if (m && KNOWN_LOCALES.has(m[1])) {
+    const rest = pathname.slice(m[0].length - (m[2] === "/" ? 1 : 0));
+    return rest.length === 0 ? "/" : rest;
+  }
+  return pathname;
+}
+
+function isAllowedCallbackPath(pathname: string): boolean {
+  return ALLOWED_CALLBACK_PATHS.has(stripLocale(pathname));
+}
+
 async function exchangeForNetScopeJwt(provider: string, accessToken: string) {
   const url = `${process.env.NETSCOPE_API_URL ?? "http://localhost:8080"}/api/v1/auth/exchange`;
   const ac = new AbortController();
@@ -56,6 +99,13 @@ async function exchangeForNetScopeJwt(provider: string, accessToken: string) {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // F-FE-05: refuse to trust X-Forwarded-Host / X-Forwarded-Proto from any
+  // peer. With trustHost=true (the default when AUTH_TRUST_HOST is set) a
+  // request can drive the canonical base URL via untrusted forwarding
+  // headers, which enables open-redirect and CSRF-on-callback attacks. We
+  // pin the canonical origin via the explicit NEXTAUTH_URL env var in
+  // production instead — see web/.env.example.
+  trustHost: false,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID,
@@ -69,6 +119,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   session: { strategy: "jwt" },
   callbacks: {
+    // F-FE-05: explicit same-origin allowlist for post-auth redirects. The
+    // NextAuth default already prevents cross-origin absolute URLs, but
+    // pinning it here makes the policy auditable and removes any
+    // dependence on version-specific defaults. callbackUrl values that
+    // point at a different origin are bounced back to baseUrl rather than
+    // honored.
+    //
+    // F-FE-07: stack a path allowlist on top of the same-origin check.
+    // The `/api/auth/[...nextauth]` catch-all accepts any callbackUrl
+    // query param, so a same-origin URL could still steer the user to
+    // an unintended in-app page. Only paths in ALLOWED_CALLBACK_PATHS
+    // (locale-prefixed variants are accepted; see stripLocale above)
+    // are honored; everything else falls back to baseUrl.
+    async redirect({ url, baseUrl }) {
+      try {
+        const parsed = new URL(url, baseUrl);
+        // 1. Must be same-origin (F-FE-05).
+        if (parsed.origin !== baseUrl) return baseUrl;
+        // 2. Must be on the explicit path allowlist (F-FE-07).
+        if (!isAllowedCallbackPath(parsed.pathname)) return baseUrl;
+        return parsed.toString();
+      } catch {
+        return baseUrl;
+      }
+    },
     async jwt({ token, account }) {
       if (account?.access_token && account.provider) {
         const data = await exchangeForNetScopeJwt(account.provider, account.access_token);

@@ -1,8 +1,8 @@
 package io.netscope.monitor;
 
 import io.netscope.auth.ApiKeyContext;
-import io.netscope.common.ApiException;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.security.TargetValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.springframework.data.domain.Page;
@@ -59,7 +59,14 @@ public class MonitorController {
         try {
             validator.resolveAndValidate(hostOnly);
         } catch (ApiException e) {
-            throw ApiException.badRequest("target rejected: " + e.getMessage());
+            // Re-throw with a single end-user message rather than echoing
+            // the validator's "address is reserved or internal" / "could
+            // not resolve" distinction. The caller is authenticated so
+            // strong opacity isn't critical, but a single message keeps
+            // the create-flow error UI consistent and avoids inadvertent
+            // leaks if the validator's wording is tuned later.
+            throw ApiException.badRequest(
+                "target rejected: must be a publicly resolvable hostname or IP");
         }
 
         UUID owner = ApiKeyContext.get().getId();

@@ -37,22 +37,22 @@ jobs:
           - java
           - javascript-typescript
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Java (for the Java matrix slice only)
         if: matrix.language == 'java'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
       - name: Build Java
         if: matrix.language == 'java'
         run: cd api && mvn -B -DskipTests package
       - name: Run CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
   # ─── Secret scan ───────────────────────────────────────────────────────
   # Replaced gitleaks/gitleaks-action@v2 (which now requires a paid
@@ -62,7 +62,7 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       # On pull_request events we want a diff scan (base = target branch,
@@ -109,7 +109,7 @@ jobs:
   osv:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install osv-scanner CLI
         run: |
           curl -sSfL \

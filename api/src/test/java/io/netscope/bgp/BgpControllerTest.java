@@ -1,7 +1,7 @@
 package io.netscope.bgp;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

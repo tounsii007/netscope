@@ -1,14 +1,27 @@
-# Traceronix — Network Diagnostics & IP Intelligence Platform
+# Traceronix — Ship Networking Changes With Confidence
 
-Production-ready SaaS for developers, DevOps and security engineers. **25 network
-diagnostic tools** in one fast, free, no-login web app — from Port Checker and
-DNS Propagation across 15+ global resolvers to JWT decoding, BGP/ASN routing
-inspection, IPv6 readiness scoring, multi-source IP geolocation comparison and
-much more.
+The four diagnostic tools you reach for *right before* and *right after* every
+production change — built deeper than the free alternatives, no login required.
 
-[![Tests](https://img.shields.io/badge/tests-vitest-success)]()
+[![Tests](https://img.shields.io/badge/tests-1117-success)]()
 [![Locales](https://img.shields.io/badge/locales-11-blue)]()
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)]()
+
+## The four reasons people open Traceronix
+
+| Hero tool | Why us, not the standard alternative |
+| --- | --- |
+| **SSL / TLS Inspector** | Full chain cryptographic verification + Subject/Issuer KU & EKU + AIA byte-scan for OCSP/caIssuers + CT-log SCT count + key-strength grading. SSL Labs gives you a letter; we give you the bytes that explain *why*. |
+| **DNS Propagation** | The same query against **15+ public resolvers worldwide**, in parallel, in ~3 s with mismatch highlighting. Other propagation checkers show 7 resolvers and time out individually — ours shows divergence at a glance so you know whether the rollout finished. |
+| **HTTP-Headers Audit** | A+→F grade with explicit per-header weight, full HSTS preload-eligibility breakdown, CSP `unsafe-inline` / `unsafe-eval` / wildcard-source flagging. The shipped policy is auditable line-by-line, not just "A". |
+| **DKIM Key Fetcher** | Parallel selector probes across `default`, `s1`, `s2`, `selector1`, `google`, `dkim` + per-key algorithm + RSA bit-size weakness warnings. Most checkers only test one selector and never tell you why the key is weak. |
+
+Plus 25 more tools — DNSSEC validator, CT-log search, DoH/DoT cross-resolver
+tester, WebSocket probe, BGP/ASN inspector, IPv6 readiness, multi-source IP
+geolocation comparison, port checker, JWT decoder, password-leak check via HIBP
+k-anonymity, and the rest. Full list under [Tools](#tools-29-total).
+
+[OpenAPI spec](https://api.traceronix.io/swagger-ui) · [Status page](https://status.traceronix.io)
 
 ---
 
@@ -16,10 +29,10 @@ much more.
 
 | Layer        | Technology                                                       |
 | ------------ | ---------------------------------------------------------------- |
-| Frontend     | Next.js 15 (App Router) · React 19 · TypeScript · TailwindCSS    |
+| Frontend     | Next.js 16 (App Router) · React 19 · TypeScript · TailwindCSS    |
 | i18n         | next-intl 4 — 11 locales (EN-US, DE, FR, ES, IT, PL, RU, UK, TR, HI, ZH) |
 | Maps         | react-leaflet + OpenStreetMap                                    |
-| Backend      | Spring Boot 3.4 · Java 21 · Maven                                |
+| Backend      | Spring Boot 3.5 · Java 21 · Maven                                |
 | Database     | PostgreSQL 16 (Flyway migrations)                                |
 | Cache / RL   | Redis 7 (result cache + Bucket4j rate limiter)                   |
 | Net libs     | dnsjava · BouncyCastle · ICMP via NIO                            |
@@ -31,19 +44,19 @@ much more.
 
 ---
 
-## Tools (25)
+## Tools (29 total)
 
 ### DNS & Domain
-DNS Lookup · DNS Propagation (15+ resolvers) · DNSSEC Validator · WHOIS/RDAP · Subdomain Finder (CT logs)
+DNS Lookup (22 record types incl. DNSSEC/RRSIG/SVCB/HTTPS) · DNS Propagation (15+ resolvers) · DNSSEC Validator · **DoH/DoT Tester** (5 resolvers) · WHOIS/RDAP · Subdomain Finder (CT logs) · **CT Log Search** (mis-issuance detection)
 
 ### Network
-Port Checker · IP Lookup (multi-source compare) · IPv6 Readiness · BGP/ASN · CDN Detector · Reachability
+Port Checker · IP Lookup (multi-source compare) · IPv6 Readiness · BGP/ASN · CDN Detector · Reachability · **WebSocket Probe** (handshake + RTT)
 
 ### Security
-SSL/TLS Inspector · IP Blacklist (20+ DNSBLs) · JWT Decoder · Password Leak (HIBP k-anonymity) · Mixed Content
+SSL/TLS Inspector (full chain + KU/EKU + AIA + SCT) · IP Blacklist (20+ DNSBLs) · JWT Decoder · Password Leak (HIBP k-anonymity) · Mixed Content
 
 ### Email
-Email Verifier · SPF/DKIM/DMARC
+Email Verifier · SPF/DKIM/DMARC Audit · **DKIM Key Fetcher** (per-selector key + algorithm + weakness warnings)
 
 ### Web Analysis
 HTTP Security Headers (A+→F grade) · Tech Stack Detector · Redirect Tracer · OpenGraph Preview · Cookies & GDPR · Robots & Sitemap · Dashboard (My IP)

@@ -43,6 +43,14 @@ func main() {
 		err = cmdReach(args)
 	case "audit":
 		err = cmdAudit(args)
+	case "dkim":
+		err = cmdDKIM(args)
+	case "ctlogs", "ct-logs":
+		err = cmdCtLogs(args)
+	case "doh":
+		err = cmdDoH(args)
+	case "ws", "websocket":
+		err = cmdWebSocket(args)
 	case "version", "-v", "--version":
 		fmt.Println("netscope", version)
 	case "help", "-h", "--help":
@@ -72,6 +80,10 @@ Commands:
   ip <ip>                    Geo + ASN + threat intel
   reach <host> [--port 443]  HTTP + TCP + ping reachability
   audit <host>               Combined ports + ssl + headers + ip
+  dkim <domain> [--selector] Fetch + grade DKIM public key
+  ctlogs <domain> [--no-subs] Search CT logs for issued certificates
+  doh <domain> [--type A]    Test DoH/DoT across 5 public resolvers
+  ws <ws-url> [--subproto X] Probe a WebSocket endpoint (handshake + RTT)
 
 Environment:
   NETSCOPE_API_URL  (default: https://api.netscope.io)
@@ -298,4 +310,154 @@ func mustInt(s string) int {
 		os.Exit(2)
 	}
 	return i
+}
+
+// cmdDKIM fetches the published DKIM TXT for a domain + optional selector,
+// then prints algorithm + bit size + any warnings. JSON via --json.
+func cmdDKIM(args []string) error {
+	if len(args) < 1 {
+		return errors.New("usage: netscope dkim <domain> [--selector NAME] [--json]")
+	}
+	fs := flag.NewFlagSet("dkim", flag.ExitOnError)
+	sel := fs.String("selector", "", "DKIM selector to query")
+	asJSON := fs.Bool("json", false, "emit raw JSON")
+	fs.Parse(args[1:])
+
+	path := "/api/v1/dkim/" + url.PathEscape(args[0])
+	if *sel != "" {
+		path += "?selector=" + url.QueryEscape(*sel)
+	}
+	var out map[string]any
+	if err := do("GET", path, nil, &out); err != nil {
+		return err
+	}
+	if *asJSON {
+		return printJSON(out)
+	}
+	result, _ := out["result"].(map[string]any)
+	if present, _ := result["present"].(bool); !present {
+		fmt.Println("✗ No DKIM record found")
+		return nil
+	}
+	fmt.Printf("✓ DKIM key at selector %q\n", out["selector"])
+	if alg, ok := result["keyAlgorithm"].(string); ok {
+		fmt.Printf("  algorithm: %s\n", alg)
+	}
+	if bits, ok := result["keySize"].(float64); ok {
+		fmt.Printf("  key size:  %d bits\n", int(bits))
+	}
+	if hs, ok := result["hashAlgorithms"].([]any); ok && len(hs) > 0 {
+		fmt.Printf("  hashes:    %v\n", hs)
+	}
+	if ws, ok := result["warnings"].([]any); ok {
+		for _, w := range ws {
+			fmt.Printf("  ! %s\n", w)
+		}
+	}
+	return nil
+}
+
+// cmdCtLogs queries crt.sh for every CT-logged certificate covering a
+// domain. By default includes subdomains; --no-subs limits to the apex.
+func cmdCtLogs(args []string) error {
+	if len(args) < 1 {
+		return errors.New("usage: netscope ctlogs <domain> [--no-subs] [--no-expired] [--json]")
+	}
+	fs := flag.NewFlagSet("ctlogs", flag.ExitOnError)
+	noSubs := fs.Bool("no-subs", false, "do not include subdomains")
+	noExp := fs.Bool("no-expired", false, "hide expired certificates")
+	asJSON := fs.Bool("json", false, "emit raw JSON")
+	fs.Parse(args[1:])
+
+	path := fmt.Sprintf("/api/v1/ct-logs/%s?includeSubdomains=%v&excludeExpired=%v",
+		url.PathEscape(args[0]), !*noSubs, *noExp)
+	var out map[string]any
+	if err := do("GET", path, nil, &out); err != nil {
+		return err
+	}
+	if *asJSON {
+		return printJSON(out)
+	}
+	fmt.Printf("%v certificates for %s\n", out["totalReturned"], out["domain"])
+	if iss, ok := out["issuerSummary"].(map[string]any); ok {
+		fmt.Println("Issuers:")
+		for k, v := range iss {
+			fmt.Printf("  %4v  %s\n", v, k)
+		}
+	}
+	return nil
+}
+
+// cmdDoH runs the encrypted-DNS multi-provider probe and prints per-resolver
+// status + latency. Use --json for machine-readable output.
+func cmdDoH(args []string) error {
+	if len(args) < 1 {
+		return errors.New("usage: netscope doh <domain> [--type A] [--json]")
+	}
+	fs := flag.NewFlagSet("doh", flag.ExitOnError)
+	typ := fs.String("type", "A", "DNS record type")
+	asJSON := fs.Bool("json", false, "emit raw JSON")
+	fs.Parse(args[1:])
+
+	var out map[string]any
+	if err := do("GET",
+		fmt.Sprintf("/api/v1/doh/%s?type=%s", url.PathEscape(args[0]), url.QueryEscape(*typ)),
+		nil, &out); err != nil {
+		return err
+	}
+	if *asJSON {
+		return printJSON(out)
+	}
+	if consistent, _ := out["consistent"].(bool); consistent {
+		fmt.Println("✓ all reachable resolvers agreed")
+	} else {
+		fmt.Printf("! %v distinct answer sets across resolvers\n", out["distinctAnswerSets"])
+	}
+	if rs, ok := out["resolvers"].([]any); ok {
+		for _, r := range rs {
+			m, _ := r.(map[string]any)
+			doh, _ := m["doh"].(map[string]any)
+			dot, _ := m["dot"].(map[string]any)
+			fmt.Printf("  %-10s  DoH=%-3v %4vms  DoT=%-3v %4vms\n",
+				m["name"], doh["ok"], doh["latencyMs"], dot["reachable"], dot["latencyMs"])
+		}
+	}
+	return nil
+}
+
+// cmdWebSocket opens a real WebSocket connection through the API,
+// captures handshake latency + ping/pong RTT, and reports any error.
+func cmdWebSocket(args []string) error {
+	if len(args) < 1 {
+		return errors.New("usage: netscope ws <wss-url> [--subproto NAME] [--json]")
+	}
+	fs := flag.NewFlagSet("ws", flag.ExitOnError)
+	sub := fs.String("subproto", "", "Sec-WebSocket-Protocol token")
+	asJSON := fs.Bool("json", false, "emit raw JSON")
+	fs.Parse(args[1:])
+
+	path := "/api/v1/websocket?url=" + url.QueryEscape(args[0])
+	if *sub != "" {
+		path += "&subprotocol=" + url.QueryEscape(*sub)
+	}
+	var out map[string]any
+	if err := do("GET", path, nil, &out); err != nil {
+		return err
+	}
+	if *asJSON {
+		return printJSON(out)
+	}
+	if ok, _ := out["ok"].(bool); ok {
+		fmt.Printf("✓ handshake %vms, ping-rtt %vms\n",
+			out["handshakeLatencyMs"], out["pingRttMs"])
+		if sp, _ := out["subprotocol"].(string); sp != "" {
+			fmt.Printf("  subprotocol: %s\n", sp)
+		}
+	} else {
+		fmt.Printf("✗ handshake failed: %v\n", out["error"])
+		if d, _ := out["detail"].(string); d != "" {
+			fmt.Printf("  %s\n", d)
+		}
+	}
+	return nil
 }

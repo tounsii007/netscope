@@ -4,6 +4,10 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    // TS 6.0 made the deprecated 'baseUrl' option (injected by tsup's DTS
+    // rollup) a hard error (TS5101). This opt-out keeps the dts build green
+    // until TS 7.0; remove once tsup stops setting baseUrl.
+    "ignoreDeprecations": "6.0",
     "declaration": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

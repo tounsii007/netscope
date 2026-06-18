@@ -1,7 +1,7 @@
 package io.netscope.webhook;
 
-import io.netscope.common.ApiException;
-import io.netscope.common.TargetValidator;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.security.TargetValidator;
 import io.netscope.testsupport.NoOpJpaRepository;
 import io.netscope.workspace.WorkspaceMember;
 import io.netscope.workspace.WorkspaceService;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Adversarial SSRF tests for {@link WebhookController#validateWebhookUrl(String)}
- * and {@link WebhookDeliveryWorker#isSsrfSafeUrl(String)}.
+ * and {@link WebhookDeliveryWorker#resolveSafeAddress(String)}.
  *
  * Before the fix, the URL-validation regex was:
  *   url.startsWith("https://") || url.startsWith("http://localhost")
@@ -160,8 +160,8 @@ class WebhookSsrfTest {
         "",
         "://malformed",
     })
-    void worker_isSsrfSafeUrl_rejects_dangerous_urls(String dangerous) {
-        assertThat(worker().isSsrfSafeUrl(dangerous)).isFalse();
+    void worker_resolveSafeAddress_rejects_dangerous_urls(String dangerous) {
+        assertThat(worker().resolveSafeAddress(dangerous)).isNull();
     }
 
     @ParameterizedTest
@@ -171,24 +171,24 @@ class WebhookSsrfTest {
         "https://example.com/endpoint",
         "https://example.com:8080/v1/webhook",  // uncommon port still allowed
     })
-    void worker_isSsrfSafeUrl_accepts_legitimate_urls(String safe) {
-        assertThat(worker().isSsrfSafeUrl(safe)).isTrue();
+    void worker_resolveSafeAddress_accepts_legitimate_urls(String safe) {
+        assertThat(worker().resolveSafeAddress(safe)).isNotNull();
     }
 
-    @Test void worker_isSsrfSafeUrl_handles_null() {
-        assertThat(worker().isSsrfSafeUrl(null)).isFalse();
+    @Test void worker_resolveSafeAddress_handles_null() {
+        assertThat(worker().resolveSafeAddress(null)).isNull();
     }
 
-    @Test void worker_isSsrfSafeUrl_handles_blank() {
-        assertThat(worker().isSsrfSafeUrl("")).isFalse();
-        assertThat(worker().isSsrfSafeUrl("   ")).isFalse();
+    @Test void worker_resolveSafeAddress_handles_blank() {
+        assertThat(worker().resolveSafeAddress("")).isNull();
+        assertThat(worker().resolveSafeAddress("   ")).isNull();
     }
 
     /* ─── stubs ──────────────────────────────────────────────────────────── */
 
     static class AllowAllWorkspace extends WorkspaceService {
         AllowAllWorkspace() {
-            super(null, null);
+            super(null, null, null);
         }
         @Override public io.netscope.workspace.Workspace requireRole(UUID id, WorkspaceMember.Role... roles) {
             return null;
@@ -208,5 +208,9 @@ class WebhookSsrfTest {
     static class StubDeliveryRepo extends NoOpJpaRepository<WebhookDelivery, UUID> implements WebhookDeliveryRepository {
         @Override public List<WebhookDelivery> pending(Instant now, org.springframework.data.domain.Pageable p) { return List.of(); }
         @Override public List<WebhookDelivery> findByWebhookIdOrderByCreatedAtDesc(UUID id, org.springframework.data.domain.Pageable p) { return List.of(); }
+        // F-RD5-05 — guarded finalisation. Stub returns 0 (no-op tests don't drive dispatch).
+        @Override public int finaliseSucceeded(UUID id, String workerId, Instant now, Integer statusCode, String responseBody) { return 0; }
+        @Override public int finaliseRetry(UUID id, String workerId, int attempt, Integer statusCode, String responseBody, Instant nextRetryAt) { return 0; }
+        @Override public int finaliseDead(UUID id, String workerId, Instant now, int attempt, Integer statusCode, String responseBody) { return 0; }
     }
 }

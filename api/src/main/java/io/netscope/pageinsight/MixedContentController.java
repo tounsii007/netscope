@@ -1,7 +1,9 @@
 package io.netscope.pageinsight;
 
-import io.netscope.common.ApiException;
-import io.netscope.common.HttpUrlNormaliser;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.http.HttpUrlNormaliser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -15,6 +17,8 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/api/v1/mixed-content")
 public class MixedContentController {
+
+    private static final Logger log = LoggerFactory.getLogger(MixedContentController.class);
 
     private static final Pattern RESOURCE = Pattern.compile(
         "<(script|img|link|iframe|source|video|audio|embed|object)\\b[^>]*?" +
@@ -60,7 +64,7 @@ public class MixedContentController {
             out.put("warnings", warnings);
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("scan failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "Mixed-content scan failed", e);
         }
     }
 }

@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { validatedApiOrigin } from "./lib/api-origin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+// F-RD5-01: Validate NEXT_PUBLIC_API_URL at build time before splicing
+// it into the CSP `connect-src` directive. A trailing slash, embedded
+// path, query, fragment, or non-http(s) scheme would either expand the
+// policy beyond what we intend or produce a malformed CSP the browser
+// silently drops in full (fail-open: every external script then loads).
+// `validatedApiOrigin` throws here, surfacing the misconfiguration as
+// a hard build error instead of a runtime "CSP looked fine in review,
+// turned off in prod" surprise. See lib/api-origin.ts.
+const apiOrigin = validatedApiOrigin();
 
 const config: NextConfig = {
   reactStrictMode: true,
@@ -25,13 +36,11 @@ const config: NextConfig = {
   async headers() {
     // Content-Security-Policy notes:
     //
-    //   script-src / style-src include 'unsafe-inline' because Next.js
-    //   injects inline bootstrap scripts (hydration, runtime config)
-    //   and Tailwind injects inline <style> tags. A proper fix
-    //   requires a per-request nonce generated in middleware and
-    //   threaded through `headers().get('x-nonce')` in every layout
-    //   plus every `<Script>` and Tailwind output — tracked separately
-    //   as a larger refactor.
+    //   Browsers ENFORCE the CSP of the HTML document — not the CSP of
+    //   the individual subresource responses. So this static CSP would
+    //   never actually constrain a script load if the rendered HTML
+    //   already carries a CSP header (which it does, from middleware.ts
+    //   with the per-request nonce).
     //
     //   In DEVELOPMENT we additionally allow 'unsafe-eval' and ws:
     //   connections so Next.js' React Refresh / HMR runtime works.
@@ -43,7 +52,33 @@ const config: NextConfig = {
     //   message in the page itself, only a CSP report). Production
     //   builds don't need either and keep the stricter policy.
     //
-    //   What we can tighten without a downstream rewrite:
+    //   What this entry STILL achieves:
+    //
+    //     1. Non-HTML routes that bypass the middleware matcher (the
+    //        static-asset prefix, error pages served before
+    //        middleware runs, the maintenance/503 page) get a CSP
+    //        header so external scanners + automated header-grade
+    //        tools report a non-empty policy. Without this entry the
+    //        site grades down on "missing CSP" even though the user-
+    //        visible HTML enforcement is tight.
+    //     2. Defence-in-depth: if a future bug makes the middleware
+    //        skip a request (matcher regression, edge runtime error,
+    //        Next.js update), the static CSP is the safety net that
+    //        still rejects inline + third-party scripts entirely.
+    //        F-RD5-03: script-src no longer includes 'unsafe-inline'
+    //        here — the routes this static fallback applies to
+    //        (/_next/static/**, error pages served before middleware
+    //        runs, maintenance/503) are static-only and never need
+    //        inline scripts, so dropping it tightens the safety net
+    //        with zero functional cost. style-src keeps 'unsafe-inline'
+    //        per F-FE-02 Option B (PR #40) — styled-components &
+    //        next/font emit inline <style> tags during SSR that we
+    //        cannot nonce on the static path.
+    //
+    //   It does NOT replace the dynamic CSP for HTML — that policy is
+    //   stricter (no 'unsafe-inline'). See lib/csp.ts + middleware.ts.
+    //
+    //   What we keep here:
     //
     //     • frame-src 'none' — make the implicit "no iframes" explicit
     //       (frame-ancestors blocks being framed; frame-src blocks
@@ -56,9 +91,16 @@ const config: NextConfig = {
     //   officially supports it — adding it now would break SSR
     //   hydration on browsers that enforce it (Chromium-based).
     const isDev = process.env.NODE_ENV !== "production";
+    // F-RD5-03: in PRODUCTION the static fallback drops 'unsafe-inline'
+    // entirely — the routes this fallback applies to (/_next/static/**,
+    // pre-middleware error pages, maintenance/503) are static-only and
+    // never need inline scripts. In DEVELOPMENT we still allow
+    // 'unsafe-inline' + 'unsafe-eval' so Next.js' React Refresh / HMR
+    // runtime (new Function/eval inside @next/react-refresh-utils) can
+    // hydrate; without it the dev page loads HTML+CSS but stays inert.
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'";
+      : "script-src 'self'";
     // Same-origin ws:/wss: are usually allowed automatically under
     // `connect-src 'self'`, but Chromium enforces explicit ws:// for
     // some HMR runtimes. Listing both schemes for localhost in dev is
@@ -69,14 +111,28 @@ const config: NextConfig = {
       : "";
     const csp = [
       "default-src 'self'",
+      // F-RD5-03 (prod) + HMR (dev): `scriptSrc` is 'self' only in
+      // production and adds 'unsafe-inline'/'unsafe-eval' in dev. See
+      // the `scriptSrc` const above.
       scriptSrc,
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
       "font-src 'self' fonts.gstatic.com",
       "img-src 'self' data: blob: *.openstreetmap.org *.cartocdn.com tile.openstreetmap.org basemaps.cartocdn.com flagcdn.com",
-      "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080") + " api.pwnedpasswords.com" + connectExtras,
+      // F-RD5-01: `apiOrigin` is the validated canonical origin from
+      // `validatedApiOrigin()` above — guaranteed to be a bare
+      // `scheme://host[:port]` with no path/query/fragment, no
+      // userinfo, https only in prod. Splicing the raw env var would
+      // let a misconfigured value smuggle extra CSP tokens or expand
+      // the directive past origin granularity. `connectExtras` adds the
+      // localhost ws:/http: HMR endpoints in dev only.
+      "connect-src 'self' " + apiOrigin + " api.pwnedpasswords.com" + connectExtras,
       "frame-src 'none'",
       "frame-ancestors 'none'",
-      "base-uri 'self'",
+      // F-FE-04: base-uri 'none' — we never render <base>, so allow zero
+      // sources. 'self' would still permit a `<base href="/evil/">` tag
+      // injected via HTML injection to rebase every relative URL on the
+      // page (script/img/form actions) onto an attacker-chosen path.
+      "base-uri 'none'",
       "form-action 'self'",
       "object-src 'none'",
       "upgrade-insecure-requests",

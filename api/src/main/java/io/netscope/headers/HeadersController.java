@@ -1,8 +1,10 @@
 package io.netscope.headers;
 
-import io.netscope.common.ApiException;
-import io.netscope.common.HttpUrlNormaliser;
-import io.netscope.common.SafeHttpClient;
+import io.netscope.common.errors.ApiException;
+import io.netscope.common.http.HttpUrlNormaliser;
+import io.netscope.common.http.SafeHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,6 +21,8 @@ import java.util.*;
 @RequestMapping("/api/v1/headers")
 public class HeadersController {
 
+    private static final Logger log = LoggerFactory.getLogger(HeadersController.class);
+
     private record Rule(String header, int weight, String good, String detail) {}
 
     private static final List<Rule> RULES = List.of(
@@ -32,6 +36,10 @@ public class HeadersController {
         new Rule("cross-origin-resource-policy", 5, "",      "Prevents cross-origin loading of your resources.")
     );
 
+    /** HEAD/GET request timeout for the header probe. 10 s lets slow
+     *  WordPress installs respond while still failing fast on tarpits. */
+    private static final Duration PROBE_TIMEOUT = Duration.ofSeconds(10);
+
     private final SafeHttpClient http;
 
     public HeadersController(SafeHttpClient http) { this.http = http; }
@@ -44,7 +52,7 @@ public class HeadersController {
 
         try {
             HttpResponse<Void> res = http.send(
-                HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(10))
+                HttpRequest.newBuilder(uri).timeout(PROBE_TIMEOUT)
                     .header("User-Agent", "NetScope/1.0").GET().build(),
                 HttpResponse.BodyHandlers.discarding());
 
@@ -91,7 +99,7 @@ public class HeadersController {
             out.put("rawHeaders", headers);
             return out;
         } catch (Exception e) {
-            throw ApiException.badRequest("fetch failed: " + e.getMessage());
+            throw ApiException.sanitizedFailure(log, "Header fetch failed", e);
         }
     }
 

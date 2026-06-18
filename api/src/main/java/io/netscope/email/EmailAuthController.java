@@ -1,7 +1,8 @@
 package io.netscope.email;
 
-import io.netscope.common.ApiException;
+import io.netscope.common.errors.ApiException;
 import io.netscope.common.BoundedDns;
+import io.netscope.common.security.DomainNormaliser;
 import org.springframework.web.bind.annotation.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
@@ -20,7 +21,12 @@ public class EmailAuthController {
     public Map<String, Object> analyze(
             @PathVariable String domain,
             @RequestParam(required = false) String dkimSelector) {
-        if (!domain.matches("^[a-zA-Z0-9.-]{1,253}$")) throw ApiException.badRequest("invalid domain");
+        // IDN canonicalisation before the ASCII regex. See
+        // DomainNormaliser for the strictness policy.
+        domain = DomainNormaliser.toAscii(domain);
+        if (domain == null || !domain.matches("^(?!.*\\.\\.)[a-zA-Z0-9.-]{1,253}$")) {
+            throw ApiException.badRequest("invalid domain");
+        }
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("domain", domain);

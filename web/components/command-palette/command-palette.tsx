@@ -68,10 +68,12 @@ export function CommandPalette() {
     );
   }, [items, query]);
 
-  // Reset active row when results shrink.
-  useEffect(() => {
-    if (active >= filtered.length) setActive(0);
-  }, [filtered.length, active]);
+  // Derive a clamped active index during render so a shrinking result
+  // set can't leave us pointing past the end. Keeps `setActive` as the
+  // sole writer for keyboard nav while removing the cascading-render
+  // effect that used to do this fix-up.
+  const safeActive =
+    filtered.length === 0 ? 0 : Math.min(active, filtered.length - 1);
 
   // Scroll active row into view as the user arrows through results.
   // jsdom doesn't implement scrollIntoView, so we feature-check before
@@ -80,12 +82,12 @@ export function CommandPalette() {
   useEffect(() => {
     if (!open || !listRef.current) return;
     const node = listRef.current.querySelector(
-      `[data-cmd-index="${active}"]`,
+      `[data-cmd-index="${safeActive}"]`,
     ) as HTMLElement | null;
     if (node && typeof node.scrollIntoView === "function") {
       node.scrollIntoView({ block: "nearest" });
     }
-  }, [active, open, filtered.length]);
+  }, [safeActive, open, filtered.length]);
 
   // Focus the search input when opened.
   useEffect(() => {
@@ -143,13 +145,13 @@ export function CommandPalette() {
       close();
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActive((a) => Math.min(filtered.length - 1, a + 1));
+      setActive(Math.min(filtered.length - 1, safeActive + 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActive((a) => Math.max(0, a - 1));
+      setActive(Math.max(0, safeActive - 1));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const item = filtered[active];
+      const item = filtered[safeActive];
       if (item) go(item.href);
     }
   }
@@ -226,7 +228,7 @@ export function CommandPalette() {
                 </li>
               ) : (
                 filtered.map((item, i) => {
-                  const isActive = i === active;
+                  const isActive = i === safeActive;
                   return (
                     <li key={item.href} role="option" aria-selected={isActive}>
                       <button

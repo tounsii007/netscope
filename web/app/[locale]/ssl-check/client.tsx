@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useFormatDate } from "@/lib/format-date";
 import { api, type SslResult } from "@/lib/api";
 import { LoadingButton, ResultCard } from "@/components/tool-shell";
 import { SkeletonCard } from "@/components/skeleton";
@@ -16,6 +17,7 @@ import {
   Clock, KeyRound, Award, Globe, Layers,
 } from "lucide-react";
 import { checkTargetGuard } from "@/lib/target-guard";
+import { CertField } from "./_pieces/cert-field";
 
 export function SslClient() {
   const t = useTranslations("ssl");
@@ -23,6 +25,7 @@ export function SslClient() {
   const tp = useTranslations("ports");
   const tg = useTranslations("guard");
   const tn = useTranslations("nav.tools");
+  const fmt = useFormatDate();
   const hostId = useId();
   const portId = useId();
   const [host, setHost] = useState("github.com");
@@ -177,32 +180,32 @@ export function SslClient() {
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  <Field
+                  <CertField
                     icon={<Lock className="h-3.5 w-3.5" />}
                     label={t("field_tls")}
                     value={data.tlsVersion}
                   />
-                  <Field
+                  <CertField
                     icon={<KeyRound className="h-3.5 w-3.5" />}
                     label={t("field_cipher")}
                     value={data.cipherSuite}
                   />
-                  <Field
+                  <CertField
                     icon={<Calendar className="h-3.5 w-3.5" />}
                     label={t("field_valid_from")}
-                    value={new Date(data.validFrom).toLocaleDateString()}
+                    value={fmt.short(data.validFrom)}
                   />
-                  <Field
+                  <CertField
                     icon={<Calendar className="h-3.5 w-3.5" />}
                     label={t("field_valid_to")}
-                    value={new Date(data.validTo).toLocaleDateString()}
+                    value={fmt.short(data.validTo)}
                   />
-                  <Field
+                  <CertField
                     icon={<Award className="h-3.5 w-3.5" />}
                     label={t("field_issuer")}
                     value={data.issuer}
                   />
-                  <Field
+                  <CertField
                     icon={<Clock className="h-3.5 w-3.5" />}
                     label={t("field_expiry")}
                     value={
@@ -220,7 +223,7 @@ export function SslClient() {
                     }
                   />
                   {data.publicKeyAlgorithm && (
-                    <Field
+                    <CertField
                       icon={<KeyRound className="h-3.5 w-3.5" />}
                       label={t("field_pubkey") || "Public key"}
                       value={
@@ -355,22 +358,5 @@ export function SslClient() {
   );
 }
 
-function Field({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-lg border border-border/60 bg-bg-elevated/60 px-3 py-2">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
-        <span className="text-violet-soft/80">{icon}</span>
-        {label}
-      </div>
-      <div className="mt-1 truncate font-mono text-sm text-fg">{value}</div>
-    </div>
-  );
-}
+// Field component extracted to ./cert-field.tsx (CertField).
+// Old inline implementation removed in iteration 29 of the refactor.

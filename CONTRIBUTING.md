@@ -7,8 +7,8 @@ don't have to reverse-engineer the patterns from commit history.
 ## Repo layout
 
 ```
-api/        Spring Boot 3.4 / Java 21 backend (Maven)
-web/        Next.js 15 / React 19 / TypeScript frontend
+api/        Spring Boot 3.5 / Java 21 backend (Maven)
+web/        Next.js 16 / React 19 / TypeScript frontend
 cli/        Standalone CLI client
 sdk/        TypeScript SDK published to npm
 deploy/     Docker / compose / infra
@@ -95,9 +95,19 @@ Rules:
   handled in both `target-guard.ts::parseIpv4` and `TargetValidator`.
   The adversarial test suites (`target-guard-adversarial.test.ts`,
   `TargetValidatorSsrfTest.java`) lock the behaviour.
-- The CSP in `web/next.config.ts` carries `'unsafe-inline'` for scripts
-  and styles. This is a known gap; a nonce-based refactor is tracked
-  but not yet shipped.
+- CSP enforcement happens in two layers:
+  1. `web/middleware.ts` sets a per-request CSP that uses
+     `nonce-<value>` for script-src and style-src — no `'unsafe-inline'`
+     in production. Every HTML route goes through this path.
+  2. `web/next.config.ts` carries a fallback CSP for static-asset
+     routes that bypass the middleware matcher; this fallback still
+     allows `'unsafe-inline'` since no user-controlled data is
+     rendered on that path.
+  When adding a new inline `<script>` or inline `<style>` to a
+  layout/page: read the nonce via `headers().get('x-nonce')` and
+  pass `nonce={n}` to the tag. Anything Next.js's own bootstrap
+  injects already inherits the nonce automatically via the response
+  header — no manual threading needed.
 
 ## Test coverage gates
 
@@ -121,6 +131,20 @@ drops below.
    - if it accepts a user-provided target, add adversarial-SSRF
      coverage to both `target-guard-adversarial.test.ts` and
      `TargetValidatorSsrfTest.java`.
+
+## Dependency pinning
+
+A few dependencies are pinned to **exact** versions (no caret prefix)
+because they ship pre-1.0 or rely on prerelease tags where a patch bump
+can carry breaking changes:
+
+- `next-auth` — pinned at `5.0.0-beta.31`. The 5.x line is still in
+  beta; later betas have re-shaped the `Session` callback signature.
+  Upgrade plan: move to `5.0.0` GA in a single dedicated PR and
+  re-validate the session-cookie + provider wiring against the live
+  Stripe-billing flow at the same time.
+
+Everything else uses `^minor.patch` and is allowed to float.
 
 ## Reporting security issues
 
