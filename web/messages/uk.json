@@ -626,7 +626,15 @@
     "subtitle": "Опит DNS-записів для будь-якого домену.",
     "record_types": "Типи записів",
     "records_count": "{count} записів",
-    "no_records": "Немає записів"
+    "no_records": "Немає записів",
+    "soa_primary_ns": "Основний NS",
+    "soa_admin": "Адмін",
+    "soa_serial": "Серійний номер",
+    "soa_refresh": "Оновлення",
+    "soa_retry": "Повтор",
+    "soa_expire": "Закінчення",
+    "soa_minimum": "Мінімум",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "Поширення DNS",

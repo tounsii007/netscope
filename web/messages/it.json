@@ -626,7 +626,15 @@
     "subtitle": "Interroga record DNS per qualsiasi dominio.",
     "record_types": "Tipi di record",
     "records_count": "{count} record",
-    "no_records": "Nessun record"
+    "no_records": "Nessun record",
+    "soa_primary_ns": "NS primario",
+    "soa_admin": "Admin",
+    "soa_serial": "Numero di serie",
+    "soa_refresh": "Aggiornamento",
+    "soa_retry": "Tentativo",
+    "soa_expire": "Scadenza",
+    "soa_minimum": "Minimo",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "Propagazione DNS",

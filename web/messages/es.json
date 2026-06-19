@@ -626,7 +626,15 @@
     "subtitle": "Consultar registros DNS para cualquier dominio.",
     "record_types": "Tipos de registro",
     "records_count": "{count} registros",
-    "no_records": "Sin registros"
+    "no_records": "Sin registros",
+    "soa_primary_ns": "NS principal",
+    "soa_admin": "Admin",
+    "soa_serial": "Número de serie",
+    "soa_refresh": "Actualización",
+    "soa_retry": "Reintento",
+    "soa_expire": "Expiración",
+    "soa_minimum": "Mínimo",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "Propagación DNS",

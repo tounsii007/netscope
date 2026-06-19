@@ -626,7 +626,15 @@
     "subtitle": "查询任意域名的 DNS 记录。",
     "record_types": "记录类型",
     "records_count": "{count} 条记录",
-    "no_records": "无记录"
+    "no_records": "无记录",
+    "soa_primary_ns": "主 NS",
+    "soa_admin": "管理员",
+    "soa_serial": "序列号",
+    "soa_refresh": "刷新",
+    "soa_retry": "重试",
+    "soa_expire": "过期",
+    "soa_minimum": "最小值",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "DNS 传播检测",

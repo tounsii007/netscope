@@ -626,7 +626,15 @@
     "subtitle": "Interroger les enregistrements DNS de tout domaine.",
     "record_types": "Types d'enregistrements",
     "records_count": "{count} enregistrements",
-    "no_records": "Aucun enregistrement"
+    "no_records": "Aucun enregistrement",
+    "soa_primary_ns": "NS principal",
+    "soa_admin": "Admin",
+    "soa_serial": "Numéro de série",
+    "soa_refresh": "Rafraîchissement",
+    "soa_retry": "Nouvelle tentative",
+    "soa_expire": "Expiration",
+    "soa_minimum": "Minimum",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "Propagation DNS",

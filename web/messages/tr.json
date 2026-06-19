@@ -626,7 +626,15 @@
     "subtitle": "Herhangi bir domain için DNS kayıtlarını sorgula.",
     "record_types": "Kayıt türleri",
     "records_count": "{count} kayıt",
-    "no_records": "Kayıt yok"
+    "no_records": "Kayıt yok",
+    "soa_primary_ns": "Birincil NS",
+    "soa_admin": "Yönetici",
+    "soa_serial": "Seri numarası",
+    "soa_refresh": "Yenileme",
+    "soa_retry": "Yeniden deneme",
+    "soa_expire": "Süre dolumu",
+    "soa_minimum": "Minimum",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "DNS yayılımı",

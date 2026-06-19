@@ -626,7 +626,15 @@
     "subtitle": "Alle DNS-Records für beliebige Domains abfragen.",
     "record_types": "Eintragstypen",
     "records_count": "{count} Einträge",
-    "no_records": "Keine Einträge"
+    "no_records": "Keine Einträge",
+    "soa_primary_ns": "Primärer NS",
+    "soa_admin": "Admin",
+    "soa_serial": "Seriennummer",
+    "soa_refresh": "Aktualisierung",
+    "soa_retry": "Wiederholung",
+    "soa_expire": "Ablauf",
+    "soa_minimum": "Minimum",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "DNS-Ausbreitung",

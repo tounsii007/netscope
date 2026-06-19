@@ -626,7 +626,15 @@
     "subtitle": "Query DNS records for any domain.",
     "record_types": "Record types",
     "records_count": "{count} records",
-    "no_records": "No records"
+    "no_records": "No records",
+    "soa_primary_ns": "Primary NS",
+    "soa_admin": "Admin",
+    "soa_serial": "Serial",
+    "soa_refresh": "Refresh",
+    "soa_retry": "Retry",
+    "soa_expire": "Expire",
+    "soa_minimum": "Minimum",
+    "soa_ttl": "TTL"
   },
   "propagation": {
     "title": "DNS Propagation",
